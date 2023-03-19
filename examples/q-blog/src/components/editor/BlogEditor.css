@@ -1,0 +1,28 @@
+/* src/components/BlogEditor.css */
+.blog-editor {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 1rem;
+    line-height: 1.5;
+    font-size: 18px;
+  }
+  
+  .toolbar {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 1rem;
+  }
+  
+  .toolbar-button {
+    background: none;
+    border: none;
+    font-size: 18px;
+    font-weight: bold;
+    margin-right: 1rem;
+    cursor: pointer;
+  }
+  
+  .toolbar-button:focus {
+    outline: none;
+  }
+  
