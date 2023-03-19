@@ -104,24 +104,24 @@ console.log({blogPosts})
 
   
  
-     <div>BlogList</div>
+     {/* <div>BlogList</div>
         {!currentBlog && !isLoadingCurrentBlog && (
             <Button onClick={()=> {
               dispatch(
                togglePublishBlogModal(true)
              );
             }}>Create Blog</Button>
-        )} 
-         {currentBlog  && (
+        )}  */}
+         {/* {currentBlog  && (
             <Button onClick={()=> {
               navigate(`/${user?.name || 'Phil'}/${currentBlog.blogId}`)
             }}>View my blog - {currentBlog.title}</Button>
-        )} 
+        )}  */}
         
    
-    <Button onClick={() => {
+    {/* <Button onClick={() => {
       navigate(`/post/new`)
-    }}>New Post</Button>
+    }}>New Post</Button> */}
     
 
   
