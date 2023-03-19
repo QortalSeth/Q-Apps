@@ -44,6 +44,7 @@ const GlobalWrapper: React.FC<Props> = ({ children }) => {
      const responseDataBlogs =  await responseBlogs.json()
      const filterOut = responseDataBlogs.filter((blog: any)=> blog.identifier.split("-").length === 3)
      let blog
+     if(filterOut.length === 0) return
      if(filterOut.length !== 0){
       blog = filterOut[0]
      }

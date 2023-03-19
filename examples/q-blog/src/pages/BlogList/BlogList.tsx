@@ -13,6 +13,7 @@ import {
   IconButton,
 } from "@mui/material";
 import { togglePublishBlogModal } from '../../state/features/globalSlice';
+import BlogPostPreview from './PostPreview';
 
 export const BlogList = () => {
   const { user } = useSelector((state: RootState) => state.auth);
@@ -48,7 +49,7 @@ export const BlogList = () => {
     }
 
 
-    const getBlogPost = React.useCallback(async(user: string, postId: string)=> {
+    const getBlogPost = React.useCallback(async(user: string, postId: string, content: any)=> {
       try {
        const url=  `http://213.202.218.148:62391/arbitrary/BLOG_POST/${user}/${postId}`
          const response = await fetch(url, {
@@ -59,7 +60,8 @@ export const BlogList = () => {
         })
         const responseData =  await response.json()
         if(checkStructure(responseData)){
-          setBlogPosts((prev)=> [...prev, {...responseData, user, postId}])
+          const findImage = responseData.find((data: any)=> data?.type === 'image')
+          setBlogPosts((prev)=> [...prev, {content: responseData, ...content, user, postId, blogImage: findImage}])
         }
         return {
           ...responseData,
@@ -73,7 +75,7 @@ export const BlogList = () => {
 
     const getBlogPosts = React.useCallback(async()=> {
       try {
-       const url=  `http://213.202.218.148:62391/arbitrary/resources/search?service=BLOG_POST&query=q-blog-&limit=20`
+       const url=  `http://213.202.218.148:62391/arbitrary/resources/search?service=BLOG_POST&query=q-blog-&limit=20&includemetadata=true`
          const response = await fetch(url, {
           method: 'GET',
           headers: {
@@ -85,7 +87,7 @@ export const BlogList = () => {
 
 for (const content of responseData) {
   if (content.name && content.identifier) {
-    await getBlogPost(content.name, content.identifier);
+    await getBlogPost(content.name, content.identifier, content);
   }
 }
       } catch (error) {
@@ -125,19 +127,28 @@ console.log({blogPosts})
   
 
   
-      <List sx={{ margin: "0px", padding: "10px" }}>
+      <List sx={{ margin: "0px", padding: "10px", display: "flex", flexWrap: 'wrap'  }}>
                         {blogPosts.map((blogPost, index) => (
                             <ListItem
+                            onClick={()=> {
+                              const str = blogPost.postId
+const arr = str.split("-post");
+const str1 = arr[0];
+
+
+                              navigate(`/${blogPost.user}/${str1}/${blogPost.postId}`)
+                             }}
                                 disablePadding
                                 sx={{
                                     display: "flex",
                                     gap: 1,
                                     alignItems: "center",
-                                    width: "100%",
+                                    width: "auto",
                                 }}
                                 key={blogPost.postId}
                             >
-                                   <Button 
+                              <BlogPostPreview title={blogPost?.metadata?.title} description={blogPost?.metadata?.description} createdAt={1679242608735} author={blogPost.user} authorAvatar=""  postImage={blogPost?.blogImage?.content?.image} />
+                                   {/* <Button 
                                    onClick={()=> {
                                     const str = blogPost.postId
 const arr = str.split("-post");
@@ -149,7 +160,7 @@ const str1 = arr[0];
        key={blogPost.postId}
        >
        View{blogPost.postId}
-       </Button>
+       </Button> */}
        {blogPost.user === user?.name && (
          <Button onClick={
           ()=> {
