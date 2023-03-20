@@ -1,22 +1,50 @@
 import React from 'react'
 import BlogEditor from '../../components/editor/BlogEditor'
 import ShortUniqueId from 'short-unique-id';
-import { Button } from '@mui/material';
 import ReadOnlySlate from '../../components/editor/ReadOnlySlate';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from "../../state/store";
 import TextField from '@mui/material/TextField';
 import AddPhotoAlternateIcon from '@mui/icons-material/AddPhotoAlternate';
+import PostAddIcon from '@mui/icons-material/PostAdd';
 import ImageUploader from '../../components/common/ImageUploader';
+import { Button, Box, Typography, CardHeader, Avatar, } from '@mui/material';
+import { styled } from '@mui/system';
+import { createEditor, Descendant, Editor, Transforms } from 'slate';
+import RemoveCircleIcon from '@mui/icons-material/RemoveCircle';
 const uid = new ShortUniqueId()
+
+const initialValue: Descendant[] = [
+  {
+    type: 'paragraph',
+    children: [{ text: "Start writing your blog post... Don't forget to add a title :)" }],
+  },
+];
+
+const BlogTitleInput = styled(TextField)(({ theme }) => ({
+  '& .MuiInputBase-input': {
+    fontSize: '28px',
+    height: '28px',
+    '&::placeholder': {
+      fontSize: '28px',
+      color: theme.palette.text.secondary,
+    },
+  },
+  '& .MuiInputLabel-root': {
+    fontSize: '28px',
+  },
+ 
+}));
+
 
 export const CreatePost = () => {
   const { user } = useSelector((state: RootState) => state.auth);
   const { currentBlog, isLoadingCurrentBlog } = useSelector((state: RootState) => state.global);
 
-  const [newPostContent, setNewPostContent] = React.useState<object[]>([])
+  const [newPostContent, setNewPostContent] = React.useState<any[]>([])
   const [title, setTitle] = React.useState<string>('')
   const [blogImage, setBlogImage] = React.useState<string>('')
+  const [value, setValue] = React.useState(initialValue);
 
   const addPostSection = React.useCallback((content: any)=> {
     const section = {
@@ -125,32 +153,119 @@ export const CreatePost = () => {
     console.log({section})
     setNewPostContent((prev)=> [...prev, section])
   }
+
+  const addSection = ()=> {
+    addPostSection(value)
+  }
+
+  const removeSection = (section: any)=> {
+    const newContent = newPostContent.filter((s)=> s.id !== section.id)
+    setNewPostContent(newContent)
+  }
   return (
-    <>
-       <div>Create a blog post</div>
-       <TextField
-            id="modal-title-input"
-            label="Title"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            
-          />
+    <Box sx={{
+      display: 'flex',
+      alignItems: 'center',
+      flexDirection: 'column'
+    }}>
+       <Box sx={{
+          maxWidth: '700px',
+          margin: '15px',
+          width: '100%'
+        }}>
+        <BlogTitleInput
+      id="modal-title-input"
+      value={title}
+      onChange={(e) => setTitle(e.target.value)}
+      fullWidth 
+      placeholder="Title"
+      variant="filled" 
+      multiline
+          maxRows={2}
+          InputLabelProps={{shrink: false}}
+    />
        
        {newPostContent.map((section: any)=> {
         if(section.type === 'editor'){
-          return <ReadOnlySlate key={section.id} content={section.content}  />
+          return <Box sx={{
+            position: 'relative'
+          }}>
+             <ReadOnlySlate key={section.id} content={section.content}  />
+             <RemoveCircleIcon onClick={()=> removeSection(section)} sx={{
+              position: 'absolute',
+              right: '5px',
+              zIndex: 5,
+              top: '50%',
+              transform: 'translateY(-50%)',
+              cursor: 'pointer'
+             }} />
+            </Box>
+          
+         
         }
         if(section.type === 'image'){
-          return <img src={section.content.image}  />
+          return <Box sx={{
+            position: 'relative'
+          }}>
+           <img src={section.content.image} className="post-image" style={{
+            marginTop: '20px'
+           }} />
+             <RemoveCircleIcon onClick={()=> removeSection(section)} sx={{
+              position: 'absolute',
+              right: '5px',
+              zIndex: 5,
+              top: '50%',
+              transform: 'translateY(-50%)',
+              cursor: 'pointer'
+             }} />
+            </Box> 
         }
        })}
-    <BlogEditor addPostSection={addPostSection}/>
-    <ImageUploader onPick={addImage}>
-          Add Image
-          <AddPhotoAlternateIcon />
-          </ImageUploader>
-    <Button onClick={publishQDNResource}>Publish</Button>
-    </>
- 
+    <Box  sx={{
+      display: 'flex',
+      alignItems: 'center',
+      gap: 1
+    }}>
+    <BlogEditor addPostSection={addPostSection} value={value} setValue={setValue}/>
+    
+   
+  
+    </Box>
+  <Box
+  sx={{
+    display: 'flex',
+   
+
+  }}
+  >
+  <PostAddIcon onClick={addSection} sx={{
+        cursor: 'pointer',
+        width: '50px',
+        height: '50px'
+      }} /> 
+  <ImageUploader onPick={addImage}>
+          <AddPhotoAlternateIcon sx={{
+            cursor: 'pointer',
+            width: '50px',
+            height: '50px'
+          }} />
+      </ImageUploader>
+     
+          
+  </Box>
+  <Box sx={{
+    position: 'fixed',
+    bottom: '30px',
+    right: '30px',
+    zIndex: 15,
+    background: 'deepskyblue',
+    padding: '10px',
+    borderRadius: '5px',
+  }}>
+  <Button onClick={publishQDNResource}>Publish</Button>
+  </Box>
+    
+   </Box>
+   </Box>
   )
 }

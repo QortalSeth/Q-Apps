@@ -4,7 +4,8 @@ import { createEditor, Descendant, Editor, Transforms } from 'slate';
 import { Slate, Editable, withReact, RenderElementProps, RenderLeafProps } from 'slate-react';
 import { CustomElement, CustomText , FormatMark } from './customTypes';
 import './BlogEditor.css';
-import { Button } from '@mui/material';
+import { Button, Box } from '@mui/material';
+import PostAddIcon from '@mui/icons-material/PostAdd';
 
 const initialValue: Descendant[] = [
   {
@@ -17,20 +18,19 @@ interface MyComponentProps {
   addPostSection?: (value: any)=> void;
   editPostSection?: (value: any, section: any)=> void;
   defaultValue?: any;
-  section?: any
+  section?: any;
+  value: any;
+  setValue: (value: any)=> void;
 }
 
 
-const BlogEditor: React.FC<MyComponentProps> = ({addPostSection, editPostSection, defaultValue, section}) => {
+const BlogEditor: React.FC<MyComponentProps> = ({addPostSection, editPostSection, defaultValue, section, value, setValue}) => {
   const editor = useMemo(() => withReact(createEditor()), []);
-  const [value, setValue] = useState(defaultValue || initialValue);
+  // const [value, setValue] = useState(defaultValue || initialValue);
 
  
 
-  const addSection = ()=> {
-    if(!addPostSection) return
-    addPostSection(value)
-  }
+ 
 
   const toggleMark = (editor: Editor, format: FormatMark) => { // Update the type here
     const isActive = Editor.marks(editor)?.[format] === true;
@@ -62,7 +62,13 @@ const BlogEditor: React.FC<MyComponentProps> = ({addPostSection, editPostSection
 
 
   return (
-    <>
+    <Box sx={{
+      width: '100%',
+      border: '1px solid',
+    borderRadius: '5px',
+    marginTop: '20px',
+    padding: '10px'
+    }}>
     
     <Slate editor={editor} value={value} onChange={(newValue) => setValue(newValue)}>
       <div className="toolbar">
@@ -76,12 +82,10 @@ const BlogEditor: React.FC<MyComponentProps> = ({addPostSection, editPostSection
           <Button onClick={()=> editPostSection(value, section)}>Edit Section</Button>
     )}
 
-    {addPostSection && (
-          <Button onClick={addSection}>Add section</Button>
-    )}
+    
 
    
-    </>
+    </Box>
    
   );
 };

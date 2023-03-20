@@ -43,9 +43,13 @@ const NavBar: React.FC<Props> = ({ isAuthenticated, hasBlog, userName, userAvata
     const dispatch = useDispatch();
 
   return (
-    <CustomAppBar position="static">
+    <CustomAppBar position="sticky">
       <CustomToolbar>
-        <CustomTitle variant="h6">
+        <CustomTitle variant="h6" sx={{
+          cursor: 'pointer'
+        }} onClick={()=> {
+          navigate(`/`)
+        }}>
           Q-Blog
         </CustomTitle>
         <Box sx={{

@@ -10,12 +10,7 @@ import { RootState } from '../../state/store';
 import { checkStructure } from '../../utils/checkStructure';
 import { BlogContent } from '../../interfaces/interfaces';
 
-const EllipsisTypography = styled(Typography)`
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  width: 100%;
-`;
+
 export const BlogIndividualPost = () => {
   const { user, postId, blog } = useParams();
   const { user: userState } = useSelector((state: RootState) => state.auth);
@@ -87,7 +82,11 @@ export const BlogIndividualPost = () => {
           }}>Edit Post</Button>
         )}
            <CardHeader
+           onClick={()=> {
+            navigate(`/${user}/${blog}`)
+           }}
         sx={{
+          cursor: 'pointer',
           '& .MuiCardHeader-content': {
             overflow: 'hidden'
           },

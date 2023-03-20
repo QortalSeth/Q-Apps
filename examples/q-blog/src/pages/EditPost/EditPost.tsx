@@ -2,7 +2,7 @@ import React from 'react'
 import { useParams } from 'react-router-dom';
 import BlogEditor from '../../components/editor/BlogEditor'
 import ShortUniqueId from 'short-unique-id';
-import { Button } from '@mui/material';
+import { Button, TextField } from '@mui/material';
 import ReadOnlySlate from '../../components/editor/ReadOnlySlate';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from "../../state/store";
@@ -11,6 +11,33 @@ import ImageUploader from '../../components/common/ImageUploader';
 import AddPhotoAlternateIcon from '@mui/icons-material/AddPhotoAlternate';
 import { checkStructure } from '../../utils/checkStructure';
 import { BlogContent } from '../../interfaces/interfaces';
+import PostAddIcon from '@mui/icons-material/PostAdd';
+import RemoveCircleIcon from '@mui/icons-material/RemoveCircle';
+import EditIcon from '@mui/icons-material/Edit';
+import { createEditor, Descendant, Editor, Transforms } from 'slate';
+import { styled } from '@mui/system';
+
+const initialValue: Descendant[] = [
+  {
+    type: 'paragraph',
+    children: [{ text: "Start writing your blog post... Don't forget to add a title :)" }],
+  },
+];
+
+const BlogTitleInput = styled(TextField)(({ theme }) => ({
+  '& .MuiInputBase-input': {
+    fontSize: '28px',
+    height: '28px',
+    '&::placeholder': {
+      fontSize: '28px',
+      color: theme.palette.text.secondary,
+    },
+  },
+  '& .MuiInputLabel-root': {
+    fontSize: '28px',
+  },
+ 
+}));
 
 const uid = new ShortUniqueId()
 export const EditPost = () => {
@@ -21,6 +48,10 @@ export const EditPost = () => {
   const [newPostContent, setNewPostContent] = React.useState<any[]>([])
   const [blogInfo, setBlogInfo] = React.useState<BlogContent | null>(null)
   const [editingSection, setEditingSection] = React.useState<any>(null)
+  const [value, setValue] = React.useState(initialValue);
+  const [value2, setValue2] = React.useState(initialValue);
+  const [title, setTitle] = React.useState('');
+
   const addPostSection = React.useCallback((content: any)=> {
     const section = {
       type: 'editor',
@@ -70,7 +101,19 @@ export const EditPost = () => {
   }
 
 
- 
+  const addImage = (base64: string)=> {
+    const section = {
+      type: 'image',
+      version: 1,
+      content: {
+        image: base64,
+        caption: ""
+      },
+      id: uid()
+    }
+    console.log({section})
+    setNewPostContent((prev)=> [...prev, section])
+  }
 
   
 
@@ -107,11 +150,11 @@ export const EditPost = () => {
     if(!name) return
     if(!blogInfo) return
     try {
-        const id = uid();
         
 
         const postObject = {
           ...blogInfo,
+          title,
           postContent: newPostContent
         }
         const blogPostToBase64 = objectToBase64(postObject)
@@ -135,6 +178,10 @@ export const EditPost = () => {
     
   }
 
+  const addSection = ()=> {
+    addPostSection(value2)
+  }
+
   const getBlogPost = React.useCallback(async()=> {
     try {
      const url=  `http://213.202.218.148:62391/arbitrary/BLOG_POST/${username}/${postId}`
@@ -148,6 +195,7 @@ export const EditPost = () => {
       const responseData =  await response.json()
       if(checkStructure(responseData)){
         setNewPostContent(responseData.postContent)
+        setTitle(responseData?.title || "")
         setBlogInfo(responseData)
       }
     } catch (error) {
@@ -159,7 +207,9 @@ export const EditPost = () => {
   }, [])
 
   const editSection = (section: any)=> {
+    console.log({section})
     setEditingSection(section)
+    setValue(section.content)
   }
 
   const removeSection = (section: any)=> {
@@ -183,23 +233,76 @@ export const EditPost = () => {
     }
   }
   return (
-    <>
+    <Box sx={{
+      display: 'flex',
+      alignItems: 'center',
+      flexDirection: 'column'
+    }}>
+       <Box sx={{
+          maxWidth: '700px',
+          margin: '15px',
+          width: '100%'
+        }}>
+           <BlogTitleInput
+      id="modal-title-input"
+      value={title}
+      onChange={(e) => setTitle(e.target.value)}
+      fullWidth 
+      placeholder="Title"
+      variant="filled" 
+      multiline
+          maxRows={2}
+          InputLabelProps={{shrink: false}}
+    />
        {newPostContent.map((section: any)=> {
         if(section.type === 'editor'){
          
 
           return <Box key={section.id}>
           {editingSection && editingSection.id === section.id ? (
-             <BlogEditor editPostSection={editPostSection} defaultValue={section.content} section={section}/>
+             <BlogEditor editPostSection={editPostSection} defaultValue={section.content} section={section} value={value} setValue={setValue}/>
           ) : (
+            <Box sx={{
+              position: 'relative'
+            }}>
             <ReadOnlySlate key={section.id} content={section.content}  />
+             <Box sx={{
+                position: 'absolute',
+                right: '5px',
+                zIndex: 5,
+                top: '50%',
+                transform: 'translateY(-50%)',
+                display: 'flex',
+                // flexDirection: 'column',
+                gap: 2
+               }}>
+             <RemoveCircleIcon onClick={()=> removeSection(section)} sx={{
+               
+                cursor: 'pointer'
+               }} />
+             <EditIcon onClick={()=> editSection(section)} sx={{
+               
+               cursor: 'pointer'
+              }}  />
+              </Box>
+              
+              </Box> 
+           
           )}
           {editingSection && editingSection.id === section.id ? (
-             <Button onClick={()=> setEditingSection(null)}>Close</Button>
+            <Box sx={{
+           
+              display: 'flex',
+              width: '100%',
+              justifyContent: 'flex-end'
+             }}>
+              <Button onClick={()=> setEditingSection(null)}>Close</Button>
+              </Box>
+             
           ) : (
+            
             <>
-            <Button onClick={()=> editSection(section)}>Edit</Button>
-            <Button onClick={()=> removeSection(section)}>Remove</Button>
+           
             </>
             
           )}
@@ -216,14 +319,43 @@ export const EditPost = () => {
               <AddPhotoAlternateIcon />
               </ImageUploader>
           ) : (
-            <img src={section.content.image}  />
+            <Box sx={{
+              position: 'relative'
+            }}>
+             <img src={section.content.image} className="post-image" style={{
+              marginTop: '20px'
+             }} />
+             <Box sx={{
+                position: 'absolute',
+                right: '5px',
+                zIndex: 5,
+                top: '50%',
+                transform: 'translateY(-50%)',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 2
+               }}>
+             <RemoveCircleIcon onClick={()=> removeSection(section)} sx={{
+               
+                cursor: 'pointer'
+               }} />
+                <ImageUploader onPick={(base64)=> editImage(base64, section)}>
+                <EditIcon  sx={{
+               
+               cursor: 'pointer'
+              }}  />
+              </ImageUploader>
+           
+              </Box>
+              
+              </Box> 
+          
           )}
           {editingSection && editingSection.id === section.id ? (
              <Button onClick={()=> setEditingSection(null)}>Close</Button>
           ) : (
             <>
-            <Button onClick={()=> editSection(section)}>Edit</Button>
-            <Button onClick={()=> removeSection(section)}>Remove</Button>
+           
             </>
             
           )}
@@ -232,9 +364,44 @@ export const EditPost = () => {
           </Box> 
         }
        })}
-    <BlogEditor addPostSection={addPostSection}/>
-    <Button onClick={publishQDNResource}>PUBLISH UPDATE</Button>
-    </>
+      
+    <BlogEditor addPostSection={addPostSection} value={value2} setValue={setValue2}/>
+    <Box
+  sx={{
+    display: 'flex',
+   
+
+  }}
+  >
+  <PostAddIcon onClick={addSection} sx={{
+        cursor: 'pointer',
+        width: '50px',
+        height: '50px'
+      }} /> 
+  <ImageUploader onPick={addImage}>
+          <AddPhotoAlternateIcon sx={{
+            cursor: 'pointer',
+            width: '50px',
+            height: '50px'
+          }} />
+      </ImageUploader>
+     
+          
+  </Box>
+    
+    </Box>
+    <Box sx={{
+    position: 'fixed',
+    bottom: '30px',
+    right: '30px',
+    zIndex: 15,
+    background: 'deepskyblue',
+    padding: '10px',
+    borderRadius: '5px',
+  }}>
+   <Button onClick={publishQDNResource}>PUBLISH UPDATE</Button>
+  </Box>
+    </Box>
  
   )
 }

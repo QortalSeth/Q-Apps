@@ -82,31 +82,6 @@ console.log({blogPosts})
 
   return (
     <>
-
-  
- 
-     {/* <div>BlogList</div>
-        {!currentBlog && !isLoadingCurrentBlog && (
-            <Button onClick={()=> {
-              dispatch(
-               togglePublishBlogModal(true)
-             );
-            }}>Create Blog</Button>
-        )}  */}
-         {/* {currentBlog  && (
-            <Button onClick={()=> {
-              navigate(`/${user?.name || 'Phil'}/${currentBlog.blogId}`)
-            }}>View my blog - {currentBlog.title}</Button>
-        )}  */}
-        
-   
-    {/* <Button onClick={() => {
-      navigate(`/post/new`)
-    }}>New Post</Button> */}
-    
-
-  
-
   
       <List sx={{ margin: "0px", padding: "10px", display: "flex", flexWrap: 'wrap'  }}>
                         {blogPosts.map((blogPost, index) => (
@@ -133,19 +108,7 @@ console.log({blogPosts})
                                       const str1 = arr[0];
                                   navigate(`/${blogPost.user}/${str1}/${blogPost.postId}`)
                               }} description={blogPost?.description?.content} title={blogPost?.title}  createdAt={blogPost?.createdAt} author={blogPost.user} authorAvatar=""  postImage={blogPost?.blogImage?.content?.image} />
-                                   {/* <Button 
-                                   onClick={()=> {
-                                    const str = blogPost.postId
-const arr = str.split("-post");
-const str1 = arr[0];
-
-
-                                    navigate(`/${blogPost.user}/${str1}/${blogPost.postId}`)
-                                   }}
-       key={blogPost.postId}
-       >
-       View{blogPost.postId}
-       </Button> */}
+                                 
        {blogPost.user === user?.name && (
         <EditIcon className="edit-btn" sx={{
           position: 'absolute',
@@ -161,14 +124,6 @@ const str1 = arr[0];
             navigate(`/${blogPost.user}/${str1}/${blogPost.postId}/edit`)
           }
         } />
-  //        <Button onClick={
-  //         ()=> {
-  //           const str = blogPost.postId
-  // const arr = str.split("-post");
-  // const str1 = arr[0];
-  //           navigate(`/${blogPost.user}/${str1}/${blogPost.postId}/edit`)
-  //         }
-  //       } >Edit{blogPost.postId}</Button>
        )}
       
                             </ListItem>
