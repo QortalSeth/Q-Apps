@@ -19,3 +19,8 @@
   transition: .2s all;
 
 }
+
+.post-image {
+  max-width: 100%;
+  border-radius: 5px;
+}
