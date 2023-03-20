@@ -48,6 +48,7 @@ const BlogPostPreview: React.FC<BlogPostPreviewProps> = ({
   description,
   onClick
 }) => {
+  const [avatarUrl, setAvatarUrl] = React.useState<string>('')
   const formatDate = (unixTimestamp: number): string => {
     const date = moment(unixTimestamp, 'x').calendar()
    
@@ -68,8 +69,24 @@ const BlogPostPreview: React.FC<BlogPostPreviewProps> = ({
   
     return text;
   }
-
-  console.log({description})
+  const getAvatar = React.useCallback(async ()=> {
+    try {
+      let url = await qortalRequest({
+        action: "GET_QDN_RESOURCE_URL",
+        name: author,
+        service: "THUMBNAIL",
+        identifier: "qortal_avatar"
+      });
+     
+      console.log({url})
+      setAvatarUrl(url)
+    } catch (error) {
+      
+    }
+  }, [author])
+  React.useEffect(()=> {
+    getAvatar()
+  }, [])
   return (
     <StyledCard onClick={onClick}>
       <CardHeader
@@ -79,10 +96,10 @@ const BlogPostPreview: React.FC<BlogPostPreviewProps> = ({
           }
          
         }}
-        avatar={<Avatar src={`qortal://THUMBNAIL/${author}/qortal_avatar`} alt={`${author}'s avatar`} />}
+        avatar={<Avatar src={avatarUrl} alt={`${author}'s avatar`} />}
         title={
           <EllipsisTypography noWrap variant="h6">
-          oauehdoheudoahtudohudohteudohaeudohteudoheudoehudouhdoeud
+          {title}
           </EllipsisTypography>
         }
         subheader={`Author: ${author}`}
