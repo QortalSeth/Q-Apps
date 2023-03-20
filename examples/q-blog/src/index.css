@@ -3,3 +3,19 @@
   margin: 0px;
   box-sizing: border-box;
 }
+
+
+.line-clamp {
+  height: 100px;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 5; /* number of lines to show */
+  -webkit-box-orient: vertical;
+  text-overflow: ellipsis;
+}
+
+.edit-btn:hover {
+  opacity: .75;
+  transition: .2s all;
+
+}

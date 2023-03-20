@@ -106,7 +106,7 @@ const BlogPostPreview: React.FC<BlogPostPreviewProps> = ({
       />
       <StyledCardMedia image={postImage}  />
       <CardContent>
-        <Typography variant="body2" color="textSecondary" component="p">
+        <Typography variant="body2" color="textSecondary" className="line-clamp" component="p" >
           {extractTextFromSlate(description)}
         </Typography>
         <Box marginTop="1rem">

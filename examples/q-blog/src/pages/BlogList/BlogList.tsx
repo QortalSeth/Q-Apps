@@ -3,6 +3,7 @@ import React from 'react'
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from "../../state/store";
+import EditIcon from '@mui/icons-material/Edit';
 import {
   Box,
   Tooltip,
@@ -122,6 +123,7 @@ console.log({blogPosts})
                                     gap: 1,
                                     alignItems: "center",
                                     width: "auto",
+                                    position: 'relative'
                                 }}
                                 key={blogPost.postId}
                             >
@@ -145,14 +147,28 @@ const str1 = arr[0];
        View{blogPost.postId}
        </Button> */}
        {blogPost.user === user?.name && (
-         <Button onClick={
+        <EditIcon className="edit-btn" sx={{
+          position: 'absolute',
+          zIndex: 10,
+          bottom: '25px',
+          right:  '25px',
+          cursor: 'pointer'
+        }} onClick={
           ()=> {
             const str = blogPost.postId
   const arr = str.split("-post");
   const str1 = arr[0];
             navigate(`/${blogPost.user}/${str1}/${blogPost.postId}/edit`)
           }
-        } key={blogPost.postId}>Edit{blogPost.postId}</Button>
+        } />
+  //        <Button onClick={
+  //         ()=> {
+  //           const str = blogPost.postId
+  // const arr = str.split("-post");
+  // const str1 = arr[0];
+  //           navigate(`/${blogPost.user}/${str1}/${blogPost.postId}/edit`)
+  //         }
+  //       } >Edit{blogPost.postId}</Button>
        )}
       
                             </ListItem>
