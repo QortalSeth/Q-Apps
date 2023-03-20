@@ -10,6 +10,7 @@ import { RootState } from "../state/store";
 import PublishBlogModal from '../components/modals/PublishBlogModal';
 import { setCurrentBlog } from '../state/features/globalSlice';
 import NavBar from '../components/layout/Navbar/Navbar';
+import PageLoader from '../components/common/PageLoader';
 
 interface Props {
   children: React.ReactNode;
@@ -22,7 +23,7 @@ const GlobalWrapper: React.FC<Props> = ({ children }) => {
     const dispatch = useDispatch();
     const { user } = useSelector((state: RootState) => state.auth);
 
-    const { isOpenPublishBlogModal , currentBlog} = useSelector((state: RootState) => state.global);
+    const { isOpenPublishBlogModal , currentBlog, isLoadingGlobal} = useSelector((state: RootState) => state.global);
 
 
     async function getNameInfo(address: string) {
@@ -165,6 +166,10 @@ const GlobalWrapper: React.FC<Props> = ({ children }) => {
     }, [])
   return (
     <>
+    {isLoadingGlobal && (
+       <PageLoader />
+    )}
+   
     <PublishBlogModal open={isOpenPublishBlogModal} onClose={onClosePublishBlogModal} onPublish={createBlog} />
     <NavBar isAuthenticated={!!user} hasBlog={!!currentBlog} userName={user?.name || ""} userAvatar="" blog={currentBlog} authenticate={askForAccountInformation} />
       {children}

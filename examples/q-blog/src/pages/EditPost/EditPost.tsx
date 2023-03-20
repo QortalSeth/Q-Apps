@@ -16,6 +16,7 @@ import RemoveCircleIcon from '@mui/icons-material/RemoveCircle';
 import EditIcon from '@mui/icons-material/Edit';
 import { createEditor, Descendant, Editor, Transforms } from 'slate';
 import { styled } from '@mui/system';
+import { setIsLoadingGlobal } from '../../state/features/globalSlice';
 
 const initialValue: Descendant[] = [
   {
@@ -51,7 +52,7 @@ export const EditPost = () => {
   const [value, setValue] = React.useState(initialValue);
   const [value2, setValue2] = React.useState(initialValue);
   const [title, setTitle] = React.useState('');
-
+  const dispatch = useDispatch()
   const addPostSection = React.useCallback((content: any)=> {
     const section = {
       type: 'editor',
@@ -184,6 +185,7 @@ export const EditPost = () => {
 
   const getBlogPost = React.useCallback(async()=> {
     try {
+      dispatch(setIsLoadingGlobal(true))
      const url=  `http://213.202.218.148:62391/arbitrary/BLOG_POST/${username}/${postId}`
        const response = await fetch(url, {
         method: 'GET',
@@ -200,6 +202,8 @@ export const EditPost = () => {
       }
     } catch (error) {
       
+    } finally {
+      dispatch(setIsLoadingGlobal(false))
     }
   }, [user, postId])
   React.useEffect(()=> {
@@ -274,7 +278,10 @@ export const EditPost = () => {
                 transform: 'translateY(-50%)',
                 display: 'flex',
                 // flexDirection: 'column',
-                gap: 2
+                gap: 2,
+                background: 'white',
+                padding: '5px',
+                borderRadius: '5px',
                }}>
              <RemoveCircleIcon onClick={()=> removeSection(section)} sx={{
                
@@ -333,7 +340,10 @@ export const EditPost = () => {
                 transform: 'translateY(-50%)',
                 display: 'flex',
                 flexDirection: 'column',
-                gap: 2
+                gap: 2,
+                background: 'white',
+    padding: '5px',
+    borderRadius: '5px',
                }}>
              <RemoveCircleIcon onClick={()=> removeSection(section)} sx={{
                

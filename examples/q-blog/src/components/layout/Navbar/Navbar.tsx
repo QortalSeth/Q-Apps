@@ -7,6 +7,7 @@ import ExitToAppIcon from '@mui/icons-material/ExitToApp';
 import { useNavigate } from 'react-router-dom';
 import { togglePublishBlogModal } from '../../../state/features/globalSlice';
 import { useDispatch } from 'react-redux';
+import AutoStoriesIcon from '@mui/icons-material/AutoStories';
 
 interface Props {
   isAuthenticated: boolean;
@@ -78,15 +79,15 @@ const NavBar: React.FC<Props> = ({ isAuthenticated, hasBlog, userName, userAvata
             Create Post
           </StyledButton>
             
-            <StyledButton color="primary" onClick={()=> {
+            <StyledButton color="primary" startIcon={<AutoStoriesIcon />} onClick={()=> {
               navigate(`/${userName}/${blog.blogId}`)
             }}>
-              See My Blog - {blog?.title}
+              My Blog
             </StyledButton>
             </>
          
         )}
-        {isAuthenticated && userName && (
+        {/* {isAuthenticated && userName && (
           <Box sx={{
             display: 'flex',
             alignItems: 'center'
@@ -100,7 +101,7 @@ const NavBar: React.FC<Props> = ({ isAuthenticated, hasBlog, userName, userAvata
               <img src={userAvatar} alt="User Avatar" width="32" height="32" />
             )}
           </Box>
-        )}
+        )} */}
         </Box>
       </CustomToolbar>
     </CustomAppBar>

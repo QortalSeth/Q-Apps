@@ -4,6 +4,7 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 interface GlobalState {
   isOpenPublishBlogModal: boolean;
   isLoadingCurrentBlog: boolean;
+  isLoadingGlobal: boolean;
   currentBlog: {
     createdAt: number;
     blogId: string;
@@ -15,6 +16,7 @@ interface GlobalState {
 const initialState: GlobalState = {
   isOpenPublishBlogModal: false,
   isLoadingCurrentBlog: true,
+  isLoadingGlobal: false,
   currentBlog: null
 };
 
@@ -25,13 +27,17 @@ export const globalSlice = createSlice({
     togglePublishBlogModal: (state, action) => {
       state.isOpenPublishBlogModal = action.payload;
     },
+    
     setCurrentBlog: (state, action) => {
       state.currentBlog = action.payload
       state.isLoadingCurrentBlog = false
+    },
+    setIsLoadingGlobal: (state, action) => {
+      state.isLoadingGlobal = action.payload
     }
   },
 });
 
-export const { togglePublishBlogModal, setCurrentBlog } = globalSlice.actions;
+export const { togglePublishBlogModal, setCurrentBlog, setIsLoadingGlobal } = globalSlice.actions;
 
 export default globalSlice.reducer;

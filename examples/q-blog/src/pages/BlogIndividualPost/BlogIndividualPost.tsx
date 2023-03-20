@@ -5,17 +5,18 @@ import { useNavigate } from "react-router-dom";
 import { styled } from '@mui/system';
 
 import ReadOnlySlate from '../../components/editor/ReadOnlySlate';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../../state/store';
 import { checkStructure } from '../../utils/checkStructure';
 import { BlogContent } from '../../interfaces/interfaces';
+import { setIsLoadingGlobal } from '../../state/features/globalSlice';
 
 
 export const BlogIndividualPost = () => {
   const { user, postId, blog } = useParams();
   const { user: userState } = useSelector((state: RootState) => state.auth);
   const [avatarUrl, setAvatarUrl] = React.useState<string>('')
-
+  const dispatch = useDispatch()
   const navigate = useNavigate();
 
    const [blogContent, setBlogContent] = React.useState<BlogContent | null>(null)
@@ -23,6 +24,7 @@ export const BlogIndividualPost = () => {
 
     const getBlogPost = React.useCallback(async()=> {
       try {
+        dispatch(setIsLoadingGlobal(true))
        const url=  `http://213.202.218.148:62391/arbitrary/BLOG_POST/${user}/${postId}`
          const response = await fetch(url, {
           method: 'GET',
@@ -37,6 +39,8 @@ export const BlogIndividualPost = () => {
         }
       } catch (error) {
         
+      } finally {
+        dispatch(setIsLoadingGlobal(false))
       }
     }, [user, postId])
     React.useEffect(()=> {

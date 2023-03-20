@@ -108,6 +108,8 @@ export const CreatePost = () => {
     console.log({address, name})
     if(!address) return
     if(!name) return
+    if(!title) return
+    if(newPostContent.length === 0) return
     console.log({currentBlog})
 
     if(!currentBlog) return

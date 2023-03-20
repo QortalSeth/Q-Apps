@@ -17,12 +17,13 @@ import {
 } from "@mui/material";
 import EditIcon from '@mui/icons-material/Edit';
 import BlogPostPreview from '../BlogList/PostPreview';
+import { setIsLoadingGlobal } from '../../state/features/globalSlice';
 
 export const BlogIndividualProfile = () => {
   const navigate = useNavigate();
   const { user } = useSelector((state: RootState) => state.auth);
   const { blog, user: username } = useParams();
-
+  const dispatch = useDispatch()
   const { currentBlog, isLoadingCurrentBlog } = useSelector((state: RootState) => state.global);
 
     const [blogPosts, setBlogPosts] = React.useState<any[]>([])
@@ -32,7 +33,6 @@ export const BlogIndividualProfile = () => {
  
 
     const getBlogPost = React.useCallback(async(user: string, postId: string, content: any)=> {
-      console.log('hello getBlogPost')
       try {
        const url=  `http://213.202.218.148:62391/arbitrary/BLOG_POST/${user}/${postId}`
          const response = await fetch(url, {
@@ -65,6 +65,7 @@ export const BlogIndividualProfile = () => {
       if(!name) return
       if(!blog) return
       try {
+        dispatch(setIsLoadingGlobal(true))
        const url=  `http://213.202.218.148:62391/arbitrary/resources/search?service=BLOG_POST&query=${blog}-post-&limit=20&name=${name}`
          const response = await fetch(url, {
           method: 'GET',
@@ -82,6 +83,8 @@ for (const content of responseData) {
 }
       } catch (error) {
         
+      } finally {
+        dispatch(setIsLoadingGlobal(false))
       }
     }, [username, blog])
 

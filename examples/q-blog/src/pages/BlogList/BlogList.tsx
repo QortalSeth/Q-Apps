@@ -13,7 +13,7 @@ import {
   Typography,
   IconButton,
 } from "@mui/material";
-import { togglePublishBlogModal } from '../../state/features/globalSlice';
+import { setIsLoadingGlobal, togglePublishBlogModal } from '../../state/features/globalSlice';
 import BlogPostPreview from './PostPreview';
 import { checkStructure } from '../../utils/checkStructure';
 
@@ -56,6 +56,7 @@ export const BlogList = () => {
 
     const getBlogPosts = React.useCallback(async()=> {
       try {
+        dispatch(setIsLoadingGlobal(true))
        const url=  `http://213.202.218.148:62391/arbitrary/resources/search?service=BLOG_POST&query=q-blog-&limit=20&includemetadata=true`
          const response = await fetch(url, {
           method: 'GET',
@@ -73,6 +74,9 @@ for (const content of responseData) {
 }
       } catch (error) {
         
+      }
+      finally {
+        dispatch(setIsLoadingGlobal(false))
       }
     }, [])
     React.useEffect(()=> {
