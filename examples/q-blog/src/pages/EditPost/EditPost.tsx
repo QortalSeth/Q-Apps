@@ -9,6 +9,8 @@ import { RootState } from "../../state/store";
 import { Box } from '@mui/material';
 import ImageUploader from '../../components/common/ImageUploader';
 import AddPhotoAlternateIcon from '@mui/icons-material/AddPhotoAlternate';
+import { checkStructure } from '../../utils/checkStructure';
+import { BlogContent } from '../../interfaces/interfaces';
 
 const uid = new ShortUniqueId()
 export const EditPost = () => {
@@ -17,6 +19,7 @@ export const EditPost = () => {
   const { user } = useSelector((state: RootState) => state.auth);
 
   const [newPostContent, setNewPostContent] = React.useState<any[]>([])
+  const [blogInfo, setBlogInfo] = React.useState<BlogContent | null>(null)
   const [editingSection, setEditingSection] = React.useState<any>(null)
   const addPostSection = React.useCallback((content: any)=> {
     const section = {
@@ -102,9 +105,17 @@ export const EditPost = () => {
         
     }
     if(!name) return
+    if(!blogInfo) return
     try {
         const id = uid();
-        const blogPostToBase64 = objectToBase64(newPostContent)
+        
+
+        const postObject = {
+          ...blogInfo,
+          postContent: newPostContent
+        }
+        const blogPostToBase64 = objectToBase64(postObject)
+
       const resourceResponse = await qortalRequest({
         action: "PUBLISH_QDN_RESOURCE",
         name: name, 
@@ -123,20 +134,7 @@ export const EditPost = () => {
     }
     
   }
-  const checkStructure = (content: any)=> {
-    console.log({content})
-    let isValid = true
-    if(!Array.isArray(content))  isValid = false
 
-    content.forEach((c : any)=> {
-      if(!c.type || !c.version || !c.id || !c.content) return isValid = false
-      if(c.version === 1){
-        if(c.type !== 'editor' && c.type !== 'image') return isValid = false
-      }
-    })
-    console.log({isValid})
-    return isValid
-  }
   const getBlogPost = React.useCallback(async()=> {
     try {
      const url=  `http://213.202.218.148:62391/arbitrary/BLOG_POST/${username}/${postId}`
@@ -149,7 +147,8 @@ export const EditPost = () => {
       console.log({response})
       const responseData =  await response.json()
       if(checkStructure(responseData)){
-        setNewPostContent(responseData)
+        setNewPostContent(responseData.postContent)
+        setBlogInfo(responseData)
       }
     } catch (error) {
       
@@ -185,7 +184,6 @@ export const EditPost = () => {
   }
   return (
     <>
-       <div>CreateEditPost</div>
        {newPostContent.map((section: any)=> {
         if(section.type === 'editor'){
          

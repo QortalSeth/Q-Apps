@@ -6,26 +6,17 @@ import { useNavigate } from "react-router-dom";
 import ReadOnlySlate from '../../components/editor/ReadOnlySlate';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../state/store';
+import { checkStructure } from '../../utils/checkStructure';
+import { BlogContent } from '../../interfaces/interfaces';
+
+
 export const BlogIndividualPost = () => {
   const { user, postId, blog } = useParams();
   const { user: userState } = useSelector((state: RootState) => state.auth);
   const navigate = useNavigate();
 
-   const [blogContent, setBlogContent] = React.useState([])
-    const checkStructure = (content: any)=> {
-      console.log({content})
-      let isValid = true
-      if(!Array.isArray(content))  isValid = false
-
-      content.forEach((c : any)=> {
-        if(!c.type || !c.version || !c.id || !c.content) return isValid = false
-        if(c.version === 1){
-          if(c.type !== 'editor' && c.type !== 'image') return isValid = false
-        }
-      })
-      console.log({isValid})
-      return isValid
-    }
+   const [blogContent, setBlogContent] = React.useState<BlogContent | null>(null)
+    
 
     const getBlogPost = React.useCallback(async()=> {
       try {
@@ -48,6 +39,8 @@ export const BlogIndividualPost = () => {
     React.useEffect(()=> {
       getBlogPost()
     }, [])
+
+    if(!blogContent) return null
   
     return (
       <div className="App">
@@ -56,7 +49,8 @@ export const BlogIndividualPost = () => {
             navigate(`/${user}/${blog}/${postId}/edit`)
           }}>Edit Post</Button>
         )}
-      {blogContent.map((section: any)=> {
+        <p>{blogContent.title}</p>
+      {blogContent?.postContent?.map((section: any)=> {
         if(section.type === 'editor'){
           return <ReadOnlySlate key={section.id} content={section.content}  />
         }

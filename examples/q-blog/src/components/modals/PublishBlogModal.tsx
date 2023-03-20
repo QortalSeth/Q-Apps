@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { Box, Button, TextField, Typography, Modal } from '@mui/material';
+import { useDispatch } from 'react-redux';
+import { togglePublishBlogModal } from '../../state/features/globalSlice';
 
 interface MyModalProps {
   open: boolean;
@@ -8,6 +10,8 @@ interface MyModalProps {
 }
 
 const MyModal: React.FC<MyModalProps> = ({ open, onClose, onPublish }) => {
+  const dispatch = useDispatch();
+
   const [title, setTitle] = useState<string>('');
   const [description, setDescription] = useState<string>('');
   const [errorMessage, setErrorMessage] = useState<string>('');
@@ -15,7 +19,7 @@ const MyModal: React.FC<MyModalProps> = ({ open, onClose, onPublish }) => {
   const handlePublish = async (): Promise<void> => {
     try {
      await onPublish(title, description);
-    //  handleClose();
+     handleClose();
     } catch (error: any) {
       setErrorMessage(error.message);
     }
@@ -26,6 +30,9 @@ const MyModal: React.FC<MyModalProps> = ({ open, onClose, onPublish }) => {
     setTitle('');
     setDescription('');
     setErrorMessage('');
+    dispatch(
+      togglePublishBlogModal(false)
+    );
     onClose();
   };
 

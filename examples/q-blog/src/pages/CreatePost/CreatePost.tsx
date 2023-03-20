@@ -16,6 +16,7 @@ export const CreatePost = () => {
 
   const [newPostContent, setNewPostContent] = React.useState<object[]>([])
   const [title, setTitle] = React.useState<string>('')
+  const [blogImage, setBlogImage] = React.useState<string>('')
 
   const addPostSection = React.useCallback((content: any)=> {
     const section = {
@@ -82,11 +83,18 @@ export const CreatePost = () => {
     console.log({currentBlog})
 
     if(!currentBlog) return
+
+    const postObject = {
+      title,
+      blogImage,
+      createdAt: Date.now(),
+      postContent: newPostContent
+    }
     try {
         const id = uid();
         
         const identifier = `${currentBlog.blogId}-post-${id}`;
-        const blogPostToBase64 = objectToBase64(newPostContent)
+        const blogPostToBase64 = objectToBase64(postObject)
       const resourceResponse = await qortalRequest({
         action: "PUBLISH_QDN_RESOURCE",
         name: name, 

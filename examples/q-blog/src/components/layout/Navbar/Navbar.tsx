@@ -1,5 +1,5 @@
 import React from 'react';
-import { AppBar, Toolbar, Typography, Button, IconButton } from '@mui/material';
+import { AppBar, Toolbar, Typography, Button, IconButton, Box } from '@mui/material';
 import { styled } from '@mui/system';
 import AccountCircle from '@mui/icons-material/AccountCircle';
 import AddBoxIcon from '@mui/icons-material/AddBox';
@@ -13,7 +13,8 @@ interface Props {
   hasBlog: boolean;
   userName: string | null;
   userAvatar: string | null;
-  blog: any
+  blog: any;
+  authenticate: ()=> void;
 }
 
 const CustomAppBar = styled(AppBar)(({ theme }) => ({
@@ -37,7 +38,7 @@ const StyledButton = styled(Button)({
   fontWeight: 600,
 });
 
-const NavBar: React.FC<Props> = ({ isAuthenticated, hasBlog, userName, userAvatar, blog }) => {
+const NavBar: React.FC<Props> = ({ isAuthenticated, hasBlog, userName, userAvatar, blog, authenticate }) => {
     const navigate = useNavigate();
     const dispatch = useDispatch();
 
@@ -47,20 +48,12 @@ const NavBar: React.FC<Props> = ({ isAuthenticated, hasBlog, userName, userAvata
         <CustomTitle variant="h6">
           Q-Blog
         </CustomTitle>
-        {userName && (
-          <>
-            <Typography variant="subtitle1" style={{ marginRight: '1rem' }}>{userName}</Typography>
-            {userAvatar ? (
-              <IconButton>
-                <AccountCircle />
-              </IconButton>
-            ) : (
-              <img src={userAvatar!} alt="User Avatar" width="32" height="32" />
-            )}
-          </>
-        )}
+        <Box sx={{
+            display: 'flex',
+            alignItems: 'center'
+          }}>
         {!isAuthenticated && (
-          <StyledButton color="primary" startIcon={<ExitToAppIcon />}>
+          <StyledButton color="primary" startIcon={<ExitToAppIcon />} onClick={authenticate}>
             Authenticate
           </StyledButton>
         )}
@@ -89,6 +82,22 @@ const NavBar: React.FC<Props> = ({ isAuthenticated, hasBlog, userName, userAvata
             </>
          
         )}
+        {isAuthenticated && userName && (
+          <Box sx={{
+            display: 'flex',
+            alignItems: 'center'
+          }}>
+            <Typography variant="subtitle1" style={{ marginRight: '1rem' }}>{userName}</Typography>
+            {!userAvatar ? (
+              <IconButton>
+                <AccountCircle />
+              </IconButton>
+            ) : (
+              <img src={userAvatar} alt="User Avatar" width="32" height="32" />
+            )}
+          </Box>
+        )}
+        </Box>
       </CustomToolbar>
     </CustomAppBar>
   );

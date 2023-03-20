@@ -14,6 +14,7 @@ import {
 } from "@mui/material";
 import { togglePublishBlogModal } from '../../state/features/globalSlice';
 import BlogPostPreview from './PostPreview';
+import { checkStructure } from '../../utils/checkStructure';
 
 export const BlogList = () => {
   const { user } = useSelector((state: RootState) => state.auth);
@@ -23,31 +24,8 @@ export const BlogList = () => {
 
     const navigate = useNavigate();
     const [blogPosts, setBlogPosts] = React.useState<any[]>([])
-    const checkStructure = (content: any)=> {
-      let isValid = true
-      if (!Array.isArray(content)) isValid = false
     
-      content.forEach((c: any)=> {
-        if (!c.type) {
-          isValid = false;
-        }
-        if (!c.version) {
-          isValid = false;
-        }
-        if (!c.id) {
-          isValid = false;
-        }
-        if (!c.content) {
-          isValid = false;
-        }
-        if (c.version === 1 && c.type !== 'editor' && c.type !== 'image') {
-          isValid = false;
-        }
-      });
-    
-      return isValid
-    }
-
+   
 
     const getBlogPost = React.useCallback(async(user: string, postId: string, content: any)=> {
       try {
@@ -58,10 +36,12 @@ export const BlogList = () => {
             'Content-Type': 'application/json'
           }
         })
+     
         const responseData =  await response.json()
         if(checkStructure(responseData)){
-          const findImage = responseData.find((data: any)=> data?.type === 'image')
-          setBlogPosts((prev)=> [...prev, {content: responseData, ...content, user, postId, blogImage: findImage}])
+          const findImage = responseData.postContent.find((data: any)=> data?.type === 'image')
+          const findText = responseData.postContent.find((data: any)=> data?.type === 'editor')
+          setBlogPosts((prev)=> [...prev, {content: responseData.postContent, ...content, user, title: responseData.title, createdAt: responseData.createdAt, postId, blogImage: findImage, description: findText}])
         }
         return {
           ...responseData,
@@ -131,12 +111,10 @@ console.log({blogPosts})
                         {blogPosts.map((blogPost, index) => (
                             <ListItem
                             onClick={()=> {
-                              const str = blogPost.postId
-const arr = str.split("-post");
-const str1 = arr[0];
+                        
 
 
-                              navigate(`/${blogPost.user}/${str1}/${blogPost.postId}`)
+                            
                              }}
                                 disablePadding
                                 sx={{
@@ -147,7 +125,12 @@ const str1 = arr[0];
                                 }}
                                 key={blogPost.postId}
                             >
-                              <BlogPostPreview title={blogPost?.metadata?.title} description={blogPost?.metadata?.description} createdAt={1679242608735} author={blogPost.user} authorAvatar=""  postImage={blogPost?.blogImage?.content?.image} />
+                              <BlogPostPreview onClick={()=> {
+                                      const str = blogPost.postId
+                                      const arr = str.split("-post");
+                                      const str1 = arr[0];
+                                  navigate(`/${blogPost.user}/${str1}/${blogPost.postId}`)
+                              }} description={blogPost?.description?.content} title={blogPost?.title}  createdAt={blogPost?.createdAt} author={blogPost.user} authorAvatar=""  postImage={blogPost?.blogImage?.content?.image} />
                                    {/* <Button 
                                    onClick={()=> {
                                     const str = blogPost.postId

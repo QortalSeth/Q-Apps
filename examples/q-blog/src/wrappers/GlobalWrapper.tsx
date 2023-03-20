@@ -161,12 +161,12 @@ const GlobalWrapper: React.FC<Props> = ({ children }) => {
     }, [])
 
     const onClosePublishBlogModal= React.useCallback(()=> {
-
+      
     }, [])
   return (
     <>
     <PublishBlogModal open={isOpenPublishBlogModal} onClose={onClosePublishBlogModal} onPublish={createBlog} />
-    <NavBar isAuthenticated={!!user} hasBlog={!!currentBlog} userName={user?.name || ""} userAvatar="" blog={currentBlog} />
+    <NavBar isAuthenticated={!!user} hasBlog={!!currentBlog} userName={user?.name || ""} userAvatar="" blog={currentBlog} authenticate={askForAccountInformation} />
       {children}
     </>
   );

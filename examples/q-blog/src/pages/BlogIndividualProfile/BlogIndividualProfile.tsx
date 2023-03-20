@@ -4,6 +4,8 @@ import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from "../../state/store";
 import { useParams } from 'react-router-dom';
+import { checkStructure } from '../../utils/checkStructure';
+import { BlogContent } from '../../interfaces/interfaces';
 
 export const BlogIndividualProfile = () => {
   const navigate = useNavigate();
@@ -12,31 +14,8 @@ export const BlogIndividualProfile = () => {
 
   const { currentBlog, isLoadingCurrentBlog } = useSelector((state: RootState) => state.global);
 
-    const [blogPosts, setBlogPosts] = React.useState<any[]>([])
-    const checkStructure = (content: any)=> {
-      let isValid = true
-      if (!Array.isArray(content)) isValid = false
-    
-      content.forEach((c: any)=> {
-        if (!c.type) {
-          isValid = false;
-        }
-        if (!c.version) {
-          isValid = false;
-        }
-        if (!c.id) {
-          isValid = false;
-        }
-        if (!c.content) {
-          isValid = false;
-        }
-        if (c.version === 1 && c.type !== 'editor' && c.type !== 'image') {
-          isValid = false;
-        }
-      });
-    
-      return isValid
-    }
+    const [blogPosts, setBlogPosts] = React.useState<BlogContent[]>([])
+  
 
 
     const getBlogPost = React.useCallback(async(user: string, postId: string)=> {
@@ -101,10 +80,10 @@ export const BlogIndividualProfile = () => {
       getBlogPosts()
     }, [])
 
-
+    if(!currentBlog) return null
   return (
     <>
-     <div>Phil's blog</div>
+     <div>{currentBlog.title}</div>
     {blogPosts.map((blogPost)=> {
      return (
       <Button onClick={

@@ -12,17 +12,18 @@ import { styled } from '@mui/system';
 import moment from 'moment'
 interface BlogPostPreviewProps {
   title: string;
-  description: string;
   createdAt: number;
   author: string;
   authorAvatar: string;
   postImage?: string;
+  description: any;
+  onClick?: ()=> void;
 }
 
 const StyledCard = styled(Card)`
   max-width: 600px;
   margin: 1rem;
-  min-width: 275px;
+  width: 275px;
   cursor: pointer;
 `;
 
@@ -30,14 +31,22 @@ const StyledCardMedia = styled(CardMedia)`
   height: 0;
   padding-top: 56.25%; // 16:9 aspect ratio
 `;
+const EllipsisTypography = styled(Typography)`
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 100%;
+`;
+
 
 const BlogPostPreview: React.FC<BlogPostPreviewProps> = ({
   title,
-  description,
   createdAt,
   author,
   authorAvatar,
   postImage,
+  description,
+  onClick
 }) => {
   const formatDate = (unixTimestamp: number): string => {
     const date = moment(unixTimestamp, 'x').calendar()
@@ -45,17 +54,43 @@ const BlogPostPreview: React.FC<BlogPostPreviewProps> = ({
     return date
   };
 
+  function extractTextFromSlate(nodes: any) {
+    console.log({nodes})
+    let text = "";
+  
+    for (const node of nodes) {
+      if (node.text) {
+        text += node.text;
+      } else if (node.children) {
+        text += extractTextFromSlate(node.children);
+      }
+    }
+  
+    return text;
+  }
+
+  console.log({description})
   return (
-    <StyledCard>
+    <StyledCard onClick={onClick}>
       <CardHeader
-        avatar={<Avatar src={authorAvatar} alt={`${author}'s avatar`} />}
-        title={title}
+        sx={{
+          '& .MuiCardHeader-content': {
+            overflow: 'hidden'
+          }
+         
+        }}
+        avatar={<Avatar src={`qortal://THUMBNAIL/${author}/qortal_avatar`} alt={`${author}'s avatar`} />}
+        title={
+          <EllipsisTypography noWrap variant="h6">
+          oauehdoheudoahtudohudohteudohaeudohteudoheudoehudouhdoeud
+          </EllipsisTypography>
+        }
         subheader={`Author: ${author}`}
       />
       <StyledCardMedia image={postImage}  />
       <CardContent>
         <Typography variant="body2" color="textSecondary" component="p">
-          {description}
+          {extractTextFromSlate(description)}
         </Typography>
         <Box marginTop="1rem">
           <Typography variant="caption" color="textSecondary">
