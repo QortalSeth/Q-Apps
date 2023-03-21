@@ -25,7 +25,7 @@ export const BlogIndividualPost = () => {
     const getBlogPost = React.useCallback(async()=> {
       try {
         dispatch(setIsLoadingGlobal(true))
-       const url=  `http://213.202.218.148:62391/arbitrary/BLOG_POST/${user}/${postId}`
+       const url=  `/arbitrary/BLOG_POST/${user}/${postId}`
          const response = await fetch(url, {
           method: 'GET',
           headers: {
@@ -78,7 +78,8 @@ export const BlogIndividualPost = () => {
       }}>
         <Box sx={{
           maxWidth: '700px',
-          margin: '15px'
+          margin: '15px',
+          width: '70%'
         }}>
         {user === userState?.name && (
           <Button onClick={()=> {

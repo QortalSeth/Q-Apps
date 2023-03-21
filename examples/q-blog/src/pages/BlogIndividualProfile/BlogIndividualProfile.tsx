@@ -19,7 +19,7 @@ import EditIcon from '@mui/icons-material/Edit';
 import BlogPostPreview from '../BlogList/PostPreview';
 import { setIsLoadingGlobal } from '../../state/features/globalSlice';
 import { BlogPost } from '../../state/features/blogSlice';
-import MyWorker from '../../webworkers/getBlogWorker?worker'
+import { fetchAndEvaluatePosts } from '../../utils/fetchPosts';
 export const BlogIndividualProfile = () => {
   const navigate = useNavigate();
   const { user } = useSelector((state: RootState) => state.auth);
@@ -47,24 +47,27 @@ export const BlogIndividualProfile = () => {
     
    
     }
-    const getBlogPost = (user: string, postId: string, content: any)=> {
-      const worker = new MyWorker()
-      worker.postMessage({user, postId, content})
+    const getBlogPost = async (user: string, postId: string, content: any)=> {
+
+      const res = await  fetchAndEvaluatePosts({
+        user, postId, content
+      })
+ 
   
-  worker.onmessage = (event: MessageEvent) => {
-    if(event.data.remove && event.data.id) 
+
+    if(res.remove && res.id) 
     {
-      removePost(event.data.id)
+      removePost(res.id)
       return
     }
-    updatePost(event.data)
-  }
+    updatePost(res)
+  
      }
  
 
     // const getBlogPost = React.useCallback(async(user: string, postId: string, content: any)=> {
     //   try {
-    //    const url=  `http://213.202.218.148:62391/arbitrary/BLOG_POST/${user}/${postId}`
+    //    const url=  `/arbitrary/BLOG_POST/${user}/${postId}`
     //      const response = await fetch(url, {
     //       method: 'GET',
     //       headers: {
@@ -95,7 +98,7 @@ export const BlogIndividualProfile = () => {
       if(!name) return
       if(!blog) return
       try {
-        const urlBlog=  `http://213.202.218.148:62391/arbitrary/BLOG/${name}/${blog}`
+        const urlBlog=  `/arbitrary/BLOG/${name}/${blog}`
         const response = await fetch(urlBlog, {
          method: 'GET',
          headers: {
@@ -110,7 +113,7 @@ export const BlogIndividualProfile = () => {
      
       try {
         dispatch(setIsLoadingGlobal(true))
-       const url=  `http://213.202.218.148:62391/arbitrary/resources/search?service=BLOG_POST&query=${blog}-post-&limit=20&name=${name}&includemetadata=true`
+       const url=  `/arbitrary/resources/search?service=BLOG_POST&query=${blog}-post-&limit=20&name=${name}&includemetadata=true`
          const response = await fetch(url, {
           method: 'GET',
           headers: {

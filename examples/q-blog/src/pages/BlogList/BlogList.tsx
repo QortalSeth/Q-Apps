@@ -17,7 +17,7 @@ import { setIsLoadingGlobal, togglePublishBlogModal } from '../../state/features
 import BlogPostPreview from './PostPreview';
 import { checkStructure } from '../../utils/checkStructure';
 import { addPosts, BlogPost, removePost, updatePost } from '../../state/features/blogSlice';
-import MyWorker from '../../webworkers/getBlogWorker?worker'
+import { fetchAndEvaluatePosts } from '../../utils/fetchPosts';
 
 
 export const BlogList = () => {
@@ -30,35 +30,30 @@ export const BlogList = () => {
     const navigate = useNavigate();
     const [blogPosts, setBlogPosts] = React.useState<any[]>([])
     
-   React.useEffect(()=> {
-    const worker = new MyWorker()
-    worker.postMessage([1,2,3])
+ 
+   const getBlogPost = async (user: string, postId: string, content: any)=> {
+  const res = await  fetchAndEvaluatePosts({
+      user, postId, content
+    })
+   
 
-worker.onmessage = (event: MessageEvent) => {
-  console.log(event.data)
-}
-    console.log({worker})
-   }, [])
-   const getBlogPost = (user: string, postId: string, content: any)=> {
-    const worker = new MyWorker()
-    worker.postMessage({user, postId, content})
 
-worker.onmessage = (event: MessageEvent) => {
-  console.log('worker return', event.data)
-  if(event.data.remove && event.data.id) 
+
+
+  if(res.remove && res.id) 
   {
-    dispatch(removePost(event.data.id))
+    dispatch(removePost(res.id))
     return
   }
-  dispatch(updatePost(event.data))
-}
+  dispatch(updatePost(res))
+
    }
    
 
     const getBlogPosts = React.useCallback(async()=> {
       try {
         dispatch(setIsLoadingGlobal(true))
-       const url=  `http://213.202.218.148:62391/arbitrary/resources/search?service=BLOG_POST&query=q-blog-&limit=20&includemetadata=true`
+       const url=  `/arbitrary/resources/search?service=BLOG_POST&query=q-blog-&limit=20&includemetadata=true`
          const response = await fetch(url, {
           method: 'GET',
           headers: {
@@ -96,7 +91,6 @@ for (const content of responseData) {
     React.useEffect(()=> {
       getBlogPosts()
     }, [])
-console.log({blogPosts})
 
   return (
     <>
