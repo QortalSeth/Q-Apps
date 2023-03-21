@@ -16,43 +16,44 @@ import {
 import { setIsLoadingGlobal, togglePublishBlogModal } from '../../state/features/globalSlice';
 import BlogPostPreview from './PostPreview';
 import { checkStructure } from '../../utils/checkStructure';
+import { addPosts, BlogPost, removePost, updatePost } from '../../state/features/blogSlice';
+import MyWorker from '../../webworkers/getBlogWorker?worker'
+
 
 export const BlogList = () => {
   const { user } = useSelector((state: RootState) => state.auth);
   const { currentBlog, isLoadingCurrentBlog } = useSelector((state: RootState) => state.global);
+  const { posts } = useSelector((state: RootState) => state.blog);
 
   const dispatch = useDispatch();
 
     const navigate = useNavigate();
     const [blogPosts, setBlogPosts] = React.useState<any[]>([])
     
-   
+   React.useEffect(()=> {
+    const worker = new MyWorker()
+    worker.postMessage([1,2,3])
 
-    const getBlogPost = React.useCallback(async(user: string, postId: string, content: any)=> {
-      try {
-       const url=  `http://213.202.218.148:62391/arbitrary/BLOG_POST/${user}/${postId}`
-         const response = await fetch(url, {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json'
-          }
-        })
-     
-        const responseData =  await response.json()
-        if(checkStructure(responseData)){
-          const findImage = responseData.postContent.find((data: any)=> data?.type === 'image')
-          const findText = responseData.postContent.find((data: any)=> data?.type === 'editor')
-          setBlogPosts((prev)=> [...prev, {content: responseData.postContent, ...content, user, title: responseData.title, createdAt: responseData.createdAt, postId, blogImage: findImage, description: findText}])
-        }
-        return {
-          ...responseData,
-          user,
-          postId
-        }
-      } catch (error) {
-        
-      }
-    }, [])
+worker.onmessage = (event: MessageEvent) => {
+  console.log(event.data)
+}
+    console.log({worker})
+   }, [])
+   const getBlogPost = (user: string, postId: string, content: any)=> {
+    const worker = new MyWorker()
+    worker.postMessage({user, postId, content})
+
+worker.onmessage = (event: MessageEvent) => {
+  console.log('worker return', event.data)
+  if(event.data.remove && event.data.id) 
+  {
+    dispatch(removePost(event.data.id))
+    return
+  }
+  dispatch(updatePost(event.data))
+}
+   }
+   
 
     const getBlogPosts = React.useCallback(async()=> {
       try {
@@ -65,11 +66,24 @@ export const BlogList = () => {
           }
         })
         const responseData =  await response.json()
-      
+        const structureData = responseData.map((post:any ) : BlogPost=>  {
+          return {
+            title: post?.metadata?.title,
+            category: post?.metadata?.category,
+categoryName: post?.metadata?.categoryName,
+tags: post?.metadata?.tags || [],
+  description: post?.metadata?.description,
+  createdAt: '',
+  user: post.name,
+  postImage: '',
+  id: post.identifier
+          }
+        })
+        dispatch(addPosts(structureData))
 
 for (const content of responseData) {
   if (content.name && content.identifier) {
-    await getBlogPost(content.name, content.identifier, content);
+     getBlogPost(content.name, content.identifier, content);
   }
 }
       } catch (error) {
@@ -88,7 +102,7 @@ console.log({blogPosts})
     <>
   
       <List sx={{ margin: "0px", padding: "10px", display: "flex", flexWrap: 'wrap'  }}>
-                        {blogPosts.map((blogPost, index) => (
+                        {posts.map((blogPost, index) => (
                             <ListItem
                             onClick={()=> {
                         
@@ -104,14 +118,14 @@ console.log({blogPosts})
                                     width: "auto",
                                     position: 'relative'
                                 }}
-                                key={blogPost.postId}
+                                key={blogPost.id}
                             >
                               <BlogPostPreview onClick={()=> {
-                                      const str = blogPost.postId
+                                      const str = blogPost.id
                                       const arr = str.split("-post");
                                       const str1 = arr[0];
-                                  navigate(`/${blogPost.user}/${str1}/${blogPost.postId}`)
-                              }} description={blogPost?.description?.content} title={blogPost?.title}  createdAt={blogPost?.createdAt} author={blogPost.user} authorAvatar=""  postImage={blogPost?.blogImage?.content?.image} />
+                                  navigate(`/${blogPost.user}/${str1}/${blogPost.id}`)
+                              }} description={blogPost?.description} title={blogPost?.title}  createdAt={blogPost?.createdAt} author={blogPost.user}  postImage={blogPost?.postImage} />
                                  
        {blogPost.user === user?.name && (
         <EditIcon className="edit-btn" sx={{
@@ -122,10 +136,10 @@ console.log({blogPosts})
           cursor: 'pointer'
         }} onClick={
           ()=> {
-            const str = blogPost.postId
+            const str = blogPost.id
   const arr = str.split("-post");
   const str1 = arr[0];
-            navigate(`/${blogPost.user}/${str1}/${blogPost.postId}/edit`)
+            navigate(`/${blogPost.user}/${str1}/${blogPost.id}/edit`)
           }
         } />
        )}

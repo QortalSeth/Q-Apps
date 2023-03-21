@@ -17,6 +17,7 @@ import EditIcon from '@mui/icons-material/Edit';
 import { createEditor, Descendant, Editor, Transforms } from 'slate';
 import { styled } from '@mui/system';
 import { setIsLoadingGlobal } from '../../state/features/globalSlice';
+import { extractTextFromSlate } from '../../utils/extractTextFromSlate';
 
 const initialValue: Descendant[] = [
   {
@@ -82,24 +83,32 @@ export const EditPost = () => {
     
   }, [newPostContent])
   
-  function objectToBase64(obj:any) {
+  function objectToBase64(obj: any) {
     // Step 1: Convert the object to a JSON string
     const jsonString = JSON.stringify(obj);
   
-    // Step 2: Convert the JSON string to a Uint8Array of bytes
-    const utf8Encoder = new TextEncoder();
-    const uint8Array = utf8Encoder.encode(jsonString);
+    // Step 2: Create a Blob from the JSON string
+    const blob = new Blob([jsonString], { type: 'application/json' });
   
-    // Step 3: Convert the Uint8Array to a base64-encoded string
-    let base64 = '';
- 
-      // For browsers
-      const numberArray = Array.from(uint8Array); // Convert Uint8Array to a regular array
-      const binaryString = String.fromCharCode.apply(null, numberArray);
-      base64 = btoa(binaryString);
-    
-    return base64;
+    // Step 3: Create a FileReader to read the Blob as a base64-encoded string
+    return new Promise<string>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        if (typeof reader.result === 'string') {
+          // Remove 'data:application/json;base64,' prefix
+          const base64 = reader.result.replace('data:application/json;base64,', '');
+          resolve(base64);
+        } else {
+          reject(new Error('Failed to read the Blob as a base64-encoded string'));
+        }
+      };
+      reader.onerror = () => {
+        reject(reader.error);
+      };
+      reader.readAsDataURL(blob);
+    });
   }
+  
 
 
   const addImage = (base64: string)=> {
@@ -158,15 +167,20 @@ export const EditPost = () => {
           title,
           postContent: newPostContent
         }
-        const blogPostToBase64 = objectToBase64(postObject)
-
+        const blogPostToBase64 = await objectToBase64(postObject)
+        let description = ""
+        const findText = newPostContent.find((data)=> data?.type === 'editor')
+        if(findText && findText.content){
+          description = extractTextFromSlate(findText?.content)
+          description =   description.slice(0, 180);
+         }
       const resourceResponse = await qortalRequest({
         action: "PUBLISH_QDN_RESOURCE",
         name: name, 
         service: 'BLOG_POST',
         data64: blogPostToBase64,
-        title: "Title",
-        description: "Description",
+        title: title,
+        description: description,
         category: "TECHNOLOGY",
         tags: ["tag1", "tag2", "tag3", "tag4", "tag5"],
         metaData: 'description=destriptontest&category=catTest',

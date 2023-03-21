@@ -12,9 +12,8 @@ import { styled } from '@mui/system';
 import moment from 'moment'
 interface BlogPostPreviewProps {
   title: string;
-  createdAt: number;
+  createdAt: number | string;
   author: string;
-  authorAvatar: string;
   postImage?: string;
   description: any;
   onClick?: ()=> void;
@@ -43,11 +42,16 @@ const BlogPostPreview: React.FC<BlogPostPreviewProps> = ({
   title,
   createdAt,
   author,
-  authorAvatar,
   postImage,
   description,
   onClick
 }) => {
+  console.log('postpreview',{title,
+    createdAt,
+    author,
+    postImage,
+    description,
+    onClick})
   const [avatarUrl, setAvatarUrl] = React.useState<string>('')
   const formatDate = (unixTimestamp: number): string => {
     const date = moment(unixTimestamp, 'x').calendar()
@@ -57,6 +61,7 @@ const BlogPostPreview: React.FC<BlogPostPreviewProps> = ({
 
   function extractTextFromSlate(nodes: any) {
     console.log({nodes})
+    if(!Array.isArray(nodes)) return ""
     let text = "";
   
     for (const node of nodes) {
@@ -107,11 +112,12 @@ const BlogPostPreview: React.FC<BlogPostPreviewProps> = ({
       <StyledCardMedia image={postImage}  />
       <CardContent>
         <Typography variant="body2" color="textSecondary" className="line-clamp" component="p" >
-          {extractTextFromSlate(description)}
+          {/* {extractTextFromSlate(description)} */}
+          {description}
         </Typography>
         <Box marginTop="1rem">
           <Typography variant="caption" color="textSecondary">
-            Created at: {formatDate(createdAt)}
+            Created at: {formatDate(+createdAt)}
           </Typography>
         </Box>
       </CardContent>

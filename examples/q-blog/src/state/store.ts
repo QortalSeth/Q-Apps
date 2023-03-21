@@ -3,13 +3,15 @@ import { configureStore } from "@reduxjs/toolkit";
 // import notificationsReducer from "./features/notificationsSlice";
 import authReducer from "./features/authSlice";
 import globalReducer from "./features/globalSlice";
+import blogReducer from "./features/blogSlice";
 
 export const store = configureStore({
   reducer: {
     // images: imagesReducer,
     // notifications: notificationsReducer,
     auth: authReducer,
-    global: globalReducer
+    global: globalReducer,
+    blog: blogReducer
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
