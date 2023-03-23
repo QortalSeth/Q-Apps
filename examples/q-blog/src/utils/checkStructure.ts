@@ -17,8 +17,13 @@ export const checkStructure = (content: any)=> {
       if (!c.content) {
         isValid = false;
       }
-      if (c.version === 1 && c.type !== 'editor' && c.type !== 'image') {
-        isValid = false;
+      if (
+        c.version === 1 &&
+        c.type !== 'editor' &&
+        c.type !== 'image' &&
+        c.type !== 'video'
+      ) {
+        isValid = false
       }
     });
   
