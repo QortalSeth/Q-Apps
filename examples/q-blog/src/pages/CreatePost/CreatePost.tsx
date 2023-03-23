@@ -15,6 +15,7 @@ import EditIcon from '@mui/icons-material/Edit';
 
 import RemoveCircleIcon from '@mui/icons-material/RemoveCircle';
 import { extractTextFromSlate } from '../../utils/extractTextFromSlate';
+import { setNotification } from '../../state/features/notificationsSlice';
 const uid = new ShortUniqueId()
 
 const initialValue: Descendant[] = [
@@ -49,7 +50,7 @@ export const CreatePost = () => {
   const [title, setTitle] = React.useState<string>('')
   const [blogImage, setBlogImage] = React.useState<string>('')
   const [value, setValue] = React.useState(initialValue);
-
+  const dispatch = useDispatch()
   const addPostSection = React.useCallback((content: any)=> {
     const section = {
       type: 'editor',
@@ -108,23 +109,55 @@ export const CreatePost = () => {
   async function publishQDNResource() {
     let address
     let name 
-
-    try {
-       console.log({user})
-      if(!user || !user.address) return
-        address = user.address
+    let errorMsg = ""
+ 
+        address = user?.address
         name = user?.name || ""
-    } catch (error) {
-        
+   
+    const missingFields = [];
+    if(!address) {
+   
+      errorMsg =  "Cannot post: your address isn't available"
+
     }
-    console.log({address, name})
-    if(!address) return
-    if(!name) return
-    if(!title) return
-    if(newPostContent.length === 0) return
+    if(!name){
+     
+      errorMsg =  'Cannot post without a name'
+      
+    }
+    if(!title) missingFields.push('title')
+    if (missingFields.length > 0) {
+      const missingFieldsString = missingFields.join(', ');
+      const errMsg = `Missing: ${missingFieldsString}`
+      errorMsg = errMsg
+    
+    }
+    if(newPostContent.length === 0) {
+      errorMsg = 'Your post has no content'
+    }
+
+ 
+
+					
+
+					
+
+    
     console.log({currentBlog})
 
-    if(!currentBlog) return
+    if(!currentBlog) {
+      errorMsg = "Cannot publish without first creating a blog."
+    }
+
+    if(errorMsg){
+      dispatch(
+        setNotification({
+          msg: errorMsg,
+          alertType: 'error',
+        })
+      )
+      return
+    }
 
     const postObject = {
       title,
@@ -133,6 +166,7 @@ export const CreatePost = () => {
       postContent: newPostContent
     }
     try {
+      if(!currentBlog) return
         const id = uid();
         
         const identifier = `${currentBlog.blogId}-post-${id}`;
@@ -154,9 +188,20 @@ export const CreatePost = () => {
         tags: ["tag1", "tag2", "tag3", "tag4", "tag5"],
         identifier: identifier
       });
+      dispatch(
+        setNotification({
+          msg: "Blog post successfully published",
+          alertType: 'success',
+        })
+      )
       console.log({ resourceResponse });
-    } catch (error) {
-      console.error(error)
+    } catch (error: any) {
+      dispatch(
+        setNotification({
+          msg: error?.message || "Failed to publish post",
+          alertType: 'error',
+        })
+      )
     }
     
   }

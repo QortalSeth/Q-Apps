@@ -1,6 +1,15 @@
-import { createSlice } from "@reduxjs/toolkit";
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
-const initialState = {
+interface AlertTypes {
+  alertSuccess: string;
+  alertError: string;
+}
+
+interface InitialState {
+  alertTypes: AlertTypes;
+}
+
+const initialState: InitialState = {
   alertTypes: {
     alertSuccess: "",
     alertError: "",
@@ -11,7 +20,10 @@ export const notificationsSlice = createSlice({
   name: "notifications",
   initialState,
   reducers: {
-    setNotification: (state, action) => {
+    setNotification: (
+      state: InitialState,
+      action: PayloadAction<{ alertType: string; msg: string }>
+    ) => {
       if (action.payload.alertType === "success") {
         return {
           ...state,
@@ -29,8 +41,9 @@ export const notificationsSlice = createSlice({
           },
         };
       }
+      return state;
     },
-    removeNotification: (state, action) => {
+    removeNotification: (state: InitialState) => {
       return {
         ...state,
         alertTypes: {

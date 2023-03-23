@@ -46,12 +46,7 @@ const BlogPostPreview: React.FC<BlogPostPreviewProps> = ({
   description,
   onClick
 }) => {
-  console.log('postpreview',{title,
-    createdAt,
-    author,
-    postImage,
-    description,
-    onClick})
+
   const [avatarUrl, setAvatarUrl] = React.useState<string>('')
   const formatDate = (unixTimestamp: number): string => {
     const date = moment(unixTimestamp, 'x').calendar()

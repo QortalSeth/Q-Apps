@@ -12,14 +12,19 @@ import { store } from "./state/store";
 import { Provider } from "react-redux";
 import GlobalWrapper from "./wrappers/GlobalWrapper";
 import { EditPost } from "./pages/EditPost/EditPost";
+import Notification from "./components/common/Notification/Notification";
 
 function App() {
 
   return (
     <Provider store={store}>
+             
+
     <ThemeProvider theme={theme}>
+    <Notification />
       <GlobalWrapper>
        <CssBaseline />
+
        <Routes>
   <Route path="/:user/:blog/:postId" element={<BlogIndividualPost />} />
   <Route path="/:user/:blog/:postId/edit" element={<EditPost />} />

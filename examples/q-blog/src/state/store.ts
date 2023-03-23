@@ -1,6 +1,6 @@
 import { configureStore } from "@reduxjs/toolkit";
 // import imagesReducer from "./features/imagesSlice";
-// import notificationsReducer from "./features/notificationsSlice";
+import notificationsReducer from "./features/notificationsSlice";
 import authReducer from "./features/authSlice";
 import globalReducer from "./features/globalSlice";
 import blogReducer from "./features/blogSlice";
@@ -8,7 +8,7 @@ import blogReducer from "./features/blogSlice";
 export const store = configureStore({
   reducer: {
     // images: imagesReducer,
-    // notifications: notificationsReducer,
+    notifications: notificationsReducer,
     auth: authReducer,
     global: globalReducer,
     blog: blogReducer

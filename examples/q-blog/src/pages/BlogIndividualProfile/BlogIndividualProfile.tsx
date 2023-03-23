@@ -1,218 +1,186 @@
-import Button from '@mui/material/Button';
 import React from 'react'
-import { useNavigate } from "react-router-dom";
-import { useDispatch, useSelector } from 'react-redux';
-import { RootState } from "../../state/store";
-import { useParams } from 'react-router-dom';
-import { checkStructure } from '../../utils/checkStructure';
-import { BlogContent } from '../../interfaces/interfaces';
-import {
-  Box,
-  Tooltip,
-  Popover,
-  List,
-  ListItem,
-  Typography,
-  IconButton,
-} from "@mui/material";
-import EditIcon from '@mui/icons-material/Edit';
-import BlogPostPreview from '../BlogList/PostPreview';
-import { setIsLoadingGlobal } from '../../state/features/globalSlice';
-import { BlogPost } from '../../state/features/blogSlice';
-import { fetchAndEvaluatePosts } from '../../utils/fetchPosts';
+import { useNavigate } from 'react-router-dom'
+import { useDispatch, useSelector } from 'react-redux'
+import { RootState } from '../../state/store'
+import { useParams } from 'react-router-dom'
+
+import { List, ListItem, Typography } from '@mui/material'
+import EditIcon from '@mui/icons-material/Edit'
+import BlogPostPreview from '../BlogList/PostPreview'
+import { setIsLoadingGlobal } from '../../state/features/globalSlice'
+import { BlogPost } from '../../state/features/blogSlice'
+import { useFetchPosts } from '../../hooks/useFetchPosts'
+import LazyLoad from '../../components/common/LazyLoad'
 export const BlogIndividualProfile = () => {
-  const navigate = useNavigate();
-  const { user } = useSelector((state: RootState) => state.auth);
-  const { blog, user: username } = useParams();
+  const navigate = useNavigate()
+  const { user } = useSelector((state: RootState) => state.auth)
+  const { blog, user: username } = useParams()
   const dispatch = useDispatch()
   const [userBlog, setUserBlog] = React.useState<any>(null)
-    const [blogPosts, setBlogPosts] = React.useState<BlogPost[]>([])
+  const { checkAndUpdatePost, getBlogPost, hashMapPosts } = useFetchPosts()
 
-   const removePost = (id: string) => {
+  const [blogPosts, setBlogPosts] = React.useState<BlogPost[]>([])
 
-      setBlogPosts((prev)=> {
-        return prev.filter((item) => item.id !== id);
+  const getBlogPosts = React.useCallback(async () => {
+    let name = username
+
+    if (!name) return
+    if (!blog) return
+
+    try {
+      dispatch(setIsLoadingGlobal(true))
+      const offset = blogPosts.length
+      const url = `/arbitrary/resources/search?service=BLOG_POST&query=${blog}-post-&limit=2&name=${name}&includemetadata=true&offset=${offset}`
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json'
+        }
       })
-    }
-  const  updatePost = (payload: BlogPost) => {
-    const {id} = payload
-    setBlogPosts((prev)=> {
-      const posts = [...prev]
-      const index = posts.findIndex(post => post.id === id);
-      if (index !== -1) {
-        posts[index] = { ...payload};
-        return posts
-      } else return prev
-    })
-    
-   
-    }
-    const getBlogPost = async (user: string, postId: string, content: any)=> {
+      const responseData = await response.json()
 
-      const res = await  fetchAndEvaluatePosts({
-        user, postId, content
+      const structureData = responseData.map((post: any): BlogPost => {
+        return {
+          title: post?.metadata?.title,
+          category: post?.metadata?.category,
+          categoryName: post?.metadata?.categoryName,
+          tags: post?.metadata?.tags || [],
+          description: post?.metadata?.description,
+          createdAt: '',
+          user: post.name,
+          postImage: '',
+          id: post.identifier
+        }
       })
- 
-  
+      setBlogPosts(structureData)
+      const copiedBlogPosts: BlogPost[] = [...blogPosts]
+      structureData.forEach((post: BlogPost) => {
+        const index = blogPosts.findIndex((p) => p.id === post.id)
+        if (index !== -1) {
+          copiedBlogPosts[index] = post
+        } else {
+          copiedBlogPosts.push(post)
+        }
+      })
+      setBlogPosts(copiedBlogPosts)
 
-    if(res.remove && res.id) 
-    {
-      removePost(res.id)
-      return
+      for (const content of structureData) {
+        if (content.user && content.id) {
+          const res = checkAndUpdatePost(content)
+          console.log({ res })
+          if (res) {
+            getBlogPost(content.user, content.id, content)
+          }
+        }
+      }
+    } catch (error) {
+    } finally {
+      dispatch(setIsLoadingGlobal(false))
     }
-    updatePost(res)
-  
-     }
- 
+  }, [username, blog, blogPosts])
+  const getBlog = React.useCallback(async () => {
+    let name = username
 
-    // const getBlogPost = React.useCallback(async(user: string, postId: string, content: any)=> {
-    //   try {
-    //    const url=  `/arbitrary/BLOG_POST/${user}/${postId}`
-    //      const response = await fetch(url, {
-    //       method: 'GET',
-    //       headers: {
-    //         'Content-Type': 'application/json'
-    //       }
-    //     })
-     
-    //     const responseData =  await response.json()
-    //     if(checkStructure(responseData)){
-    //       const findImage = responseData.postContent.find((data: any)=> data?.type === 'image')
-    //       const findText = responseData.postContent.find((data: any)=> data?.type === 'editor')
-    //       setBlogPosts((prev)=> [...prev, {content: responseData.postContent, ...content, user, title: responseData.title, createdAt: responseData.createdAt, postId, blogImage: findImage, description: findText}])
-    //     }
-    //     return {
-    //       ...responseData,
-    //       user,
-    //       postId
-    //     }
-    //   } catch (error) {
-        
-    //   }
-    // }, [])
+    if (!name) return
+    if (!blog) return
+    try {
+      const urlBlog = `/arbitrary/BLOG/${name}/${blog}`
+      const response = await fetch(urlBlog, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      const responseData = await response.json()
+      setUserBlog(responseData)
+    } catch (error) {}
+  }, [username, blog, blogPosts])
 
-    const getBlogPosts = React.useCallback(async()=> {
-      let name = username
+  React.useEffect(() => {
+    getBlog()
+  }, [username, blog])
+  const getPosts = React.useCallback(async () => {
+    await getBlogPosts()
+  }, [getBlogPosts])
 
-   
-      if(!name) return
-      if(!blog) return
-      try {
-        const urlBlog=  `/arbitrary/BLOG/${name}/${blog}`
-        const response = await fetch(urlBlog, {
-         method: 'GET',
-         headers: {
-           'Content-Type': 'application/json'
-         }
-       })
-       const responseData =  await response.json()
-       setUserBlog(responseData)
-      } catch (error) {
-        
-      }
-     
-      try {
-        dispatch(setIsLoadingGlobal(true))
-       const url=  `/arbitrary/resources/search?service=BLOG_POST&query=${blog}-post-&limit=20&name=${name}&includemetadata=true`
-         const response = await fetch(url, {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json'
-          }
-        })
-        const responseData =  await response.json()
-      
-        const structureData = responseData.map((post:any ) : BlogPost=>  {
-          return {
-            title: post?.metadata?.title,
-            category: post?.metadata?.category,
-categoryName: post?.metadata?.categoryName,
-tags: post?.metadata?.tags || [],
-  description: post?.metadata?.description,
-  createdAt: '',
-  user: post.name,
-  postImage: '',
-  id: post.identifier
-          }
-        })
-        setBlogPosts(structureData)
-for (const content of responseData) {
-  if (content.name && content.identifier) {
-     getBlogPost(content.name, content.identifier, content);
-  }
-}
-      } catch (error) {
-        
-      } finally {
-        dispatch(setIsLoadingGlobal(false))
-      }
-    }, [username, blog])
-
-
-
-    React.useEffect(()=> {
-      getBlogPosts()
-    }, [])
-
-
-
-    if(!userBlog) return null
+  if (!userBlog) return null
   return (
     <>
-   <Typography variant="h1" color="textPrimary" sx={{
+      <Typography
+        variant="h1"
+        color="textPrimary"
+        sx={{
           textAlign: 'center',
           marginTop: '20px'
-        }}>
+        }}
+      >
         {userBlog.title}
-        </Typography>
- 
-     <List sx={{ margin: "0px", padding: "10px", display: "flex", flexWrap: 'wrap'  }}>
-                        {blogPosts.map((blogPost, index) => (
-                            <ListItem
-                            onClick={()=> {
-                        
+      </Typography>
 
-
-                            
-                             }}
-                                disablePadding
-                                sx={{
-                                    display: "flex",
-                                    gap: 1,
-                                    alignItems: "center",
-                                    width: "auto",
-                                    position: 'relative'
-                                }}
-                                key={blogPost.id}
-                            >
-                              <BlogPostPreview onClick={()=> {
-                                      const str = blogPost.id
-                                      const arr = str.split("-post");
-                                      const str1 = arr[0];
-                                  navigate(`/${blogPost.user}/${str1}/${blogPost.id}`)
-                              }} description={blogPost?.description} title={blogPost?.title}  createdAt={blogPost?.createdAt} author={blogPost.user}   postImage={blogPost?.postImage} />
-                                 
-       {blogPost.user === user?.name && (
-        <EditIcon className="edit-btn" sx={{
-          position: 'absolute',
-          zIndex: 10,
-          bottom: '25px',
-          right:  '25px',
-          cursor: 'pointer'
-        }} onClick={
-          ()=> {
-            const str = blogPost.id
-  const arr = str.split("-post");
-  const str1 = arr[0];
-            navigate(`/${blogPost.user}/${str1}/${blogPost.id}/edit`)
+      <List
+        sx={{
+          margin: '0px',
+          padding: '10px',
+          display: 'flex',
+          flexWrap: 'wrap'
+        }}
+      >
+        {blogPosts.map((post, index) => {
+          const existingPost = hashMapPosts[post.id]
+          let blogPost = post
+          if (existingPost) {
+            blogPost = existingPost
           }
-        } />
-       )}
-      
-                            </ListItem>
-                        ))}
-                    </List>
+          return (
+            <ListItem
+              onClick={() => {}}
+              disablePadding
+              sx={{
+                display: 'flex',
+                gap: 1,
+                alignItems: 'center',
+                width: 'auto',
+                position: 'relative'
+              }}
+              key={blogPost.id}
+            >
+              <BlogPostPreview
+                onClick={() => {
+                  const str = blogPost.id
+                  const arr = str.split('-post')
+                  const str1 = arr[0]
+                  navigate(`/${blogPost.user}/${str1}/${blogPost.id}`)
+                }}
+                description={blogPost?.description}
+                title={blogPost?.title}
+                createdAt={blogPost?.createdAt}
+                author={blogPost.user}
+                postImage={blogPost?.postImage}
+              />
+
+              {blogPost.user === user?.name && (
+                <EditIcon
+                  className="edit-btn"
+                  sx={{
+                    position: 'absolute',
+                    zIndex: 10,
+                    bottom: '25px',
+                    right: '25px',
+                    cursor: 'pointer'
+                  }}
+                  onClick={() => {
+                    const str = blogPost.id
+                    const arr = str.split('-post')
+                    const str1 = arr[0]
+                    navigate(`/${blogPost.user}/${str1}/${blogPost.id}/edit`)
+                  }}
+                />
+              )}
+            </ListItem>
+          )
+        })}
+      </List>
+      <LazyLoad onLoadMore={getPosts}></LazyLoad>
     </>
-   
   )
 }
