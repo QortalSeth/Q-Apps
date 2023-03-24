@@ -12,6 +12,10 @@ interface QortalRequestOptions {
   address?: string
   metaData?: string
   encoding?: string
+  includeMetadata?: boolean
+  limit?: numebr
+  offset?: number
+  reverse?: boolean
 }
   
   declare function qortalRequest(options: QortalRequestOptions): Promise<any>;

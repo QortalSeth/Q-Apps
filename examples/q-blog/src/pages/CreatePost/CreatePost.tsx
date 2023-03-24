@@ -16,6 +16,8 @@ import VideoCallIcon from '@mui/icons-material/VideoCall'
 import RemoveCircleIcon from '@mui/icons-material/RemoveCircle'
 import { extractTextFromSlate } from '../../utils/extractTextFromSlate'
 import { setNotification } from '../../state/features/notificationsSlice'
+import { VideoPanel } from '../../components/common/VideoPanel'
+import { VideoContent } from '../../components/common/VideoContent'
 const uid = new ShortUniqueId()
 
 const initialValue: Descendant[] = [
@@ -204,14 +206,30 @@ export const CreatePost = () => {
     console.log({ section })
     setNewPostContent((prev) => [...prev, section])
   }
-  const addVideo = () => {
+
+  interface IaddVideo {
+    name: string
+    identifier: string
+    service: string
+    title: string
+    description: string
+  }
+  const addVideo = ({
+    name,
+    identifier,
+    service,
+    title,
+    description
+  }: IaddVideo) => {
     const section = {
       type: 'video',
       version: 1,
       content: {
-        name: 'AlphaX',
-        identifier: 'qtube_tyfBQYwh',
-        service: 'VIDEO'
+        name: name,
+        identifier: identifier,
+        service: service,
+        title,
+        description
       },
       id: uid()
     }
@@ -233,6 +251,30 @@ export const CreatePost = () => {
       content: {
         image: base64,
         caption: section.content.caption
+      }
+    }
+    const findSectionIndex = newPostContent.findIndex(
+      (s) => s.id === section.id
+    )
+    if (findSectionIndex !== -1) {
+      const copyNewPostContent = [...newPostContent]
+      copyNewPostContent[findSectionIndex] = newSection
+
+      setNewPostContent(copyNewPostContent)
+    }
+  }
+  const editVideo = (
+    { name, identifier, service, description, title }: IaddVideo,
+    section: any
+  ) => {
+    const newSection = {
+      ...section,
+      content: {
+        name: name,
+        identifier: identifier,
+        service: service,
+        description,
+        title
       }
     }
     const findSectionIndex = newPostContent.findIndex(
@@ -272,6 +314,17 @@ export const CreatePost = () => {
     },
     [newPostContent]
   )
+
+  const onSelectVideo = React.useCallback((video: any) => {
+    addVideo({
+      name: video.name,
+      identifier: video.identifier,
+      service: video.service,
+      title: video?.metadata?.title,
+      description: video?.metadata?.description
+    })
+    console.log({ video })
+  }, [])
   return (
     <Box
       sx={{
@@ -430,6 +483,85 @@ export const CreatePost = () => {
               </Box>
             )
           }
+
+          if (section.type === 'video') {
+            return (
+              <Box key={section.id}>
+                {editingSection && editingSection.id === section.id ? (
+                  <VideoPanel
+                    width="24px"
+                    height="24px"
+                    onSelect={(video) =>
+                      editVideo(
+                        {
+                          name: video.name,
+                          identifier: video.identifier,
+                          service: video.service,
+                          title: video?.metadata?.title,
+                          description: video?.metadata?.description
+                        },
+                        section
+                      )
+                    }
+                  />
+                ) : (
+                  <Box
+                    sx={{
+                      position: 'relative'
+                    }}
+                  >
+                    <VideoContent
+                      title={section.content?.title}
+                      description={section.content?.description}
+                    />
+                    <Box
+                      sx={{
+                        position: 'absolute',
+                        right: '5px',
+                        zIndex: 5,
+                        top: '50%',
+                        transform: 'translateY(-50%)',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: 2,
+                        background: 'white',
+                        padding: '5px',
+                        borderRadius: '5px'
+                      }}
+                    >
+                      <RemoveCircleIcon
+                        onClick={() => removeSection(section)}
+                        sx={{
+                          cursor: 'pointer'
+                        }}
+                      />
+                      <VideoPanel
+                        width="24px"
+                        height="24px"
+                        onSelect={(video) =>
+                          editVideo(
+                            {
+                              name: video.name,
+                              identifier: video.identifier,
+                              service: video.service,
+                              title: video?.metadata?.title,
+                              description: video?.metadata?.description
+                            },
+                            section
+                          )
+                        }
+                      />
+                    </Box>
+                  </Box>
+                )}
+                {editingSection && editingSection.id === section.id ? (
+                  <Button onClick={() => setEditingSection(null)}>Close</Button>
+                ) : (
+                  <></>
+                )}
+              </Box>
+            )
+          }
         })}
         <Box
           sx={{
@@ -466,15 +598,7 @@ export const CreatePost = () => {
               }}
             />
           </ImageUploader>
-          <VideoCallIcon
-           onClick={addVideo}
-            
-           sx={{
-             cursor: 'pointer',
-             width: '50px',
-             height: '50px'
-           }}
-          ></VideoCallIcon>
+          <VideoPanel onSelect={onSelectVideo} />
         </Box>
         <Box
           sx={{

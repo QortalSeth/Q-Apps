@@ -18,6 +18,7 @@ const VideoContainer = styled(Box)`
   justify-content: center;
   width: 100%;
   height: 100%;
+  margin: 20px 0px;
 `
 
 const VideoElement = styled('video')`
@@ -179,9 +180,6 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
           <CircularProgress />
         </Box>
       )}
-      With these changes, a circular progress spinner will be displayed in the
-      middle of the video player while the video is loading. Once the video is
-      ready to play, the spinner will disappear.
       <VideoElement
         ref={videoRef}
         src={src}
