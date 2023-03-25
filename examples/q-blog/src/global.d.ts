@@ -16,7 +16,12 @@ interface QortalRequestOptions {
   limit?: numebr
   offset?: number
   reverse?: boolean
+  resources?: any[]
+  filename?: string
 }
-  
-  declare function qortalRequest(options: QortalRequestOptions): Promise<any>;
-  
+
+declare function qortalRequest(options: QortalRequestOptions): Promise<any>
+declare function qortalRequestWithTimeout(
+  options: QortalRequestOptions,
+  time: number
+): Promise<any>
