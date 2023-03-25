@@ -13,16 +13,47 @@
     margin-bottom: 1rem;
   }
   
-  .toolbar-button {
-    background: none;
-    border: none;
-    font-size: 18px;
-    font-weight: bold;
-    margin-right: 1rem;
-    cursor: pointer;
-  }
+
   
   .toolbar-button:focus {
     outline: none;
   }
   
+  .code-block {
+    background-color: #2c2b31;
+    color: rgb(238, 234, 234);
+    border-radius: 3px;
+    padding: 10px;
+    margin: 10px 0;
+    font-family: 'Courier New', Courier, monospace;
+    white-space: pre-wrap;
+    overflow-x: auto;
+    max-width: 100%;
+    font-size: 14px;
+  }
+
+  .paragraph {
+    font-size: 20px;
+  }
+
+  .toolbar-button {
+    background-color: white;
+    border: 1px solid gray;
+    border-radius: 5px;
+    margin-right: 5px;
+    padding: 5px 10px;
+    cursor: pointer;
+    outline: none;
+  }
+  
+  .toolbar-button.active {
+    background-color: lightgray;
+  }
+
+  .h2 {
+    font-size: 25px
+  }
+
+  .h2 {
+    font-size: 22px
+  }
