@@ -22,7 +22,7 @@ export interface BlogPost {
   category?: string
   categoryName?: string
   tags?: string[]
-  updatedDate?: number | string
+  updated?: number | string
 }
 
 export const blogSlice = createSlice({

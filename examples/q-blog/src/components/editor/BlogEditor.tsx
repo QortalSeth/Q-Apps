@@ -1,16 +1,21 @@
 // src/components/BlogEditor.tsx
+// @ts-nocheck
+
 import React, { useMemo, useState, useCallback } from 'react';
 import { createEditor, Descendant, Editor, Transforms, Range } from 'slate'
+
 import {
   Slate,
   Editable,
   withReact,
   RenderElementProps,
-  RenderLeafProps
+  RenderLeafProps,
+  useSlate
 } from 'slate-react'
+import { styled } from '@mui/system'
 import { CustomElement, CustomText, FormatMark } from './customTypes'
 import './BlogEditor.css'
-import { Button, Box } from '@mui/material'
+import { Modal, Box, TextField, Button } from '@mui/material'
 import PostAddIcon from '@mui/icons-material/PostAdd'
 
 const initialValue: Descendant[] = [
@@ -28,6 +33,21 @@ interface MyComponentProps {
   value: any
   setValue: (value: any) => void
 }
+
+const ModalBox = styled(Box)(({ theme }) => ({
+  position: 'absolute',
+  top: '50%',
+  left: '50%',
+  transform: 'translate(-50%, -50%)',
+  backgroundColor: theme.palette.background.paper,
+  boxShadow: theme.shadows[5],
+  padding: theme.spacing(2, 4, 3),
+  gap: '15px',
+  borderRadius: '5px',
+  alignItems: 'center',
+  display: 'flex',
+  flex: 0
+}))
 
 const BlogEditor: React.FC<MyComponentProps> = ({
   addPostSection,
@@ -65,6 +85,8 @@ const BlogEditor: React.FC<MyComponentProps> = ({
     label: string
     editor: Editor
   }> = ({ format, label, editor }) => {
+    const editor2 = useSlate()
+    console.log({ editor2 })
     let onClick = () => {
       console.log({ format })
       if (format === 'heading-2' || format === 'heading-3') {
@@ -112,6 +134,8 @@ const BlogEditor: React.FC<MyComponentProps> = ({
     label: string
     editor: Editor
   }> = ({ format, label, editor }) => {
+    const editor2 = useSlate()
+
     let onClick = () => {
       console.log({ format })
       if (format === 'code-block') {
@@ -130,6 +154,39 @@ const BlogEditor: React.FC<MyComponentProps> = ({
         onMouseDown={(event) => {
           event.preventDefault()
           onClick()
+        }}
+      >
+        {label}
+      </button>
+    )
+  }
+
+  const ToolbarButtonCodeLink: React.FC<{
+    format: FormatMark | string
+    label: string
+    editor: Editor
+  }> = ({ format, label, editor }) => {
+    const editor2 = useSlate()
+
+    let isActive = false
+    if (format === 'link') {
+      isActive = !!Editor.marks(editor)?.link
+    }
+
+    return (
+      <button
+        className={`toolbar-button ${isActive ? 'active' : ''}`}
+        onMouseDown={(event) => {
+          event.preventDefault()
+          console.log(Editor.marks(editor))
+          const isActive2 = !!Editor.marks(editor)?.link
+          console.log({ isActive2 })
+          if (isActive2) {
+            Editor.removeMark(editor, 'link')
+            return
+          }
+          // const url = window.prompt('Enter the URL of the link:')
+          setOpen(true)
         }}
       >
         {label}
@@ -192,6 +249,7 @@ const BlogEditor: React.FC<MyComponentProps> = ({
 
     if (selection && !Range.isCollapsed(selection)) {
       const isLink = Editor.marks(editor)?.link === true
+      const isInsideLink = isLinkActive(editor)
 
       if (isLink) {
         Editor.removeMark(editor, 'link')
@@ -200,6 +258,68 @@ const BlogEditor: React.FC<MyComponentProps> = ({
       }
     }
   }
+
+  const [open, setOpen] = useState(false)
+
+  const initialValue = 'qortal://'
+  const [inputValue, setInputValue] = useState(initialValue)
+
+  const handleChangeLink = (event) => {
+    const newValue = event.target.value
+    if (newValue.startsWith(initialValue)) {
+      setInputValue(newValue)
+    }
+  }
+  const isLinkActive = (editor: Editor) => {
+    const [link] = Editor.nodes(editor, {
+      match: (n) => n.type === 'link'
+    })
+    return !!link
+  }
+  const handleSaveClick = () => {
+    const marks = Editor.marks(editor)
+    const isLink = marks?.link === true
+
+    if (isLink) {
+      Editor.removeMark(editor, 'link')
+      return // Return early to skip the rest of the function
+    }
+    toggleLink(editor, inputValue)
+    setOpen(false)
+  }
+
+  const onClose = () => {
+    setOpen(false)
+  }
+
+  const handlePaste = (event: React.ClipboardEvent) => {
+    event.preventDefault();
+    const text = event.clipboardData.getData('text/plain');
+    const isCodeBlock = isBlockActive(editor, 'code-block');
+  
+    if (isCodeBlock) {
+      const lines = text.split('\n');
+      const fragment: Descendant[] = [
+        {
+          type: 'code-block',
+          children: lines.map((line) => ({
+            type: 'code-line',
+            children: [{ text: line }],
+          })),
+        },
+      ];
+  
+      Transforms.insertFragment(editor, fragment);
+    } else {
+      const fragment = text.split('\n').map((line) => ({
+        type: 'paragraph',
+        children: [{ text: line }],
+      }));
+  
+      Transforms.insertFragment(editor, fragment);
+    }
+  };
+  
 
   return (
     <Box
@@ -215,27 +335,21 @@ const BlogEditor: React.FC<MyComponentProps> = ({
         editor={editor}
         value={newValue}
         onChange={(newValue) => handleChange(newValue)}
+     
       >
         <div className="toolbar">
           <ToolbarButton format="bold" label="B" editor={editor} />
           <ToolbarButton format="italic" label="I" editor={editor} />
           <ToolbarButton format="underline" label="U" editor={editor} />
           <ToolbarButton format="heading-2" label="H2" editor={editor} />
+          <ToolbarButton format="heading-3" label="H3" editor={editor} />
           <ToolbarButtonCodeBlock
             format="code-block"
             label="Code"
             editor={editor}
           />
-          <button
-            className="toolbar-button"
-            onMouseDown={(event) => {
-              event.preventDefault()
-              const url = window.prompt('Enter the URL of the link:')
-              toggleLink(editor, url)
-            }}
-          >
-            Link
-          </button>
+          <ToolbarButtonCodeLink format="link" label="Link" editor={editor} />
+
           {/* <button
             className="toolbar-button"
             onMouseDown={(event) => {
@@ -251,8 +365,21 @@ const BlogEditor: React.FC<MyComponentProps> = ({
           renderElement={renderElement}
           renderLeaf={renderLeaf}
           onKeyDown={handleKeyDown}
+          onPaste={handlePaste}
         />
       </Slate>
+      <Modal open={open} onClose={onClose}>
+        <ModalBox>
+          <TextField
+            label="Link"
+            value={inputValue}
+            onChange={handleChangeLink}
+          />
+          <Button variant="contained" onClick={handleSaveClick}>
+            Save
+          </Button>
+        </ModalBox>
+      </Modal>
       {editPostSection && (
         <Button onClick={() => editPostSection(value, section)}>
           Edit Section

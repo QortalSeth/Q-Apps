@@ -28,12 +28,11 @@ export const useFetchPosts = () => {
         // If the post doesn't exist, add it to hashMapPosts
         return true
       } else if (
-        post?.updatedDate &&
-        existingPost?.updatedDate &&
-        (!existingPost?.updatedDate || post?.updatedDate) >
-          existingPost?.updatedDate
+        post?.updated &&
+        existingPost?.updated &&
+        (!existingPost?.updated || post?.updated) > existingPost?.updated
       ) {
-        // If the post exists and its updatedDate is more recent than the existing post's updatedDate, update it in hashMapPosts
+        // If the post exists and its updated is more recent than the existing post's updated, update it in hashMapPosts
         return true
       } else {
         return false

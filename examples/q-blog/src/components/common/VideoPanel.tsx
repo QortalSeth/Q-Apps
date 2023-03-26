@@ -10,6 +10,9 @@ import {
   Button
 } from '@mui/material'
 import VideoCallIcon from '@mui/icons-material/VideoCall'
+import VideoModal from './VideoPublishModal'
+import { useSelector } from 'react-redux'
+import { RootState } from '../../state/store'
 
 interface VideoPanelProps {
   onSelect: (video: Video) => void
@@ -55,21 +58,6 @@ const PublishButton = styled(Button)`
   max-width: 80%;
 `
 
-const fetchVideos = async (): Promise<Video[]> => {
-  // Replace this URL with the actual API endpoint
-  let res = await qortalRequest({
-    action: 'LIST_QDN_RESOURCES',
-    service: 'VIDEO',
-    name: 'AlphaX',
-    includeMetadata: true,
-    limit: 100,
-    offset: 0,
-    reverse: true
-  })
-  console.log({ res })
-  return res
-}
-
 export const VideoPanel: React.FC<VideoPanelProps> = ({
   onSelect,
   height,
@@ -77,7 +65,23 @@ export const VideoPanel: React.FC<VideoPanelProps> = ({
 }) => {
   const [isOpen, setIsOpen] = useState(false)
   const [videos, setVideos] = useState<Video[]>([])
+  const [isOpenVideoModal, setIsOpenVideoModal] = useState<boolean>(false)
+  const { user } = useSelector((state: RootState) => state.auth)
 
+  const fetchVideos = React.useCallback(async (): Promise<Video[]> => {
+    if (!user?.name) return []
+    // Replace this URL with the actual API endpoint
+    let res = await qortalRequest({
+      action: 'LIST_QDN_RESOURCES',
+      service: 'VIDEO',
+      name: user.name,
+      includeMetadata: true,
+      limit: 100,
+      offset: 0,
+      reverse: true
+    })
+    return res
+  }, [user])
   useEffect(() => {
     fetchVideos().then((fetchedVideos) => setVideos(fetchedVideos))
   }, [])
@@ -172,13 +176,23 @@ export const VideoPanel: React.FC<VideoPanelProps> = ({
           >
             <PublishButton
               variant="contained"
-              onClick={() => console.log('Publish new video')}
+              onClick={() => setIsOpenVideoModal(true)}
             >
               Publish new video
             </PublishButton>
           </Box>
         </Panel>
       </Drawer>
+      <VideoModal
+        onClose={() => {
+          setIsOpenVideoModal(false)
+        }}
+        open={isOpenVideoModal}
+        onPublish={(value) => {
+          fetchVideos().then((fetchedVideos) => setVideos(fetchedVideos))
+          setIsOpenVideoModal(false)
+        }}
+      />
     </Box>
   )
 }

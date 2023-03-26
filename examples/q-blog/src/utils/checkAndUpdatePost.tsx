@@ -11,9 +11,13 @@ export const checkAndUpdatePost = (post: BlogPost) => {
 
   if (!existingPost) {
     // If the post doesn't exist, add it to hashMapPosts
-    dispatch(addToHashMap(post));
-  } else if  (post?.updatedDate && existingPost?.updatedDate && ((!existingPost.updatedDate || post.updatedDate) > existingPost.updatedDate)) {
+    dispatch(addToHashMap(post))
+  } else if (
+    post?.updated &&
+    existingPost?.updated &&
+    (!existingPost.updated || post.updated) > existingPost.updated
+  ) {
     // If the post exists and its updatedDate is more recent than the existing post's updatedDate, update it in hashMapPosts
-    dispatch(updateInHashMap(post));
+    dispatch(updateInHashMap(post))
   }
 }
