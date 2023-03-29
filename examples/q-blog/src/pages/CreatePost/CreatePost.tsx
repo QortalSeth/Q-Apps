@@ -19,6 +19,7 @@ import { setNotification } from '../../state/features/notificationsSlice'
 import { VideoPanel } from '../../components/common/VideoPanel'
 import { VideoContent } from '../../components/common/VideoContent'
 import PostPublishModal from '../../components/common/PostPublishModal'
+import { AudioPanel } from '../../components/common/AudioPanel'
 const uid = new ShortUniqueId()
 
 const initialValue: Descendant[] = [
@@ -363,6 +364,17 @@ export const CreatePost = () => {
     console.log({ video })
   }, [])
 
+  const onSelectAudio = React.useCallback((video: any) => {
+    addVideo({
+      name: video.name,
+      identifier: video.identifier,
+      service: video.service,
+      title: video?.metadata?.title,
+      description: video?.metadata?.description
+    })
+    console.log({ video })
+  }, [])
+
   // React.useEffect(() => {
   //   const getMedia = async () => {
   //     console.log('test media')
@@ -651,6 +663,7 @@ export const CreatePost = () => {
             />
           </ImageUploader>
           <VideoPanel onSelect={onSelectVideo} />
+          <AudioPanel onSelect={onSelectVideo} />
         </Box>
         <Box
           sx={{

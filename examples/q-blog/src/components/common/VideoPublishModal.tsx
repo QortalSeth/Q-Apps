@@ -104,17 +104,6 @@ const VideoModal: React.FC<VideoModalProps> = ({
     setChips(newChips)
   }
 
-  const handleAddTag = (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault()
-    if (tags.length >= 5 || !selectedOption) return
-    setTags([...tags, selectedOption.name])
-    setSelectedOption(null)
-  }
-
-  const handleRemoveTag = (index: number) => {
-    setTags(tags.filter((_, i) => i !== index))
-  }
-
   const handleSubmit = async () => {
     const missingFields = []
 

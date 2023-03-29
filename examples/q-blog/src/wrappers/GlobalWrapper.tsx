@@ -21,6 +21,7 @@ import PageLoader from '../components/common/PageLoader'
 import { fetchAndEvaluatePosts } from '../utils/fetchPosts'
 import { addPosts, addToHashMap, BlogPost } from '../state/features/blogSlice'
 import { useFetchPosts } from '../hooks/useFetchPosts'
+import { setNotification } from '../state/features/notificationsSlice'
 
 interface Props {
   children: React.ReactNode
@@ -52,7 +53,7 @@ const GlobalWrapper: React.FC<Props> = ({ children }) => {
     }
   }
   async function getBlog(name: string) {
-    const url = `/arbitrary/resources/search?service=BLOG&identifier=q-blog-&name=${name}&prefix=true&limit=20`
+    const url = `/arbitrary/resources/search?service=BLOG&identifier=q-blog-&name=${name}&prefix=true&limit=20&includemetadata=true`
     const responseBlogs = await fetch(url, {
       method: 'GET',
       headers: {
@@ -83,7 +84,9 @@ const GlobalWrapper: React.FC<Props> = ({ children }) => {
         blogId: blog.identifier,
         title: responseData?.title || '',
         description: responseData?.description || '',
-        blogImage: responseData?.blogImage || ''
+        blogImage: responseData?.blogImage || '',
+        category: blog.metadata?.category,
+        tags: blog.metadata?.tags || []
       })
     )
     // const response = await fetch("/names/address/" + address);
@@ -130,12 +133,24 @@ const GlobalWrapper: React.FC<Props> = ({ children }) => {
   }
 
   const createBlog = React.useCallback(
-    async (title: string, description: string) => {
+    async (
+      title: string,
+      description: string,
+      category: string,
+      tags: string[]
+    ) => {
       if (!user || !user.name)
         throw new Error('Cannot publish: You do not have a Qortal name')
+      if (!title) throw new Error('A title is required')
+      if (!description) throw new Error('A description is required')
       const name = user.name
       const id = uid()
       const identifier = `q-blog-${id}`
+      const formattedTags: { [key: string]: string } = {}
+      tags.forEach((tag: string, i: number) => {
+        console.log({ tag })
+        formattedTags[`tag${i + 1}`] = tag
+      })
       const blogPostToBase64 = objectToBase64({
         title,
         description,
@@ -149,13 +164,25 @@ const GlobalWrapper: React.FC<Props> = ({ children }) => {
           service: 'BLOG',
           data64: blogPostToBase64,
           title,
-          description: 'This is a test of a blog',
-          category: 'TECHNOLOGY',
-          tags: ['tag1', 'tag2', 'tag3', 'tag4', 'tag5'],
-          identifier: identifier
+          description,
+          category,
+          identifier: identifier,
+          ...formattedTags
         })
         // navigate(`/${user.name}/${identifier}`)
-        console.log({ resourceResponse })
+        await new Promise<void>((res, rej) => {
+          setTimeout(() => {
+            res()
+          }, 1000)
+        })
+
+        getBlog(name)
+        dispatch(
+          setNotification({
+            msg: 'Blog successfully created',
+            alertType: 'success'
+          })
+        )
       } catch (error) {
         if (error instanceof Error) {
           throw new Error(error.message)
@@ -168,7 +195,12 @@ const GlobalWrapper: React.FC<Props> = ({ children }) => {
   )
 
   const editBlog = React.useCallback(
-    async (title: string, description: string) => {
+    async (
+      title: string,
+      description: string,
+      category: string,
+      tags: string[]
+    ) => {
       if (!user || !user.name)
         throw new Error('Cannot update: your Qortal name is not accessible')
 
@@ -177,7 +209,11 @@ const GlobalWrapper: React.FC<Props> = ({ children }) => {
       if (!title) throw new Error('A title is required')
       if (!description) throw new Error('A description is required')
       const name = user.name
-
+      const formattedTags: { [key: string]: string } = {}
+      tags.forEach((tag: string, i: number) => {
+        console.log({ tag })
+        formattedTags[`tag${i + 1}`] = tag
+      })
       const blogPostToBase64 = objectToBase64({
         ...currentBlog,
         title,
@@ -191,8 +227,8 @@ const GlobalWrapper: React.FC<Props> = ({ children }) => {
           data64: blogPostToBase64,
           title,
           description,
-          category: 'TECHNOLOGY',
-          tags: ['tag1', 'tag2', 'tag3', 'tag4', 'tag5'],
+          category,
+          ...formattedTags,
           identifier: currentBlog.blogId
         })
 
@@ -203,6 +239,12 @@ const GlobalWrapper: React.FC<Props> = ({ children }) => {
         })
 
         getBlog(name)
+        dispatch(
+          setNotification({
+            msg: 'Blog successfully updated',
+            alertType: 'success'
+          })
+        )
         console.log({ resourceResponse })
       } catch (error) {
         if (error instanceof Error) {
