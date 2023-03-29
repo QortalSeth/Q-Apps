@@ -42,7 +42,7 @@ export const  fetchAndEvaluatePosts = async (data: any)=> {
               isValid: true
             }
 
-            if (findText && findText.content) {
+            if (findText && findText.content && !content?.description) {
               obj.description = extractTextFromSlate(findText?.content)
             }
           }

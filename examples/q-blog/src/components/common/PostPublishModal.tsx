@@ -44,10 +44,11 @@ const ModalContent = styled(Box)(({ theme }) => ({
   }
 }))
 
-interface VideoModalProps {
+interface PostModalProps {
   open: boolean
   onClose: () => void
-  onPublish: (value: any) => void
+  onPublish: (value: any) => Promise<void>
+  post: any
 }
 
 interface SelectOption {
@@ -55,10 +56,11 @@ interface SelectOption {
   name: string
 }
 
-const VideoModal: React.FC<VideoModalProps> = ({
+const PostPublishModal: React.FC<PostModalProps> = ({
   open,
   onClose,
-  onPublish
+  onPublish,
+  post
 }) => {
   const [file, setFile] = useState<File | null>(null)
   const [title, setTitle] = useState('')
@@ -82,6 +84,15 @@ const VideoModal: React.FC<VideoModalProps> = ({
     }
   })
 
+  React.useEffect(() => {
+    if (post.title) {
+      setTitle(post.title)
+    }
+    if (post.description) {
+      setDescription(post.description)
+    }
+  }, [post])
+
   const handleTitleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setTitle(event.target.value)
   }
@@ -104,30 +115,7 @@ const VideoModal: React.FC<VideoModalProps> = ({
     setChips(newChips)
   }
 
-  const handleAddTag = (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault()
-    if (tags.length >= 5 || !selectedOption) return
-    setTags([...tags, selectedOption.name])
-    setSelectedOption(null)
-  }
-
-  const handleRemoveTag = (index: number) => {
-    setTags(tags.filter((_, i) => i !== index))
-  }
-
   const handleSubmit = async () => {
-    const missingFields = []
-
-    if (!title) missingFields.push('title')
-    if (!file) missingFields.push('file')
-    if (missingFields.length > 0) {
-      const missingFieldsString = missingFields.join(', ')
-      const errMsg = `Missing: ${missingFieldsString}`
-
-      return
-    }
-    if (!file) return
-
     const formattedTags: { [key: string]: string } = {}
     chips.forEach((tag, i) => {
       console.log({ tag })
@@ -136,18 +124,12 @@ const VideoModal: React.FC<VideoModalProps> = ({
 
     console.log({ formattedTags })
     try {
-      const base64 = await toBase64(file)
-      if (typeof base64 !== 'string') return
-      const base64String = base64.split(',')[1]
-
-      const res = await publishVideo({
+      await onPublish({
         title,
         description,
-        base64: base64String,
-        category: selectedOption?.id || '',
-        ...formattedTags
+        tags: chips,
+        category: selectedOption?.id || ''
       })
-      onPublish(res)
       setFile(null)
       setTitle('')
       setDescription('')
@@ -199,35 +181,21 @@ const VideoModal: React.FC<VideoModalProps> = ({
     <StyledModal open={open} onClose={onClose}>
       <ModalContent>
         <Typography variant="h6" component="h2" gutterBottom>
-          Upload Video
+          Upload Blog Post
         </Typography>
-        <Box
-          {...getRootProps()}
-          sx={{
-            border: '1px dashed gray',
-            padding: 2,
-            textAlign: 'center',
-            marginBottom: 2
-          }}
-        >
-          <input {...getInputProps()} />
-          <Typography>
-            {file
-              ? file.name
-              : 'Drag and drop a video file here or click to select a file'}
-          </Typography>
-        </Box>
+
         <TextField
-          label="Video Title"
+          label="Post Title"
           variant="outlined"
           fullWidth
           value={title}
           onChange={handleTitleChange}
           inputProps={{ maxLength: 40 }}
           sx={{ marginBottom: 2 }}
+          disabled
         />
         <TextField
-          label="Video Description"
+          label="Post Description"
           variant="outlined"
           fullWidth
           multiline
@@ -288,4 +256,4 @@ const VideoModal: React.FC<VideoModalProps> = ({
   )
 }
 
-export default VideoModal
+export default PostPublishModal

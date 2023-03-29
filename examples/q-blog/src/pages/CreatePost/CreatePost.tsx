@@ -18,6 +18,7 @@ import { extractTextFromSlate } from '../../utils/extractTextFromSlate'
 import { setNotification } from '../../state/features/notificationsSlice'
 import { VideoPanel } from '../../components/common/VideoPanel'
 import { VideoContent } from '../../components/common/VideoContent'
+import PostPublishModal from '../../components/common/PostPublishModal'
 const uid = new ShortUniqueId()
 
 const initialValue: Descendant[] = [
@@ -53,6 +54,7 @@ export const CreatePost = () => {
   const [newPostContent, setNewPostContent] = React.useState<any[]>([])
   const [title, setTitle] = React.useState<string>('')
   const [blogImage, setBlogImage] = React.useState<string>('')
+  const [isOpenPostModal, setIsOpenPostModal] = React.useState<boolean>(false)
   const [value, setValue] = React.useState(initialValue)
   const dispatch = useDispatch()
   const addPostSection = React.useCallback((content: any) => {
@@ -107,7 +109,25 @@ export const CreatePost = () => {
   //       }
   // }
 
-  async function publishQDNResource() {
+  const description = React.useMemo(() => {
+    let description = ''
+    const findText = newPostContent.find((data) => data?.type === 'editor')
+    if (findText && findText.content) {
+      description = extractTextFromSlate(findText?.content)
+      description = description.slice(0, 180)
+    }
+    return description
+  }, [newPostContent])
+  console.log({ description })
+  const post = React.useMemo(() => {
+    return {
+      description,
+      title
+    }
+  }, [title, description])
+
+  async function publishQDNResource(params: any) {
+    console.log({ params })
     let address
     let name
     let errorMsg = ''
@@ -145,7 +165,7 @@ export const CreatePost = () => {
           alertType: 'error'
         })
       )
-      return
+      throw new Error(errorMsg)
     }
 
     const postObject = {
@@ -166,17 +186,32 @@ export const CreatePost = () => {
         description = extractTextFromSlate(findText?.content)
         description = description.slice(0, 180)
       }
-      const resourceResponse = await qortalRequest({
+
+      let requestBody = {
         action: 'PUBLISH_QDN_RESOURCE',
         name: name,
         service: 'BLOG_POST',
         data64: blogPostToBase64,
         title: title,
-        description: description,
-        category: 'TECHNOLOGY',
-        tags: ['tag1', 'tag2', 'tag3', 'tag4', 'tag5'],
+        description: params?.description || description,
+        category: params?.category || '',
         identifier: identifier
-      })
+      }
+
+      const formattedTags: { [key: string]: string } = {}
+      if (params?.tags) {
+        params.tags.forEach((tag: string, i: number) => {
+          console.log({ tag })
+          formattedTags[`tag${i + 1}`] = tag
+        })
+
+        requestBody = {
+          ...requestBody,
+          ...formattedTags
+        }
+      }
+
+      const resourceResponse = await qortalRequest(requestBody)
       dispatch(
         setNotification({
           msg: 'Blog post successfully published',
@@ -191,6 +226,8 @@ export const CreatePost = () => {
           alertType: 'error'
         })
       )
+
+      throw new Error('Failed to publish post')
     }
   }
   const addImage = (base64: string) => {
@@ -325,6 +362,21 @@ export const CreatePost = () => {
     })
     console.log({ video })
   }, [])
+
+  // React.useEffect(() => {
+  //   const getMedia = async () => {
+  //     console.log('test media')
+  //     try {
+  //       const constraints = { audio: true, video: true }
+  //       const stream = await navigator.mediaDevices.getUserMedia(constraints)
+  //       console.log({ stream })
+  //     } catch (error) {
+  //       console.error(error)
+  //     }
+  //   }
+
+  //   getMedia()
+  // }, [])
   return (
     <Box
       sx={{
@@ -611,9 +663,23 @@ export const CreatePost = () => {
             borderRadius: '5px'
           }}
         >
-          <Button onClick={publishQDNResource}>Publish</Button>
+          <Button
+            onClick={() => {
+              setIsOpenPostModal(true)
+            }}
+          >
+            Publish
+          </Button>
         </Box>
       </Box>
+      <PostPublishModal
+        onClose={() => {
+          setIsOpenPostModal(false)
+        }}
+        open={isOpenPostModal}
+        post={post}
+        onPublish={publishQDNResource}
+      />
     </Box>
   )
 }

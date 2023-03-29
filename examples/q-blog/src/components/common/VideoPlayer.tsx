@@ -1,6 +1,6 @@
 import React, { useRef, useState } from 'react'
 import { Box, IconButton, Slider } from '@mui/material'
-import { CircularProgress } from '@mui/material'
+import { CircularProgress, Typography } from '@mui/material'
 import {
   PlayArrow,
   Pause,
@@ -24,6 +24,7 @@ const VideoContainer = styled(Box)`
 const VideoElement = styled('video')`
   width: 100%;
   height: auto;
+  background: rgb(33, 33, 33);
 `
 
 const ControlsContainer = styled(Box)`
@@ -52,16 +53,22 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
   name,
   identifier,
   service,
-  autoplay
+  autoplay = true
 }) => {
   const videoRef = useRef<HTMLVideoElement | null>(null)
   const [playing, setPlaying] = useState(false)
   const [volume, setVolume] = useState(1)
   const [progress, setProgress] = useState(0)
-  const [isLoading, setIsLoading] = useState(true)
+  const [isLoading, setIsLoading] = useState(false)
   const [src, setSrc] = useState('')
-  const togglePlay = () => {
+  const [resourceStatus, setResourceStatus] = useState<any>(null)
+  const togglePlay = async () => {
     if (!videoRef.current) return
+    if (!src) {
+      setIsLoading(true)
+      getStatus()
+      getSrc()
+    }
     if (playing) {
       videoRef.current.pause()
     } else {
@@ -152,17 +159,36 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
       let videoData = await qortalRequest({
         action: 'FETCH_QDN_RESOURCE',
         name: name,
-        service: 'VIDEO',
+        service: service,
         identifier: identifier,
         encoding: 'base64'
       })
       const src = 'data:video/mp4;base64,' + videoData
       setSrc(src)
     } catch (error) {}
-  }, [identifier, name])
-  React.useEffect(() => {
-    getSrc()
-  }, [getSrc])
+  }, [identifier, name, service])
+
+  const getStatus = () => {
+    const intervalId = setInterval(async () => {
+      const res = await qortalRequest({
+        action: 'GET_QDN_RESOURCE_STATUS',
+        name: name,
+        service: service,
+        identifier: identifier
+      })
+      if (res.localChunkCount) {
+        setResourceStatus(res)
+      }
+
+      // check if progress is 100% and clear interval if true
+      if (res?.status === 'READY') {
+        clearInterval(intervalId)
+      }
+    }, 1000) // 3 second interval
+
+    // cleanup function to clear interval when component unmounts
+    return () => clearInterval(intervalId)
+  }
 
   return (
     <VideoContainer>
@@ -176,10 +202,59 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
           display="flex"
           justifyContent="center"
           alignItems="center"
+          zIndex={9999}
+          bgcolor="rgba(0, 0, 0, 0.6)"
+          sx={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '10px'
+          }}
         >
-          <CircularProgress />
+          <CircularProgress color="secondary" />
+          {resourceStatus && (
+            <Typography
+              variant="subtitle2"
+              component="div"
+              sx={{
+                color: 'white',
+                fontSize: '18px'
+              }}
+            >
+              {(resourceStatus.localChunkCount /
+                resourceStatus.totalChunkCount) *
+                100}
+              %
+            </Typography>
+          )}
         </Box>
       )}
+      {!src && !isLoading && (
+        <Box
+          position="absolute"
+          top={0}
+          left={0}
+          right={0}
+          bottom={0}
+          display="flex"
+          justifyContent="center"
+          alignItems="center"
+          zIndex={9999}
+          bgcolor="rgba(0, 0, 0, 0.6)"
+          onClick={togglePlay}
+          sx={{
+            cursor: 'pointer'
+          }}
+        >
+          <PlayArrow
+            sx={{
+              width: '50px',
+              height: '50px',
+              color: 'white'
+            }}
+          />
+        </Box>
+      )}
+
       <VideoElement
         ref={videoRef}
         src={src}

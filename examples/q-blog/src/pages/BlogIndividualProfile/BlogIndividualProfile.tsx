@@ -3,17 +3,21 @@ import { useNavigate } from 'react-router-dom'
 import { useDispatch, useSelector } from 'react-redux'
 import { RootState } from '../../state/store'
 import { useParams } from 'react-router-dom'
-
-import { List, ListItem, Typography } from '@mui/material'
+import { List, ListItem, Typography, Box } from '@mui/material'
 import EditIcon from '@mui/icons-material/Edit'
 import BlogPostPreview from '../BlogList/PostPreview'
-import { setIsLoadingGlobal } from '../../state/features/globalSlice'
+import {
+  setIsLoadingGlobal,
+  toggleEditBlogModal
+} from '../../state/features/globalSlice'
 import { BlogPost } from '../../state/features/blogSlice'
 import { useFetchPosts } from '../../hooks/useFetchPosts'
 import LazyLoad from '../../components/common/LazyLoad'
 export const BlogIndividualProfile = () => {
   const navigate = useNavigate()
   const { user } = useSelector((state: RootState) => state.auth)
+  const { currentBlog } = useSelector((state: RootState) => state.global)
+
   const { blog, user: username } = useParams()
   const dispatch = useDispatch()
   const [userBlog, setUserBlog] = React.useState<any>(null)
@@ -102,20 +106,39 @@ export const BlogIndividualProfile = () => {
   const getPosts = React.useCallback(async () => {
     await getBlogPosts()
   }, [getBlogPosts])
-
+  console.log({ currentBlog })
   if (!userBlog) return null
   return (
     <>
-      <Typography
-        variant="h1"
-        color="textPrimary"
+      <Box
         sx={{
-          textAlign: 'center',
-          marginTop: '20px'
+          display: 'flex',
+          gap: 1,
+          alignItems: 'center',
+          justifyContent: 'center'
         }}
       >
-        {userBlog.title}
-      </Typography>
+        <Typography
+          variant="h1"
+          color="textPrimary"
+          sx={{
+            textAlign: 'center',
+            marginTop: '20px'
+          }}
+        >
+          {currentBlog?.blogId === blog ? currentBlog?.title : userBlog.title}
+        </Typography>
+        {currentBlog?.blogId === blog && (
+          <EditIcon
+            sx={{
+              cursor: 'pointer'
+            }}
+            onClick={() => {
+              dispatch(toggleEditBlogModal(true))
+            }}
+          ></EditIcon>
+        )}
+      </Box>
 
       <List
         sx={{

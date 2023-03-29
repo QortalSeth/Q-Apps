@@ -10,6 +10,7 @@ interface IPublishVideo {
   title: string
   description: string
   base64: string
+  category: string
 }
 
 export const usePublishVideo = () => {
@@ -18,7 +19,9 @@ export const usePublishVideo = () => {
   const publishVideo = async ({
     title,
     description,
-    base64
+    base64,
+    category,
+    ...rest
   }: IPublishVideo) => {
     let address
     let name
@@ -48,7 +51,7 @@ export const usePublishVideo = () => {
           alertType: 'error'
         })
       )
-      return
+      throw new Error(errorMsg)
     }
 
     try {
@@ -63,8 +66,8 @@ export const usePublishVideo = () => {
         data64: base64,
         title: title,
         description: description,
-        category: 'TECHNOLOGY',
-        tags: ['tag1', 'tag2', 'tag3', 'tag4', 'tag5'],
+        category: category,
+        ...rest,
         identifier: identifier
       })
       dispatch(

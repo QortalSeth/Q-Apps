@@ -8,9 +8,13 @@ import {
 import ShortUniqueId from 'short-unique-id';
 import { RootState } from "../state/store";
 import PublishBlogModal from '../components/modals/PublishBlogModal';
+import EditBlogModal from '../components/modals/EditBlogModal'
+
 import {
   setCurrentBlog,
-  setIsLoadingGlobal
+  setIsLoadingGlobal,
+  toggleEditBlogModal,
+  togglePublishBlogModal
 } from '../state/features/globalSlice'
 import NavBar from '../components/layout/Navbar/Navbar'
 import PageLoader from '../components/common/PageLoader'
@@ -29,9 +33,13 @@ const GlobalWrapper: React.FC<Props> = ({ children }) => {
   const dispatch = useDispatch()
   const { user } = useSelector((state: RootState) => state.auth)
   const { getBlogPosts } = useFetchPosts()
-  const { isOpenPublishBlogModal, currentBlog, isLoadingGlobal } = useSelector(
-    (state: RootState) => state.global
-  )
+
+  const {
+    isOpenPublishBlogModal,
+    currentBlog,
+    isLoadingGlobal,
+    isOpenEditBlogModal
+  } = useSelector((state: RootState) => state.global)
 
   async function getNameInfo(address: string) {
     const response = await fetch('/names/address/' + address)
@@ -99,7 +107,6 @@ const GlobalWrapper: React.FC<Props> = ({ children }) => {
 
       const blog = await getBlog(name)
     } catch (error) {
-      const blog = await getBlog('Phil')
       console.error(error)
     }
   }, [])
@@ -160,12 +167,64 @@ const GlobalWrapper: React.FC<Props> = ({ children }) => {
     [user]
   )
 
+  const editBlog = React.useCallback(
+    async (title: string, description: string) => {
+      if (!user || !user.name)
+        throw new Error('Cannot update: your Qortal name is not accessible')
+
+      if (!currentBlog)
+        throw new Error('Your blog is not available. Refresh and try again.')
+      if (!title) throw new Error('A title is required')
+      if (!description) throw new Error('A description is required')
+      const name = user.name
+
+      const blogPostToBase64 = objectToBase64({
+        ...currentBlog,
+        title,
+        description
+      })
+      try {
+        const resourceResponse = await qortalRequest({
+          action: 'PUBLISH_QDN_RESOURCE',
+          name: name,
+          service: 'BLOG',
+          data64: blogPostToBase64,
+          title,
+          description,
+          category: 'TECHNOLOGY',
+          tags: ['tag1', 'tag2', 'tag3', 'tag4', 'tag5'],
+          identifier: currentBlog.blogId
+        })
+
+        await new Promise<void>((res, rej) => {
+          setTimeout(() => {
+            res()
+          }, 1000)
+        })
+
+        getBlog(name)
+        console.log({ resourceResponse })
+      } catch (error) {
+        if (error instanceof Error) {
+          throw new Error(error.message)
+        } else {
+          throw new Error('An unknown error occurred')
+        }
+      }
+    },
+    [user, currentBlog]
+  )
+
   React.useEffect(() => {
     askForAccountInformation()
   }, [])
 
-  const onClosePublishBlogModal = React.useCallback(() => {}, [])
-
+  const onClosePublishBlogModal = React.useCallback(() => {
+    dispatch(togglePublishBlogModal(false))
+  }, [])
+  const onCloseEditBlogModal = React.useCallback(() => {
+    dispatch(toggleEditBlogModal(false))
+  }, [])
   // const getBlogPost = async (user: string, postId: string, content: any)=> {
   //   const res = await  fetchAndEvaluatePosts({
   //       user, postId, content
@@ -230,6 +289,12 @@ const GlobalWrapper: React.FC<Props> = ({ children }) => {
         open={isOpenPublishBlogModal}
         onClose={onClosePublishBlogModal}
         onPublish={createBlog}
+      />
+      <EditBlogModal
+        open={isOpenEditBlogModal}
+        onClose={onCloseEditBlogModal}
+        onPublish={editBlog}
+        currentBlog={currentBlog}
       />
       <NavBar
         isAuthenticated={!!user}

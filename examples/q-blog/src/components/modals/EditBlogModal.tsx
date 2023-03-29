@@ -1,40 +1,48 @@
-import React, { useState } from 'react';
-import { Box, Button, TextField, Typography, Modal } from '@mui/material';
-import { useDispatch } from 'react-redux';
-import { togglePublishBlogModal } from '../../state/features/globalSlice';
+import React, { useState } from 'react'
+import { Box, Button, TextField, Typography, Modal } from '@mui/material'
+import { useDispatch } from 'react-redux'
+import { togglePublishBlogModal } from '../../state/features/globalSlice'
 
 interface MyModalProps {
-  open: boolean;
-  onClose: () => void;
-  onPublish: (title: string, description: string) => Promise<void>;
+  open: boolean
+  onClose: () => void
+  onPublish: (title: string, description: string) => Promise<void>
+  currentBlog: any
 }
 
-const MyModal: React.FC<MyModalProps> = ({ open, onClose, onPublish }) => {
-  const dispatch = useDispatch();
+const MyModal: React.FC<MyModalProps> = ({
+  open,
+  onClose,
+  onPublish,
+  currentBlog
+}) => {
+  const dispatch = useDispatch()
 
-  const [title, setTitle] = useState<string>('');
-  const [description, setDescription] = useState<string>('');
-  const [errorMessage, setErrorMessage] = useState<string>('');
+  const [title, setTitle] = useState<string>('')
+  const [description, setDescription] = useState<string>('')
+  const [errorMessage, setErrorMessage] = useState<string>('')
+
+  React.useEffect(() => {
+    if (currentBlog) {
+      setTitle(currentBlog?.title || '')
+      setDescription(currentBlog?.description || '')
+    }
+  }, [currentBlog])
 
   const handlePublish = async (): Promise<void> => {
     try {
-     await onPublish(title, description);
-     handleClose();
+      await onPublish(title, description)
+      handleClose()
     } catch (error: any) {
-      setErrorMessage(error.message);
+      setErrorMessage(error.message)
     }
-   
-  };
+  }
 
   const handleClose = (): void => {
-    setTitle('');
-    setDescription('');
-    setErrorMessage('');
-    dispatch(
-      togglePublishBlogModal(false)
-    );
-    onClose();
-  };
+    setErrorMessage('')
+    dispatch(togglePublishBlogModal(false))
+    onClose()
+  }
 
   return (
     <Modal
@@ -59,7 +67,7 @@ const MyModal: React.FC<MyModalProps> = ({ open, onClose, onPublish }) => {
         }}
       >
         <Typography id="modal-title" variant="h6" component="h2">
-          Create blog
+          Edit Blog
         </Typography>
         <TextField
           id="modal-title-input"
@@ -93,6 +101,6 @@ const MyModal: React.FC<MyModalProps> = ({ open, onClose, onPublish }) => {
       </Box>
     </Modal>
   )
-};
+}
 
-export default MyModal;
+export default MyModal
