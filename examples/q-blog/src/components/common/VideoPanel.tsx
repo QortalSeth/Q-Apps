@@ -159,8 +159,8 @@ export const VideoPanel: React.FC<VideoPanelProps> = ({
                   sx={{ width: '100%' }}
                 >
                   <ListItemText
-                    primary={video.metadata.title}
-                    secondary={video.metadata.description}
+                    primary={video?.metadata?.title || ''}
+                    secondary={video?.metadata?.description || ''}
                   />
                 </ButtonBase>
               </ListItem>

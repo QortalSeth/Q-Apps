@@ -13,7 +13,8 @@ import VideoCallIcon from '@mui/icons-material/VideoCall'
 import VideoModal from './VideoPublishModal'
 import { useSelector } from 'react-redux'
 import { RootState } from '../../state/store'
-
+import { AudioModal } from './AudioPublishModal'
+import AudioFileIcon from '@mui/icons-material/AudioFile'
 interface VideoPanelProps {
   onSelect: (video: Video) => void
   height?: string
@@ -73,7 +74,7 @@ export const AudioPanel: React.FC<VideoPanelProps> = ({
     // Replace this URL with the actual API endpoint
     let res = await qortalRequest({
       action: 'LIST_QDN_RESOURCES',
-      service: 'VIDEO',
+      service: 'AUDIO',
       name: user.name,
       includeMetadata: true,
       limit: 100,
@@ -96,14 +97,14 @@ export const AudioPanel: React.FC<VideoPanelProps> = ({
 
   return (
     <Box>
-      <VideoCallIcon
+      <AudioFileIcon
         onClick={handleToggle}
         sx={{
           height: height || '50px',
           width: width || '50px',
           cursor: 'pointer'
         }}
-      ></VideoCallIcon>
+      ></AudioFileIcon>
 
       <Drawer
         anchor="right"
@@ -132,14 +133,14 @@ export const AudioPanel: React.FC<VideoPanelProps> = ({
               component="div"
               sx={{ flexGrow: 1, mt: 2, mb: 1 }}
             >
-              Select Video
+              Select Audio
             </Typography>
             <Typography
               variant="subtitle2"
               component="div"
               sx={{ flexGrow: 1, mb: 2 }}
             >
-              List of videos in QDN under your name
+              List of audios in QDN under your name
             </Typography>
           </Box>
 
@@ -159,8 +160,8 @@ export const AudioPanel: React.FC<VideoPanelProps> = ({
                   sx={{ width: '100%' }}
                 >
                   <ListItemText
-                    primary={video.metadata.title}
-                    secondary={video.metadata.description}
+                    primary={video?.metadata?.title || ''}
+                    secondary={video?.metadata?.description || ''}
                   />
                 </ButtonBase>
               </ListItem>
@@ -183,7 +184,7 @@ export const AudioPanel: React.FC<VideoPanelProps> = ({
           </Box>
         </Panel>
       </Drawer>
-      <VideoModal
+      <AudioModal
         onClose={() => {
           setIsOpenVideoModal(false)
         }}

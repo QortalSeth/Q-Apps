@@ -16,10 +16,11 @@ import {
 } from '@mui/material'
 import { styled } from '@mui/system'
 import { useDropzone } from 'react-dropzone'
-import { usePublishVideo } from './PublishVideo'
 import { toBase64 } from '../../utils/toBase64'
 import AddIcon from '@mui/icons-material/Add'
 import CloseIcon from '@mui/icons-material/Close'
+import { usePublishAudio } from './PublishAudio'
+
 const StyledModal = styled(Modal)(({ theme }) => ({
   display: 'flex',
   alignItems: 'center',
@@ -55,7 +56,88 @@ interface SelectOption {
   name: string
 }
 
-const VideoModal: React.FC<VideoModalProps> = ({
+async function addAudioCoverImage(
+  base64Audio: string,
+  coverImageBase64: string
+): Promise<string> {
+  // Decode the base64 audio data
+  const audioData: Uint8Array = new Uint8Array(
+    atob(base64Audio)
+      .split('')
+      .map((char) => char.charCodeAt(0))
+  )
+  console.log({ audioData })
+  const decoder: TextDecoder = new TextDecoder('utf-8')
+  const decodedAudioData: string = decoder.decode(audioData)
+  console.log({ decodedAudioData })
+  // Create a Blob object from the decoded audio data
+  const blob: Blob = new Blob([decodedAudioData], { type: 'audio/mpeg' })
+  console.log({ blob })
+  // Create a new file name for the audio with cover image
+  const fileName: string = 'audio-with-cover.mp3'
+
+  // Create a new FormData object to hold the file and metadata
+  const formData: FormData = new FormData()
+  formData.append('file', blob, fileName)
+  console.log({ formData })
+  // Create a new image object from the base64 data
+  const image: HTMLImageElement = new Image()
+  image.src = `data:image/png;base64,${coverImageBase64}`
+
+  // Wait for the image to load before getting its dimensions
+  await new Promise((resolve) => {
+    image.onload = () => resolve(null)
+  })
+
+  // Get the image dimensions
+  const width: number = image.width
+  const height: number = image.height
+
+  // Create a new metadata object with the image dimensions
+  const metadata: any = {
+    title: 'Audio with Cover',
+    artist: 'Artist Name',
+    album: 'Album Name',
+    trackNumber: 1,
+    image: {
+      mime: 'image/png',
+      type: 3,
+      description: 'Cover Image',
+      data: coverImageBase64,
+      width: width,
+      height: height
+    }
+  }
+
+  // Set the metadata on the file
+  formData.set('metadata', JSON.stringify(metadata))
+
+  // Create a new URL object for the file
+  const url: string = URL.createObjectURL(blob)
+  console.log({ url })
+  // Create a download link for the file
+  const link: HTMLAnchorElement = document.createElement('a')
+  link.href = url
+  link.download = fileName
+  link.click()
+
+  // Read the downloaded file and return its contents as a base64 string
+  const fileReader: FileReader = new FileReader()
+  fileReader.readAsDataURL(blob)
+  return await new Promise<string>((resolve, reject) => {
+    fileReader.onload = () => {
+      const base64: string | undefined = fileReader.result?.toString()
+      if (base64 !== undefined) {
+        resolve(base64)
+      } else {
+        reject(new Error('Failed to read downloaded file.'))
+      }
+    }
+    fileReader.onerror = () => reject(fileReader.error)
+  })
+}
+
+export const AudioModal: React.FC<VideoModalProps> = ({
   open,
   onClose,
   onPublish
@@ -71,10 +153,10 @@ const VideoModal: React.FC<VideoModalProps> = ({
 
   const [options, setOptions] = useState<SelectOption[]>([])
   const [tags, setTags] = useState<string[]>([])
-  const { publishVideo } = usePublishVideo()
+  const { publishAudio } = usePublishAudio()
   const { getRootProps, getInputProps } = useDropzone({
     accept: {
-      'video/*': []
+      'audio/*': []
     },
     maxFiles: 1,
     onDrop: (acceptedFiles) => {
@@ -129,7 +211,7 @@ const VideoModal: React.FC<VideoModalProps> = ({
       if (typeof base64 !== 'string') return
       const base64String = base64.split(',')[1]
 
-      const res = await publishVideo({
+      const res = await publishAudio({
         title,
         description,
         base64: base64String,
@@ -276,5 +358,3 @@ const VideoModal: React.FC<VideoModalProps> = ({
     </StyledModal>
   )
 }
-
-export default VideoModal

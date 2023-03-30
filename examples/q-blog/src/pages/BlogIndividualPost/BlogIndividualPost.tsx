@@ -3,14 +3,15 @@ import { useParams } from 'react-router-dom';
 import { Button, Box, Typography, CardHeader, Avatar, } from '@mui/material';
 import { useNavigate } from "react-router-dom";
 import { styled } from '@mui/system';
-
-import ReadOnlySlate from '../../components/editor/ReadOnlySlate';
-import { useDispatch, useSelector } from 'react-redux';
-import { RootState } from '../../state/store';
-import { checkStructure } from '../../utils/checkStructure';
-import { BlogContent } from '../../interfaces/interfaces';
-import { setIsLoadingGlobal } from '../../state/features/globalSlice';
+import AudiotrackIcon from '@mui/icons-material/Audiotrack'
+import ReadOnlySlate from '../../components/editor/ReadOnlySlate'
+import { useDispatch, useSelector } from 'react-redux'
+import { RootState } from '../../state/store'
+import { checkStructure } from '../../utils/checkStructure'
+import { BlogContent } from '../../interfaces/interfaces'
+import { setIsLoadingGlobal } from '../../state/features/globalSlice'
 import { VideoPlayer } from '../../components/common/VideoPlayer'
+import { AudioPlayer, IPlaylist } from '../../components/common/AudioPlayer'
 
 export const BlogIndividualPost = () => {
   const { user, postId, blog } = useParams()
@@ -18,13 +19,14 @@ export const BlogIndividualPost = () => {
   const [avatarUrl, setAvatarUrl] = React.useState<string>('')
   const dispatch = useDispatch()
   const navigate = useNavigate()
+  const [currAudio, setCurrAudio] = React.useState<number | null>(null)
 
   const [blogContent, setBlogContent] = React.useState<BlogContent | null>(null)
 
   const getBlogPost = React.useCallback(async () => {
     try {
       dispatch(setIsLoadingGlobal(true))
-      const url = `/arbitrary/BLOG_POST/${user}/${postId}`
+      const url = `http://213.202.218.148:62391/arbitrary/BLOG_POST/${user}/${postId}`
       const response = await fetch(url, {
         method: 'GET',
         headers: {
@@ -62,6 +64,19 @@ export const BlogIndividualPost = () => {
     getAvatar()
   }, [])
 
+  const audios = React.useMemo<IPlaylist[]>(() => {
+    const filteredAudios = (blogContent?.postContent || []).filter(
+      (content) => content.type === 'audio'
+    )
+
+    return filteredAudios.map((fa) => {
+      return {
+        ...fa.content,
+        id: fa.id
+      }
+    })
+  }, [blogContent])
+  console.log({ blogContent, audios })
   if (!blogContent) return null
 
   return (
@@ -109,7 +124,7 @@ export const BlogIndividualPost = () => {
             textAlign: 'center'
           }}
         >
-          {blogContent.title}
+          {blogContent?.title}
         </Typography>
 
         {blogContent?.postContent?.map((section: any) => {
@@ -117,18 +132,61 @@ export const BlogIndividualPost = () => {
             return <ReadOnlySlate key={section.id} content={section.content} />
           }
           if (section.type === 'image') {
-            return <img src={section.content.image} className="post-image" />
+            return (
+              <img
+                key={section.id}
+                src={section.content.image}
+                className="post-image"
+              />
+            )
           }
           if (section.type === 'video') {
             return (
               <VideoPlayer
+                key={section.id}
                 name={section.content.name}
                 service={section.content.service}
                 identifier={section.content.identifier}
               />
             )
           }
+          if (section.type === 'audio') {
+            return (
+              <Box
+                key={section.id}
+                onClick={() => {
+                  const findIndex = audios.findIndex(
+                    (item) => item.identifier === section.content.identifier
+                  )
+                  setCurrAudio(findIndex)
+                }}
+                sx={{
+                  display: 'flex',
+                  padding: '5px',
+                  gap: 1,
+                  alignItems: 'center',
+                  marginTop: '15px',
+                  cursor: 'pointer'
+                }}
+              >
+                <Typography variant="h5" sx={{}}>
+                  {section.content.title}
+                </Typography>
+                <AudiotrackIcon />
+              </Box>
+              // <AudioPlayer
+              //   name={section.content.name}
+              //   service={section.content.service}
+              //   identifier={section.content.identifier}
+              //   title={section.content?.title}
+              //   description={section.content?.description}
+              // />
+            )
+          }
         })}
+        {audios.length > 0 && (
+          <AudioPlayer currAudio={currAudio} playlist={audios} />
+        )}
       </Box>
     </Box>
   )

@@ -21,7 +21,8 @@ export const checkStructure = (content: any)=> {
         c.version === 1 &&
         c.type !== 'editor' &&
         c.type !== 'image' &&
-        c.type !== 'video'
+        c.type !== 'video' &&
+        c.type !== 'audio'
       ) {
         isValid = false
       }

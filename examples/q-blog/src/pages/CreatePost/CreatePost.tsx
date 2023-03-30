@@ -275,6 +275,29 @@ export const CreatePost = () => {
     setNewPostContent((prev) => [...prev, section])
   }
 
+  const addAudio = ({
+    name,
+    identifier,
+    service,
+    title,
+    description
+  }: IaddVideo) => {
+    const section = {
+      type: 'audio',
+      version: 1,
+      content: {
+        name: name,
+        identifier: identifier,
+        service: service,
+        title,
+        description
+      },
+      id: uid()
+    }
+    console.log({ section })
+    setNewPostContent((prev) => [...prev, section])
+  }
+
   const addSection = () => {
     addPostSection(value)
   }
@@ -365,7 +388,7 @@ export const CreatePost = () => {
   }, [])
 
   const onSelectAudio = React.useCallback((video: any) => {
-    addVideo({
+    addAudio({
       name: video.name,
       identifier: video.identifier,
       service: video.service,
@@ -663,7 +686,7 @@ export const CreatePost = () => {
             />
           </ImageUploader>
           <VideoPanel onSelect={onSelectVideo} />
-          <AudioPanel onSelect={onSelectVideo} />
+          <AudioPanel onSelect={onSelectAudio} />
         </Box>
         <Box
           sx={{
