@@ -34,7 +34,7 @@ export const BlogIndividualProfile = () => {
     try {
       dispatch(setIsLoadingGlobal(true))
       const offset = blogPosts.length
-      const url = `http://213.202.218.148:62391/arbitrary/resources/search?service=BLOG_POST&query=${blog}-post-&limit=20&name=${name}&includemetadata=true&offset=${offset}`
+      const url = `/arbitrary/resources/search?service=BLOG_POST&query=${blog}-post-&limit=20&name=${name}&includemetadata=true&offset=${offset}`
       const response = await fetch(url, {
         method: 'GET',
         headers: {
@@ -88,7 +88,7 @@ export const BlogIndividualProfile = () => {
     if (!name) return
     if (!blog) return
     try {
-      const urlBlog = `http://213.202.218.148:62391/arbitrary/BLOG/${name}/${blog}`
+      const urlBlog = `/arbitrary/BLOG/${name}/${blog}`
       const response = await fetch(urlBlog, {
         method: 'GET',
         headers: {
