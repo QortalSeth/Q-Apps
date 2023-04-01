@@ -20,74 +20,99 @@ interface Props {
 
 const CustomAppBar = styled(AppBar)(({ theme }) => ({
   backgroundColor: '#FFFFFF',
-  color: '#000000',
-}));
+  color: '#000000'
+}))
 
 const CustomToolbar = styled(Toolbar)({
-  minHeight: 48,
   display: 'flex',
   justifyContent: 'space-between',
-  alignItems: 'center',
-});
+  alignItems: 'center'
+})
 
 const CustomTitle = styled(Typography)({
   fontWeight: 600,
-  color: '#000000',
-});
+  color: '#000000'
+})
 
 const StyledButton = styled(Button)({
-  fontWeight: 600,
-});
+  fontWeight: 600
+})
 
-const NavBar: React.FC<Props> = ({ isAuthenticated, hasBlog, userName, userAvatar, blog, authenticate }) => {
-    const navigate = useNavigate();
-    const dispatch = useDispatch();
+const NavBar: React.FC<Props> = ({
+  isAuthenticated,
+  hasBlog,
+  userName,
+  userAvatar,
+  blog,
+  authenticate
+}) => {
+  const navigate = useNavigate()
+  const dispatch = useDispatch()
 
   return (
     <CustomAppBar position="sticky">
-      <CustomToolbar>
-        <CustomTitle variant="h6" sx={{
-          cursor: 'pointer'
-        }} onClick={()=> {
-          navigate(`/`)
-        }}>
+      <CustomToolbar variant="dense">
+        <CustomTitle
+          variant="h6"
+          sx={{
+            cursor: 'pointer'
+          }}
+          onClick={() => {
+            navigate(`/`)
+          }}
+        >
           Q-Blog
         </CustomTitle>
-        <Box sx={{
+        <Box
+          sx={{
             display: 'flex',
             alignItems: 'center'
-          }}>
-        {!isAuthenticated && (
-          <StyledButton color="primary" startIcon={<ExitToAppIcon />} onClick={authenticate}>
-            Authenticate
-          </StyledButton>
-        )}
-        {isAuthenticated &&  userName && !hasBlog && (
-          <StyledButton color="primary" startIcon={<AddBoxIcon />} onClick={()=> {
-            dispatch(
-                togglePublishBlogModal(true)
-              );
-          }}>
-            Create Blog
-          </StyledButton>
-        )}
-        {isAuthenticated && userName && hasBlog && (
-            <>
-             <StyledButton color="primary" startIcon={<AddBoxIcon />} onClick={()=> {
-            navigate(`/post/new`)
-          }}>
-            Create Post
-          </StyledButton>
-            
-            <StyledButton color="primary" startIcon={<AutoStoriesIcon />} onClick={()=> {
-              navigate(`/${userName}/${blog.blogId}`)
-            }}>
-              My Blog
+          }}
+        >
+          {!isAuthenticated && (
+            <StyledButton
+              color="primary"
+              startIcon={<ExitToAppIcon />}
+              onClick={authenticate}
+            >
+              Authenticate
             </StyledButton>
+          )}
+          {isAuthenticated && userName && !hasBlog && (
+            <StyledButton
+              color="primary"
+              startIcon={<AddBoxIcon />}
+              onClick={() => {
+                dispatch(togglePublishBlogModal(true))
+              }}
+            >
+              Create Blog
+            </StyledButton>
+          )}
+          {isAuthenticated && userName && hasBlog && (
+            <>
+              <StyledButton
+                color="primary"
+                startIcon={<AddBoxIcon />}
+                onClick={() => {
+                  navigate(`/post/new`)
+                }}
+              >
+                Create Post
+              </StyledButton>
+
+              <StyledButton
+                color="primary"
+                startIcon={<AutoStoriesIcon />}
+                onClick={() => {
+                  navigate(`/${userName}/${blog.blogId}`)
+                }}
+              >
+                My Blog
+              </StyledButton>
             </>
-         
-        )}
-        {/* {isAuthenticated && userName && (
+          )}
+          {/* {isAuthenticated && userName && (
           <Box sx={{
             display: 'flex',
             alignItems: 'center'
@@ -105,7 +130,7 @@ const NavBar: React.FC<Props> = ({ isAuthenticated, hasBlog, userName, userAvata
         </Box>
       </CustomToolbar>
     </CustomAppBar>
-  );
-};
+  )
+}
 
 export default NavBar;

@@ -7,26 +7,26 @@ self.addEventListener('message', async (event) => {
   // const identifier = event.data.identifier
 
 
-  const url2 = `/arbitrary/VIDEO/crowetic/q-blog-video-xGR8HP?&encoding=base64`
-  const res = await fetch(url2);
-  const data = await res.text();
-  self.postMessage(data);
-  // const url2 = `/arbitrary/VIDEO/crowetic/q-blog-video-xGR8HP`
+  // const url2 = `/arbitrary/VIDEO/crowetic/q-blog-video-xGR8HP?&encoding=base64`
+  // const res = await fetch(url2);
+  // const data = await res.text();
+  // self.postMessage(data);
+  const url2 = `/arbitrary/VIDEO/crowetic/q-blog-video-xGR8HP`
 
-  // const xhr = new XMLHttpRequest();
-  // xhr.open('GET', url2, true);
-  // xhr.responseType = 'blob';
-  // xhr.onload = () => {
-  //   const headers = xhr.getAllResponseHeaders();
-  //   const blob = xhr.response;
-  //   const url = URL.createObjectURL(blob);
-  //   const byteLength = blob.size;
-  //   const contentRange = `bytes 0-${byteLength}/${byteLength}`;
-  //   const contentType = xhr.getResponseHeader('Content-Type');
-  //   self.postMessage(url);
-  //   this.dispatchEvent(new CustomEvent('loaded', { detail: { headers, byteLength, contentRange, contentType } }));
-  // };
-  // xhr.send();
+  const xhr = new XMLHttpRequest();
+  xhr.open('GET', url2, true);
+  xhr.responseType = 'blob';
+  xhr.onload = () => {
+    const headers = xhr.getAllResponseHeaders();
+    const blob = xhr.response;
+    const url = URL.createObjectURL(blob);
+    const byteLength = blob.size;
+    const contentRange = `bytes 0-${byteLength}/${byteLength}`;
+    const contentType = xhr.getResponseHeader('Content-Type');
+    self.postMessage(url);
+    // this.dispatchEvent(new CustomEvent('loaded', { detail: { headers, byteLength, contentRange, contentType } }));
+  };
+  xhr.send();
   // fetch(url2)
   //   .then(response => response.blob())
   //   .then(blob => {

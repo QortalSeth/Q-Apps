@@ -194,51 +194,65 @@ export const BlogIndividualPost = () => {
                     i={section.id}
                     breakpoint={currentBreakpoint}
                   >
-                    <img
-                      key={section.id}
-                      src={section.content.image}
-                      className="post-image"
-                    />
+                    <img src={section.content.image} className="post-image" />
                   </DynamicHeightItem>
                 </div>
               )
             }
             if (section.type === 'video') {
               return (
-                <VideoPlayer
-                  key={section.id}
-                  name={section.content.name}
-                  service={section.content.service}
-                  identifier={section.content.identifier}
-                />
+                <div key={section.id}>
+                  <DynamicHeightItem
+                    layouts={layouts}
+                    onLayoutsChange={setLayouts}
+                    i={section.id}
+                    breakpoint={currentBreakpoint}
+                  >
+                    <VideoPlayer
+                      name={section.content.name}
+                      service={section.content.service}
+                      identifier={section.content.identifier}
+                    />
+                  </DynamicHeightItem>
+                </div>
               )
             }
             if (section.type === 'audio') {
               return (
-                <Box
-                  key={section.id}
-                  onClick={() => {
-                    const findIndex = audios.findIndex(
-                      (item) => item.identifier === section.content.identifier
-                    )
-                    if (findIndex >= 0) {
-                      setCurrAudio(findIndex)
-                    }
-                  }}
-                  sx={{
-                    display: 'flex',
-                    padding: '5px',
-                    gap: 1,
-                    alignItems: 'center',
-                    marginTop: '15px',
-                    cursor: 'pointer'
-                  }}
-                >
-                  <Typography variant="h5" sx={{}}>
-                    {section.content.title}
-                  </Typography>
-                  <AudiotrackIcon />
-                </Box>
+                <div key={section.id}>
+                  <DynamicHeightItem
+                    layouts={layouts}
+                    onLayoutsChange={setLayouts}
+                    i={section.id}
+                    breakpoint={currentBreakpoint}
+                  >
+                    <Box
+                      key={section.id}
+                      onClick={() => {
+                        const findIndex = audios.findIndex(
+                          (item) =>
+                            item.identifier === section.content.identifier
+                        )
+                        if (findIndex >= 0) {
+                          setCurrAudio(findIndex)
+                        }
+                      }}
+                      sx={{
+                        display: 'flex',
+                        padding: '5px',
+                        gap: 1,
+                        alignItems: 'center',
+                        marginTop: '15px',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      <Typography variant="h5" sx={{}}>
+                        {section.content.title}
+                      </Typography>
+                      <AudiotrackIcon />
+                    </Box>
+                  </DynamicHeightItem>
+                </div>
               )
             }
           })}

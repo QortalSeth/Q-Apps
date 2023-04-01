@@ -8,10 +8,19 @@ import TextField from '@mui/material/TextField';
 import AddPhotoAlternateIcon from '@mui/icons-material/AddPhotoAlternate';
 import PostAddIcon from '@mui/icons-material/PostAdd';
 import ImageUploader from '../../components/common/ImageUploader';
-import { Button, Box, Typography, CardHeader, Avatar, } from '@mui/material';
-import { styled } from '@mui/system';
-import { createEditor, Descendant, Editor, Transforms } from 'slate';
-import EditIcon from '@mui/icons-material/Edit';
+import TextFieldsIcon from '@mui/icons-material/TextFields'
+import {
+  Button,
+  Box,
+  Typography,
+  CardHeader,
+  Avatar,
+  Toolbar,
+  AppBar
+} from '@mui/material'
+import { styled } from '@mui/system'
+import { createEditor, Descendant, Editor, Transforms } from 'slate'
+import EditIcon from '@mui/icons-material/Edit'
 import VideoCallIcon from '@mui/icons-material/VideoCall'
 import RemoveCircleIcon from '@mui/icons-material/RemoveCircle'
 import { extractTextFromSlate } from '../../utils/extractTextFromSlate'
@@ -24,6 +33,7 @@ import DynamicHeightItem from '../../components/DynamicHeightItem'
 import { Responsive, WidthProvider } from 'react-grid-layout'
 import '/node_modules/react-grid-layout/css/styles.css'
 import '/node_modules/react-resizable/css/styles.css'
+import { ReusableModal } from '../../components/modals/ReusableModal'
 const ResponsiveGridLayout = WidthProvider(Responsive)
 const initialMinHeight = 2 // Define an initial minimum height for grid items
 const uid = new ShortUniqueId()
@@ -54,6 +64,17 @@ const BlogTitleInput = styled(TextField)(({ theme }) => ({
   }
 }))
 
+const CustomToolbar = styled(Toolbar)({
+  display: 'flex',
+  justifyContent: 'space-between',
+  alignItems: 'center'
+})
+
+const CustomAppBar = styled(AppBar)(({ theme }) => ({
+  backgroundColor: '#FFFFFF',
+  color: '#000000'
+}))
+
 export const CreatePost = () => {
   const { user } = useSelector((state: RootState) => state.auth)
   const { currentBlog, isLoadingCurrentBlog } = useSelector(
@@ -71,6 +92,8 @@ export const CreatePost = () => {
   const [blogImage, setBlogImage] = React.useState<string>('')
   const [isOpenPostModal, setIsOpenPostModal] = React.useState<boolean>(false)
   const [value, setValue] = React.useState(initialValue)
+  const [isOpenAddTextModal, setIsOpenAddTextModal] =
+    React.useState<boolean>(false)
   const dispatch = useDispatch()
   const addPostSection = React.useCallback((content: any) => {
     const section = {
@@ -417,358 +440,375 @@ export const CreatePost = () => {
     setCurrentBreakpoint(newBreakpoint)
   }
 
+  const closeAddTextModal = React.useCallback(() => {
+    setIsOpenAddTextModal(false)
+  }, [])
+
   return (
-    <Box
-      sx={{
-        display: 'flex',
-        alignItems: 'center',
-        flexDirection: 'column'
-      }}
-    >
-      <BlogTitleInput
-        id="modal-title-input"
-        value={title}
-        onChange={(e) => setTitle(e.target.value)}
-        fullWidth
-        placeholder="Title"
-        variant="filled"
-        multiline
-        maxRows={2}
-        InputLabelProps={{ shrink: false }}
-        sx={{ maxWidth: '700px' }}
-      />
+    <>
+      <CustomAppBar position="sticky">
+        <CustomToolbar variant="dense">
+          <Box
+            sx={{
+              display: 'flex',
+              gap: '10px'
+            }}
+          >
+            <TextFieldsIcon
+              onClick={() => setIsOpenAddTextModal(true)}
+              sx={{
+                cursor: 'pointer',
+                width: '40px',
+                height: '40px'
+              }}
+            />
+            <ImageUploader onPick={addImage}>
+              <AddPhotoAlternateIcon
+                sx={{
+                  cursor: 'pointer',
+                  width: '40px',
+                  height: '40px'
+                }}
+              />
+            </ImageUploader>
+            <VideoPanel onSelect={onSelectVideo} />
+            <AudioPanel onSelect={onSelectAudio} />
+          </Box>
+        </CustomToolbar>
+      </CustomAppBar>
       <Box
         sx={{
-          maxWidth: '1400px',
-          // margin: '15px',
-          width: '95%'
+          display: 'flex',
+          alignItems: 'center',
+          flexDirection: 'column',
+          padding: '10px'
         }}
       >
-        <ResponsiveGridLayout
-          layouts={layouts}
-          breakpoints={{ md: 996, sm: 768, xs: 480 }}
-          cols={{ md: 4, sm: 3, xs: 1 }}
-          onLayoutChange={handleLayoutChange}
-          measureBeforeMount={false}
-          autoSize={true}
-          // compactType={null}
-          isBounded={true}
-          resizeHandles={['se', 'sw', 'ne', 'nw']}
-          rowHeight={30}
-          onBreakpointChange={onBreakpointChange}
-          // isDraggable={false}
-          // isResizable={false}
+        <BlogTitleInput
+          id="modal-title-input"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          fullWidth
+          placeholder="Title"
+          variant="filled"
+          multiline
+          maxRows={2}
+          InputLabelProps={{ shrink: false }}
+          sx={{ maxWidth: '700px' }}
+        />
+        <Box
+          sx={{
+            maxWidth: '1400px',
+            // margin: '15px',
+            width: '95%'
+          }}
         >
-          {newPostContent.map((section: any) => {
-            if (section.type === 'editor') {
-              return (
-                <div key={section.id}>
-                  <DynamicHeightItem
-                    layouts={layouts}
-                    onLayoutsChange={setLayouts}
-                    i={section.id}
-                    breakpoint={currentBreakpoint}
-                  >
-                    {editingSection && editingSection.id === section.id ? (
-                      <BlogEditor
-                        editPostSection={editPostSection}
-                        defaultValue={section.content}
-                        section={section}
-                        value={value}
-                        setValue={setValue}
-                      />
-                    ) : (
-                      <Box
-                        sx={{
-                          position: 'relative',
-                          width: '100%'
-                        }}
-                      >
-                        <ReadOnlySlate
-                          key={section.id}
-                          content={section.content}
+          <ResponsiveGridLayout
+            layouts={layouts}
+            breakpoints={{ md: 996, sm: 768, xs: 480 }}
+            cols={{ md: 4, sm: 3, xs: 1 }}
+            onLayoutChange={handleLayoutChange}
+            measureBeforeMount={false}
+            autoSize={true}
+            // compactType={null}
+            isBounded={true}
+            resizeHandles={['se', 'sw', 'ne', 'nw']}
+            rowHeight={30}
+            onBreakpointChange={onBreakpointChange}
+            // isDraggable={false}
+            // isResizable={false}
+          >
+            {newPostContent.map((section: any) => {
+              if (section.type === 'editor') {
+                return (
+                  <div key={section.id}>
+                    <DynamicHeightItem
+                      layouts={layouts}
+                      onLayoutsChange={setLayouts}
+                      i={section.id}
+                      breakpoint={currentBreakpoint}
+                    >
+                      {editingSection && editingSection.id === section.id ? (
+                        <BlogEditor
+                          editPostSection={editPostSection}
+                          defaultValue={section.content}
+                          section={section}
+                          value={value}
+                          setValue={setValue}
                         />
+                      ) : (
                         <Box
                           sx={{
-                            position: 'absolute',
-                            right: '5px',
-                            zIndex: 5,
-                            top: '50%',
-                            transform: 'translateY(-50%)',
-                            display: 'flex',
-                            // flexDirection: 'column',
-                            gap: 2,
-                            background: 'white',
-                            padding: '5px',
-                            borderRadius: '5px'
+                            position: 'relative',
+                            width: '100%'
                           }}
                         >
-                          <RemoveCircleIcon
-                            onClick={() => removeSection(section)}
-                            sx={{
-                              cursor: 'pointer'
-                            }}
+                          <ReadOnlySlate
+                            key={section.id}
+                            content={section.content}
                           />
-                          <EditIcon
-                            onClick={() => editSection(section)}
+                          <Box
                             sx={{
-                              cursor: 'pointer'
+                              position: 'absolute',
+                              right: '5px',
+                              zIndex: 5,
+                              top: '50%',
+                              transform: 'translateY(-50%)',
+                              display: 'flex',
+                              // flexDirection: 'column',
+                              gap: 2,
+                              background: 'white',
+                              padding: '5px',
+                              borderRadius: '5px'
                             }}
-                          />
-                        </Box>
-                      </Box>
-                    )}
-                    {editingSection && editingSection.id === section.id ? (
-                      <Box
-                        sx={{
-                          display: 'flex',
-                          width: '100%',
-                          justifyContent: 'flex-end'
-                        }}
-                      >
-                        <Button onClick={() => setEditingSection(null)}>
-                          Close
-                        </Button>
-                      </Box>
-                    ) : (
-                      <></>
-                    )}
-                  </DynamicHeightItem>
-                </div>
-              )
-            }
-            if (section.type === 'image') {
-              return (
-                <div key={section.id}>
-                  <DynamicHeightItem
-                    layouts={layouts}
-                    onLayoutsChange={setLayouts}
-                    i={section.id}
-                    breakpoint={currentBreakpoint}
-                  >
-                    {editingSection && editingSection.id === section.id ? (
-                      <ImageUploader
-                        onPick={(base64) => editImage(base64, section)}
-                      >
-                        Add Image
-                        <AddPhotoAlternateIcon />
-                      </ImageUploader>
-                    ) : (
-                      <Box
-                        sx={{
-                          position: 'relative',
-                          width: '100%',
-                          height: '100%'
-                        }}
-                      >
-                        <img
-                          src={section.content.image}
-                          className="post-image"
-                          style={{
-                            marginTop: '20px'
-                          }}
-                        />
-                        <Box
-                          sx={{
-                            position: 'absolute',
-                            right: '5px',
-                            zIndex: 5,
-                            top: '50%',
-                            transform: 'translateY(-50%)',
-                            display: 'flex',
-                            flexDirection: 'column',
-                            gap: 2,
-                            background: 'white',
-                            padding: '5px',
-                            borderRadius: '5px'
-                          }}
-                        >
-                          <RemoveCircleIcon
-                            onClick={() => removeSection(section)}
-                            sx={{
-                              cursor: 'pointer'
-                            }}
-                          />
-                          <ImageUploader
-                            onPick={(base64) => editImage(base64, section)}
                           >
-                            <EditIcon
+                            <RemoveCircleIcon
+                              onClick={() => removeSection(section)}
                               sx={{
                                 cursor: 'pointer'
                               }}
                             />
-                          </ImageUploader>
+                            <EditIcon
+                              onClick={() => editSection(section)}
+                              sx={{
+                                cursor: 'pointer'
+                              }}
+                            />
+                          </Box>
                         </Box>
-                      </Box>
-                    )}
-
-                    {editingSection && editingSection.id === section.id ? (
-                      <Button onClick={() => setEditingSection(null)}>
-                        Close
-                      </Button>
-                    ) : (
-                      <></>
-                    )}
-                  </DynamicHeightItem>
-                </div>
-              )
-            }
-
-            if (section.type === 'video') {
-              return (
-                <div key={section.id}>
-                  <DynamicHeightItem
-                    layouts={layouts}
-                    onLayoutsChange={setLayouts}
-                    i={section.id}
-                    breakpoint={currentBreakpoint}
-                  >
-                    {editingSection && editingSection.id === section.id ? (
-                      <VideoPanel
-                        width="24px"
-                        height="24px"
-                        onSelect={(video) =>
-                          editVideo(
-                            {
-                              name: video.name,
-                              identifier: video.identifier,
-                              service: video.service,
-                              title: video?.metadata?.title,
-                              description: video?.metadata?.description
-                            },
-                            section
-                          )
-                        }
-                      />
-                    ) : (
-                      <Box
-                        sx={{
-                          position: 'relative'
-                        }}
-                      >
-                        <VideoContent
-                          title={section.content?.title}
-                          description={section.content?.description}
-                        />
+                      )}
+                      {editingSection && editingSection.id === section.id ? (
                         <Box
                           sx={{
-                            position: 'absolute',
-                            right: '5px',
-                            zIndex: 5,
-                            top: '50%',
-                            transform: 'translateY(-50%)',
                             display: 'flex',
-                            flexDirection: 'column',
-                            gap: 2,
-                            background: 'white',
-                            padding: '5px',
-                            borderRadius: '5px'
+                            width: '100%',
+                            justifyContent: 'flex-end'
                           }}
                         >
-                          <RemoveCircleIcon
-                            onClick={() => removeSection(section)}
-                            sx={{
-                              cursor: 'pointer'
+                          <Button onClick={() => setEditingSection(null)}>
+                            Close
+                          </Button>
+                        </Box>
+                      ) : (
+                        <></>
+                      )}
+                    </DynamicHeightItem>
+                  </div>
+                )
+              }
+              if (section.type === 'image') {
+                return (
+                  <div key={section.id}>
+                    <DynamicHeightItem
+                      layouts={layouts}
+                      onLayoutsChange={setLayouts}
+                      i={section.id}
+                      breakpoint={currentBreakpoint}
+                    >
+                      {editingSection && editingSection.id === section.id ? (
+                        <ImageUploader
+                          onPick={(base64) => editImage(base64, section)}
+                        >
+                          Add Image
+                          <AddPhotoAlternateIcon />
+                        </ImageUploader>
+                      ) : (
+                        <Box
+                          sx={{
+                            position: 'relative',
+                            width: '100%',
+                            height: '100%'
+                          }}
+                        >
+                          <img
+                            src={section.content.image}
+                            className="post-image"
+                            style={{
+                              marginTop: '20px'
                             }}
                           />
-                          <VideoPanel
-                            width="24px"
-                            height="24px"
-                            onSelect={(video) =>
-                              editVideo(
-                                {
-                                  name: video.name,
-                                  identifier: video.identifier,
-                                  service: video.service,
-                                  title: video?.metadata?.title,
-                                  description: video?.metadata?.description
-                                },
-                                section
-                              )
-                            }
-                          />
+                          <Box
+                            sx={{
+                              position: 'absolute',
+                              right: '5px',
+                              zIndex: 5,
+                              top: '50%',
+                              transform: 'translateY(-50%)',
+                              display: 'flex',
+                              flexDirection: 'column',
+                              gap: 2,
+                              background: 'white',
+                              padding: '5px',
+                              borderRadius: '5px'
+                            }}
+                          >
+                            <RemoveCircleIcon
+                              onClick={() => removeSection(section)}
+                              sx={{
+                                cursor: 'pointer'
+                              }}
+                            />
+                            <ImageUploader
+                              onPick={(base64) => editImage(base64, section)}
+                            >
+                              <EditIcon
+                                sx={{
+                                  cursor: 'pointer'
+                                }}
+                              />
+                            </ImageUploader>
+                          </Box>
                         </Box>
-                      </Box>
-                    )}
-                    {editingSection && editingSection.id === section.id ? (
-                      <Button onClick={() => setEditingSection(null)}>
-                        Close
-                      </Button>
-                    ) : (
-                      <></>
-                    )}
-                  </DynamicHeightItem>
-                </div>
-              )
-            }
-          })}
-        </ResponsiveGridLayout>
-        <Box
-          sx={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 1
-          }}
-        >
-          <BlogEditor
-            addPostSection={addPostSection}
-            value={value}
-            setValue={setValue}
-          />
-        </Box>
-        <Box
-          sx={{
-            display: 'flex'
-          }}
-        >
-          <PostAddIcon
-            onClick={addSection}
+                      )}
+
+                      {editingSection && editingSection.id === section.id ? (
+                        <Button onClick={() => setEditingSection(null)}>
+                          Close
+                        </Button>
+                      ) : (
+                        <></>
+                      )}
+                    </DynamicHeightItem>
+                  </div>
+                )
+              }
+
+              if (section.type === 'video') {
+                return (
+                  <div key={section.id}>
+                    <DynamicHeightItem
+                      layouts={layouts}
+                      onLayoutsChange={setLayouts}
+                      i={section.id}
+                      breakpoint={currentBreakpoint}
+                    >
+                      {editingSection && editingSection.id === section.id ? (
+                        <VideoPanel
+                          width="24px"
+                          height="24px"
+                          onSelect={(video) =>
+                            editVideo(
+                              {
+                                name: video.name,
+                                identifier: video.identifier,
+                                service: video.service,
+                                title: video?.metadata?.title,
+                                description: video?.metadata?.description
+                              },
+                              section
+                            )
+                          }
+                        />
+                      ) : (
+                        <Box
+                          sx={{
+                            position: 'relative'
+                          }}
+                        >
+                          <VideoContent
+                            title={section.content?.title}
+                            description={section.content?.description}
+                          />
+                          <Box
+                            sx={{
+                              position: 'absolute',
+                              right: '5px',
+                              zIndex: 5,
+                              top: '50%',
+                              transform: 'translateY(-50%)',
+                              display: 'flex',
+                              flexDirection: 'column',
+                              gap: 2,
+                              background: 'white',
+                              padding: '5px',
+                              borderRadius: '5px'
+                            }}
+                          >
+                            <RemoveCircleIcon
+                              onClick={() => removeSection(section)}
+                              sx={{
+                                cursor: 'pointer'
+                              }}
+                            />
+                            <VideoPanel
+                              width="24px"
+                              height="24px"
+                              onSelect={(video) =>
+                                editVideo(
+                                  {
+                                    name: video.name,
+                                    identifier: video.identifier,
+                                    service: video.service,
+                                    title: video?.metadata?.title,
+                                    description: video?.metadata?.description
+                                  },
+                                  section
+                                )
+                              }
+                            />
+                          </Box>
+                        </Box>
+                      )}
+                      {editingSection && editingSection.id === section.id ? (
+                        <Button onClick={() => setEditingSection(null)}>
+                          Close
+                        </Button>
+                      ) : (
+                        <></>
+                      )}
+                    </DynamicHeightItem>
+                  </div>
+                )
+              }
+            })}
+          </ResponsiveGridLayout>
+
+          <Box
             sx={{
-              cursor: 'pointer',
-              width: '50px',
-              height: '50px'
-            }}
-          />
-          <ImageUploader onPick={addImage}>
-            <AddPhotoAlternateIcon
-              sx={{
-                cursor: 'pointer',
-                width: '50px',
-                height: '50px'
-              }}
-            />
-          </ImageUploader>
-          <VideoPanel onSelect={onSelectVideo} />
-          <AudioPanel onSelect={onSelectAudio} />
-        </Box>
-        <Box
-          sx={{
-            position: 'fixed',
-            bottom: '30px',
-            right: '30px',
-            zIndex: 15,
-            background: 'deepskyblue',
-            padding: '10px',
-            borderRadius: '5px'
-          }}
-        >
-          <Button
-            onClick={() => {
-              setIsOpenPostModal(true)
+              position: 'fixed',
+              bottom: '30px',
+              right: '30px',
+              zIndex: 15,
+              background: 'deepskyblue',
+              padding: '10px',
+              borderRadius: '5px'
             }}
           >
-            Publish
-          </Button>
+            <Button
+              onClick={() => {
+                setIsOpenPostModal(true)
+              }}
+            >
+              Publish
+            </Button>
+          </Box>
         </Box>
+        <ReusableModal open={isOpenAddTextModal}>
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 1
+            }}
+          >
+            <BlogEditor
+              addPostSection={addPostSection}
+              value={value}
+              setValue={setValue}
+            />
+          </Box>
+          <Button onClick={addSection}>Add Text</Button>
+          <Button onClick={closeAddTextModal}>Close</Button>
+        </ReusableModal>
+        <PostPublishModal
+          onClose={() => {
+            setIsOpenPostModal(false)
+          }}
+          open={isOpenPostModal}
+          post={post}
+          onPublish={publishQDNResource}
+        />
       </Box>
-      <PostPublishModal
-        onClose={() => {
-          setIsOpenPostModal(false)
-        }}
-        open={isOpenPostModal}
-        post={post}
-        onPublish={publishQDNResource}
-      />
-    </Box>
+    </>
   )
 }

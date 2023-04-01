@@ -170,7 +170,35 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
       // })
       console.log('starting')
       try {
-        workerRef.current.postMessage('Hello, world!')
+        const url = `/arbitrary/${service}/${name}/${identifier}`
+
+        fetch(url)
+          .then((response) => response.blob())
+          .then((blob) => {
+            const url = URL.createObjectURL(blob)
+            const videoElement = document.querySelector('video')
+            if (!videoElement) return
+            setSrc(url)
+          })
+          .catch((error) => {
+            console.error('Error fetching the video:', error)
+          })
+
+        // const xhr = new XMLHttpRequest()
+        // xhr.open('GET', url2, true)
+        // xhr.responseType = 'blob'
+
+        // // Add the Range header to fetch only the first 1MB of the video
+
+        // xhr.onload = () => {
+        //   const blob = xhr.response
+        //   const url = URL.createObjectURL(blob)
+        //   const videoElement = document.querySelector('video')
+        //   if (!videoElement) return
+        //   setSrc(url)
+        // }
+        // xhr.send()
+        // workerRef.current.postMessage('Hello, world!')
       } catch (error) {
         console.log({ error })
       }
@@ -221,8 +249,8 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
       console.log({ url })
       const videoElement = document.querySelector('video')
       if (!videoElement) return
-      videoElement.src = 'data:video/mp4;base64,' + url
-      // setSrc(url)
+      videoElement.src = url
+      setSrc(url)
     })
 
     return () => {
@@ -262,10 +290,16 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
                 fontSize: '18px'
               }}
             >
-              {(resourceStatus.localChunkCount /
-                resourceStatus.totalChunkCount) *
-                100}
-              %
+              {resourceStatus?.status !== 'READY' ? (
+                <>
+                  {(resourceStatus.localChunkCount /
+                    resourceStatus.totalChunkCount) *
+                    100}
+                  %
+                </>
+              ) : (
+                <>Download Completed: fetching video...</>
+              )}
             </Typography>
           )}
         </Box>

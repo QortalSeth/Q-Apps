@@ -100,8 +100,8 @@ export const AudioPanel: React.FC<VideoPanelProps> = ({
       <AudioFileIcon
         onClick={handleToggle}
         sx={{
-          height: height || '50px',
-          width: width || '50px',
+          height: height || '40px',
+          width: width || '40px',
           cursor: 'pointer'
         }}
       ></AudioFileIcon>
