@@ -9,6 +9,8 @@ interface DynamicHeightItemProps {
   i: string
   breakpoint: keyof Layouts
   rows?: number
+  count?: number
+  type?: string
 }
 
 const DynamicHeightItem: React.FC<DynamicHeightItemProps> = ({
@@ -17,9 +19,11 @@ const DynamicHeightItem: React.FC<DynamicHeightItemProps> = ({
   onLayoutsChange,
   i,
   breakpoint,
-  rows = 1
+  rows = 1,
+  count,
+  type
 }) => {
-  const [height, setHeight] = useState<number>(rows * 30)
+  const [height, setHeight] = useState<number>(rows * 150)
   const ref = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -34,20 +38,52 @@ const DynamicHeightItem: React.FC<DynamicHeightItemProps> = ({
     }
   }
 
+  const getBreakpoint = (screenWidth: number) => {
+    if (screenWidth >= 996) {
+      return 'md'
+    } else if (screenWidth >= 768) {
+      return 'sm'
+    } else {
+      return 'xs'
+    }
+  }
+
   useEffect(() => {
     const newLayouts: Layouts = { ...layouts }
-    newLayouts[breakpoint] = newLayouts[breakpoint]?.map((item: Layout) => {
-      if (item.i === i) {
-        return {
-          ...item,
-          h: Math.ceil(height / (rows * 30)) // Adjust this value based on your rowHeight and the number of rows the element spans
+    console.log({ newLayouts })
+    const widthWin = window.innerWidth
+    let newBreakpoint = breakpoint
+    // if (!newBreakpoint) {
+    //   newBreakpoint = getBreakpoint(widthWin)
+    // }
+
+    console.log({ newBreakpoint })
+    newLayouts[newBreakpoint] = newLayouts[newBreakpoint]?.map(
+      (item: Layout) => {
+        if (item.i === i) {
+          let constantNum = 25
+
+          console.log({
+            item,
+            height,
+            minHeight: Math.ceil(height / (rows * constantNum))
+          })
+          // if (type === 'image') {
+          //   constantNum = 39
+          // }
+          return {
+            ...item,
+            minH: Math.ceil(height / (rows * constantNum)) // Adjust this value based on your rowHeight and the number of rows the element spans
+          }
         }
+        return item
       }
-      return item
-    })
+    )
 
     onLayoutsChange(newLayouts)
-  }, [height, breakpoint])
+  }, [height, breakpoint, count])
+
+  console.log({ height, breakpoint })
 
   return (
     <div ref={ref} style={{ width: '100%' }}>

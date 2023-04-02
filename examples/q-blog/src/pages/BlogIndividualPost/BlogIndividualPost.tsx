@@ -37,7 +37,15 @@ const saveLayoutsToLocalStorage = (layouts: any) => {
   }
 }
 
-const lg = [
+const md = [
+  { i: 'a', x: 0, y: 0, w: 4, h: initialMinHeight },
+  { i: 'b', x: 6, y: 0, w: 4, h: initialMinHeight }
+]
+const sm = [
+  { i: 'a', x: 0, y: 0, w: 6, h: initialMinHeight },
+  { i: 'b', x: 6, y: 0, w: 6, h: initialMinHeight }
+]
+const xs = [
   { i: 'a', x: 0, y: 0, w: 6, h: initialMinHeight },
   { i: 'b', x: 6, y: 0, w: 6, h: initialMinHeight }
 ]
@@ -48,9 +56,9 @@ export const BlogIndividualPost = () => {
   const dispatch = useDispatch()
   const navigate = useNavigate()
   const [currAudio, setCurrAudio] = React.useState<number | null>(null)
-  const [layouts, setLayouts] = React.useState<any>(
-    loadLayoutsFromLocalStorage() || { lg }
-  )
+  const [layouts, setLayouts] = React.useState<any>({ md, sm, xs })
+  const [count, setCount] = React.useState<number>(1)
+
   const [currentBreakpoint, setCurrentBreakpoint] = React.useState<any>()
   const handleLayoutChange = (layout: any, layoutss: any) => {
     // const redoLayouts = setAutoHeight(layoutss)
@@ -62,7 +70,7 @@ export const BlogIndividualPost = () => {
   const getBlogPost = React.useCallback(async () => {
     try {
       dispatch(setIsLoadingGlobal(true))
-      const url = `/arbitrary/BLOG_POST/${user}/${postId}`
+      const url = `http://213.202.218.148:62391/arbitrary/BLOG_POST/${user}/${postId}`
       const response = await fetch(url, {
         method: 'GET',
         headers: {
@@ -103,6 +111,16 @@ export const BlogIndividualPost = () => {
     getAvatar()
   }, [])
 
+  const onBreakpointChange = React.useCallback((newBreakpoint: any) => {
+    setCurrentBreakpoint(newBreakpoint)
+  }, [])
+
+  const onResizeStop = React.useCallback((layout: any, layoutItem: any) => {
+    console.log({ layoutItem })
+    // Update the layout state with the new position and size of the component
+    setCount((prev) => prev + 1)
+  }, [])
+
   const audios = React.useMemo<IPlaylist[]>(() => {
     const filteredAudios = (blogContent?.postContent || []).filter(
       (content) => content.type === 'audio'
@@ -117,10 +135,6 @@ export const BlogIndividualPost = () => {
   }, [blogContent])
   console.log({ blogContent, audios })
   if (!blogContent) return null
-
-  const onBreakpointChange = (newBreakpoint: any) => {
-    setCurrentBreakpoint(newBreakpoint)
-  }
 
   return (
     <Box
@@ -169,16 +183,22 @@ export const BlogIndividualPost = () => {
         >
           {blogContent?.title}
         </Typography>
-        <Content layouts={layouts} blogContent={blogContent}>
+        <Content
+          layouts={layouts}
+          blogContent={blogContent}
+          onResizeStop={onResizeStop}
+          onBreakpointChange={onBreakpointChange}
+        >
           {blogContent?.postContent?.map((section: any) => {
             if (section.type === 'editor') {
               return (
-                <div key={section.id}>
+                <div key={section.id} className="grid-item-view">
                   <DynamicHeightItem
                     layouts={layouts}
                     onLayoutsChange={setLayouts}
                     i={section.id}
                     breakpoint={currentBreakpoint}
+                    count={count}
                   >
                     <ReadOnlySlate content={section.content} />
                   </DynamicHeightItem>
@@ -187,12 +207,13 @@ export const BlogIndividualPost = () => {
             }
             if (section.type === 'image') {
               return (
-                <div key={section.id}>
+                <div key={section.id} className="grid-item-view">
                   <DynamicHeightItem
                     layouts={layouts}
                     onLayoutsChange={setLayouts}
                     i={section.id}
                     breakpoint={currentBreakpoint}
+                    count={count}
                   >
                     <img src={section.content.image} className="post-image" />
                   </DynamicHeightItem>
@@ -201,12 +222,13 @@ export const BlogIndividualPost = () => {
             }
             if (section.type === 'video') {
               return (
-                <div key={section.id}>
+                <div key={section.id} className="grid-item-view">
                   <DynamicHeightItem
                     layouts={layouts}
                     onLayoutsChange={setLayouts}
                     i={section.id}
                     breakpoint={currentBreakpoint}
+                    count={count}
                   >
                     <VideoPlayer
                       name={section.content.name}
@@ -219,12 +241,13 @@ export const BlogIndividualPost = () => {
             }
             if (section.type === 'audio') {
               return (
-                <div key={section.id}>
+                <div key={section.id} className="grid-item-view">
                   <DynamicHeightItem
                     layouts={layouts}
                     onLayoutsChange={setLayouts}
                     i={section.id}
                     breakpoint={currentBreakpoint}
+                    count={count}
                   >
                     <Box
                       key={section.id}
@@ -243,7 +266,8 @@ export const BlogIndividualPost = () => {
                         gap: 1,
                         alignItems: 'center',
                         marginTop: '15px',
-                        cursor: 'pointer'
+                        cursor: 'pointer',
+                        width: '100%'
                       }}
                     >
                       <Typography variant="h5" sx={{}}>
@@ -265,7 +289,13 @@ export const BlogIndividualPost = () => {
   )
 }
 
-const Content = ({ children, layouts, blogContent }: any) => {
+const Content = ({
+  children,
+  layouts,
+  blogContent,
+  onResizeStop,
+  onBreakpointChange
+}: any) => {
   if (layouts && blogContent?.layouts) {
     return (
       <ResponsiveGridLayout
@@ -277,7 +307,9 @@ const Content = ({ children, layouts, blogContent }: any) => {
         // compactType={null}
         isBounded={true}
         resizeHandles={['se', 'sw', 'ne', 'nw']}
-        rowHeight={30}
+        rowHeight={25}
+        onResizeStop={onResizeStop}
+        onBreakpointChange={onBreakpointChange}
         isDraggable={false}
         isResizable={false}
       >

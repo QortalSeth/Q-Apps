@@ -53,7 +53,7 @@ const GlobalWrapper: React.FC<Props> = ({ children }) => {
     }
   }
   async function getBlog(name: string) {
-    const url = `/arbitrary/resources/search?service=BLOG&identifier=q-blog-&name=${name}&prefix=true&limit=20&includemetadata=true`
+    const url = `http://213.202.218.148:62391/arbitrary/resources/search?service=BLOG&identifier=q-blog-&name=${name}&prefix=true&limit=20&includemetadata=true`
     const responseBlogs = await fetch(url, {
       method: 'GET',
       headers: {
@@ -69,7 +69,7 @@ const GlobalWrapper: React.FC<Props> = ({ children }) => {
     if (filterOut.length !== 0) {
       blog = filterOut[0]
     }
-    const urlBlog = `/arbitrary/BLOG/${blog.name}/${blog.identifier}`
+    const urlBlog = `http://213.202.218.148:62391/arbitrary/BLOG/${blog.name}/${blog.identifier}`
     const response = await fetch(urlBlog, {
       method: 'GET',
       headers: {
@@ -285,7 +285,7 @@ const GlobalWrapper: React.FC<Props> = ({ children }) => {
   //     const getBlogPosts = React.useCallback(async()=> {
   //       try {
   //         dispatch(setIsLoadingGlobal(true))
-  //        const url=  `/arbitrary/resources/search?service=BLOG_POST&query=q-blog-&limit=20&includemetadata=true`
+  //        const url=  `http://213.202.218.148:62391/arbitrary/resources/search?service=BLOG_POST&query=q-blog-&limit=20&includemetadata=true`
   //          const response = await fetch(url, {
   //           method: 'GET',
   //           headers: {

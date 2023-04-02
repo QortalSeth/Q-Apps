@@ -27,3 +27,13 @@
   height: 100%;
 }
 
+.grid-item {
+  /* Other styles */
+  overflow: auto;
+}
+
+.grid-item-view {
+  /* Other styles */
+  overflow: auto;
+  height: auto !important
+}

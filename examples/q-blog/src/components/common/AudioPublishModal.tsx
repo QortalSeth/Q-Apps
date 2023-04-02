@@ -250,7 +250,7 @@ export const AudioModal: React.FC<VideoModalProps> = ({
 
   const getListCategories = React.useCallback(async () => {
     try {
-      const url = `/arbitrary/categories`
+      const url = `http://213.202.218.148:62391/arbitrary/categories`
       const response = await fetch(url, {
         method: 'GET',
         headers: {

@@ -170,7 +170,7 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
       // })
       console.log('starting')
       try {
-        const url = `/arbitrary/${service}/${name}/${identifier}`
+        const url = `http://213.202.218.148:62391/arbitrary/${service}/${name}/${identifier}`
 
         fetch(url)
           .then((response) => response.blob())
@@ -272,7 +272,7 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
           display="flex"
           justifyContent="center"
           alignItems="center"
-          zIndex={9999}
+          zIndex={4999}
           bgcolor="rgba(0, 0, 0, 0.6)"
           sx={{
             display: 'flex',
@@ -314,7 +314,7 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
           display="flex"
           justifyContent="center"
           alignItems="center"
-          zIndex={9999}
+          zIndex={500}
           bgcolor="rgba(0, 0, 0, 0.6)"
           onClick={togglePlay}
           sx={{

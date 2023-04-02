@@ -9,6 +9,8 @@ import AddPhotoAlternateIcon from '@mui/icons-material/AddPhotoAlternate';
 import PostAddIcon from '@mui/icons-material/PostAdd';
 import ImageUploader from '../../components/common/ImageUploader';
 import TextFieldsIcon from '@mui/icons-material/TextFields'
+import AudiotrackIcon from '@mui/icons-material/Audiotrack'
+
 import {
   Button,
   Box,
@@ -37,7 +39,15 @@ import { ReusableModal } from '../../components/modals/ReusableModal'
 const ResponsiveGridLayout = WidthProvider(Responsive)
 const initialMinHeight = 2 // Define an initial minimum height for grid items
 const uid = new ShortUniqueId()
-const lg = [
+const md = [
+  { i: 'a', x: 0, y: 0, w: 4, h: initialMinHeight },
+  { i: 'b', x: 6, y: 0, w: 4, h: initialMinHeight }
+]
+const sm = [
+  { i: 'a', x: 0, y: 0, w: 6, h: initialMinHeight },
+  { i: 'b', x: 6, y: 0, w: 6, h: initialMinHeight }
+]
+const xs = [
   { i: 'a', x: 0, y: 0, w: 6, h: initialMinHeight },
   { i: 'b', x: 6, y: 0, w: 6, h: initialMinHeight }
 ]
@@ -81,10 +91,11 @@ export const CreatePost = () => {
     (state: RootState) => state.global
   )
   const [editingSection, setEditingSection] = React.useState<any>(null)
-  const [layouts, setLayouts] = React.useState<any>({ lg })
+  const [layouts, setLayouts] = React.useState<any>({ md, sm, xs })
   const [currentBreakpoint, setCurrentBreakpoint] = React.useState<any>()
   const handleLayoutChange = (layout: any, layoutss: any) => {
     // const redoLayouts = setAutoHeight(layoutss)
+
     setLayouts(layoutss)
   }
   const [newPostContent, setNewPostContent] = React.useState<any[]>([])
@@ -92,6 +103,7 @@ export const CreatePost = () => {
   const [blogImage, setBlogImage] = React.useState<string>('')
   const [isOpenPostModal, setIsOpenPostModal] = React.useState<boolean>(false)
   const [value, setValue] = React.useState(initialValue)
+  const [count, setCount] = React.useState<number>(1)
   const [isOpenAddTextModal, setIsOpenAddTextModal] =
     React.useState<boolean>(false)
   const dispatch = useDispatch()
@@ -105,6 +117,7 @@ export const CreatePost = () => {
 
     setNewPostContent((prev) => [...prev, section])
   }, [])
+
   function objectToBase64(obj: any) {
     // Step 1: Convert the object to a JSON string
     const jsonString = JSON.stringify(obj)
@@ -444,6 +457,12 @@ export const CreatePost = () => {
     setIsOpenAddTextModal(false)
   }, [])
 
+  const onResizeStop = (layout: any, layoutItem: any) => {
+    console.log({ layoutItem })
+    // Update the layout state with the new position and size of the component
+    setCount((prev) => prev + 1)
+  }
+
   return (
     <>
       <CustomAppBar position="sticky">
@@ -513,20 +532,22 @@ export const CreatePost = () => {
             // compactType={null}
             isBounded={true}
             resizeHandles={['se', 'sw', 'ne', 'nw']}
-            rowHeight={30}
+            rowHeight={25}
             onBreakpointChange={onBreakpointChange}
+            onResizeStop={onResizeStop}
             // isDraggable={false}
             // isResizable={false}
           >
             {newPostContent.map((section: any) => {
               if (section.type === 'editor') {
                 return (
-                  <div key={section.id}>
+                  <div key={section.id} className="grid-item">
                     <DynamicHeightItem
                       layouts={layouts}
                       onLayoutsChange={setLayouts}
                       i={section.id}
                       breakpoint={currentBreakpoint}
+                      count={count}
                     >
                       {editingSection && editingSection.id === section.id ? (
                         <BlogEditor
@@ -540,7 +561,8 @@ export const CreatePost = () => {
                         <Box
                           sx={{
                             position: 'relative',
-                            width: '100%'
+                            width: '100%',
+                            height: 'auto'
                           }}
                         >
                           <ReadOnlySlate
@@ -598,12 +620,14 @@ export const CreatePost = () => {
               }
               if (section.type === 'image') {
                 return (
-                  <div key={section.id}>
+                  <div key={section.id} className="grid-item">
                     <DynamicHeightItem
                       layouts={layouts}
                       onLayoutsChange={setLayouts}
                       i={section.id}
                       breakpoint={currentBreakpoint}
+                      count={count}
+                      type="image"
                     >
                       {editingSection && editingSection.id === section.id ? (
                         <ImageUploader
@@ -623,9 +647,6 @@ export const CreatePost = () => {
                           <img
                             src={section.content.image}
                             className="post-image"
-                            style={{
-                              marginTop: '20px'
-                            }}
                           />
                           <Box
                             sx={{
@@ -675,12 +696,13 @@ export const CreatePost = () => {
 
               if (section.type === 'video') {
                 return (
-                  <div key={section.id}>
+                  <div key={section.id} className="grid-item">
                     <DynamicHeightItem
                       layouts={layouts}
                       onLayoutsChange={setLayouts}
                       i={section.id}
                       breakpoint={currentBreakpoint}
+                      count={count}
                     >
                       {editingSection && editingSection.id === section.id ? (
                         <VideoPanel
@@ -756,6 +778,37 @@ export const CreatePost = () => {
                       ) : (
                         <></>
                       )}
+                    </DynamicHeightItem>
+                  </div>
+                )
+              }
+              if (section.type === 'audio') {
+                return (
+                  <div key={section.id} className="grid-item">
+                    <DynamicHeightItem
+                      layouts={layouts}
+                      onLayoutsChange={setLayouts}
+                      i={section.id}
+                      breakpoint={currentBreakpoint}
+                      count={count}
+                    >
+                      <Box
+                        key={section.id}
+                        sx={{
+                          display: 'flex',
+                          padding: '5px',
+                          gap: 1,
+                          alignItems: 'center',
+                          marginTop: '15px',
+                          cursor: 'pointer',
+                          width: '100%'
+                        }}
+                      >
+                        <Typography variant="h5" sx={{}}>
+                          {section.content.title}
+                        </Typography>
+                        <AudiotrackIcon />
+                      </Box>
                     </DynamicHeightItem>
                   </div>
                 )
