@@ -146,12 +146,12 @@ export const BlogIndividualPost = () => {
       window.removeEventListener('resize', handleResize)
     }
   }, [])
-  if (!blogContent) return null
 
   const handleCount = React.useCallback(() => {
     // Update the layout state with the new position and size of the component
     setCount((prev) => prev + 1)
   }, [])
+  if (!blogContent) return null
 
   return (
     <Box
@@ -343,7 +343,7 @@ const Content = ({
         measureBeforeMount={false}
         onLayoutChange={handleLayoutChange}
         autoSize={true}
-        // compactType={null}
+        compactType={null}
         isBounded={true}
         resizeHandles={['se', 'sw', 'ne', 'nw']}
         rowHeight={25}
