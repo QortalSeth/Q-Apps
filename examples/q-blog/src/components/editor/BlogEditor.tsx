@@ -32,6 +32,7 @@ interface MyComponentProps {
   section?: any
   value: any
   setValue: (value: any) => void
+  editorKey?: number
 }
 
 const ModalBox = styled(Box)(({ theme }) => ({
@@ -55,11 +56,11 @@ const BlogEditor: React.FC<MyComponentProps> = ({
   defaultValue,
   section,
   value,
-  setValue
+  setValue,
+  editorKey
 }) => {
   const editor = useMemo(() => withReact(createEditor()), [])
   // const [value, setValue] = useState(defaultValue || initialValue);
-
   const toggleMark = (editor: Editor, format: FormatMark) => {
     console.log(Editor.marks(editor))
     // Update the type here
@@ -80,6 +81,9 @@ const BlogEditor: React.FC<MyComponentProps> = ({
     ],
     [value]
   )
+
+  console.log({ newValue })
+
   const ToolbarButton: React.FC<{
     format: FormatMark | string
     label: string
@@ -293,33 +297,32 @@ const BlogEditor: React.FC<MyComponentProps> = ({
   }
 
   const handlePaste = (event: React.ClipboardEvent) => {
-    event.preventDefault();
-    const text = event.clipboardData.getData('text/plain');
-    const isCodeBlock = isBlockActive(editor, 'code-block');
-  
+    event.preventDefault()
+    const text = event.clipboardData.getData('text/plain')
+    const isCodeBlock = isBlockActive(editor, 'code-block')
+
     if (isCodeBlock) {
-      const lines = text.split('\n');
+      const lines = text.split('\n')
       const fragment: Descendant[] = [
         {
           type: 'code-block',
           children: lines.map((line) => ({
             type: 'code-line',
-            children: [{ text: line }],
-          })),
-        },
-      ];
-  
-      Transforms.insertFragment(editor, fragment);
+            children: [{ text: line }]
+          }))
+        }
+      ]
+
+      Transforms.insertFragment(editor, fragment)
     } else {
       const fragment = text.split('\n').map((line) => ({
         type: 'paragraph',
-        children: [{ text: line }],
-      }));
-  
-      Transforms.insertFragment(editor, fragment);
+        children: [{ text: line }]
+      }))
+
+      Transforms.insertFragment(editor, fragment)
     }
-  };
-  
+  }
 
   return (
     <Box
@@ -335,7 +338,7 @@ const BlogEditor: React.FC<MyComponentProps> = ({
         editor={editor}
         value={newValue}
         onChange={(newValue) => handleChange(newValue)}
-     
+        key={editorKey || 1}
       >
         <div className="toolbar">
           <ToolbarButton format="bold" label="B" editor={editor} />

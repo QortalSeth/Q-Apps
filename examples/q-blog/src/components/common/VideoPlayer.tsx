@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react'
+import React, { Dispatch, SetStateAction, useRef, useState } from 'react'
 import ReactDOM from 'react-dom'
 import { Box, IconButton, Slider } from '@mui/material'
 import { CircularProgress, Typography } from '@mui/material'
@@ -51,6 +51,7 @@ interface VideoPlayerProps {
   service?: string
   autoplay?: boolean
   from?: string | null
+  setCount?: () => void
 }
 
 export const VideoPlayer: React.FC<VideoPlayerProps> = ({
@@ -59,7 +60,8 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
   identifier,
   service,
   autoplay = true,
-  from = null
+  from = null,
+  setCount
 }) => {
   const workerRef = useRef<any>(null)
   const videoRef = useRef<HTMLVideoElement | null>(null)
@@ -158,6 +160,9 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
   }
 
   const handleCanPlay = () => {
+    if (setCount) {
+      setCount()
+    }
     setIsLoading(false)
   }
 

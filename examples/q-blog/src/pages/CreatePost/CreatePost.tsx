@@ -55,9 +55,7 @@ const xs = [
 const initialValue: Descendant[] = [
   {
     type: 'paragraph',
-    children: [
-      { text: "Start writing your blog post... Don't forget to add a title :)" }
-    ]
+    children: [{ text: '' }]
   }
 ]
 
@@ -104,6 +102,7 @@ export const CreatePost = () => {
   const [blogImage, setBlogImage] = React.useState<string>('')
   const [isOpenPostModal, setIsOpenPostModal] = React.useState<boolean>(false)
   const [value, setValue] = React.useState(initialValue)
+  const [editorKey, setEditorKey] = React.useState(1)
   const [count, setCount] = React.useState<number>(1)
   const [isOpenAddTextModal, setIsOpenAddTextModal] =
     React.useState<boolean>(false)
@@ -117,6 +116,7 @@ export const CreatePost = () => {
     }
 
     setNewPostContent((prev) => [...prev, section])
+    setEditorKey((prev) => prev + 1)
   }, [])
 
   function objectToBase64(obj: any) {
@@ -351,6 +351,7 @@ export const CreatePost = () => {
   }
 
   const addSection = () => {
+    setValue(initialValue)
     addPostSection(value)
   }
 
@@ -474,6 +475,9 @@ export const CreatePost = () => {
       window.removeEventListener('resize', handleResize)
     }
   }, [])
+
+  const gridItemCount =
+    currentBreakpoint === 'md' ? 4 : currentBreakpoint === 'sm' ? 3 : 1
   return (
     <>
       <CustomAppBar position="sticky">
@@ -530,9 +534,20 @@ export const CreatePost = () => {
           sx={{
             maxWidth: '1400px',
             // margin: '15px',
-            width: '95%'
+            width: '95%',
+            position: 'relative'
           }}
         >
+          <div
+            className="test-grid"
+            style={{
+              gridTemplateColumns: `repeat(${gridItemCount}, 1fr)`
+            }}
+          >
+            {Array.from({ length: gridItemCount }, (_, i) => (
+              <div key={`grid-item-${i}`} className="test-grid-item"></div>
+            ))}
+          </div>
           <ResponsiveGridLayout
             layouts={layouts}
             breakpoints={{ md: 996, sm: 768, xs: 480 }}
@@ -540,8 +555,8 @@ export const CreatePost = () => {
             onLayoutChange={handleLayoutChange}
             measureBeforeMount={false}
             autoSize={true}
-            // compactType={null}
-            isBounded={true}
+            compactType={null}
+            isBounded={false}
             resizeHandles={['se', 'sw', 'ne', 'nw']}
             rowHeight={25}
             onBreakpointChange={onBreakpointChange}
@@ -881,6 +896,7 @@ export const CreatePost = () => {
               addPostSection={addPostSection}
               value={value}
               setValue={setValue}
+              editorKey={editorKey}
             />
           </Box>
           <Button onClick={addSection}>Add Text</Button>

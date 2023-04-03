@@ -148,6 +148,11 @@ export const BlogIndividualPost = () => {
   }, [])
   if (!blogContent) return null
 
+  const handleCount = React.useCallback(() => {
+    // Update the layout state with the new position and size of the component
+    setCount((prev) => prev + 1)
+  }, [])
+
   return (
     <Box
       sx={{
@@ -248,6 +253,7 @@ export const BlogIndividualPost = () => {
                       name={section.content.name}
                       service={section.content.service}
                       identifier={section.content.identifier}
+                      setCount={handleCount}
                     />
                   </DynamicHeightItem>
                 </div>
