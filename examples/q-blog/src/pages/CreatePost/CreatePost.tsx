@@ -462,7 +462,17 @@ export const CreatePost = () => {
     // Update the layout state with the new position and size of the component
     setCount((prev) => prev + 1)
   }
+  const handleResize = () => {
+    setCount((prev) => prev + 1)
+  }
 
+  React.useEffect(() => {
+    window.addEventListener('resize', handleResize)
+
+    return () => {
+      window.removeEventListener('resize', handleResize)
+    }
+  }, [])
   return (
     <>
       <CustomAppBar position="sticky">
@@ -535,6 +545,7 @@ export const CreatePost = () => {
             rowHeight={25}
             onBreakpointChange={onBreakpointChange}
             onResizeStop={onResizeStop}
+            margin={[0, 0]}
             // isDraggable={false}
             // isResizable={false}
           >
@@ -544,7 +555,7 @@ export const CreatePost = () => {
                   <div key={section.id} className="grid-item">
                     <DynamicHeightItem
                       layouts={layouts}
-                      onLayoutsChange={setLayouts}
+                      setLayouts={setLayouts}
                       i={section.id}
                       breakpoint={currentBreakpoint}
                       count={count}
@@ -623,7 +634,7 @@ export const CreatePost = () => {
                   <div key={section.id} className="grid-item">
                     <DynamicHeightItem
                       layouts={layouts}
-                      onLayoutsChange={setLayouts}
+                      setLayouts={setLayouts}
                       i={section.id}
                       breakpoint={currentBreakpoint}
                       count={count}
@@ -699,7 +710,7 @@ export const CreatePost = () => {
                   <div key={section.id} className="grid-item">
                     <DynamicHeightItem
                       layouts={layouts}
-                      onLayoutsChange={setLayouts}
+                      setLayouts={setLayouts}
                       i={section.id}
                       breakpoint={currentBreakpoint}
                       count={count}
@@ -787,7 +798,7 @@ export const CreatePost = () => {
                   <div key={section.id} className="grid-item">
                     <DynamicHeightItem
                       layouts={layouts}
-                      onLayoutsChange={setLayouts}
+                      setLayouts={setLayouts}
                       i={section.id}
                       breakpoint={currentBreakpoint}
                       count={count}

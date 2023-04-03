@@ -63,7 +63,7 @@ export const BlogIndividualPost = () => {
   const handleLayoutChange = (layout: any, layoutss: any) => {
     // const redoLayouts = setAutoHeight(layoutss)
     setLayouts(layoutss)
-    saveLayoutsToLocalStorage(layoutss)
+    // saveLayoutsToLocalStorage(layoutss)
   }
   const [blogContent, setBlogContent] = React.useState<BlogContent | null>(null)
 
@@ -134,6 +134,18 @@ export const BlogIndividualPost = () => {
     })
   }, [blogContent])
   console.log({ blogContent, audios })
+
+  const handleResize = () => {
+    setCount((prev) => prev + 1)
+  }
+
+  React.useEffect(() => {
+    window.addEventListener('resize', handleResize)
+
+    return () => {
+      window.removeEventListener('resize', handleResize)
+    }
+  }, [])
   if (!blogContent) return null
 
   return (
@@ -188,6 +200,7 @@ export const BlogIndividualPost = () => {
           blogContent={blogContent}
           onResizeStop={onResizeStop}
           onBreakpointChange={onBreakpointChange}
+          handleLayoutChange={handleLayoutChange}
         >
           {blogContent?.postContent?.map((section: any) => {
             if (section.type === 'editor') {
@@ -195,7 +208,7 @@ export const BlogIndividualPost = () => {
                 <div key={section.id} className="grid-item-view">
                   <DynamicHeightItem
                     layouts={layouts}
-                    onLayoutsChange={setLayouts}
+                    setLayouts={setLayouts}
                     i={section.id}
                     breakpoint={currentBreakpoint}
                     count={count}
@@ -210,7 +223,7 @@ export const BlogIndividualPost = () => {
                 <div key={section.id} className="grid-item-view">
                   <DynamicHeightItem
                     layouts={layouts}
-                    onLayoutsChange={setLayouts}
+                    setLayouts={setLayouts}
                     i={section.id}
                     breakpoint={currentBreakpoint}
                     count={count}
@@ -225,7 +238,7 @@ export const BlogIndividualPost = () => {
                 <div key={section.id} className="grid-item-view">
                   <DynamicHeightItem
                     layouts={layouts}
-                    onLayoutsChange={setLayouts}
+                    setLayouts={setLayouts}
                     i={section.id}
                     breakpoint={currentBreakpoint}
                     count={count}
@@ -244,7 +257,7 @@ export const BlogIndividualPost = () => {
                 <div key={section.id} className="grid-item-view">
                   <DynamicHeightItem
                     layouts={layouts}
-                    onLayoutsChange={setLayouts}
+                    setLayouts={setLayouts}
                     i={section.id}
                     breakpoint={currentBreakpoint}
                     count={count}
@@ -294,7 +307,8 @@ const Content = ({
   layouts,
   blogContent,
   onResizeStop,
-  onBreakpointChange
+  onBreakpointChange,
+  handleLayoutChange
 }: any) => {
   if (layouts && blogContent?.layouts) {
     return (
@@ -303,6 +317,7 @@ const Content = ({
         breakpoints={{ md: 996, sm: 768, xs: 480 }}
         cols={{ md: 4, sm: 3, xs: 1 }}
         measureBeforeMount={false}
+        onLayoutChange={handleLayoutChange}
         autoSize={true}
         // compactType={null}
         isBounded={true}
@@ -312,6 +327,7 @@ const Content = ({
         onBreakpointChange={onBreakpointChange}
         isDraggable={false}
         isResizable={false}
+        margin={[0, 0]}
       >
         {children}
       </ResponsiveGridLayout>
