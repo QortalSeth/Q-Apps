@@ -36,6 +36,7 @@ import { Responsive, WidthProvider } from 'react-grid-layout'
 import '/node_modules/react-grid-layout/css/styles.css'
 import '/node_modules/react-resizable/css/styles.css'
 import { ReusableModal } from '../../components/modals/ReusableModal'
+import { VideoPlayer } from '../../components/common/VideoPlayer'
 const ResponsiveGridLayout = WidthProvider(Responsive)
 const initialMinHeight = 2 // Define an initial minimum height for grid items
 const uid = new ShortUniqueId()
@@ -735,18 +736,22 @@ export const CreatePost = () => {
                       ) : (
                         <Box
                           sx={{
-                            position: 'relative'
+                            position: 'relative',
+                            width: '100%',
+                            height: '100%'
                           }}
                         >
-                          <VideoContent
-                            title={section.content?.title}
-                            description={section.content?.description}
+                          <VideoPlayer
+                            name={section.content.name}
+                            service={section.content.service}
+                            identifier={section.content.identifier}
+                            from="create"
                           />
                           <Box
                             sx={{
                               position: 'absolute',
                               right: '5px',
-                              zIndex: 5,
+                              zIndex: 501,
                               top: '50%',
                               transform: 'translateY(-50%)',
                               display: 'flex',
@@ -809,16 +814,33 @@ export const CreatePost = () => {
                           display: 'flex',
                           padding: '5px',
                           gap: 1,
-                          alignItems: 'center',
                           marginTop: '15px',
                           cursor: 'pointer',
-                          width: '100%'
+                          width: '100%',
+                          margin: 0,
+                          height: '100%',
+                          flexDirection: 'column',
+                          justifyContent: 'center'
                         }}
                       >
-                        <Typography variant="h5" sx={{}}>
-                          {section.content.title}
-                        </Typography>
-                        <AudiotrackIcon />
+                        <Box
+                          sx={{
+                            display: 'flex',
+                            alignItems: 'center'
+                          }}
+                        >
+                          <Typography variant="h5" sx={{}}>
+                            {section.content?.title}
+                          </Typography>
+
+                          <AudiotrackIcon />
+                        </Box>
+
+                        <Box>
+                          <Typography variant="subtitle1" sx={{}}>
+                            {section.content?.description}
+                          </Typography>
+                        </Box>
                       </Box>
                     </DynamicHeightItem>
                   </div>

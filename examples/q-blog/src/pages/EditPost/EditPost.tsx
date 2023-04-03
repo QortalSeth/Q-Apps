@@ -206,7 +206,7 @@ export const EditPost = () => {
   const getBlogPost = React.useCallback(async () => {
     try {
       dispatch(setIsLoadingGlobal(true))
-      const url = `http://213.202.218.148:62391/arbitrary/BLOG_POST/${username}/${postId}`
+      const url = `/arbitrary/BLOG_POST/${username}/${postId}`
       const response = await fetch(url, {
         method: 'GET',
         headers: {

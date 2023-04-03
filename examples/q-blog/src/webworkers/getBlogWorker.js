@@ -28,7 +28,7 @@ self.onmessage = async (event) => {
     if(!user || !postId) return obj
 
     try {
-      const url = `http://213.202.218.148:62391/arbitrary/BLOG_POST / ${user}/${postId}`
+      const url = `/arbitrary/BLOG_POST / ${user}/${postId}`
        const response = await fetch(url, {
         method: 'GET',
         headers: {

@@ -70,7 +70,7 @@ export const BlogIndividualPost = () => {
   const getBlogPost = React.useCallback(async () => {
     try {
       dispatch(setIsLoadingGlobal(true))
-      const url = `http://213.202.218.148:62391/arbitrary/BLOG_POST/${user}/${postId}`
+      const url = `/arbitrary/BLOG_POST/${user}/${postId}`
       const response = await fetch(url, {
         method: 'GET',
         headers: {
@@ -160,7 +160,8 @@ export const BlogIndividualPost = () => {
         sx={{
           maxWidth: '1400px',
           // margin: '15px',
-          width: '95%'
+          width: '95%',
+          paddingBottom: '50px'
         }}
       >
         {user === userState?.name && (
@@ -263,7 +264,6 @@ export const BlogIndividualPost = () => {
                     count={count}
                   >
                     <Box
-                      key={section.id}
                       onClick={() => {
                         const findIndex = audios.findIndex(
                           (item) =>
@@ -273,20 +273,38 @@ export const BlogIndividualPost = () => {
                           setCurrAudio(findIndex)
                         }
                       }}
+                      key={section.id}
                       sx={{
                         display: 'flex',
                         padding: '5px',
                         gap: 1,
-                        alignItems: 'center',
                         marginTop: '15px',
                         cursor: 'pointer',
-                        width: '100%'
+                        width: '100%',
+                        margin: 0,
+                        height: '100%',
+                        flexDirection: 'column',
+                        justifyContent: 'center'
                       }}
                     >
-                      <Typography variant="h5" sx={{}}>
-                        {section.content.title}
-                      </Typography>
-                      <AudiotrackIcon />
+                      <Box
+                        sx={{
+                          display: 'flex',
+                          alignItems: 'center'
+                        }}
+                      >
+                        <Typography variant="h5" sx={{}}>
+                          {section.content?.title}
+                        </Typography>
+
+                        <AudiotrackIcon />
+                      </Box>
+
+                      <Box>
+                        <Typography variant="subtitle1" sx={{}}>
+                          {section.content?.description}
+                        </Typography>
+                      </Box>
                     </Box>
                   </DynamicHeightItem>
                 </div>

@@ -21,7 +21,8 @@ const VideoContainer = styled(Box)`
   justify-content: center;
   width: 100%;
   height: 100%;
-  margin: 20px 0px;
+  margin: 0px;
+  padding: 0px;
 `
 
 const VideoElement = styled('video')`
@@ -49,6 +50,7 @@ interface VideoPlayerProps {
   identifier?: string
   service?: string
   autoplay?: boolean
+  from?: string | null
 }
 
 export const VideoPlayer: React.FC<VideoPlayerProps> = ({
@@ -56,7 +58,8 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
   name,
   identifier,
   service,
-  autoplay = true
+  autoplay = true,
+  from = null
 }) => {
   const workerRef = useRef<any>(null)
   const videoRef = useRef<HTMLVideoElement | null>(null)
@@ -170,7 +173,7 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
       // })
       console.log('starting')
       try {
-        const url = `http://213.202.218.148:62391/arbitrary/${service}/${name}/${identifier}`
+        const url = `/arbitrary/${service}/${name}/${identifier}`
 
         fetch(url)
           .then((response) => response.blob())
@@ -261,7 +264,11 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
   console.log({ src })
 
   return (
-    <VideoContainer>
+    <VideoContainer
+      style={{
+        padding: from === 'create' ? '8px' : 0
+      }}
+    >
       {isLoading && (
         <Box
           position="absolute"
@@ -316,7 +323,11 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
           alignItems="center"
           zIndex={500}
           bgcolor="rgba(0, 0, 0, 0.6)"
-          onClick={togglePlay}
+          onClick={() => {
+            if (from === 'create') return
+
+            togglePlay()
+          }}
           sx={{
             cursor: 'pointer'
           }}
@@ -342,7 +353,11 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
         onCanPlay={handleCanPlay}
         preload="metadata"
       />
-      <ControlsContainer>
+      <ControlsContainer
+        style={{
+          bottom: from === 'create' ? '15px' : 0
+        }}
+      >
         <IconButton
           sx={{
             color: 'rgba(255, 255, 255, 0.7)'

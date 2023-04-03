@@ -57,7 +57,7 @@ export const useFetchPosts = () => {
       const offset = posts.length
       console.log({ offset })
       dispatch(setIsLoadingGlobal(true))
-      const url = `http://213.202.218.148:62391/arbitrary/resources/search?service=BLOG_POST&query=q-blog-&limit=20&includemetadata=true&offset=${offset}`
+      const url = `/arbitrary/resources/search?service=BLOG_POST&query=q-blog-&limit=20&includemetadata=true&offset=${offset}`
       const response = await fetch(url, {
         method: 'GET',
         headers: {

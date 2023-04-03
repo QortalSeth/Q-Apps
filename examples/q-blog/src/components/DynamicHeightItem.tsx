@@ -87,7 +87,7 @@ const DynamicHeightItem: React.FC<DynamicHeightItemProps> = ({
   console.log({ height, breakpoint, layouts })
 
   return (
-    <div ref={ref} style={{ width: '100%' }}>
+    <div ref={ref} style={{ width: '100%', height: 'auto' }}>
       <ReactResizeDetector handleHeight onResize={onResize}>
         {children}
       </ReactResizeDetector>

@@ -71,15 +71,24 @@ export const VideoPanel: React.FC<VideoPanelProps> = ({
   const fetchVideos = React.useCallback(async (): Promise<Video[]> => {
     if (!user?.name) return []
     // Replace this URL with the actual API endpoint
-    let res = await qortalRequest({
-      action: 'LIST_QDN_RESOURCES',
-      service: 'VIDEO',
-      name: user.name,
-      includeMetadata: true,
-      limit: 100,
-      offset: 0,
-      reverse: true
-    })
+    let res
+    try {
+      res = await qortalRequest({
+        action: 'LIST_QDN_RESOURCES',
+        service: 'VIDEO',
+        name: user.name,
+        includeMetadata: true,
+        limit: 100,
+        offset: 0,
+        reverse: true
+      })
+    } catch (error) {
+      const res2 = await fetch(
+        'http://213.202.218.148:62391/arbitrary/resources?&service=VIDEO&name=Phil&includemetadata=true&limit=100&offset=0&reverse=true'
+      )
+      res = await res2.json()
+    }
+
     return res
   }, [user])
   useEffect(() => {
