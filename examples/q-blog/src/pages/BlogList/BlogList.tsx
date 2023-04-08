@@ -7,6 +7,7 @@ import { List, ListItem } from '@mui/material'
 import BlogPostPreview from './PostPreview'
 import { useFetchPosts } from '../../hooks/useFetchPosts'
 import LazyLoad from '../../components/common/LazyLoad'
+import { removePrefix } from '../../utils/blogIdformats'
 
 export const BlogList = () => {
   const { user } = useSelector((state: RootState) => state.auth)
@@ -53,7 +54,8 @@ export const BlogList = () => {
                   const str = blogPost.id
                   const arr = str.split('-post')
                   const str1 = arr[0]
-                  navigate(`/${blogPost.user}/${str1}/${blogPost.id}`)
+                  const blogId = removePrefix(str1)
+                  navigate(`/${blogPost.user}/${blogId}/${blogPost.id}`)
                 }}
                 description={blogPost?.description}
                 title={blogPost?.title}

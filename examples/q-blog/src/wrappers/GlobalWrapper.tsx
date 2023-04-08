@@ -52,6 +52,20 @@ const GlobalWrapper: React.FC<Props> = ({ children }) => {
       return ''
     }
   }
+
+  async function verifyIfBlogIdExtists(username: string, identifier: string) {
+    let doesExist = false
+    const url = `/arbitrary/metadata/BLOG/${username}/${identifier}}`
+    const responseBlogs = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    })
+    const responseDataBlogs = await responseBlogs.json()
+
+    return doesExist
+  }
   async function getBlog(name: string) {
     const url = `/arbitrary/resources/search?service=BLOG&identifier=q-blog-&name=${name}&prefix=true&limit=20&includemetadata=true`
     const responseBlogs = await fetch(url, {
@@ -137,7 +151,8 @@ const GlobalWrapper: React.FC<Props> = ({ children }) => {
       title: string,
       description: string,
       category: string,
-      tags: string[]
+      tags: string[],
+      blogIdentifier: string
     ) => {
       if (!user || !user.name)
         throw new Error('Cannot publish: You do not have a Qortal name')
@@ -145,7 +160,12 @@ const GlobalWrapper: React.FC<Props> = ({ children }) => {
       if (!description) throw new Error('A description is required')
       const name = user.name
       const id = uid()
-      const identifier = `q-blog-${id}`
+      const identifier = `q-blog-${blogIdentifier}`
+      const doesExitst = await verifyIfBlogIdExtists(name, identifier)
+      if (doesExitst) {
+        throw new Error('The blog identifier already exists')
+      }
+
       const formattedTags: { [key: string]: string } = {}
       tags.forEach((tag: string, i: number) => {
         console.log({ tag })
@@ -267,62 +287,7 @@ const GlobalWrapper: React.FC<Props> = ({ children }) => {
   const onCloseEditBlogModal = React.useCallback(() => {
     dispatch(toggleEditBlogModal(false))
   }, [])
-  // const getBlogPost = async (user: string, postId: string, content: any)=> {
-  //   const res = await  fetchAndEvaluatePosts({
-  //       user, postId, content
-  //     })
 
-  //   if(res.remove && res.id)
-  //   {
-  //     // dispatch(removePost(res.id))
-  //     return
-  //   }
-  //   dispatch(addToHashMap(res))
-  //   // dispatch(updatePost(res))
-
-  //    }
-
-  //     const getBlogPosts = React.useCallback(async()=> {
-  //       try {
-  //         dispatch(setIsLoadingGlobal(true))
-  //        const url=  `/arbitrary/resources/search?service=BLOG_POST&query=q-blog-&limit=20&includemetadata=true`
-  //          const response = await fetch(url, {
-  //           method: 'GET',
-  //           headers: {
-  //             'Content-Type': 'application/json'
-  //           }
-  //         })
-  //         const responseData =  await response.json()
-  //         const structureData = responseData.map((post:any ) : BlogPost=>  {
-  //           return {
-  //             title: post?.metadata?.title,
-  //             category: post?.metadata?.category,
-  // categoryName: post?.metadata?.categoryName,
-  // tags: post?.metadata?.tags || [],
-  //   description: post?.metadata?.description,
-  //   createdAt: '',
-  //   user: post.name,
-  //   postImage: '',
-  //   id: post.identifier
-  //           }
-  //         })
-  //         dispatch(addPosts(structureData))
-
-  // for (const content of responseData) {
-  //   if (content.name && content.identifier) {
-  //      getBlogPost(content.name, content.identifier, content);
-  //   }
-  // }
-  //       } catch (error) {
-
-  //       }
-  //       finally {
-  //         dispatch(setIsLoadingGlobal(false))
-  //       }
-  //     }, [])
-  // React.useEffect(()=> {
-  //   getBlogPosts()
-  // }, [])
   return (
     <>
       {isLoadingGlobal && <PageLoader />}

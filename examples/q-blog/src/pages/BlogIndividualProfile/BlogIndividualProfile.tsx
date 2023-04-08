@@ -13,12 +13,17 @@ import {
 import { BlogPost } from '../../state/features/blogSlice'
 import { useFetchPosts } from '../../hooks/useFetchPosts'
 import LazyLoad from '../../components/common/LazyLoad'
+import { addPrefix, removePrefix } from '../../utils/blogIdformats'
 export const BlogIndividualProfile = () => {
   const navigate = useNavigate()
   const { user } = useSelector((state: RootState) => state.auth)
   const { currentBlog } = useSelector((state: RootState) => state.global)
 
-  const { blog, user: username } = useParams()
+  const { blog: blogShortVersion, user: username } = useParams()
+  const blog = React.useMemo(() => {
+    if (!blogShortVersion) return ''
+    return addPrefix(blogShortVersion)
+  }, [blogShortVersion])
   const dispatch = useDispatch()
   const [userBlog, setUserBlog] = React.useState<any>(null)
   const { checkAndUpdatePost, getBlogPost, hashMapPosts } = useFetchPosts()
@@ -172,7 +177,10 @@ export const BlogIndividualProfile = () => {
                   const str = blogPost.id
                   const arr = str.split('-post')
                   const str1 = arr[0]
-                  navigate(`/${blogPost.user}/${str1}/${blogPost.id}`)
+
+                  const blogId = removePrefix(str1)
+
+                  navigate(`/${blogPost.user}/${blogId}/${blogPost.id}`)
                 }}
                 description={blogPost?.description}
                 title={blogPost?.title}

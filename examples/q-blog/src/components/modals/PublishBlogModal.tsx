@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { ChangeEvent, useState } from 'react'
 import {
   Box,
   Button,
@@ -30,7 +30,8 @@ interface MyModalProps {
     title: string,
     description: string,
     category: string,
-    tags: string[]
+    tags: string[],
+    blogIdentifier: string
   ) => Promise<void>
 }
 
@@ -53,11 +54,17 @@ const MyModal: React.FC<MyModalProps> = ({ open, onClose, onPublish }) => {
   )
   const [inputValue, setInputValue] = useState<string>('')
   const [chips, setChips] = useState<string[]>([])
-
+  const [blogIdentifier, setBlogIdentifier] = useState('')
   const [options, setOptions] = useState<SelectOption[]>([])
   const handlePublish = async (): Promise<void> => {
     try {
-      await onPublish(title, description, selectedOption?.id || '', chips)
+      await onPublish(
+        title,
+        description,
+        selectedOption?.id || '',
+        chips,
+        blogIdentifier
+      )
       handleClose()
     } catch (error: any) {
       setErrorMessage(error.message)
@@ -124,6 +131,18 @@ const MyModal: React.FC<MyModalProps> = ({ open, onClose, onPublish }) => {
     getListCategories()
   }, [getListCategories])
 
+  const handleInputChangeId = (event: ChangeEvent<HTMLInputElement>) => {
+    // Replace any non-alphanumeric and non-space characters with an empty string
+    // Replace multiple spaces with a single dash and remove any dashes that come one after another
+    const newValue = event.target.value
+      .replace(/[^a-zA-Z0-9\s-]/g, '')
+      .replace(/\s+/g, '-')
+      .replace(/-+/g, '-')
+      .trim()
+    setBlogIdentifier(newValue)
+  }
+  const name = 'Phil'
+
   return (
     <Modal
       open={open}
@@ -143,12 +162,32 @@ const MyModal: React.FC<MyModalProps> = ({ open, onClose, onPublish }) => {
           p: 4,
           display: 'flex',
           flexDirection: 'column',
-          gap: 2
+          gap: 2,
+          overflowY: 'auto',
+          maxHeight: '95vh'
         }}
       >
         <Typography id="modal-title" variant="h6" component="h2">
           Create blog
         </Typography>
+        <TextField
+          id="modal-title-input"
+          label="Url Preview"
+          value={`/${name}/${blogIdentifier}`}
+          // onChange={(e) => setTitle(e.target.value)}
+          fullWidth
+          disabled={true}
+        />
+
+        <TextField
+          id="modal-blogId-input"
+          label="Blog Id"
+          value={blogIdentifier}
+          onChange={handleInputChangeId}
+          fullWidth
+          inputProps={{ maxLength: 25 }}
+        />
+
         <TextField
           id="modal-title-input"
           label="Title"
@@ -182,7 +221,6 @@ const MyModal: React.FC<MyModalProps> = ({ open, onClose, onPublish }) => {
             </Select>
           </FormControl>
         )}
-
         <FormControl fullWidth sx={{ marginBottom: 2 }}>
           <Box sx={{ display: 'flex', alignItems: 'flex-end' }}>
             <TextField
@@ -226,4 +264,4 @@ const MyModal: React.FC<MyModalProps> = ({ open, onClose, onPublish }) => {
   )
 }
 
-export default MyModal;
+export default MyModal
