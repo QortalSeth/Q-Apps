@@ -179,8 +179,8 @@ export const BlogIndividualProfile = () => {
                   const str1 = arr[0]
 
                   const blogId = removePrefix(str1)
-
-                  navigate(`/${blogPost.user}/${blogId}/${blogPost.id}`)
+                  const str2 = arr[1]
+                  navigate(`/${blogPost.user}/${blogId}/${str2}`)
                 }}
                 description={blogPost?.description}
                 title={blogPost?.title}

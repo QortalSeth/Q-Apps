@@ -33,6 +33,7 @@ interface MyModalProps {
     tags: string[],
     blogIdentifier: string
   ) => Promise<void>
+  username: string
 }
 
 const ChipContainer = styled(Box)({
@@ -43,7 +44,12 @@ const ChipContainer = styled(Box)({
   }
 })
 
-const MyModal: React.FC<MyModalProps> = ({ open, onClose, onPublish }) => {
+const MyModal: React.FC<MyModalProps> = ({
+  open,
+  onClose,
+  onPublish,
+  username
+}) => {
   const dispatch = useDispatch()
 
   const [title, setTitle] = useState<string>('')
@@ -134,14 +140,22 @@ const MyModal: React.FC<MyModalProps> = ({ open, onClose, onPublish }) => {
   const handleInputChangeId = (event: ChangeEvent<HTMLInputElement>) => {
     // Replace any non-alphanumeric and non-space characters with an empty string
     // Replace multiple spaces with a single dash and remove any dashes that come one after another
-    const newValue = event.target.value
+    let newValue = event.target.value
       .replace(/[^a-zA-Z0-9\s-]/g, '')
       .replace(/\s+/g, '-')
       .replace(/-+/g, '-')
       .trim()
+
+    if (newValue.toLowerCase().includes('post')) {
+      // Replace the 'post' string with an empty string
+      newValue = newValue.replace(/post/gi, '')
+    }
+    if (newValue.toLowerCase().includes('q-blog')) {
+      // Replace the 'q-blog' string with an empty string
+      newValue = newValue.replace(/q-blog/gi, '')
+    }
     setBlogIdentifier(newValue)
   }
-  const name = 'Phil'
 
   return (
     <Modal
@@ -173,7 +187,7 @@ const MyModal: React.FC<MyModalProps> = ({ open, onClose, onPublish }) => {
         <TextField
           id="modal-title-input"
           label="Url Preview"
-          value={`/${name}/${blogIdentifier}`}
+          value={`/${username}/${blogIdentifier}`}
           // onChange={(e) => setTitle(e.target.value)}
           fullWidth
           disabled={true}

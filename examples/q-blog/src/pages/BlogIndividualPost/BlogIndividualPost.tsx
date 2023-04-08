@@ -16,6 +16,10 @@ import { Responsive, WidthProvider } from 'react-grid-layout'
 import '/node_modules/react-grid-layout/css/styles.css'
 import '/node_modules/react-resizable/css/styles.css'
 import DynamicHeightItem from '../../components/DynamicHeightItem'
+import {
+  addPrefix,
+  buildIdentifierFromCreateTitleIdAndId
+} from '../../utils/blogIdformats'
 const ResponsiveGridLayout = WidthProvider(Responsive)
 const initialMinHeight = 2 // Define an initial minimum height for grid items
 
@@ -74,8 +78,14 @@ export const BlogIndividualPost = () => {
 
   const getBlogPost = React.useCallback(async () => {
     try {
+      if (!blog || !postId) return
       dispatch(setIsLoadingGlobal(true))
-      const url = `/arbitrary/BLOG_POST/${user}/${postId}`
+      const formBlogId = addPrefix(blog)
+      const formPostId = buildIdentifierFromCreateTitleIdAndId(
+        formBlogId,
+        postId
+      )
+      const url = `/arbitrary/BLOG_POST/${user}/${formPostId}`
       const response = await fetch(url, {
         method: 'GET',
         headers: {
@@ -98,7 +108,7 @@ export const BlogIndividualPost = () => {
     } finally {
       dispatch(setIsLoadingGlobal(false))
     }
-  }, [user, postId])
+  }, [user, postId, blog])
   React.useEffect(() => {
     getBlogPost()
   }, [])

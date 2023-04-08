@@ -236,8 +236,26 @@ export const CreatePost = () => {
     try {
       if (!currentBlog) return
       const id = uid()
+      let createTitleId = title
+        .replace(/[^a-zA-Z0-9\s-]/g, '')
+        .replace(/\s+/g, '-')
+        .replace(/-+/g, '-')
+        .trim()
 
-      const identifier = `${currentBlog.blogId}-post-${id}`
+      if (createTitleId.toLowerCase().includes('post')) {
+        createTitleId = createTitleId.replace(/post/gi, '')
+      }
+      if (createTitleId.toLowerCase().includes('q-blog')) {
+        createTitleId = createTitleId.replace(/q-blog/gi, '')
+      }
+
+      if (createTitleId.endsWith('-')) {
+        createTitleId = createTitleId.slice(0, -1)
+      }
+      if (createTitleId.startsWith('-')) {
+        createTitleId = createTitleId.slice(1)
+      }
+      const identifier = `${currentBlog.blogId}-post-${createTitleId}-${id}`
       const blogPostToBase64 = await objectToBase64(postObject)
       let description = ''
       const findText = newPostContent.find((data) => data?.type === 'editor')

@@ -160,7 +160,14 @@ const GlobalWrapper: React.FC<Props> = ({ children }) => {
       if (!description) throw new Error('A description is required')
       const name = user.name
       const id = uid()
-      const identifier = `q-blog-${blogIdentifier}`
+      let formatBlogIdentifier = blogIdentifier
+      if (formatBlogIdentifier.endsWith('-')) {
+        formatBlogIdentifier = formatBlogIdentifier.slice(0, -1)
+      }
+      if (formatBlogIdentifier.startsWith('-')) {
+        formatBlogIdentifier = formatBlogIdentifier.slice(1)
+      }
+      const identifier = `q-blog-${formatBlogIdentifier}`
       const doesExitst = await verifyIfBlogIdExtists(name, identifier)
       if (doesExitst) {
         throw new Error('The blog identifier already exists')
@@ -296,6 +303,7 @@ const GlobalWrapper: React.FC<Props> = ({ children }) => {
         open={isOpenPublishBlogModal}
         onClose={onClosePublishBlogModal}
         onPublish={createBlog}
+        username={user?.name || ''}
       />
       <EditBlogModal
         open={isOpenEditBlogModal}
