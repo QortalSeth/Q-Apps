@@ -25,3 +25,9 @@ declare function qortalRequestWithTimeout(
   options: QortalRequestOptions,
   time: number
 ): Promise<any>
+
+declare global {
+  interface Window {
+    _qdnBase: any // Replace 'any' with the appropriate type if you know it
+  }
+}

@@ -34,7 +34,7 @@ export const BlogIndividualProfile = () => {
     try {
       dispatch(setIsLoadingGlobal(true))
       const offset = blogPosts.length
-      const url = `/arbitrary/resources/search?service=BLOG_POST&query=${blog}-post-&limit=20&name=${name}&includemetadata=true&offset=${offset}`
+      const url = `/arbitrary/resources/search?service=BLOG_POST&query=${blog}-post-&limit=20&name=${name}&includemetadata=true&offset=${offset}&reverse=true`
       const response = await fetch(url, {
         method: 'GET',
         headers: {

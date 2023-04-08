@@ -10,6 +10,8 @@ import PostAddIcon from '@mui/icons-material/PostAdd';
 import ImageUploader from '../../components/common/ImageUploader';
 import TextFieldsIcon from '@mui/icons-material/TextFields'
 import AudiotrackIcon from '@mui/icons-material/Audiotrack'
+import SettingsEthernetIcon from '@mui/icons-material/SettingsEthernet'
+import Slider from '@mui/material/Slider'
 
 import {
   Button,
@@ -99,13 +101,13 @@ export const CreatePost = () => {
   }
   const [newPostContent, setNewPostContent] = React.useState<any[]>([])
   const [title, setTitle] = React.useState<string>('')
-  const [blogImage, setBlogImage] = React.useState<string>('')
   const [isOpenPostModal, setIsOpenPostModal] = React.useState<boolean>(false)
   const [value, setValue] = React.useState(initialValue)
   const [editorKey, setEditorKey] = React.useState(1)
   const [count, setCount] = React.useState<number>(1)
   const [isOpenAddTextModal, setIsOpenAddTextModal] =
     React.useState<boolean>(false)
+  const [paddingValue, onChangePadding] = React.useState(5)
   const dispatch = useDispatch()
   const addPostSection = React.useCallback((content: any) => {
     const section = {
@@ -220,12 +222,16 @@ export const CreatePost = () => {
       throw new Error(errorMsg)
     }
 
+    const layoutGeneralSettings = {
+      padding: paddingValue ?? 0
+    }
+
     const postObject = {
       title,
-      blogImage,
       createdAt: Date.now(),
       postContent: newPostContent,
-      layouts
+      layouts,
+      layoutGeneralSettings
     }
     try {
       if (!currentBlog) return
@@ -485,28 +491,58 @@ export const CreatePost = () => {
           <Box
             sx={{
               display: 'flex',
-              gap: '10px'
+              justifyContent: 'space-between',
+              width: '100%'
             }}
           >
-            <TextFieldsIcon
-              onClick={() => setIsOpenAddTextModal(true)}
+            <Box
               sx={{
-                cursor: 'pointer',
-                width: '40px',
-                height: '40px'
+                display: 'flex',
+                gap: '10px'
               }}
-            />
-            <ImageUploader onPick={addImage}>
-              <AddPhotoAlternateIcon
+            >
+              <TextFieldsIcon
+                onClick={() => setIsOpenAddTextModal(true)}
                 sx={{
                   cursor: 'pointer',
                   width: '40px',
                   height: '40px'
                 }}
               />
-            </ImageUploader>
-            <VideoPanel onSelect={onSelectVideo} />
-            <AudioPanel onSelect={onSelectAudio} />
+              <ImageUploader onPick={addImage}>
+                <AddPhotoAlternateIcon
+                  sx={{
+                    cursor: 'pointer',
+                    width: '40px',
+                    height: '40px'
+                  }}
+                />
+              </ImageUploader>
+              <VideoPanel onSelect={onSelectVideo} />
+              <AudioPanel onSelect={onSelectAudio} />
+            </Box>
+            <Box
+              sx={{
+                display: 'flex',
+                gap: '10px'
+              }}
+            >
+              <Box>
+                <Typography gutterBottom>Spacing</Typography>
+                <Slider
+                  value={paddingValue}
+                  onChange={(event: any) => onChangePadding(event.target.value)}
+                  defaultValue={5}
+                  aria-label="Default"
+                  valueLabelDisplay="auto"
+                  min={0}
+                  max={40}
+                  sx={{
+                    width: '100px'
+                  }}
+                />
+              </Box>
+            </Box>
           </Box>
         </CustomToolbar>
       </CustomAppBar>
@@ -575,6 +611,7 @@ export const CreatePost = () => {
                       i={section.id}
                       breakpoint={currentBreakpoint}
                       count={count}
+                      padding={paddingValue}
                     >
                       {editingSection && editingSection.id === section.id ? (
                         <BlogEditor
@@ -655,6 +692,7 @@ export const CreatePost = () => {
                       breakpoint={currentBreakpoint}
                       count={count}
                       type="image"
+                      padding={paddingValue}
                     >
                       {editingSection && editingSection.id === section.id ? (
                         <ImageUploader
@@ -730,6 +768,7 @@ export const CreatePost = () => {
                       i={section.id}
                       breakpoint={currentBreakpoint}
                       count={count}
+                      padding={paddingValue}
                     >
                       {editingSection && editingSection.id === section.id ? (
                         <VideoPanel
@@ -822,6 +861,7 @@ export const CreatePost = () => {
                       i={section.id}
                       breakpoint={currentBreakpoint}
                       count={count}
+                      padding={paddingValue}
                     >
                       <Box
                         key={section.id}

@@ -49,6 +49,10 @@ const xs = [
   { i: 'a', x: 0, y: 0, w: 6, h: initialMinHeight },
   { i: 'b', x: 6, y: 0, w: 6, h: initialMinHeight }
 ]
+
+interface ILayoutGeneralSettings {
+  padding: number
+}
 export const BlogIndividualPost = () => {
   const { user, postId, blog } = useParams()
   const { user: userState } = useSelector((state: RootState) => state.auth)
@@ -58,7 +62,8 @@ export const BlogIndividualPost = () => {
   const [currAudio, setCurrAudio] = React.useState<number | null>(null)
   const [layouts, setLayouts] = React.useState<any>({ md, sm, xs })
   const [count, setCount] = React.useState<number>(1)
-
+  const [layoutGeneralSettings, setLayoutGeneralSettings] =
+    React.useState<ILayoutGeneralSettings | null>(null)
   const [currentBreakpoint, setCurrentBreakpoint] = React.useState<any>()
   const handleLayoutChange = (layout: any, layoutss: any) => {
     // const redoLayouts = setAutoHeight(layoutss)
@@ -79,10 +84,14 @@ export const BlogIndividualPost = () => {
       })
       console.log({ response })
       const responseData = await response.json()
+      console.log({ responseData })
       if (checkStructure(responseData)) {
         setBlogContent(responseData)
         if (responseData?.layouts) {
           setLayouts(responseData?.layouts)
+        }
+        if (responseData?.layoutGeneralSettings) {
+          setLayoutGeneralSettings(responseData.layoutGeneralSettings)
         }
       }
     } catch (error) {
@@ -153,6 +162,8 @@ export const BlogIndividualPost = () => {
   }, [])
   if (!blogContent) return null
 
+  console.log({ layoutGeneralSettings })
+
   return (
     <Box
       sx={{
@@ -218,6 +229,7 @@ export const BlogIndividualPost = () => {
                     i={section.id}
                     breakpoint={currentBreakpoint}
                     count={count}
+                    padding={layoutGeneralSettings?.padding}
                   >
                     <ReadOnlySlate content={section.content} />
                   </DynamicHeightItem>
@@ -233,6 +245,7 @@ export const BlogIndividualPost = () => {
                     i={section.id}
                     breakpoint={currentBreakpoint}
                     count={count}
+                    padding={layoutGeneralSettings?.padding}
                   >
                     <img src={section.content.image} className="post-image" />
                   </DynamicHeightItem>
@@ -248,6 +261,7 @@ export const BlogIndividualPost = () => {
                     i={section.id}
                     breakpoint={currentBreakpoint}
                     count={count}
+                    padding={layoutGeneralSettings?.padding}
                   >
                     <VideoPlayer
                       name={section.content.name}
@@ -268,6 +282,7 @@ export const BlogIndividualPost = () => {
                     i={section.id}
                     breakpoint={currentBreakpoint}
                     count={count}
+                    padding={layoutGeneralSettings?.padding}
                   >
                     <Box
                       onClick={() => {

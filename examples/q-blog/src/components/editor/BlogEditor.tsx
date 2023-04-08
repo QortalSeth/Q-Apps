@@ -60,17 +60,43 @@ const BlogEditor: React.FC<MyComponentProps> = ({
   editorKey
 }) => {
   const editor = useMemo(() => withReact(createEditor()), [])
+
   // const [value, setValue] = useState(defaultValue || initialValue);
+  const isTextAlignmentActive = (editor: Editor, alignment: string) => {
+    const [match] = Editor.nodes(editor, {
+      match: (n) => {
+        return n?.textAlign === alignment.replace(/^align-/, '')
+      }
+    })
+    return !!match
+  }
+
+  const toggleTextAlignment = (editor: Editor, alignment: string) => {
+    const isActive = isTextAlignmentActive(editor, alignment)
+    Transforms.setNodes(
+      editor,
+      { style: { textAlign: isActive ? 'inherit' : alignment } },
+      { match: (n) => Editor.isBlock(editor, n) }
+    )
+  }
+
   const toggleMark = (editor: Editor, format: FormatMark) => {
-    console.log(Editor.marks(editor))
-    // Update the type here
-    const isActive = Editor.marks(editor)?.[format] === true
-    if (isActive) {
-      Editor.removeMark(editor, format)
+    if (
+      format === 'align-left' ||
+      format === 'align-center' ||
+      format === 'align-right'
+    ) {
+      toggleTextAlignment(editor, format)
     } else {
-      Editor.addMark(editor, format, true)
+      const isActive = Editor.marks(editor)?.[format] === true
+      if (isActive) {
+        Editor.removeMark(editor, format)
+      } else {
+        Editor.addMark(editor, format, true)
+      }
     }
   }
+
   const newValue = useMemo(
     () => [
       ...(value || initialValue),
@@ -82,37 +108,61 @@ const BlogEditor: React.FC<MyComponentProps> = ({
     [value]
   )
 
-  console.log({ newValue })
+  const types = ['paragraph', 'heading-2', 'heading-3']
+
+  const setTextAlignment = (editor, alignment) => {
+    const isActive = isTextAlignmentActive(editor, alignment)
+    const alignmentType = ''
+    Transforms.setNodes(
+      editor,
+      {
+        textAlign: isActive ? null : alignment
+      },
+      {
+        match: (n) =>
+          n.type === 'heading-2' ||
+          n.type === 'heading-3' ||
+          n.type === 'paragraph'
+      }
+    )
+  }
 
   const ToolbarButton: React.FC<{
     format: FormatMark | string
     label: string
     editor: Editor
   }> = ({ format, label, editor }) => {
-    const editor2 = useSlate()
-    console.log({ editor2 })
+    useSlate()
+
     let onClick = () => {
-      console.log({ format })
       if (format === 'heading-2' || format === 'heading-3') {
-        console.log('yes')
         toggleBlock(editor, format)
-      }
-      if (
+      } else if (
         format === 'bold' ||
         format === 'italic' ||
         format === 'underline' ||
         format === ''
       ) {
-        console.log('no')
         toggleMark(editor, format)
+      } else if (
+        format === 'align-left' ||
+        format === 'align-center' ||
+        format === 'align-right'
+      ) {
+        setTextAlignment(editor, format.replace(/^align-/, ''))
       }
     }
-    let isActive = false
-    if (format === 'heading-2' || format === 'heading-3') {
-      isActive = isBlockActive(editor, format)
-    }
 
+    let isActive = false
     if (
+      format === 'align-left' ||
+      format === 'align-center' ||
+      format === 'align-right'
+    ) {
+      isActive = isTextAlignmentActive(editor, format)
+    } else if (format === 'heading-2' || format === 'heading-3') {
+      isActive = isBlockActive(editor, format)
+    } else if (
       format === 'bold' ||
       format === 'italic' ||
       format === 'underline' ||
@@ -120,6 +170,7 @@ const BlogEditor: React.FC<MyComponentProps> = ({
     ) {
       isActive = Editor.marks(editor)?.[format] === true
     }
+    console.log({ isActive })
     return (
       <button
         className={`toolbar-button ${isActive ? 'active' : ''}`}
@@ -141,9 +192,7 @@ const BlogEditor: React.FC<MyComponentProps> = ({
     const editor2 = useSlate()
 
     let onClick = () => {
-      console.log({ format })
       if (format === 'code-block') {
-        console.log('yes')
         toggleBlock(editor, 'code-block')
       }
     }
@@ -165,12 +214,39 @@ const BlogEditor: React.FC<MyComponentProps> = ({
     )
   }
 
+  const ToolbarButtonAlign: React.FC<{
+    format: string
+    label: string
+    editor: Editor
+  }> = ({ format, label, editor }) => {
+    const isActive =
+      Editor.nodes(editor, {
+        match: (n) => n.align === format
+      }).length > 0
+
+    return (
+      <button
+        className={`toolbar-button ${isActive ? 'active' : ''}`}
+        onMouseDown={(event) => {
+          event.preventDefault()
+          Transforms.setNodes(
+            editor,
+            { align: format },
+            { match: (n) => Editor.isBlock(editor, n) }
+          )
+        }}
+      >
+        {label}
+      </button>
+    )
+  }
+
   const ToolbarButtonCodeLink: React.FC<{
     format: FormatMark | string
     label: string
     editor: Editor
   }> = ({ format, label, editor }) => {
-    const editor2 = useSlate()
+    useSlate()
 
     let isActive = false
     if (format === 'link') {
@@ -182,9 +258,7 @@ const BlogEditor: React.FC<MyComponentProps> = ({
         className={`toolbar-button ${isActive ? 'active' : ''}`}
         onMouseDown={(event) => {
           event.preventDefault()
-          console.log(Editor.marks(editor))
           const isActive2 = !!Editor.marks(editor)?.link
-          console.log({ isActive2 })
           if (isActive2) {
             Editor.removeMark(editor, 'link')
             return
@@ -346,6 +420,10 @@ const BlogEditor: React.FC<MyComponentProps> = ({
           <ToolbarButton format="underline" label="U" editor={editor} />
           <ToolbarButton format="heading-2" label="H2" editor={editor} />
           <ToolbarButton format="heading-3" label="H3" editor={editor} />
+          <ToolbarButton format="align-left" label="L" editor={editor} />
+          <ToolbarButton format="align-center" label="C" editor={editor} />
+          <ToolbarButton format="align-right" label="R" editor={editor} />
+
           <ToolbarButtonCodeBlock
             format="code-block"
             label="Code"
@@ -399,24 +477,30 @@ export const renderElement = ({
   children,
   element
 }: RenderElementProps) => {
-  console.log({ element })
   switch (element.type) {
     case 'block-quote':
       return <blockquote {...attributes}>{children}</blockquote>
     case 'heading-2':
       return (
-        <h2 className="h2" {...attributes}>
+        <h2
+          className="h2"
+          {...attributes}
+          style={{ textAlign: element.textAlign }}
+        >
           {children}
         </h2>
       )
     case 'heading-3':
       return (
-        <h3 className="h3" {...attributes}>
+        <h3
+          className="h3"
+          {...attributes}
+          style={{ textAlign: element.textAlign }}
+        >
           {children}
         </h3>
       )
     case 'code-block':
-      console.log('heelll code')
       return (
         <pre {...attributes} className="code-block">
           <code>{children}</code>
@@ -425,7 +509,6 @@ export const renderElement = ({
     case 'code-line':
       return <div {...attributes}>{children}</div>
     case 'link':
-      console.log('hello link')
       return (
         <a href={element.url} {...attributes}>
           {children}
@@ -433,12 +516,17 @@ export const renderElement = ({
       )
     default:
       return (
-        <p className="paragraph" {...attributes}>
+        <p
+          className="paragraph"
+          {...attributes}
+          style={{ textAlign: element.textAlign }}
+        >
           {children}
         </p>
       )
   }
 }
+
 
 export const renderLeaf = ({ attributes, children, leaf }: RenderLeafProps) => {
   let el = children

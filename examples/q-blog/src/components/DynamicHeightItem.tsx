@@ -11,6 +11,7 @@ interface DynamicHeightItemProps {
   rows?: number
   count?: number
   type?: string
+  padding?: number
 }
 
 const DynamicHeightItem: React.FC<DynamicHeightItemProps> = ({
@@ -21,7 +22,8 @@ const DynamicHeightItem: React.FC<DynamicHeightItemProps> = ({
   breakpoint,
   rows = 1,
   count,
-  type
+  type,
+  padding
 }) => {
   const [height, setHeight] = useState<number>(rows * 150)
   const ref = useRef<HTMLDivElement>(null)
@@ -89,7 +91,13 @@ const DynamicHeightItem: React.FC<DynamicHeightItemProps> = ({
   return (
     <div ref={ref} style={{ width: '100%', height: 'auto' }}>
       <ReactResizeDetector handleHeight onResize={onResize}>
-        {children}
+        <div
+          style={{
+            padding: `${padding ? padding : 0}px`
+          }}
+        >
+          {children}
+        </div>
       </ReactResizeDetector>
     </div>
   )
