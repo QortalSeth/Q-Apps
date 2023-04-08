@@ -175,7 +175,7 @@ export const BlogIndividualProfile = () => {
               <BlogPostPreview
                 onClick={() => {
                   const str = blogPost.id
-                  const arr = str.split('-post')
+                  const arr = str.split('-post-')
                   const str1 = arr[0]
 
                   const blogId = removePrefix(str1)
