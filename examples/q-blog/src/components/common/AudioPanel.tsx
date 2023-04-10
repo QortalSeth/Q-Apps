@@ -85,7 +85,7 @@ export const AudioPanel: React.FC<VideoPanelProps> = ({
       })
     } catch (error) {
       const res2 = await fetch(
-        'http://213.202.218.148:62391/arbitrary/resources?&service=AUDIO&name=Phil&includemetadata=true&limit=100&offset=0&reverse=true'
+        '/arbitrary/resources?&service=AUDIO&name=Phil&includemetadata=true&limit=100&offset=0&reverse=true'
       )
       res = await res2.json()
     }

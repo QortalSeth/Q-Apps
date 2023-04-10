@@ -20,26 +20,9 @@ import {
   addPrefix,
   buildIdentifierFromCreateTitleIdAndId
 } from '../../utils/blogIdformats'
+import { DynamicHeightItemMinimal } from '../../components/DynamicHeightItemMinimal'
 const ResponsiveGridLayout = WidthProvider(Responsive)
 const initialMinHeight = 2 // Define an initial minimum height for grid items
-
-const loadLayoutsFromLocalStorage = () => {
-  try {
-    const storedLayouts = localStorage.getItem('myGridLayouts')
-    if (storedLayouts) {
-      return JSON.parse(storedLayouts)
-    }
-  } catch (err) {
-    console.error('Failed to load layouts from localStorage:', err)
-  }
-}
-const saveLayoutsToLocalStorage = (layouts: any) => {
-  try {
-    localStorage.setItem('myGridLayouts', JSON.stringify(layouts))
-  } catch (err) {
-    console.error('Failed to save layouts to localStorage:', err)
-  }
-}
 
 const md = [
   { i: 'a', x: 0, y: 0, w: 4, h: initialMinHeight },
@@ -56,6 +39,7 @@ const xs = [
 
 interface ILayoutGeneralSettings {
   padding: number
+  blogPostType: string
 }
 export const BlogIndividualPost = () => {
   const { user, postId, blog } = useParams()
@@ -172,8 +156,6 @@ export const BlogIndividualPost = () => {
   }, [])
   if (!blogContent) return null
 
-  console.log({ layoutGeneralSettings })
-
   return (
     <Box
       sx={{
@@ -222,127 +204,294 @@ export const BlogIndividualPost = () => {
         >
           {blogContent?.title}
         </Typography>
-        <Content
-          layouts={layouts}
-          blogContent={blogContent}
-          onResizeStop={onResizeStop}
-          onBreakpointChange={onBreakpointChange}
-          handleLayoutChange={handleLayoutChange}
-        >
-          {blogContent?.postContent?.map((section: any) => {
-            if (section.type === 'editor') {
-              return (
-                <div key={section.id} className="grid-item-view">
-                  <DynamicHeightItem
-                    layouts={layouts}
-                    setLayouts={setLayouts}
-                    i={section.id}
-                    breakpoint={currentBreakpoint}
-                    count={count}
-                    padding={layoutGeneralSettings?.padding}
-                  >
-                    <ReadOnlySlate content={section.content} />
-                  </DynamicHeightItem>
-                </div>
-              )
-            }
-            if (section.type === 'image') {
-              return (
-                <div key={section.id} className="grid-item-view">
-                  <DynamicHeightItem
-                    layouts={layouts}
-                    setLayouts={setLayouts}
-                    i={section.id}
-                    breakpoint={currentBreakpoint}
-                    count={count}
-                    padding={layoutGeneralSettings?.padding}
-                  >
-                    <img src={section.content.image} className="post-image" />
-                  </DynamicHeightItem>
-                </div>
-              )
-            }
-            if (section.type === 'video') {
-              return (
-                <div key={section.id} className="grid-item-view">
-                  <DynamicHeightItem
-                    layouts={layouts}
-                    setLayouts={setLayouts}
-                    i={section.id}
-                    breakpoint={currentBreakpoint}
-                    count={count}
-                    padding={layoutGeneralSettings?.padding}
-                  >
-                    <VideoPlayer
-                      name={section.content.name}
-                      service={section.content.service}
-                      identifier={section.content.identifier}
-                      setCount={handleCount}
-                    />
-                  </DynamicHeightItem>
-                </div>
-              )
-            }
-            if (section.type === 'audio') {
-              return (
-                <div key={section.id} className="grid-item-view">
-                  <DynamicHeightItem
-                    layouts={layouts}
-                    setLayouts={setLayouts}
-                    i={section.id}
-                    breakpoint={currentBreakpoint}
-                    count={count}
-                    padding={layoutGeneralSettings?.padding}
-                  >
-                    <Box
-                      onClick={() => {
-                        const findIndex = audios.findIndex(
-                          (item) =>
-                            item.identifier === section.content.identifier
-                        )
-                        if (findIndex >= 0) {
-                          setCurrAudio(findIndex)
-                        }
-                      }}
-                      key={section.id}
-                      sx={{
-                        display: 'flex',
-                        padding: '5px',
-                        gap: 1,
-                        marginTop: '15px',
-                        cursor: 'pointer',
-                        width: '100%',
-                        margin: 0,
-                        height: '100%',
-                        flexDirection: 'column',
-                        justifyContent: 'center'
-                      }}
+        {(layoutGeneralSettings?.blogPostType === 'builder' ||
+          !layoutGeneralSettings?.blogPostType) && (
+          <Content
+            layouts={layouts}
+            blogContent={blogContent}
+            onResizeStop={onResizeStop}
+            onBreakpointChange={onBreakpointChange}
+            handleLayoutChange={handleLayoutChange}
+          >
+            {blogContent?.postContent?.map((section: any) => {
+              if (section.type === 'editor') {
+                return (
+                  <div key={section.id} className="grid-item-view">
+                    <DynamicHeightItem
+                      layouts={layouts}
+                      setLayouts={setLayouts}
+                      i={section.id}
+                      breakpoint={currentBreakpoint}
+                      count={count}
+                      padding={layoutGeneralSettings?.padding}
+                    >
+                      <ReadOnlySlate content={section.content} />
+                    </DynamicHeightItem>
+                  </div>
+                )
+              }
+              if (section.type === 'image') {
+                return (
+                  <div key={section.id} className="grid-item-view">
+                    <DynamicHeightItem
+                      layouts={layouts}
+                      setLayouts={setLayouts}
+                      i={section.id}
+                      breakpoint={currentBreakpoint}
+                      count={count}
+                      padding={layoutGeneralSettings?.padding}
+                    >
+                      <img src={section.content.image} className="post-image" />
+                    </DynamicHeightItem>
+                  </div>
+                )
+              }
+              if (section.type === 'video') {
+                return (
+                  <div key={section.id} className="grid-item-view">
+                    <DynamicHeightItem
+                      layouts={layouts}
+                      setLayouts={setLayouts}
+                      i={section.id}
+                      breakpoint={currentBreakpoint}
+                      count={count}
+                      padding={layoutGeneralSettings?.padding}
+                    >
+                      <VideoPlayer
+                        name={section.content.name}
+                        service={section.content.service}
+                        identifier={section.content.identifier}
+                        setCount={handleCount}
+                      />
+                    </DynamicHeightItem>
+                  </div>
+                )
+              }
+              if (section.type === 'audio') {
+                return (
+                  <div key={section.id} className="grid-item-view">
+                    <DynamicHeightItem
+                      layouts={layouts}
+                      setLayouts={setLayouts}
+                      i={section.id}
+                      breakpoint={currentBreakpoint}
+                      count={count}
+                      padding={layoutGeneralSettings?.padding}
                     >
                       <Box
+                        onClick={() => {
+                          const findIndex = audios.findIndex(
+                            (item) =>
+                              item.identifier === section.content.identifier
+                          )
+                          if (findIndex >= 0) {
+                            setCurrAudio(findIndex)
+                          }
+                        }}
+                        key={section.id}
                         sx={{
                           display: 'flex',
-                          alignItems: 'center'
+                          padding: '5px',
+                          gap: 1,
+                          marginTop: '15px',
+                          cursor: 'pointer',
+                          width: '100%',
+                          margin: 0,
+                          height: '100%',
+                          flexDirection: 'column',
+                          justifyContent: 'center'
                         }}
                       >
-                        <Typography variant="h5" sx={{}}>
-                          {section.content?.title}
-                        </Typography>
+                        <Box
+                          sx={{
+                            display: 'flex',
+                            alignItems: 'center'
+                          }}
+                        >
+                          <Typography variant="h5" sx={{}}>
+                            {section.content?.title}
+                          </Typography>
 
-                        <AudiotrackIcon />
-                      </Box>
+                          <AudiotrackIcon />
+                        </Box>
 
-                      <Box>
-                        <Typography variant="subtitle1" sx={{}}>
-                          {section.content?.description}
-                        </Typography>
+                        <Box>
+                          <Typography variant="subtitle1" sx={{}}>
+                            {section.content?.description}
+                          </Typography>
+                        </Box>
                       </Box>
-                    </Box>
-                  </DynamicHeightItem>
-                </div>
+                    </DynamicHeightItem>
+                  </div>
+                )
+              }
+            })}
+          </Content>
+        )}
+        {layoutGeneralSettings?.blogPostType === 'minimal' && (
+          <>
+            {layouts?.rows?.map((row: any, rowIndex: number) => {
+              return (
+                <Box
+                  sx={{
+                    display: 'flex',
+                    width: '100%',
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    marginTop: '25px',
+                    gap: 2
+                  }}
+                >
+                  {row.ids.map((elementId: string) => {
+                    const section: any = blogContent?.postContent?.find(
+                      (el) => el.id === elementId
+                    )
+                    if (!section) return null
+                    if (section.type === 'editor') {
+                      return (
+                        <div
+                          key={section.id}
+                          className="grid-item"
+                          style={{
+                            maxWidth: '800px',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            width: '100%'
+                          }}
+                        >
+                          <DynamicHeightItemMinimal
+                            layouts={layouts}
+                            setLayouts={setLayouts}
+                            i={section.id}
+                            breakpoint={currentBreakpoint}
+                            count={count}
+                            padding={0}
+                          >
+                            <ReadOnlySlate
+                              key={section.id}
+                              content={section.content}
+                            />
+                          </DynamicHeightItemMinimal>
+                        </div>
+                      )
+                    }
+                    if (section.type === 'image') {
+                      return (
+                        <div key={section.id} className="grid-item">
+                          <DynamicHeightItemMinimal
+                            layouts={layouts}
+                            setLayouts={setLayouts}
+                            i={section.id}
+                            breakpoint={currentBreakpoint}
+                            count={count}
+                            type="image"
+                            padding={0}
+                          >
+                            <Box
+                              sx={{
+                                position: 'relative',
+                                width: '100%',
+                                height: '100%'
+                              }}
+                            >
+                              <img
+                                src={section.content.image}
+                                className="post-image"
+                                style={{
+                                  objectFit: 'contain',
+                                  maxHeight: '50vh'
+                                }}
+                              />
+                            </Box>
+                          </DynamicHeightItemMinimal>
+                        </div>
+                      )
+                    }
+
+                    if (section.type === 'video') {
+                      return (
+                        <div key={section.id} className="grid-item">
+                          <DynamicHeightItemMinimal
+                            layouts={layouts}
+                            setLayouts={setLayouts}
+                            i={section.id}
+                            breakpoint={currentBreakpoint}
+                            count={count}
+                            padding={0}
+                          >
+                            <Box
+                              sx={{
+                                position: 'relative',
+                                width: '100%',
+                                height: '100%'
+                              }}
+                            >
+                              <VideoPlayer
+                                name={section.content.name}
+                                service={section.content.service}
+                                identifier={section.content.identifier}
+                              />
+                            </Box>
+                          </DynamicHeightItemMinimal>
+                        </div>
+                      )
+                    }
+                    if (section.type === 'audio') {
+                      return (
+                        <div key={section.id} className="grid-item">
+                          <DynamicHeightItemMinimal
+                            layouts={layouts}
+                            setLayouts={setLayouts}
+                            i={section.id}
+                            breakpoint={currentBreakpoint}
+                            count={count}
+                            padding={0}
+                          >
+                            <Box
+                              key={section.id}
+                              sx={{
+                                display: 'flex',
+                                padding: '5px',
+                                gap: 1,
+                                marginTop: '15px',
+                                cursor: 'pointer',
+                                width: '100%',
+                                margin: 0,
+                                height: '100%',
+                                flexDirection: 'column',
+                                justifyContent: 'center'
+                              }}
+                            >
+                              <Box
+                                sx={{
+                                  display: 'flex',
+                                  alignItems: 'center'
+                                }}
+                              >
+                                <Typography variant="h5" sx={{}}>
+                                  {section.content?.title}
+                                </Typography>
+
+                                <AudiotrackIcon />
+                              </Box>
+
+                              <Box>
+                                <Typography variant="subtitle1" sx={{}}>
+                                  {section.content?.description}
+                                </Typography>
+                              </Box>
+                            </Box>
+                          </DynamicHeightItemMinimal>
+                        </div>
+                      )
+                    }
+                  })}
+                </Box>
               )
-            }
-          })}
-        </Content>
+            })}
+          </>
+        )}
         {audios.length > 0 && (
           <AudioPlayer currAudio={currAudio} playlist={audios} />
         )}

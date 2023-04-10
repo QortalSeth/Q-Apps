@@ -6,13 +6,15 @@ interface MyModalProps {
   onClose?: () => void
   onSubmit?: (obj: any) => Promise<void>
   children: any
+  customStyles?: any
 }
 
 export const ReusableModal: React.FC<MyModalProps> = ({
   open,
   onClose,
   onSubmit,
-  children
+  children,
+  customStyles = {}
 }) => {
   return (
     <Modal
@@ -33,7 +35,8 @@ export const ReusableModal: React.FC<MyModalProps> = ({
           p: 4,
           display: 'flex',
           flexDirection: 'column',
-          gap: 2
+          gap: 2,
+          ...customStyles
         }}
       >
         {children}
