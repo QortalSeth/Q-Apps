@@ -52,6 +52,7 @@ interface VideoPlayerProps {
   autoplay?: boolean
   from?: string | null
   setCount?: () => void
+  customStyle?: any
 }
 
 export const VideoPlayer: React.FC<VideoPlayerProps> = ({
@@ -61,7 +62,8 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
   service,
   autoplay = true,
   from = null,
-  setCount
+  setCount,
+  customStyle = {}
 }) => {
   const workerRef = useRef<any>(null)
   const videoRef = useRef<HTMLVideoElement | null>(null)
@@ -357,6 +359,9 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
         onLoadedMetadata={handleLoadedMetadata}
         onCanPlay={handleCanPlay}
         preload="metadata"
+        style={{
+          ...customStyle
+        }}
       />
       <ControlsContainer
         style={{

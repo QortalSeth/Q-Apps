@@ -9,7 +9,10 @@ import { useDispatch, useSelector } from 'react-redux'
 import { RootState } from '../../state/store'
 import { checkStructure } from '../../utils/checkStructure'
 import { BlogContent } from '../../interfaces/interfaces'
-import { setIsLoadingGlobal } from '../../state/features/globalSlice'
+import {
+  setIsLoadingGlobal,
+  setVisitingBlog
+} from '../../state/features/globalSlice'
 import { VideoPlayer } from '../../components/common/VideoPlayer'
 import { AudioPlayer, IPlaylist } from '../../components/common/AudioPlayer'
 import { Responsive, WidthProvider } from 'react-grid-layout'
@@ -43,6 +46,10 @@ interface ILayoutGeneralSettings {
 }
 export const BlogIndividualPost = () => {
   const { user, postId, blog } = useParams()
+  const blogFull = React.useMemo(() => {
+    if (!blog) return ''
+    return addPrefix(blog)
+  }, [blog])
   const { user: userState } = useSelector((state: RootState) => state.auth)
   const [avatarUrl, setAvatarUrl] = React.useState<string>('')
   const dispatch = useDispatch()
@@ -95,7 +102,7 @@ export const BlogIndividualPost = () => {
   }, [user, postId, blog])
   React.useEffect(() => {
     getBlogPost()
-  }, [])
+  }, [postId])
 
   const getAvatar = React.useCallback(async () => {
     try {
@@ -154,6 +161,28 @@ export const BlogIndividualPost = () => {
     // Update the layout state with the new position and size of the component
     setCount((prev) => prev + 1)
   }, [])
+
+  const getBlog = React.useCallback(async () => {
+    let name = user
+    if (!name) return
+    if (!blogFull) return
+    try {
+      const urlBlog = `/arbitrary/BLOG/${name}/${blogFull}`
+      const response = await fetch(urlBlog, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      const responseData = await response.json()
+      dispatch(setVisitingBlog({ ...responseData, name }))
+    } catch (error) {}
+  }, [user, blogFull])
+
+  React.useEffect(() => {
+    getBlog()
+  }, [user, blogFull])
+
   if (!blogContent) return null
 
   return (
@@ -431,6 +460,9 @@ export const BlogIndividualPost = () => {
                                 name={section.content.name}
                                 service={section.content.service}
                                 identifier={section.content.identifier}
+                                customStyle={{
+                                  height: '50vh'
+                                }}
                               />
                             </Box>
                           </DynamicHeightItemMinimal>

@@ -7,6 +7,7 @@ import { styled } from '@mui/system'
 import ImageUploader from '../../../../components/common/ImageUploader'
 import AddPhotoAlternateIcon from '@mui/icons-material/AddPhotoAlternate'
 import { VideoPanel } from '../../../../components/common/VideoPanel'
+import MenuOpenIcon from '@mui/icons-material/MenuOpen'
 
 const CustomToolbar = styled(Toolbar)({
   display: 'flex',
@@ -27,6 +28,7 @@ interface IEditorToolbar {
   paddingValue: number
   onChangePadding: (padding: number) => void
   isMinimal?: boolean
+  addNav?: () => void
 }
 
 export const EditorToolbar = ({
@@ -36,7 +38,8 @@ export const EditorToolbar = ({
   onSelectAudio,
   paddingValue,
   onChangePadding,
-  isMinimal = false
+  isMinimal = false,
+  addNav
 }: IEditorToolbar) => {
   return (
     <CustomAppBar position="sticky">
@@ -80,6 +83,16 @@ export const EditorToolbar = ({
               gap: '10px'
             }}
           >
+            {!isMinimal && (
+              <MenuOpenIcon
+                onClick={addNav}
+                sx={{
+                  cursor: 'pointer',
+                  width: '40px',
+                  height: '40px'
+                }}
+              />
+            )}
             {!isMinimal && (
               <Box>
                 <Typography gutterBottom>Spacing</Typography>

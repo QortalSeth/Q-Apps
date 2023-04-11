@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useCallback } from 'react'
 import BlogEditor from '../../components/editor/BlogEditor'
 import ShortUniqueId from 'short-unique-id'
 import ReadOnlySlate from '../../components/editor/ReadOnlySlate'
@@ -25,6 +25,9 @@ import '/node_modules/react-resizable/css/styles.css'
 import { ReusableModal } from '../../components/modals/ReusableModal'
 import { VideoPlayer } from '../../components/common/VideoPlayer'
 import { EditorToolbar } from './components/Toolbar/EditorToolbar'
+import { Navbar } from './components/Navbar/NavbarBuilder'
+import { UserNavbar } from '../../components/common/UserNavbar'
+import { setCurrentBlog } from '../../state/features/globalSlice'
 const ResponsiveGridLayout = WidthProvider(Responsive)
 const initialMinHeight = 2 // Define an initial minimum height for grid items
 const uid = new ShortUniqueId()
@@ -79,7 +82,9 @@ export const CreatePostBuilder = () => {
   const [isOpenAddTextModal, setIsOpenAddTextModal] =
     React.useState<boolean>(false)
   const [paddingValue, onChangePadding] = React.useState(5)
+  const [isEditNavOpen, setIsEditNavOpen] = React.useState<boolean>(false)
   const dispatch = useDispatch()
+  const [navbarConfig, setNavbarConfig] = React.useState<any>(null)
   const addPostSection = React.useCallback((content: any) => {
     const section = {
       type: 'editor',
@@ -90,6 +95,108 @@ export const CreatePostBuilder = () => {
 
     setNewPostContent((prev) => [...prev, section])
     setEditorKey((prev) => prev + 1)
+  }, [])
+
+  async function getBlog(name: string, identifier: string, blog: any) {
+    const urlBlog = `/arbitrary/BLOG/${name}/${identifier}`
+    const response = await fetch(urlBlog, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    })
+    const responseData = await response.json()
+    dispatch(
+      setCurrentBlog({
+        createdAt: responseData?.createdAt || '',
+        blogId: blog.identifier,
+        title: responseData?.title || '',
+        description: responseData?.description || '',
+        blogImage: responseData?.blogImage || '',
+        category: blog.metadata?.category,
+        tags: blog.metadata?.tags || []
+      })
+    )
+  }
+
+  const editBlog = React.useCallback(
+    async (navbarConfig: any) => {
+      if (!user || !user.name)
+        throw new Error('Cannot update: your Qortal name is not accessible')
+
+      if (!currentBlog)
+        throw new Error('Your blog is not available. Refresh and try again.')
+
+      const name = user.name
+      const formattedTags: { [key: string]: string } = {}
+      const tags = currentBlog?.tags || []
+      const category = currentBlog?.category || ''
+      const title = currentBlog?.title || ''
+      const description = currentBlog?.description || ''
+      tags.forEach((tag: string, i: number) => {
+        console.log({ tag })
+        formattedTags[`tag${i + 1}`] = tag
+      })
+      const blogPostToBase64 = await objectToBase64({
+        ...currentBlog,
+        navbarConfig
+      })
+      try {
+        const resourceResponse = await qortalRequest({
+          action: 'PUBLISH_QDN_RESOURCE',
+          name: name,
+          service: 'BLOG',
+          data64: blogPostToBase64,
+          title,
+          description,
+          category,
+          ...formattedTags,
+          identifier: currentBlog.blogId
+        })
+
+        await new Promise<void>((res, rej) => {
+          setTimeout(() => {
+            res()
+          }, 1000)
+        })
+
+        getBlog(name, currentBlog.blogId, currentBlog)
+        dispatch(
+          setNotification({
+            msg: 'Blog successfully updated',
+            alertType: 'success'
+          })
+        )
+        console.log({ resourceResponse })
+      } catch (error) {
+        if (error instanceof Error) {
+          throw new Error(error.message)
+        } else {
+          throw new Error('An unknown error occurred')
+        }
+      }
+    },
+    [user, currentBlog]
+  )
+
+  const handleSaveNavBar = useCallback(async (navMenu: any) => {
+    try {
+      const config = {
+        navItems: navMenu,
+        type: 'topNav',
+        title: '',
+        logo: ''
+      }
+      await editBlog(config)
+      setNavbarConfig(config)
+    } catch (error: any) {
+      dispatch(
+        setNotification({
+          msg: error?.message || 'Could not save the navbar',
+          alertType: 'error'
+        })
+      )
+    }
   }, [])
 
   function objectToBase64(obj: any) {
@@ -446,6 +553,10 @@ export const CreatePostBuilder = () => {
 
   const gridItemCount =
     currentBreakpoint === 'md' ? 4 : currentBreakpoint === 'sm' ? 3 : 1
+
+  const addNav = () => {
+    setIsEditNavOpen(true)
+  }
   return (
     <>
       <EditorToolbar
@@ -455,8 +566,16 @@ export const CreatePostBuilder = () => {
         onSelectAudio={onSelectAudio}
         paddingValue={paddingValue}
         onChangePadding={onChangePadding}
+        addNav={addNav}
       />
-
+      {navbarConfig && Array.isArray(navbarConfig?.navItems) && (
+        <UserNavbar
+          title="Test"
+          menuItems={navbarConfig?.navItems || []}
+          name=""
+          blogId=""
+        />
+      )}
       <Box
         sx={{
           display: 'flex',
@@ -850,6 +969,14 @@ export const CreatePostBuilder = () => {
           <Button onClick={addSection}>Add Text</Button>
           <Button onClick={closeAddTextModal}>Close</Button>
         </ReusableModal>
+        <ReusableModal open={isEditNavOpen}>
+          <Navbar
+            saveNav={handleSaveNavBar}
+            removeNav={() => {}}
+            close={() => setIsEditNavOpen(false)}
+          />
+        </ReusableModal>
+
         <PostPublishModal
           onClose={() => {
             setIsOpenPostModal(false)

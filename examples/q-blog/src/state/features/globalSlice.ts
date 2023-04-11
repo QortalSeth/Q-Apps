@@ -12,6 +12,19 @@ interface GlobalState {
     title: string
     description: string
     blogImage: string
+    category?: string
+    tags?: string[]
+  } | null
+  visitingBlog: {
+    createdAt: number
+    blogId: string
+    title: string
+    description: string
+    blogImage: string
+    category?: string
+    tags?: string[]
+    navbarConfig?: any
+    name?: string
   } | null
 }
 const initialState: GlobalState = {
@@ -19,7 +32,8 @@ const initialState: GlobalState = {
   isLoadingCurrentBlog: true,
   isLoadingGlobal: false,
   currentBlog: null,
-  isOpenEditBlogModal: false
+  isOpenEditBlogModal: false,
+  visitingBlog: null
 }
 
 export const globalSlice = createSlice({
@@ -36,6 +50,10 @@ export const globalSlice = createSlice({
       state.currentBlog = action.payload
       state.isLoadingCurrentBlog = false
     },
+    setVisitingBlog: (state, action) => {
+      state.visitingBlog = action.payload
+      state.isLoadingCurrentBlog = false
+    },
     setIsLoadingGlobal: (state, action) => {
       state.isLoadingGlobal = action.payload
     }
@@ -46,7 +64,8 @@ export const {
   togglePublishBlogModal,
   setCurrentBlog,
   setIsLoadingGlobal,
-  toggleEditBlogModal
+  toggleEditBlogModal,
+  setVisitingBlog
 } = globalSlice.actions
 
 export default globalSlice.reducer;

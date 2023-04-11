@@ -609,7 +609,9 @@ export const CreatePostMinimal = () => {
                   width: '100%',
                   flexDirection: 'row',
                   alignItems: 'center',
-                  justifyContent: 'center'
+                  justifyContent: 'center',
+                  marginTop: '25px',
+                  gap: 2
                 }}
               >
                 {row.type === 'image' && row.ids.length < 3 && (
@@ -854,6 +856,9 @@ export const CreatePostMinimal = () => {
                                 service={section.content.service}
                                 identifier={section.content.identifier}
                                 from="create"
+                                customStyle={{
+                                  height: '50vh'
+                                }}
                               />
                               <Box
                                 sx={{
