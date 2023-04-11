@@ -363,6 +363,22 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
     }
   }, [])
 
+  function formatTime(seconds: number): string {
+    seconds = Math.floor(seconds)
+
+    let minutes: number | string = Math.floor(seconds / 60)
+    let remainingSeconds: number | string = seconds % 60
+
+    if (minutes < 10) {
+      minutes = '0' + minutes
+    }
+    if (remainingSeconds < 10) {
+      remainingSeconds = '0' + remainingSeconds
+    }
+
+    return minutes + ':' + remainingSeconds
+  }
+
   return (
     <VideoContainer
       style={{
@@ -476,6 +492,20 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
           max={videoRef.current?.duration || 100}
           sx={{ flexGrow: 1, mx: 2 }}
         />
+        <Typography
+          sx={{
+            fontSize: '14px',
+            marginRight: '5px',
+            color: 'rgba(255, 255, 255, 0.7)',
+            visibility:
+              !videoRef.current?.duration || !progress ? 'hidden' : 'visible'
+          }}
+        >
+          {progress && videoRef.current?.duration && formatTime(progress)}/
+          {progress &&
+            videoRef.current?.duration &&
+            formatTime(videoRef.current?.duration)}
+        </Typography>
         <VolumeUp />
         <Slider
           value={volume}
