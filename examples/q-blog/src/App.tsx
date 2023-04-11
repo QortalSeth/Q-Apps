@@ -17,15 +17,6 @@ import { EditPost } from './pages/EditPost/EditPost'
 import Notification from './components/common/Notification/Notification'
 
 function App() {
-  try {
-    console.log('test', {
-      windowTop: window.top,
-      reduxStore: window.top.reduxStore.getState().app.selectedAddress,
-      base58PublicKeyToAddress: window.top.base58PublicKeyToAddress
-    })
-  } catch (error) {
-    console.log({ error })
-  }
   return (
     <Provider store={store}>
       <ThemeProvider theme={theme}>

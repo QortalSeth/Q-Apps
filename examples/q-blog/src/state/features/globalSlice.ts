@@ -26,6 +26,9 @@ interface GlobalState {
     navbarConfig?: any
     name?: string
   } | null
+  audios: any[] | null
+  currAudio: any
+  audioPostId: string
 }
 const initialState: GlobalState = {
   isOpenPublishBlogModal: false,
@@ -33,7 +36,10 @@ const initialState: GlobalState = {
   isLoadingGlobal: false,
   currentBlog: null,
   isOpenEditBlogModal: false,
-  visitingBlog: null
+  visitingBlog: null,
+  audios: null,
+  currAudio: null,
+  audioPostId: ''
 }
 
 export const globalSlice = createSlice({
@@ -54,6 +60,18 @@ export const globalSlice = createSlice({
       state.visitingBlog = action.payload
       state.isLoadingCurrentBlog = false
     },
+    setAudio: (state, action) => {
+      state.audios = action.payload.audios
+      state.audioPostId = action.payload.postId
+    },
+
+    setCurrAudio: (state, action) => {
+      state.currAudio = action.payload
+    },
+    removeAudio: (state, action) => {
+      state.audios = null
+      state.currAudio = null
+    },
     setIsLoadingGlobal: (state, action) => {
       state.isLoadingGlobal = action.payload
     }
@@ -65,7 +83,10 @@ export const {
   setCurrentBlog,
   setIsLoadingGlobal,
   toggleEditBlogModal,
-  setVisitingBlog
+  setVisitingBlog,
+  setAudio,
+  setCurrAudio,
+  removeAudio
 } = globalSlice.actions
 
 export default globalSlice.reducer;

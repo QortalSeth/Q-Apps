@@ -2,6 +2,7 @@ import React, { useRef, useState } from 'react'
 import { Box, IconButton, Slider } from '@mui/material'
 import { CircularProgress, Typography } from '@mui/material'
 import AudioPlyr from 'philliplm-react-modern-audio-player'
+import LinearProgress from '@mui/material/LinearProgress'
 
 import {
   PlayArrow,
@@ -67,7 +68,7 @@ export const AudioPlayer: React.FC<VideoPlayerProps> = ({
   currAudio
 }) => {
   const [playlistFormatted, setPlaylistFormatted] = useState<any>([])
-
+  const [isLoading, setIsLoading] = useState<boolean>(false)
   const getSrc = React.useCallback(
     async (name: string, identifier: string, service: string) => {
       if (!name || !identifier || !service) return
@@ -90,6 +91,7 @@ export const AudioPlayer: React.FC<VideoPlayerProps> = ({
 
   const fetchPlaylistData = React.useCallback(async () => {
     console.log({ playlist })
+    setIsLoading(true)
     const playlistAudio = await Promise.all(
       playlist?.map(async (audio: IPlaylist, index) => {
         const src = await getSrc(audio.name, audio.identifier, audio.service)
@@ -103,6 +105,7 @@ export const AudioPlayer: React.FC<VideoPlayerProps> = ({
       }) ?? []
     )
     setPlaylistFormatted(playlistAudio.filter((pa) => !!pa.src))
+    setIsLoading(false)
   }, [playlist])
 
   React.useEffect(() => {
@@ -111,8 +114,38 @@ export const AudioPlayer: React.FC<VideoPlayerProps> = ({
 
   console.log({ playlistFormatted, playlist })
 
+  if (isLoading)
+    return (
+      <Box
+        sx={{
+          isolation: 'isolate',
+          width: '100%',
+          position: 'fixed',
+          colorScheme: 'light',
+          bottom: '0px',
+          padding: '10px',
+          height: '50px',
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'center',
+          alignItems: 'flex-start'
+        }}
+      >
+        <Typography
+          sx={{
+            fontSize: '10px'
+          }}
+        >
+          Loading playlist...
+        </Typography>
+        <LinearProgress
+          sx={{
+            width: '100%'
+          }}
+        />
+      </Box>
+    )
   if (playlistFormatted.length === 0) return null
-
   return (
     <VideoContainer>
       <AudioPlyr

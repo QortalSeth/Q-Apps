@@ -1,13 +1,11 @@
-import React from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { useNavigate } from "react-router-dom";
+import React, { useState } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
+import { useNavigate } from 'react-router-dom'
 
-import {
-  addUser
-} from '../state/features/authSlice';
-import ShortUniqueId from 'short-unique-id';
-import { RootState } from "../state/store";
-import PublishBlogModal from '../components/modals/PublishBlogModal';
+import { addUser } from '../state/features/authSlice'
+import ShortUniqueId from 'short-unique-id'
+import { RootState } from '../state/store'
+import PublishBlogModal from '../components/modals/PublishBlogModal'
 import EditBlogModal from '../components/modals/EditBlogModal'
 
 import {
@@ -22,6 +20,7 @@ import { fetchAndEvaluatePosts } from '../utils/fetchPosts'
 import { addPosts, addToHashMap, BlogPost } from '../state/features/blogSlice'
 import { useFetchPosts } from '../hooks/useFetchPosts'
 import { setNotification } from '../state/features/notificationsSlice'
+import { AudioPlayer } from '../components/common/AudioPlayer'
 
 interface Props {
   children: React.ReactNode
@@ -33,8 +32,8 @@ const GlobalWrapper: React.FC<Props> = ({ children }) => {
   const navigate = useNavigate()
   const dispatch = useDispatch()
   const { user } = useSelector((state: RootState) => state.auth)
+  const { audios, currAudio } = useSelector((state: RootState) => state.global)
   const { getBlogPosts } = useFetchPosts()
-
   const {
     isOpenPublishBlogModal,
     currentBlog,
@@ -320,8 +319,12 @@ const GlobalWrapper: React.FC<Props> = ({ children }) => {
         authenticate={askForAccountInformation}
       />
       {children}
+
+      {audios && audios.length > 0 && (
+        <AudioPlayer currAudio={currAudio} playlist={audios} />
+      )}
     </>
   )
 }
 
-export default GlobalWrapper;
+export default GlobalWrapper

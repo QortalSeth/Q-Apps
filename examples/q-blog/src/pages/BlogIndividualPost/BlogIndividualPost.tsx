@@ -1,8 +1,8 @@
-import React from 'react'
-import { useParams } from 'react-router-dom';
-import { Button, Box, Typography, CardHeader, Avatar, } from '@mui/material';
-import { useNavigate } from "react-router-dom";
-import { styled } from '@mui/system';
+import React, { useRef, useState } from 'react'
+import { useParams } from 'react-router-dom'
+import { Button, Box, Typography, CardHeader, Avatar } from '@mui/material'
+import { useNavigate } from 'react-router-dom'
+import { styled } from '@mui/system'
 import AudiotrackIcon from '@mui/icons-material/Audiotrack'
 import ReadOnlySlate from '../../components/editor/ReadOnlySlate'
 import { useDispatch, useSelector } from 'react-redux'
@@ -10,6 +10,8 @@ import { RootState } from '../../state/store'
 import { checkStructure } from '../../utils/checkStructure'
 import { BlogContent } from '../../interfaces/interfaces'
 import {
+  setAudio,
+  setCurrAudio,
   setIsLoadingGlobal,
   setVisitingBlog
 } from '../../state/features/globalSlice'
@@ -24,6 +26,7 @@ import {
   buildIdentifierFromCreateTitleIdAndId
 } from '../../utils/blogIdformats'
 import { DynamicHeightItemMinimal } from '../../components/DynamicHeightItemMinimal'
+import { ReusableModal } from '../../components/modals/ReusableModal'
 const ResponsiveGridLayout = WidthProvider(Responsive)
 const initialMinHeight = 2 // Define an initial minimum height for grid items
 
@@ -51,10 +54,14 @@ export const BlogIndividualPost = () => {
     return addPrefix(blog)
   }, [blog])
   const { user: userState } = useSelector((state: RootState) => state.auth)
+  const { audios, audioPostId } = useSelector(
+    (state: RootState) => state.global
+  )
+
   const [avatarUrl, setAvatarUrl] = React.useState<string>('')
   const dispatch = useDispatch()
   const navigate = useNavigate()
-  const [currAudio, setCurrAudio] = React.useState<number | null>(null)
+  // const [currAudio, setCurrAudio] = React.useState<number | null>(null)
   const [layouts, setLayouts] = React.useState<any>({ md, sm, xs })
   const [count, setCount] = React.useState<number>(1)
   const [layoutGeneralSettings, setLayoutGeneralSettings] =
@@ -66,7 +73,9 @@ export const BlogIndividualPost = () => {
     // saveLayoutsToLocalStorage(layoutss)
   }
   const [blogContent, setBlogContent] = React.useState<BlogContent | null>(null)
-
+  const [isOpenSwitchPlaylistModal, setisOpenSwitchPlaylistModal] =
+    useState<boolean>(false)
+  const tempSaveAudio = useRef<any>(null)
   const getBlogPost = React.useCallback(async () => {
     try {
       if (!blog || !postId) return
@@ -94,6 +103,29 @@ export const BlogIndividualPost = () => {
         if (responseData?.layoutGeneralSettings) {
           setLayoutGeneralSettings(responseData.layoutGeneralSettings)
         }
+        const filteredAudios = (responseData?.postContent || []).filter(
+          (content: any) => content?.type === 'audio'
+        )
+
+        const transformAudios = filteredAudios.map((fa: any) => {
+          return {
+            ...(fa?.content || {}),
+            id: fa?.id
+          }
+        })
+        console.log({ transformAudios })
+        if (!audios && transformAudios.length > 0) {
+          dispatch(setAudio({ audios: transformAudios, postId: formPostId }))
+        } else if (
+          formPostId === audioPostId &&
+          audios?.length !== transformAudios.length
+        ) {
+          tempSaveAudio.current = {
+            message:
+              "This post's audio playlist has updated. Would you like to switch?"
+          }
+          setisOpenSwitchPlaylistModal(true)
+        }
       }
     } catch (error) {
     } finally {
@@ -103,6 +135,34 @@ export const BlogIndividualPost = () => {
   React.useEffect(() => {
     getBlogPost()
   }, [postId])
+
+  const switchPlayList = () => {
+    const filteredAudios = (blogContent?.postContent || []).filter(
+      (content) => content.type === 'audio'
+    )
+
+    const formatAudios = filteredAudios.map((fa) => {
+      return {
+        ...fa.content,
+        id: fa.id
+      }
+    })
+    if (!blog || !postId) return
+    const formBlogId = addPrefix(blog)
+    const formPostId = buildIdentifierFromCreateTitleIdAndId(formBlogId, postId)
+    dispatch(setAudio({ audios: formatAudios, postId: formPostId }))
+    if (tempSaveAudio?.current?.currentSelection) {
+      const findIndex = (formatAudios || []).findIndex(
+        (item) =>
+          item?.identifier ===
+          tempSaveAudio?.current?.currentSelection?.content?.identifier
+      )
+      if (findIndex >= 0) {
+        dispatch(setCurrAudio(findIndex))
+      }
+    }
+    setisOpenSwitchPlaylistModal(false)
+  }
 
   const getAvatar = React.useCallback(async () => {
     try {
@@ -131,18 +191,18 @@ export const BlogIndividualPost = () => {
     setCount((prev) => prev + 1)
   }, [])
 
-  const audios = React.useMemo<IPlaylist[]>(() => {
-    const filteredAudios = (blogContent?.postContent || []).filter(
-      (content) => content.type === 'audio'
-    )
+  // const audios = React.useMemo<IPlaylist[]>(() => {
+  //   const filteredAudios = (blogContent?.postContent || []).filter(
+  //     (content) => content.type === 'audio'
+  //   )
 
-    return filteredAudios.map((fa) => {
-      return {
-        ...fa.content,
-        id: fa.id
-      }
-    })
-  }, [blogContent])
+  //   return filteredAudios.map((fa) => {
+  //     return {
+  //       ...fa.content,
+  //       id: fa.id
+  //     }
+  //   })
+  // }, [blogContent])
   console.log({ blogContent, audios })
 
   const handleResize = () => {
@@ -309,12 +369,29 @@ export const BlogIndividualPost = () => {
                     >
                       <Box
                         onClick={() => {
-                          const findIndex = audios.findIndex(
-                            (item) =>
-                              item.identifier === section.content.identifier
-                          )
-                          if (findIndex >= 0) {
-                            setCurrAudio(findIndex)
+                          if (!blog || !postId) return
+                          const formBlogId = addPrefix(blog)
+                          const formPostId =
+                            buildIdentifierFromCreateTitleIdAndId(
+                              formBlogId,
+                              postId
+                            )
+                          if (formPostId !== audioPostId) {
+                            tempSaveAudio.current = {
+                              ...(tempSaveAudio.current || {}),
+                              currentSelection: section,
+                              message:
+                                'You are current on a playlist. Would you like to switch?'
+                            }
+                            setisOpenSwitchPlaylistModal(true)
+                          } else {
+                            const findIndex = (audios || []).findIndex(
+                              (item) =>
+                                item.identifier === section.content.identifier
+                            )
+                            if (findIndex >= 0) {
+                              dispatch(setCurrAudio(findIndex))
+                            }
                           }
                         }}
                         key={section.id}
@@ -524,9 +601,25 @@ export const BlogIndividualPost = () => {
             })}
           </>
         )}
-        {audios.length > 0 && (
-          <AudioPlayer currAudio={currAudio} playlist={audios} />
-        )}
+        <ReusableModal open={isOpenSwitchPlaylistModal}>
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 1
+            }}
+          >
+            <Typography>
+              {tempSaveAudio?.current?.message
+                ? tempSaveAudio?.current?.message
+                : 'You are current on a playlist. Would you like to switch?'}
+            </Typography>
+          </Box>
+          <Button onClick={() => setisOpenSwitchPlaylistModal(false)}>
+            Cancel
+          </Button>
+          <Button onClick={switchPlayList}>Switch</Button>
+        </ReusableModal>
       </Box>
     </Box>
   )
