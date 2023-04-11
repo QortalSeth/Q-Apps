@@ -27,6 +27,7 @@ import {
 } from '../../utils/blogIdformats'
 import { DynamicHeightItemMinimal } from '../../components/DynamicHeightItemMinimal'
 import { ReusableModal } from '../../components/modals/ReusableModal'
+import AudioElement from '../../components/AudioElement'
 const ResponsiveGridLayout = WidthProvider(Responsive)
 const initialMinHeight = 2 // Define an initial minimum height for grid items
 
@@ -367,7 +368,39 @@ export const BlogIndividualPost = () => {
                       count={count}
                       padding={layoutGeneralSettings?.padding}
                     >
-                      <Box
+                      <AudioElement
+                        key={section.id}
+                        onClick={() => {
+                          if (!blog || !postId) return
+                          const formBlogId = addPrefix(blog)
+                          const formPostId =
+                            buildIdentifierFromCreateTitleIdAndId(
+                              formBlogId,
+                              postId
+                            )
+                          if (formPostId !== audioPostId) {
+                            tempSaveAudio.current = {
+                              ...(tempSaveAudio.current || {}),
+                              currentSelection: section,
+                              message:
+                                'You are current on a playlist. Would you like to switch?'
+                            }
+                            setisOpenSwitchPlaylistModal(true)
+                          } else {
+                            const findIndex = (audios || []).findIndex(
+                              (item) =>
+                                item.identifier === section.content.identifier
+                            )
+                            if (findIndex >= 0) {
+                              dispatch(setCurrAudio(findIndex))
+                            }
+                          }
+                        }}
+                        title={section.content?.title}
+                        description={section.content?.description}
+                        author=""
+                      />
+                      {/* <Box
                         onClick={() => {
                           if (!blog || !postId) return
                           const formBlogId = addPrefix(blog)
@@ -426,7 +459,7 @@ export const BlogIndividualPost = () => {
                             {section.content?.description}
                           </Typography>
                         </Box>
-                      </Box>
+                      </Box> */}
                     </DynamicHeightItem>
                   </div>
                 )
@@ -557,7 +590,40 @@ export const BlogIndividualPost = () => {
                             count={count}
                             padding={0}
                           >
-                            <Box
+                            <AudioElement
+                              key={section.id}
+                              onClick={() => {
+                                if (!blog || !postId) return
+                                const formBlogId = addPrefix(blog)
+                                const formPostId =
+                                  buildIdentifierFromCreateTitleIdAndId(
+                                    formBlogId,
+                                    postId
+                                  )
+                                if (formPostId !== audioPostId) {
+                                  tempSaveAudio.current = {
+                                    ...(tempSaveAudio.current || {}),
+                                    currentSelection: section,
+                                    message:
+                                      'You are current on a playlist. Would you like to switch?'
+                                  }
+                                  setisOpenSwitchPlaylistModal(true)
+                                } else {
+                                  const findIndex = (audios || []).findIndex(
+                                    (item) =>
+                                      item.identifier ===
+                                      section.content.identifier
+                                  )
+                                  if (findIndex >= 0) {
+                                    dispatch(setCurrAudio(findIndex))
+                                  }
+                                }
+                              }}
+                              title={section.content?.title}
+                              description={section.content?.description}
+                              author=""
+                            />
+                            {/* <Box
                               key={section.id}
                               sx={{
                                 display: 'flex',
@@ -590,7 +656,7 @@ export const BlogIndividualPost = () => {
                                   {section.content?.description}
                                 </Typography>
                               </Box>
-                            </Box>
+                            </Box> */}
                           </DynamicHeightItemMinimal>
                         </div>
                       )

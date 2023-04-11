@@ -28,6 +28,7 @@ import { EditorToolbar } from './components/Toolbar/EditorToolbar'
 import { Navbar } from './components/Navbar/NavbarBuilder'
 import { UserNavbar } from '../../components/common/UserNavbar'
 import { setCurrentBlog } from '../../state/features/globalSlice'
+import AudioElement from '../../components/AudioElement'
 const ResponsiveGridLayout = WidthProvider(Responsive)
 const initialMinHeight = 2 // Define an initial minimum height for grid items
 const uid = new ShortUniqueId()
@@ -114,7 +115,8 @@ export const CreatePostBuilder = () => {
         description: responseData?.description || '',
         blogImage: responseData?.blogImage || '',
         category: blog.metadata?.category,
-        tags: blog.metadata?.tags || []
+        tags: blog.metadata?.tags || [],
+        navbarConfig: responseData?.navbarConfig || null
       })
     )
   }
@@ -179,25 +181,29 @@ export const CreatePostBuilder = () => {
     [user, currentBlog]
   )
 
-  const handleSaveNavBar = useCallback(async (navMenu: any) => {
-    try {
-      const config = {
-        navItems: navMenu,
-        type: 'topNav',
-        title: '',
-        logo: ''
+  const handleSaveNavBar = useCallback(
+    async (navMenu: any, navbarConfig: any) => {
+      try {
+        const config = {
+          type: 'topNav',
+          title: '',
+          logo: '',
+          ...navbarConfig,
+          navItems: navMenu
+        }
+        await editBlog(config)
+        setNavbarConfig(config)
+      } catch (error: any) {
+        dispatch(
+          setNotification({
+            msg: error?.message || 'Could not save the navbar',
+            alertType: 'error'
+          })
+        )
       }
-      await editBlog(config)
-      setNavbarConfig(config)
-    } catch (error: any) {
-      dispatch(
-        setNotification({
-          msg: error?.message || 'Could not save the navbar',
-          alertType: 'error'
-        })
-      )
-    }
-  }, [])
+    },
+    []
+  )
 
   function objectToBase64(obj: any) {
     // Step 1: Convert the object to a JSON string
@@ -627,6 +633,7 @@ export const CreatePostBuilder = () => {
             onBreakpointChange={onBreakpointChange}
             onResizeStop={onResizeStop}
             margin={[0, 0]}
+            preventCollision={true}
           >
             {newPostContent.map((section: any) => {
               if (section.type === 'editor') {
@@ -890,7 +897,14 @@ export const CreatePostBuilder = () => {
                       count={count}
                       padding={paddingValue}
                     >
-                      <Box
+                      <AudioElement
+                        key={section.id}
+                        onClick={() => {}}
+                        title={section.content?.title}
+                        description={section.content?.description}
+                        author=""
+                      />
+                      {/* <Box
                         key={section.id}
                         sx={{
                           display: 'flex',
@@ -923,7 +937,7 @@ export const CreatePostBuilder = () => {
                             {section.content?.description}
                           </Typography>
                         </Box>
-                      </Box>
+                      </Box> */}
                     </DynamicHeightItem>
                   </div>
                 )

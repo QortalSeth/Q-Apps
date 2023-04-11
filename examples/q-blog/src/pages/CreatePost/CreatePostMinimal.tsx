@@ -25,6 +25,7 @@ import { ReusableModal } from '../../components/modals/ReusableModal'
 import { VideoPlayer } from '../../components/common/VideoPlayer'
 import { EditorToolbar } from './components/Toolbar/EditorToolbar'
 import { DynamicHeightItemMinimal } from '../../components/DynamicHeightItemMinimal'
+import AudioElement from '../../components/AudioElement'
 const ResponsiveGridLayout = WidthProvider(Responsive)
 const initialMinHeight = 2 // Define an initial minimum height for grid items
 const uid = new ShortUniqueId()
@@ -926,7 +927,14 @@ export const CreatePostMinimal = () => {
                           count={count}
                           padding={paddingValue}
                         >
-                          <Box
+                          <AudioElement
+                            key={section.id}
+                            onClick={() => {}}
+                            title={section.content?.title}
+                            description={section.content?.description}
+                            author=""
+                          />
+                          {/* <Box
                             key={section.id}
                             sx={{
                               display: 'flex',
@@ -959,7 +967,7 @@ export const CreatePostMinimal = () => {
                                 {section.content?.description}
                               </Typography>
                             </Box>
-                          </Box>
+                          </Box> */}
                         </DynamicHeightItemMinimal>
                       </div>
                     )

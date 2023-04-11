@@ -24,7 +24,7 @@ import ShortUniqueId from 'short-unique-id'
 
 const uid = new ShortUniqueId()
 interface INavbar {
-  saveNav: (navMenu: any) => void
+  saveNav: (navMenu: any, navbarConfig: any) => void
   removeNav: () => void
   close: () => void
 }
@@ -41,6 +41,15 @@ export const Navbar = ({ saveNav, removeNav, close }: INavbar) => {
     const selectedOption = options.find((option: any) => option.id === optionId)
     setBlogPostOption(selectedOption || null)
   }
+
+  useEffect(() => {
+    if (currentBlog && currentBlog?.navbarConfig) {
+      const { navItems } = currentBlog.navbarConfig
+      if (!navItems || !Array.isArray(navItems)) return
+
+      setNavItems(navItems)
+    }
+  }, [currentBlog])
 
   const getOptions = useCallback(async () => {
     // if(!user || !currentBlog) return
@@ -83,8 +92,10 @@ export const Navbar = ({ saveNav, removeNav, close }: INavbar) => {
   }
 
   const handleSaveNav = () => {
-    saveNav(navItems)
+    if (!currentBlog) return
+    saveNav(navItems, currentBlog?.navbarConfig || {})
   }
+
   return (
     <>
       <Box

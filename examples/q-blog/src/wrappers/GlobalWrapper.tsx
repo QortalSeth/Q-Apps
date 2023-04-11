@@ -99,7 +99,8 @@ const GlobalWrapper: React.FC<Props> = ({ children }) => {
         description: responseData?.description || '',
         blogImage: responseData?.blogImage || '',
         category: blog.metadata?.category,
-        tags: blog.metadata?.tags || []
+        tags: blog.metadata?.tags || [],
+        navbarConfig: responseData?.navbarConfig || null
       })
     )
     // const response = await fetch("/names/address/" + address);

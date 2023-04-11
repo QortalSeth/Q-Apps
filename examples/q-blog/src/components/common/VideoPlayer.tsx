@@ -73,9 +73,14 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
   const [isLoading, setIsLoading] = useState(false)
   const [src, setSrc] = useState('')
   const [resourceStatus, setResourceStatus] = useState<any>(null)
+  const toggleRef = useRef<any>(null)
   const togglePlay = async () => {
     if (!videoRef.current) return
     if (!src) {
+      const el = document.getElementById('videoWrapper')
+      if (el) {
+        el?.parentElement?.removeChild(el)
+      }
       ReactDOM.flushSync(() => {
         setIsLoading(true)
       })
@@ -138,7 +143,6 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
   }
   const togglePictureInPicture = async () => {
     if (!videoRef.current) return
-
     if (document.pictureInPictureElement === videoRef.current) {
       await document.exitPictureInPicture()
     } else {
@@ -268,7 +272,96 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
     }
   }, [])
 
-  console.log({ src })
+  React.useEffect(() => {
+    const videoElement = videoRef.current
+
+    const handleLeavePictureInPicture = async (event: any) => {
+      const target = event?.target
+      if (target) {
+        console.log({ target })
+        target.pause()
+        if (setPlaying) {
+          setPlaying(false)
+        }
+      }
+    }
+
+    if (videoElement) {
+      videoElement.addEventListener(
+        'leavepictureinpicture',
+        handleLeavePictureInPicture
+      )
+    }
+
+    return () => {
+      if (videoElement) {
+        videoElement.removeEventListener(
+          'leavepictureinpicture',
+          handleLeavePictureInPicture
+        )
+      }
+    }
+  }, [])
+
+  React.useEffect(() => {
+    const videoElement = videoRef.current
+
+    const minimizeVideo = async () => {
+      if (!videoElement) return
+      const handleClose = () => {
+        if (videoElement && videoElement.parentElement) {
+          const el = document.getElementById('videoWrapper')
+          if (el) {
+            el?.parentElement?.removeChild(el)
+          }
+        }
+      }
+      const createCloseButton = (): HTMLButtonElement => {
+        const closeButton = document.createElement('button')
+        closeButton.textContent = 'X'
+        closeButton.style.position = 'absolute'
+        closeButton.style.top = '0'
+        closeButton.style.right = '0'
+        closeButton.style.backgroundColor = 'rgba(255, 255, 255, 0.7)'
+        closeButton.style.border = 'none'
+        closeButton.style.fontWeight = 'bold'
+        closeButton.style.fontSize = '1.2rem'
+        closeButton.style.cursor = 'pointer'
+        closeButton.style.padding = '2px 8px'
+        closeButton.style.borderRadius = '0 0 0 4px'
+
+        closeButton.addEventListener('click', handleClose)
+
+        return closeButton
+      }
+      const buttonClose = createCloseButton()
+      const videoWrapper = document.createElement('div')
+      videoWrapper.id = 'videoWrapper'
+      videoWrapper.style.position = 'fixed'
+      videoWrapper.style.zIndex = '900000009'
+      videoWrapper.style.bottom = '0px'
+      videoWrapper.style.right = '0px'
+
+      videoElement.parentElement?.insertBefore(videoWrapper, videoElement)
+      videoWrapper.appendChild(videoElement)
+
+      videoWrapper.appendChild(buttonClose)
+      videoElement.controls = true
+      videoElement.style.height = 'auto'
+      videoElement.style.width = '300px'
+
+      console.log({ videoElement })
+      document.body.appendChild(videoWrapper)
+    }
+
+    return () => {
+      if (videoElement) {
+        if (videoElement && !videoElement.paused && !videoElement.ended) {
+          minimizeVideo()
+        }
+      }
+    }
+  }, [])
 
   return (
     <VideoContainer
@@ -396,6 +489,7 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
             color: 'rgba(255, 255, 255, 0.7)',
             marginLeft: '15px'
           }}
+          ref={toggleRef}
           onClick={togglePictureInPicture}
         >
           <PictureInPicture />

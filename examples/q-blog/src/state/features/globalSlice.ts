@@ -14,6 +14,7 @@ interface GlobalState {
     blogImage: string
     category?: string
     tags?: string[]
+    navbarConfig?: any
   } | null
   visitingBlog: {
     createdAt: number
