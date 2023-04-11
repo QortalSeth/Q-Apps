@@ -120,6 +120,9 @@ export const UserNavbar: React.FC<Props> = ({
               cursor: 'pointer',
               marginLeft: '10px'
             }}
+            onClick={() => {
+              navigate(`/${name}/${blogId}`)
+            }}
           >
             {title}
           </CustomTitle>

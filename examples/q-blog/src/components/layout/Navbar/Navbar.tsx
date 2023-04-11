@@ -66,7 +66,7 @@ const NavBar: React.FC<Props> = ({
         title={visitingBlog?.title || ''}
         menuItems={visitingBlog?.navbarConfig?.navItems || []}
         name={visitingBlog?.name || ''}
-        blogId=""
+        blogId={visitingBlog?.blogId || ''}
       />
     )
   }
