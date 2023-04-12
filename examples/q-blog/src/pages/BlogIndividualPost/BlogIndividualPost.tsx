@@ -77,6 +77,7 @@ export const BlogIndividualPost = () => {
   const [isOpenSwitchPlaylistModal, setisOpenSwitchPlaylistModal] =
     useState<boolean>(false)
   const tempSaveAudio = useRef<any>(null)
+  const saveAudio = React.useRef<any>(null)
 
   const fullPostId = useMemo(() => {
     if (!blog || !postId) return ''
@@ -122,8 +123,10 @@ export const BlogIndividualPost = () => {
             id: fa?.id
           }
         })
+
         console.log({ transformAudios })
         if (!audios && transformAudios.length > 0) {
+          saveAudio.current = { audios: transformAudios, postId: formPostId }
           dispatch(setAudio({ audios: transformAudios, postId: formPostId }))
         } else if (
           formPostId === audioPostId &&
@@ -382,13 +385,14 @@ export const BlogIndividualPost = () => {
                         key={section.id}
                         onClick={() => {
                           if (!blog || !postId) return
+
                           const formBlogId = addPrefix(blog)
                           const formPostId =
                             buildIdentifierFromCreateTitleIdAndId(
                               formBlogId,
                               postId
                             )
-                          if (formPostId !== audioPostId) {
+                          if (audioPostId && formPostId !== audioPostId) {
                             tempSaveAudio.current = {
                               ...(tempSaveAudio.current || {}),
                               currentSelection: section,
@@ -397,6 +401,18 @@ export const BlogIndividualPost = () => {
                             }
                             setisOpenSwitchPlaylistModal(true)
                           } else {
+                            if (!audios && saveAudio?.current) {
+                              const findIndex = (
+                                saveAudio?.current?.audios || []
+                              ).findIndex(
+                                (item: any) =>
+                                  item.identifier === section.content.identifier
+                              )
+                              dispatch(setAudio(saveAudio?.current))
+                              dispatch(setCurrAudio(findIndex))
+                              return
+                            }
+
                             const findIndex = (audios || []).findIndex(
                               (item) =>
                                 item.identifier === section.content.identifier

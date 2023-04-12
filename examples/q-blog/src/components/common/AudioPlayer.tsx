@@ -12,6 +12,8 @@ import {
   PictureInPicture
 } from '@mui/icons-material'
 import { styled } from '@mui/system'
+import { removeAudio } from '../../state/features/globalSlice'
+import { useDispatch } from 'react-redux'
 
 const VideoContainer = styled(Box)`
   position: relative;
@@ -69,6 +71,7 @@ export const AudioPlayer: React.FC<VideoPlayerProps> = ({
 }) => {
   const [playlistFormatted, setPlaylistFormatted] = useState<any>([])
   const [isLoading, setIsLoading] = useState<boolean>(false)
+  const dispatch = useDispatch()
   const getSrc = React.useCallback(
     async (name: string, identifier: string, service: string) => {
       if (!name || !identifier || !service) return
@@ -160,7 +163,9 @@ export const AudioPlayer: React.FC<VideoPlayerProps> = ({
           playList: 'top',
           volumeSlider: 'right'
         }}
-
+        closeCallback={() => {
+          dispatch(removeAudio({}))
+        }}
         // rootContainerProps={{
         //   colorScheme: theme,
         //   width

@@ -105,7 +105,12 @@ export const DownloadTaskManager: React.FC = () => {
             padding: '5px'
           }}
         >
-          <List>
+          <List
+            sx={{
+              maxHeight: '50vh',
+              overflow: 'auto'
+            }}
+          >
             {Object.keys(downloads).map((download: any) => {
               const downloadObj = downloads[download]
               const progress = downloads[download]?.status?.percentLoaded || 0

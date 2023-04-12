@@ -74,6 +74,7 @@ export const globalSlice = createSlice({
     removeAudio: (state, action) => {
       state.audios = null
       state.currAudio = null
+      state.audioPostId = ''
     },
     setIsLoadingGlobal: (state, action) => {
       state.isLoadingGlobal = action.payload
