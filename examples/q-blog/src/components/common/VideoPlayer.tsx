@@ -1,8 +1,7 @@
-import React, { Dispatch, SetStateAction, useRef, useState } from 'react'
+import React, { useContext, useMemo, useRef, useState } from 'react'
 import ReactDOM from 'react-dom'
 import { Box, IconButton, Slider } from '@mui/material'
 import { CircularProgress, Typography } from '@mui/material'
-import MyWorker from '../../webworkers/decodeBase64.js/?worker'
 
 import {
   PlayArrow,
@@ -12,6 +11,9 @@ import {
   PictureInPicture
 } from '@mui/icons-material'
 import { styled } from '@mui/system'
+import { MyContext } from '../../wrappers/DownloadWrapper'
+import { useSelector } from 'react-redux'
+import { RootState } from '../../state/store'
 
 const VideoContainer = styled(Box)`
   position: relative;
@@ -53,6 +55,8 @@ interface VideoPlayerProps {
   from?: string | null
   setCount?: () => void
   customStyle?: any
+  user?: string
+  postId?: string
 }
 
 export const VideoPlayer: React.FC<VideoPlayerProps> = ({
@@ -63,19 +67,39 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
   autoplay = true,
   from = null,
   setCount,
-  customStyle = {}
+  customStyle = {},
+  user = '',
+  postId = ''
 }) => {
-  const workerRef = useRef<any>(null)
   const videoRef = useRef<HTMLVideoElement | null>(null)
   const [playing, setPlaying] = useState(false)
   const [volume, setVolume] = useState(1)
   const [progress, setProgress] = useState(0)
   const [isLoading, setIsLoading] = useState(false)
-  const [src, setSrc] = useState('')
-  const [resourceStatus, setResourceStatus] = useState<any>(null)
+  const [startPlay, setStartPlay] = useState(false)
+
+  const { downloads } = useSelector((state: RootState) => state.global)
+
+  const download = useMemo(() => {
+    if (!downloads || !identifier) return {}
+    const findDownload = downloads[identifier]
+
+    if (!findDownload) return {}
+    return findDownload
+  }, [downloads, identifier])
+
+  const src = useMemo(() => {
+    return download?.url || ''
+  }, download?.url)
+  const resourceStatus = useMemo(() => {
+    return download?.status || {}
+  }, download?.url)
+
   const toggleRef = useRef<any>(null)
+  const { downloadVideo } = useContext(MyContext)
   const togglePlay = async () => {
     if (!videoRef.current) return
+    setStartPlay(true)
     if (!src) {
       const el = document.getElementById('videoWrapper')
       if (el) {
@@ -173,104 +197,19 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
   }
 
   const getSrc = React.useCallback(async () => {
-    if (!name || !identifier || !service) return
+    if (!name || !identifier || !service || !postId || !user) return
     try {
-      // let videoData = await qortalRequest({
-      //   action: 'FETCH_QDN_RESOURCE',
-      //   name: name,
-      //   service: service,
-      //   identifier: identifier,
-      //   encoding: 'base64'
-      // })
-      console.log('starting')
-      try {
-        const url = `/arbitrary/${service}/${name}/${identifier}`
-
-        fetch(url)
-          .then((response) => response.blob())
-          .then((blob) => {
-            const url = URL.createObjectURL(blob)
-            const videoElement = document.querySelector('video')
-            if (!videoElement) return
-            setSrc(url)
-          })
-          .catch((error) => {
-            console.error('Error fetching the video:', error)
-          })
-
-        // const xhr = new XMLHttpRequest()
-        // xhr.open('GET', url2, true)
-        // xhr.responseType = 'blob'
-
-        // // Add the Range header to fetch only the first 1MB of the video
-
-        // xhr.onload = () => {
-        //   const blob = xhr.response
-        //   const url = URL.createObjectURL(blob)
-        //   const videoElement = document.querySelector('video')
-        //   if (!videoElement) return
-        //   setSrc(url)
-        // }
-        // xhr.send()
-        // workerRef.current.postMessage('Hello, world!')
-      } catch (error) {
-        console.log({ error })
-      }
-
-      // setSrc('data:video/mp4;base64,' + videoData)
+      downloadVideo({
+        name,
+        service,
+        identifier,
+        blogPost: {
+          postId,
+          user
+        }
+      })
     } catch (error) {}
   }, [identifier, name, service])
-
-  const isCalling = React.useRef(false)
-
-  React.useEffect(() => {
-    if (!isLoading) return
-    const getStatus = () => {
-      const intervalId = setInterval(async () => {
-        if (isCalling.current) return
-        isCalling.current = true
-        const res = await qortalRequest({
-          action: 'GET_QDN_RESOURCE_STATUS',
-          name: name,
-          service: service,
-          identifier: identifier
-        })
-        isCalling.current = false
-        if (res.localChunkCount) {
-          setResourceStatus(res)
-        }
-
-        // check if progress is 100% and clear interval if true
-        if (res?.status === 'READY') {
-          clearInterval(intervalId)
-        }
-      }, 1000) // 1 second interval
-
-      return intervalId
-    }
-
-    const intervalId = getStatus()
-
-    // cleanup function to clear interval when component unmounts
-    return () => clearInterval(intervalId)
-  }, [identifier, name, service, isLoading])
-
-  React.useEffect(() => {
-    workerRef.current = new MyWorker()
-
-    workerRef.current.addEventListener('message', (event: any) => {
-      const url = event.data
-      console.log({ url })
-      const videoElement = document.querySelector('video')
-      if (!videoElement) return
-      videoElement.src = url
-      setSrc(url)
-    })
-
-    return () => {
-      workerRef.current.terminate()
-    }
-  }, [])
 
   React.useEffect(() => {
     const videoElement = videoRef.current
@@ -415,9 +354,11 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
             >
               {resourceStatus?.status !== 'READY' ? (
                 <>
-                  {(resourceStatus.localChunkCount /
-                    resourceStatus.totalChunkCount) *
-                    100}
+                  {(
+                    (resourceStatus?.localChunkCount /
+                      resourceStatus?.totalChunkCount) *
+                    100
+                  )?.toFixed(0)}
                   %
                 </>
               ) : (
@@ -427,7 +368,7 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
           )}
         </Box>
       )}
-      {!src && !isLoading && (
+      {((!src && !isLoading) || !startPlay) && (
         <Box
           position="absolute"
           top={0}
@@ -460,7 +401,7 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
 
       <VideoElement
         ref={videoRef}
-        src={src}
+        src={!startPlay ? '' : src}
         poster={poster}
         onTimeUpdate={updateProgress}
         autoPlay={autoplay}

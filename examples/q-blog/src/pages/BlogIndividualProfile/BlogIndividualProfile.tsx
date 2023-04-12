@@ -8,6 +8,7 @@ import EditIcon from '@mui/icons-material/Edit'
 import BlogPostPreview from '../BlogList/PostPreview'
 import {
   setIsLoadingGlobal,
+  setVisitingBlog,
   toggleEditBlogModal
 } from '../../state/features/globalSlice'
 import { BlogPost } from '../../state/features/blogSlice'
@@ -101,9 +102,10 @@ export const BlogIndividualProfile = () => {
         }
       })
       const responseData = await response.json()
+      dispatch(setVisitingBlog({ ...responseData, name }))
       setUserBlog(responseData)
     } catch (error) {}
-  }, [username, blog, blogPosts])
+  }, [username, blog])
 
   React.useEffect(() => {
     getBlog()

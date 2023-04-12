@@ -13,6 +13,8 @@ import theme from './styles/theme'
 import { store } from './state/store'
 import { Provider } from 'react-redux'
 import GlobalWrapper from './wrappers/GlobalWrapper'
+import DownloadWrapper from './wrappers/DownloadWrapper'
+
 import { EditPost } from './pages/EditPost/EditPost'
 import Notification from './components/common/Notification/Notification'
 
@@ -22,19 +24,21 @@ function App() {
       <ThemeProvider theme={theme}>
         <Notification />
         <GlobalWrapper>
-          <CssBaseline />
+          <DownloadWrapper>
+            <CssBaseline />
 
-          <Routes>
-            <Route
-              path="/:user/:blog/:postId"
-              element={<BlogIndividualPost />}
-            />
-            <Route path="/:user/:blog/:postId/edit" element={<EditPost />} />
-            <Route path="/:user/:blog" element={<BlogIndividualProfile />} />
-            <Route path="/post/new" element={<CreatePost />} />
-            <Route path="/profile/new" element={<CreatEditProfile />} />
-            <Route path="/" element={<BlogList />} />
-          </Routes>
+            <Routes>
+              <Route
+                path="/:user/:blog/:postId"
+                element={<BlogIndividualPost />}
+              />
+              <Route path="/:user/:blog/:postId/edit" element={<EditPost />} />
+              <Route path="/:user/:blog" element={<BlogIndividualProfile />} />
+              <Route path="/post/new" element={<CreatePost />} />
+              <Route path="/profile/new" element={<CreatEditProfile />} />
+              <Route path="/" element={<BlogList />} />
+            </Routes>
+          </DownloadWrapper>
         </GlobalWrapper>
       </ThemeProvider>
     </Provider>

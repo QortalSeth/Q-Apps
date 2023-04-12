@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react'
+import React, { useMemo, useRef, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { Button, Box, Typography, CardHeader, Avatar } from '@mui/material'
 import { useNavigate } from 'react-router-dom'
@@ -77,6 +77,14 @@ export const BlogIndividualPost = () => {
   const [isOpenSwitchPlaylistModal, setisOpenSwitchPlaylistModal] =
     useState<boolean>(false)
   const tempSaveAudio = useRef<any>(null)
+
+  const fullPostId = useMemo(() => {
+    if (!blog || !postId) return ''
+    dispatch(setIsLoadingGlobal(true))
+    const formBlogId = addPrefix(blog)
+    const formPostId = buildIdentifierFromCreateTitleIdAndId(formBlogId, postId)
+    return formPostId
+  }, [blog, postId])
   const getBlogPost = React.useCallback(async () => {
     try {
       if (!blog || !postId) return
@@ -352,6 +360,8 @@ export const BlogIndividualPost = () => {
                         service={section.content.service}
                         identifier={section.content.identifier}
                         setCount={handleCount}
+                        user={user}
+                        postId={fullPostId}
                       />
                     </DynamicHeightItem>
                   </div>
@@ -573,6 +583,8 @@ export const BlogIndividualPost = () => {
                                 customStyle={{
                                   height: '50vh'
                                 }}
+                                user={user}
+                                postId={fullPostId}
                               />
                             </Box>
                           </DynamicHeightItemMinimal>
