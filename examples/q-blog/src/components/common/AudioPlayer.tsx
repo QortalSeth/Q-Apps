@@ -161,7 +161,7 @@ export const AudioPlayer: React.FC<VideoPlayerProps> = ({
           player: 'bottom',
 
           playList: 'top',
-          volumeSlider: 'right'
+          volumeSlider: 'top'
         }}
         closeCallback={() => {
           dispatch(removeAudio({}))
