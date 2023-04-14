@@ -189,6 +189,7 @@ export const BlogIndividualProfile = () => {
                 createdAt={blogPost?.createdAt}
                 author={blogPost.user}
                 postImage={blogPost?.postImage}
+                blogPost={blogPost}
               />
 
               {blogPost.user === user?.name && (

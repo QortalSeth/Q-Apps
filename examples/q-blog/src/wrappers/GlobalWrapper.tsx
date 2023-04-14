@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
 
@@ -17,10 +17,16 @@ import {
 import NavBar from '../components/layout/Navbar/Navbar'
 import PageLoader from '../components/common/PageLoader'
 import { fetchAndEvaluatePosts } from '../utils/fetchPosts'
-import { addPosts, addToHashMap, BlogPost } from '../state/features/blogSlice'
+import {
+  addFavorites,
+  addPosts,
+  addToHashMap,
+  BlogPost
+} from '../state/features/blogSlice'
 import { useFetchPosts } from '../hooks/useFetchPosts'
 import { setNotification } from '../state/features/notificationsSlice'
 import { AudioPlayer } from '../components/common/AudioPlayer'
+import localForage from 'localforage'
 
 interface Props {
   children: React.ReactNode
@@ -34,6 +40,17 @@ const GlobalWrapper: React.FC<Props> = ({ children }) => {
   const { user } = useSelector((state: RootState) => state.auth)
   const { audios, currAudio } = useSelector((state: RootState) => state.global)
   const { getBlogPosts } = useFetchPosts()
+  const favoritesLocalRef = useRef<any>(null)
+
+  useEffect(() => {
+    if (!user?.name) return
+    const dynamicInstanceName = `q-blog-favorites-${user.name}` // Replace this with your dynamic value
+    favoritesLocalRef.current = localForage.createInstance({
+      name: dynamicInstanceName
+    })
+    getFavorites()
+  }, [user?.name])
+
   const {
     isOpenPublishBlogModal,
     currentBlog,
@@ -294,6 +311,35 @@ const GlobalWrapper: React.FC<Props> = ({ children }) => {
   const onCloseEditBlogModal = React.useCallback(() => {
     dispatch(toggleEditBlogModal(false))
   }, [])
+
+  const getFavorites = useCallback(async () => {
+    try {
+      const allItems: any[] = []
+      console.log('favoritesLocalRef', favoritesLocalRef.current)
+      if (!favoritesLocalRef?.current) return
+      favoritesLocalRef?.current
+        .iterate(function (value: any, key: string) {
+          // Handle each key-value pair here
+          console.log({ key, value })
+          allItems.push({ id: key, ...(value || {}) })
+        })
+        .then(function () {
+          dispatch(addFavorites(allItems))
+        })
+        .catch(function (error: any) {
+          // Handle any errors here
+          console.log(error)
+        })
+    } catch (error) {}
+  }, [user?.name])
+
+  // React.useEffect(() => {
+  //   console.log('hello fav2', user)
+  //   // if (user?.name) {
+  //   console.log('hello fav')
+  //   getFavorites('string')
+  //   // }
+  // }, [user])
 
   return (
     <>

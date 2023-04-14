@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { FC } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useDispatch, useSelector } from 'react-redux'
 import { RootState } from '../../state/store'
@@ -9,18 +9,40 @@ import { useFetchPosts } from '../../hooks/useFetchPosts'
 import LazyLoad from '../../components/common/LazyLoad'
 import { removePrefix } from '../../utils/blogIdformats'
 
-export const BlogList = () => {
+interface BlogListProps {
+  mode?: string
+}
+export const BlogList = ({ mode }: BlogListProps) => {
   const { user } = useSelector((state: RootState) => state.auth)
   const hashMapPosts = useSelector(
     (state: RootState) => state.blog.hashMapPosts
   )
-  const { posts } = useSelector((state: RootState) => state.blog)
+  const favoritesLocal = useSelector(
+    (state: RootState) => state.blog.favoritesLocal
+  )
+  const { posts: globalPosts, favorites } = useSelector(
+    (state: RootState) => state.blog
+  )
   const navigate = useNavigate()
-  const { getBlogPosts } = useFetchPosts()
+  const { getBlogPosts, getBlogPostsFavorites } = useFetchPosts()
   const getPosts = React.useCallback(async () => {
+    console.log({ main: favoritesLocal })
+    if (mode === 'favorites') {
+      console.log('hello ites')
+      getBlogPostsFavorites()
+      return
+    }
     await getBlogPosts()
-  }, [getBlogPosts])
+  }, [getBlogPosts, mode, favoritesLocal])
 
+  let posts = globalPosts
+
+  if (mode === 'favorites') {
+    posts = favorites
+  }
+
+  if (!favoritesLocal) return null
+  console.log({ favoritesLocal })
   return (
     <>
       <List
@@ -63,6 +85,7 @@ export const BlogList = () => {
                 createdAt={blogPost?.createdAt}
                 author={blogPost.user}
                 postImage={blogPost?.postImage}
+                blogPost={blogPost}
               />
 
               {blogPost.user === user?.name && (

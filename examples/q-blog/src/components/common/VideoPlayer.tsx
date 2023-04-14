@@ -90,10 +90,10 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
 
   const src = useMemo(() => {
     return download?.url || ''
-  }, download?.url)
+  }, [download?.url])
   const resourceStatus = useMemo(() => {
     return download?.status || {}
-  }, download?.url)
+  }, [download])
 
   const toggleRef = useRef<any>(null)
   const { downloadVideo } = useContext(MyContext)

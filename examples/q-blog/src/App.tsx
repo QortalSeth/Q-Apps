@@ -36,6 +36,10 @@ function App() {
               <Route path="/:user/:blog" element={<BlogIndividualProfile />} />
               <Route path="/post/new" element={<CreatePost />} />
               <Route path="/profile/new" element={<CreatEditProfile />} />
+              <Route
+                path="/favorites"
+                element={<BlogList mode="favorites" />}
+              />
               <Route path="/" element={<BlogList />} />
             </Routes>
           </DownloadWrapper>

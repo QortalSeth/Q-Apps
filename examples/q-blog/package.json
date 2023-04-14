@@ -17,6 +17,7 @@
     "@types/react-grid-layout": "^1.3.2",
     "axios": "^1.3.4",
     "compressorjs": "^1.2.1",
+    "localforage": "^1.10.0",
     "moment": "^2.29.4",
     "philliplm-react-modern-audio-player": "^1.4.6",
     "react": "^18.2.0",

@@ -12,6 +12,8 @@ import { RootState } from '../../../state/store'
 import { UserNavbar } from '../../common/UserNavbar'
 import { addPrefix, removePrefix } from '../../../utils/blogIdformats'
 import { useLocation } from 'react-router-dom'
+import BookmarkIcon from '@mui/icons-material/Bookmark'
+
 interface Props {
   isAuthenticated: boolean
   hasBlog: boolean
@@ -97,6 +99,21 @@ const NavBar: React.FC<Props> = ({
               onClick={authenticate}
             >
               Authenticate
+            </StyledButton>
+          )}
+          {isAuthenticated && userName && (
+            <StyledButton
+              color="primary"
+              startIcon={
+                <BookmarkIcon
+                  sx={{
+                    color: 'red'
+                  }}
+                />
+              }
+              onClick={() => navigate('/favorites')}
+            >
+              Favorites
             </StyledButton>
           )}
           {isAuthenticated && userName && !hasBlog && (

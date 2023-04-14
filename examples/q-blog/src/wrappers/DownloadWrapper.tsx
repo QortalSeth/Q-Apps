@@ -119,7 +119,7 @@ const DownloadWrapper: React.FC<Props> = ({ children }) => {
       if (res?.status === 'READY') {
         clearInterval(intervalId)
       }
-    }, 1000) // 1 second interval
+    }, 3000) // 1 second interval
     console.log('hello before')
     fetch(url)
       .then((response) => response.blob())
