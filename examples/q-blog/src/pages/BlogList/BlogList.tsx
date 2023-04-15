@@ -20,29 +20,38 @@ export const BlogList = ({ mode }: BlogListProps) => {
   const favoritesLocal = useSelector(
     (state: RootState) => state.blog.favoritesLocal
   )
+  const subscriptionPosts = useSelector(
+    (state: RootState) => state.blog.subscriptionPosts
+  )
+
   const { posts: globalPosts, favorites } = useSelector(
     (state: RootState) => state.blog
   )
   const navigate = useNavigate()
-  const { getBlogPosts, getBlogPostsFavorites } = useFetchPosts()
+  const { getBlogPosts, getBlogPostsFavorites, getBlogPostsSubscriptions } =
+    useFetchPosts()
   const getPosts = React.useCallback(async () => {
-    console.log({ main: favoritesLocal })
     if (mode === 'favorites') {
-      console.log('hello ites')
       getBlogPostsFavorites()
       return
     }
+    if (mode === 'subscriptions' && user?.name) {
+      getBlogPostsSubscriptions(user.name)
+      return
+    }
     await getBlogPosts()
-  }, [getBlogPosts, mode, favoritesLocal])
+  }, [getBlogPosts, mode, favoritesLocal, user?.name])
 
   let posts = globalPosts
 
   if (mode === 'favorites') {
     posts = favorites
   }
+  if (mode === 'subscriptions') {
+    posts = subscriptionPosts
+  }
 
   if (!favoritesLocal) return null
-  console.log({ favoritesLocal })
   return (
     <>
       <List

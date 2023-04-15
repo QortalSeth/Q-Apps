@@ -12,13 +12,17 @@ interface GlobalState {
   blogListPageNumber: number
   favorites: any[]
   favoritesLocal: any[] | null
+  subscriptions: any[]
+  subscriptionPosts: any[]
 }
 const initialState: GlobalState = {
   posts: [],
   hashMapPosts: {},
   blogListPageNumber: 0,
   favorites: [],
-  favoritesLocal: null
+  favoritesLocal: null,
+  subscriptions: [],
+  subscriptionPosts: []
 }
 
 export interface BlogPost {
@@ -50,6 +54,28 @@ export const removeFavorites = createAsyncThunk<
   }
   await favoritesLocal.removeItem(id)
   return id
+})
+export const removeFavoritesArray = createAsyncThunk<
+  string[],
+  string[],
+  { state: RootState }
+>('favorites/remove', async (ids, thunkAPI) => {
+  const state = thunkAPI.getState() // Get the current state
+  const username = state?.auth?.user?.name // Access the user.name property
+  if (!username || !ids.length) return []
+
+  let favoritesLocal = instanceCache.get(`q-blog-favorites-${username}`)
+  if (!favoritesLocal) {
+    favoritesLocal = localForage.createInstance({
+      name: `q-blog-favorites-${username}`
+    })
+  }
+  if (!favoritesLocal) return []
+
+  // Remove all items in parallel
+  await Promise.all(ids.map((id) => favoritesLocal?.removeItem(id)))
+
+  return ids
 })
 
 export const upsertFavorites = createAsyncThunk<
@@ -87,6 +113,20 @@ export const blogSlice = createSlice({
     },
     addPosts: (state, action) => {
       state.posts = action.payload
+    },
+    addSubscriptions: (state, action) => {
+      state.subscriptions = action.payload
+    },
+    removeSubscription: (state, action) => {
+      state.subscriptions = state.subscriptions.filter(
+        (sub) => sub !== action.payload
+      )
+      state.subscriptionPosts = state.subscriptionPosts.filter(
+        (post) => post.user !== action.payload
+      )
+    },
+    addSubscription: (state, action) => {
+      state.subscriptions.push(action.payload)
     },
     addFavorites: (state, action) => {
       state.favoritesLocal = action.payload
@@ -134,7 +174,16 @@ export const blogSlice = createSlice({
         }
       })
     },
-
+    upsertSubscriptionPosts: (state, action) => {
+      action.payload.forEach((post: BlogPost) => {
+        const index = state.subscriptionPosts.findIndex((p) => p.id === post.id)
+        if (index !== -1) {
+          state.subscriptionPosts[index] = post
+        } else {
+          state.subscriptionPosts.push(post)
+        }
+      })
+    },
     populateFavorites: (state, action) => {
       action.payload.forEach((favorite: BlogPost) => {
         const index = state.favorites.findIndex((p) => p.id === favorite.id)
@@ -144,6 +193,25 @@ export const blogSlice = createSlice({
           state.favorites.push(favorite)
         }
       })
+    },
+    blockUser: (state, action) => {
+      const username = action.payload
+      state.posts = state.posts.filter((item) => item.user !== username)
+      state.favorites = state.favorites.filter((item) => item.user !== username)
+      state.subscriptionPosts = state.subscriptionPosts.filter(
+        (item) => item.user !== username
+      )
+
+      if (state?.favoritesLocal) {
+        const ids = state.favoritesLocal
+          .filter((item) => item.user === username)
+          .map((user) => user?.user || '')
+        state.favoritesLocal = state.favoritesLocal.filter(
+          (item) => item.user !== username
+        )
+
+        removeFavoritesArray(ids)
+      }
     }
   },
   extraReducers: (builder) => {
@@ -191,7 +259,12 @@ export const {
   setBlogListPageNumber,
   upsertPosts,
   addFavorites,
-  populateFavorites
+  populateFavorites,
+  addSubscriptions,
+  removeSubscription,
+  addSubscription,
+  upsertSubscriptionPosts,
+  blockUser
 } = blogSlice.actions
 
 export default blogSlice.reducer

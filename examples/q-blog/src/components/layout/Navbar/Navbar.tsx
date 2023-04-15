@@ -1,9 +1,17 @@
 import React from 'react';
-import { AppBar, Toolbar, Typography, Button, IconButton, Box } from '@mui/material';
-import { styled } from '@mui/system';
-import AccountCircle from '@mui/icons-material/AccountCircle';
-import AddBoxIcon from '@mui/icons-material/AddBox';
-import ExitToAppIcon from '@mui/icons-material/ExitToApp';
+import {
+  AppBar,
+  Toolbar,
+  Typography,
+  Button,
+  IconButton,
+  Box,
+  Popover
+} from '@mui/material'
+import { styled } from '@mui/system'
+import AccountCircle from '@mui/icons-material/AccountCircle'
+import AddBoxIcon from '@mui/icons-material/AddBox'
+import ExitToAppIcon from '@mui/icons-material/ExitToApp'
 import { useNavigate } from 'react-router-dom'
 import { togglePublishBlogModal } from '../../../state/features/globalSlice'
 import { useDispatch, useSelector } from 'react-redux'
@@ -13,7 +21,9 @@ import { UserNavbar } from '../../common/UserNavbar'
 import { addPrefix, removePrefix } from '../../../utils/blogIdformats'
 import { useLocation } from 'react-router-dom'
 import BookmarkIcon from '@mui/icons-material/Bookmark'
-
+import SubscriptionsIcon from '@mui/icons-material/Subscriptions'
+import SettingsIcon from '@mui/icons-material/Settings'
+import { BlockedNamesModal } from '../../common/BlockedNamesModal'
 interface Props {
   isAuthenticated: boolean
   hasBlog: boolean
@@ -60,7 +70,8 @@ const NavBar: React.FC<Props> = ({
   const query = useQuery()
   const { visitingBlog } = useSelector((state: RootState) => state.global)
   const location = useLocation()
-
+  const [anchorEl, setAnchorEl] = React.useState<HTMLButtonElement | null>(null)
+  const [isOpenModal, setIsOpenModal] = React.useState<boolean>(false)
   const stripBlogId = removePrefix(visitingBlog?.blogId || '')
   if (visitingBlog?.navbarConfig && location?.pathname?.includes(stripBlogId)) {
     return (
@@ -72,6 +83,20 @@ const NavBar: React.FC<Props> = ({
       />
     )
   }
+
+  const handleClick = (event: React.MouseEvent<HTMLDivElement>) => {
+    const target = event.currentTarget as unknown as HTMLButtonElement | null
+    setAnchorEl(target)
+  }
+
+  const handleClose = () => {
+    setAnchorEl(null)
+  }
+  const onClose = () => {
+    setIsOpenModal(false)
+  }
+  const open = Boolean(anchorEl)
+  const id = open ? 'simple-popover' : undefined
   return (
     <CustomAppBar position="sticky">
       <CustomToolbar variant="dense">
@@ -102,19 +127,28 @@ const NavBar: React.FC<Props> = ({
             </StyledButton>
           )}
           {isAuthenticated && userName && (
-            <StyledButton
-              color="primary"
-              startIcon={
-                <BookmarkIcon
-                  sx={{
-                    color: 'red'
-                  }}
-                />
-              }
-              onClick={() => navigate('/favorites')}
-            >
-              Favorites
-            </StyledButton>
+            <>
+              <StyledButton
+                color="primary"
+                startIcon={
+                  <BookmarkIcon
+                    sx={{
+                      color: 'red'
+                    }}
+                  />
+                }
+                onClick={() => navigate('/favorites')}
+              >
+                Favorites
+              </StyledButton>
+              <StyledButton
+                color="primary"
+                startIcon={<SubscriptionsIcon />}
+                onClick={() => navigate('/subscriptions')}
+              >
+                Subscriptions
+              </StyledButton>
+            </>
           )}
           {isAuthenticated && userName && !hasBlog && (
             <StyledButton
@@ -150,6 +184,26 @@ const NavBar: React.FC<Props> = ({
               </StyledButton>
             </>
           )}
+          <Box onClick={handleClick}>
+            <SettingsIcon />
+          </Box>
+          <Popover
+            id={id}
+            open={open}
+            anchorEl={anchorEl}
+            onClose={handleClose}
+            anchorOrigin={{
+              vertical: 'bottom',
+              horizontal: 'left'
+            }}
+          >
+            <Typography
+              sx={{ p: 2, cursor: 'pointer' }}
+              onClick={() => setIsOpenModal(true)}
+            >
+              Blocked Names
+            </Typography>
+          </Popover>
           {/* {isAuthenticated && userName && (
           <Box sx={{
             display: 'flex',
@@ -165,6 +219,7 @@ const NavBar: React.FC<Props> = ({
             )}
           </Box>
         )} */}
+          <BlockedNamesModal open={isOpenModal} onClose={onClose} />
         </Box>
       </CustomToolbar>
     </CustomAppBar>

@@ -4,7 +4,8 @@ import {
   addToHashMap,
   BlogPost,
   populateFavorites,
-  upsertPosts
+  upsertPosts,
+  upsertSubscriptionPosts
 } from '../state/features/blogSlice'
 import {
   setCurrentBlog,
@@ -23,6 +24,12 @@ export const useFetchPosts = () => {
     (state: RootState) => state.blog.favoritesLocal
   )
   const favorites = useSelector((state: RootState) => state.blog.favorites)
+  const subscriptionPosts = useSelector(
+    (state: RootState) => state.blog.subscriptionPosts
+  )
+  const subscriptions = useSelector(
+    (state: RootState) => state.blog.subscriptions
+  )
 
   const checkAndUpdatePost = React.useCallback(
     (post: BlogPost) => {
@@ -98,6 +105,54 @@ export const useFetchPosts = () => {
       dispatch(setIsLoadingGlobal(false))
     }
   }, [posts, hashMapPosts])
+
+  const getBlogPostsSubscriptions = React.useCallback(
+    async (username: string) => {
+      try {
+        console.log({ subscriptionPosts })
+        const offset = subscriptionPosts.length
+        console.log({ offset })
+        dispatch(setIsLoadingGlobal(true))
+        const url = `/arbitrary/resources/search?service=BLOG_POST&query=q-blog-&limit=20&includemetadata=true&offset=${offset}&reverse=true&namefilter=q-blog-subscriptions-${username}`
+        const response = await fetch(url, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        })
+        const responseData = await response.json()
+        const structureData = responseData.map((post: any): BlogPost => {
+          return {
+            title: post?.metadata?.title,
+            category: post?.metadata?.category,
+            categoryName: post?.metadata?.categoryName,
+            tags: post?.metadata?.tags || [],
+            description: post?.metadata?.description,
+            createdAt: '',
+            user: post.name,
+            postImage: '',
+            id: post.identifier
+          }
+        })
+        dispatch(upsertSubscriptionPosts(structureData))
+
+        for (const content of structureData) {
+          if (content.user && content.id) {
+            const res = checkAndUpdatePost(content)
+            console.log({ res })
+            if (res) {
+              getBlogPost(content.user, content.id, content)
+            }
+          }
+        }
+      } catch (error) {
+      } finally {
+        dispatch(setIsLoadingGlobal(false))
+      }
+    },
+    [subscriptionPosts, hashMapPosts, subscriptions]
+  )
+
   const getBlogPostsFavorites = React.useCallback(async () => {
     try {
       console.log({ posts, favoritesLocal })
@@ -169,6 +224,7 @@ export const useFetchPosts = () => {
   return {
     getBlogPosts,
     getBlogPostsFavorites,
+    getBlogPostsSubscriptions,
     checkAndUpdatePost,
     getBlogPost,
     hashMapPosts

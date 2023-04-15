@@ -18,6 +18,9 @@ interface QortalRequestOptions {
   reverse?: boolean
   resources?: any[]
   filename?: string
+  list_name?: string
+  item?: string
+  items?: strings[]
 }
 
 declare function qortalRequest(options: QortalRequestOptions): Promise<any>

@@ -24,6 +24,7 @@ const VideoContainer = styled(Box)`
   width: 100%;
   height: 100%;
   margin: 20px 0px;
+  z-index: 501;
 `
 
 const VideoElement = styled('video')`

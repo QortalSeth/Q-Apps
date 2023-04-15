@@ -40,6 +40,10 @@ function App() {
                 path="/favorites"
                 element={<BlogList mode="favorites" />}
               />
+              <Route
+                path="/subscriptions"
+                element={<BlogList mode="subscriptions" />}
+              />
               <Route path="/" element={<BlogList />} />
             </Routes>
           </DownloadWrapper>

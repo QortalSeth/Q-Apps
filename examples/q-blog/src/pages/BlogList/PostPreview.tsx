@@ -12,14 +12,17 @@ import {
 import { styled } from '@mui/system'
 import moment from 'moment'
 import {
+  blockUser,
   BlogPost,
   removeFavorites,
+  removeSubscription,
   upsertFavorites
 } from '../../state/features/blogSlice'
 import { useDispatch, useSelector } from 'react-redux'
 import BookmarkBorderIcon from '@mui/icons-material/BookmarkBorder'
 import BookmarkIcon from '@mui/icons-material/Bookmark'
 import { AppDispatch, RootState } from '../../state/store'
+import BlockIcon from '@mui/icons-material/Block'
 interface BlogPostPreviewProps {
   title: string
   createdAt: number | string
@@ -61,6 +64,9 @@ const BlogPostPreview: React.FC<BlogPostPreviewProps> = ({
   const dispatch = useDispatch<AppDispatch>()
   const favoritesLocal = useSelector(
     (state: RootState) => state.blog.favoritesLocal
+  )
+  const subscriptions = useSelector(
+    (state: RootState) => state.blog.subscriptions
   )
   const username = useSelector((state: RootState) => state.auth?.user?.name)
   const formatDate = (unixTimestamp: number): string => {
@@ -105,6 +111,39 @@ const BlogPostPreview: React.FC<BlogPostPreviewProps> = ({
     if (!favoritesLocal) return false
     return favoritesLocal.find((fav) => fav?.id === blogPost?.id)
   }, [favoritesLocal, blogPost?.id])
+
+  const blockUserFunc = async (user: string) => {
+    if (user === 'q-blog' || user === 'Phil') return
+    if (subscriptions.includes(user) && username) {
+      try {
+        const listName = `q-blog-subscriptions-${username}`
+
+        const response = await qortalRequest({
+          action: 'DELETE_LIST_ITEM',
+          list_name: listName,
+          item: user
+        })
+        if (response === true) {
+          dispatch(removeSubscription(user))
+        }
+      } catch (error) {
+        console.log({ error })
+      }
+    }
+
+    try {
+      const response = await qortalRequest({
+        action: 'ADD_LIST_ITEMS',
+        list_name: 'blockedNames_q-blog',
+        items: [user]
+      })
+
+      if (response === true) {
+        dispatch(blockUser(user))
+        dispatch(removeFavorites(blogPost.id))
+      }
+    } catch (error) {}
+  }
   return (
     <>
       <StyledCard onClick={onClick}>
@@ -147,6 +186,11 @@ const BlogPostPreview: React.FC<BlogPostPreviewProps> = ({
           right: '15px'
         }}
       >
+        <BlockIcon
+          onClick={() => {
+            blockUserFunc(blogPost.user)
+          }}
+        />
         {username && isFavorite && (
           <BookmarkIcon
             sx={{

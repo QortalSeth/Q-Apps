@@ -20,6 +20,7 @@ import { fetchAndEvaluatePosts } from '../utils/fetchPosts'
 import {
   addFavorites,
   addPosts,
+  addSubscriptions,
   addToHashMap,
   BlogPost
 } from '../state/features/blogSlice'
@@ -49,7 +50,23 @@ const GlobalWrapper: React.FC<Props> = ({ children }) => {
       name: dynamicInstanceName
     })
     getFavorites()
+    getSubscriptions()
   }, [user?.name])
+
+  const getSubscriptions = async () => {
+    try {
+      if (!user?.name) return
+      const listName = `q-blog-subscriptions-${user.name}`
+      const response = await qortalRequest({
+        action: 'GET_LIST_ITEMS',
+        list_name: listName
+      })
+      console.log({ response })
+      dispatch(addSubscriptions(response))
+    } catch (error) {
+      console.log({ error })
+    }
+  }
 
   const {
     isOpenPublishBlogModal,

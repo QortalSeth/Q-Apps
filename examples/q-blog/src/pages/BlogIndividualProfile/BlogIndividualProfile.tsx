@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useDispatch, useSelector } from 'react-redux'
 import { RootState } from '../../state/store'
 import { useParams } from 'react-router-dom'
-import { List, ListItem, Typography, Box } from '@mui/material'
+import { List, ListItem, Typography, Box, Button } from '@mui/material'
 import EditIcon from '@mui/icons-material/Edit'
 import BlogPostPreview from '../BlogList/PostPreview'
 import {
@@ -11,7 +11,11 @@ import {
   setVisitingBlog,
   toggleEditBlogModal
 } from '../../state/features/globalSlice'
-import { BlogPost } from '../../state/features/blogSlice'
+import {
+  addSubscription,
+  BlogPost,
+  removeSubscription
+} from '../../state/features/blogSlice'
 import { useFetchPosts } from '../../hooks/useFetchPosts'
 import LazyLoad from '../../components/common/LazyLoad'
 import { addPrefix, removePrefix } from '../../utils/blogIdformats'
@@ -19,6 +23,9 @@ export const BlogIndividualProfile = () => {
   const navigate = useNavigate()
   const { user } = useSelector((state: RootState) => state.auth)
   const { currentBlog } = useSelector((state: RootState) => state.global)
+  const subscriptions = useSelector(
+    (state: RootState) => state.blog.subscriptions
+  )
 
   const { blog: blogShortVersion, user: username } = useParams()
   const blog = React.useMemo(() => {
@@ -114,6 +121,46 @@ export const BlogIndividualProfile = () => {
     await getBlogPosts()
   }, [getBlogPosts])
   console.log({ currentBlog })
+
+  const subscribe = async () => {
+    try {
+      if (!user?.name) return
+      const body = {
+        items: [username]
+      }
+
+      const listName = `q-blog-subscriptions-${user.name}`
+
+      const response = await qortalRequest({
+        action: 'ADD_LIST_ITEMS',
+        list_name: listName,
+        items: [username]
+      })
+      if (response === true) {
+        dispatch(addSubscription(username))
+      }
+    } catch (error) {
+      console.log({ error })
+    }
+  }
+  const unsubscribe = async () => {
+    try {
+      if (!user?.name) return
+
+      const listName = `q-blog-subscriptions-${user.name}`
+
+      const response = await qortalRequest({
+        action: 'DELETE_LIST_ITEM',
+        list_name: listName,
+        item: username
+      })
+      if (response === true) {
+        dispatch(removeSubscription(username))
+      }
+    } catch (error) {
+      console.log({ error })
+    }
+  }
   if (!userBlog) return null
   return (
     <>
@@ -144,6 +191,12 @@ export const BlogIndividualProfile = () => {
               dispatch(toggleEditBlogModal(true))
             }}
           ></EditIcon>
+        )}
+        {subscriptions.includes(username) && (
+          <Button onClick={unsubscribe}>Unsubscribe</Button>
+        )}
+        {!subscriptions.includes(username) && (
+          <Button onClick={subscribe}>Subscribe</Button>
         )}
       </Box>
 
