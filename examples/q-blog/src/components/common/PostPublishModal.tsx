@@ -49,6 +49,8 @@ interface PostModalProps {
   onClose: () => void
   onPublish: (value: any) => Promise<void>
   post: any
+  mode?: string
+  metadata?: any
 }
 
 interface SelectOption {
@@ -60,7 +62,9 @@ const PostPublishModal: React.FC<PostModalProps> = ({
   open,
   onClose,
   onPublish,
-  post
+  post,
+  mode,
+  metadata
 }) => {
   const [file, setFile] = useState<File | null>(null)
   const [title, setTitle] = useState('')
@@ -92,6 +96,19 @@ const PostPublishModal: React.FC<PostModalProps> = ({
       setDescription(post.description)
     }
   }, [post])
+
+  React.useEffect(() => {
+    if (mode === 'edit' && metadata) {
+      console.log({ metadata })
+      const findCategory = options.find(
+        (option) => option.id === metadata?.category
+      )
+      if (!findCategory) return
+      setSelectedOption(findCategory)
+      if (!metadata?.tags || !Array.isArray(metadata?.tags)) return
+      setChips(metadata.tags)
+    }
+  }, [mode, metadata, options])
 
   const handleTitleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setTitle(event.target.value)

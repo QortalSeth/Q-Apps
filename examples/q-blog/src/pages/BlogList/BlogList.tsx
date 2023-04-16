@@ -50,8 +50,7 @@ export const BlogList = ({ mode }: BlogListProps) => {
   if (mode === 'subscriptions') {
     posts = subscriptionPosts
   }
-
-  if (!favoritesLocal) return null
+  // if (!favoritesLocal) return null
   return (
     <>
       <List

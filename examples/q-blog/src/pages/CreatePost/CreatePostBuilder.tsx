@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react'
+import React, { useCallback, useEffect } from 'react'
 import BlogEditor from '../../components/editor/BlogEditor'
 import ShortUniqueId from 'short-unique-id'
 import ReadOnlySlate from '../../components/editor/ReadOnlySlate'
@@ -65,7 +65,17 @@ const BlogTitleInput = styled(TextField)(({ theme }) => ({
   }
 }))
 
-export const CreatePostBuilder = () => {
+interface CreatePostBuilderProps {
+  blogContentForEdit?: any
+  postIdForEdit?: string
+  blogMetadataForEdit?: any
+}
+
+export const CreatePostBuilder = ({
+  blogContentForEdit,
+  postIdForEdit,
+  blogMetadataForEdit
+}: CreatePostBuilderProps) => {
   const { user } = useSelector((state: RootState) => state.auth)
   const { currentBlog } = useSelector((state: RootState) => state.global)
   const [editingSection, setEditingSection] = React.useState<any>(null)
@@ -120,6 +130,19 @@ export const CreatePostBuilder = () => {
       })
     )
   }
+
+  useEffect(() => {
+    if (blogContentForEdit && postIdForEdit && blogMetadataForEdit) {
+      setTitle(blogContentForEdit?.title || '')
+      setLayouts(
+        blogContentForEdit?.layouts || {
+          rows: []
+        }
+      )
+      setNewPostContent(blogContentForEdit?.postContent || [])
+      onChangePadding(blogContentForEdit?.layoutGeneralSettings?.padding || 5)
+    }
+  }, [blogContentForEdit, postIdForEdit, blogMetadataForEdit])
 
   const editBlog = React.useCallback(
     async (navbarConfig: any) => {
@@ -373,6 +396,112 @@ export const CreatePostBuilder = () => {
       )
 
       throw new Error('Failed to publish post')
+    }
+  }
+
+  async function updateQDNResource(params: any) {
+    if (!blogContentForEdit || !postIdForEdit || !blogMetadataForEdit) return
+    let address
+    let name
+    let errorMsg = ''
+
+    address = user?.address
+    name = user?.name || ''
+
+    const missingFields = []
+    if (!address) {
+      errorMsg = "Cannot post: your address isn't available"
+    }
+    if (!name) {
+      errorMsg = 'Cannot post without a name'
+    }
+    if (!title) missingFields.push('title')
+    if (missingFields.length > 0) {
+      const missingFieldsString = missingFields.join(', ')
+      const errMsg = `Missing: ${missingFieldsString}`
+      errorMsg = errMsg
+    }
+    if (newPostContent.length === 0) {
+      errorMsg = 'Your post has no content'
+    }
+
+    if (!currentBlog) {
+      errorMsg = 'Cannot publish without first creating a blog.'
+    }
+
+    if (errorMsg) {
+      dispatch(
+        setNotification({
+          msg: errorMsg,
+          alertType: 'error'
+        })
+      )
+      throw new Error(errorMsg)
+    }
+
+    const layoutGeneralSettings = {
+      padding: paddingValue ?? 0,
+      blogPostType: 'builder'
+    }
+
+    const postObject = {
+      ...blogContentForEdit,
+      title,
+      postContent: newPostContent,
+      layouts,
+      layoutGeneralSettings
+    }
+    try {
+      if (!currentBlog) return
+
+      const identifier = postIdForEdit
+      const blogPostToBase64 = await objectToBase64(postObject)
+      let description = ''
+      const findText = newPostContent.find((data) => data?.type === 'editor')
+      if (findText && findText.content) {
+        description = extractTextFromSlate(findText?.content)
+        description = description.slice(0, 180)
+      }
+
+      let requestBody = {
+        action: 'PUBLISH_QDN_RESOURCE',
+        name: name,
+        service: 'BLOG_POST',
+        data64: blogPostToBase64,
+        title: title,
+        description: params?.description || description,
+        category: params?.category || '',
+        identifier: identifier
+      }
+
+      const formattedTags: { [key: string]: string } = {}
+      if (params?.tags) {
+        params.tags.forEach((tag: string, i: number) => {
+          formattedTags[`tag${i + 1}`] = tag
+        })
+
+        requestBody = {
+          ...requestBody,
+          ...formattedTags
+        }
+      }
+
+      const resourceResponse = await qortalRequest(requestBody)
+      dispatch(
+        setNotification({
+          msg: 'Blog post successfully updated',
+          alertType: 'success'
+        })
+      )
+    } catch (error: any) {
+      dispatch(
+        setNotification({
+          msg: error?.message || 'Failed to update post',
+          alertType: 'error'
+        })
+      )
+
+      throw new Error('Failed to update post')
     }
   }
   const addImage = (base64: string) => {
@@ -991,14 +1120,29 @@ export const CreatePostBuilder = () => {
           />
         </ReusableModal>
 
-        <PostPublishModal
-          onClose={() => {
-            setIsOpenPostModal(false)
-          }}
-          open={isOpenPostModal}
-          post={post}
-          onPublish={publishQDNResource}
-        />
+        {!blogContentForEdit && (
+          <PostPublishModal
+            onClose={() => {
+              setIsOpenPostModal(false)
+            }}
+            open={isOpenPostModal}
+            post={post}
+            onPublish={publishQDNResource}
+          />
+        )}
+
+        {blogContentForEdit && blogMetadataForEdit?.metadata && (
+          <PostPublishModal
+            onClose={() => {
+              setIsOpenPostModal(false)
+            }}
+            open={isOpenPostModal}
+            post={post}
+            onPublish={updateQDNResource}
+            mode="edit"
+            metadata={blogMetadataForEdit?.metadata}
+          />
+        )}
       </Box>
     </>
   )

@@ -1,20 +1,44 @@
 import { Box, Button, Typography } from '@mui/material'
-import React, { useState } from 'react'
+import React, { useMemo, useState } from 'react'
 import { ReusableModal } from '../../components/modals/ReusableModal'
 import { CreatePostBuilder } from './CreatePostBuilder'
 import { CreatePostMinimal } from './CreatePostMinimal'
 import HandymanRoundedIcon from '@mui/icons-material/HandymanRounded'
 import HourglassFullRoundedIcon from '@mui/icons-material/HourglassFullRounded'
 import { display } from '@mui/system'
+import { useDispatch, useSelector } from 'react-redux'
+import { setIsLoadingGlobal } from '../../state/features/globalSlice'
+import { useParams } from 'react-router-dom'
+import { checkStructure } from '../../utils/checkStructure'
+import { RootState } from '../../state/store'
+import {
+  addPrefix,
+  buildIdentifierFromCreateTitleIdAndId
+} from '../../utils/blogIdformats'
 type EditorType = 'minimal' | 'builder'
-export const CreatePost = () => {
+interface CreatePostProps {
+  mode?: string
+}
+export const CreatePost = ({ mode }: CreatePostProps) => {
+  const { user: username, postId, blog } = useParams()
+  const fullPostId = useMemo(() => {
+    if (!blog || !postId || mode !== 'edit') return ''
+    const formBlogId = addPrefix(blog)
+    const formPostId = buildIdentifierFromCreateTitleIdAndId(formBlogId, postId)
+    return formPostId
+  }, [blog, postId, mode])
+  const { user } = useSelector((state: RootState) => state.auth)
+
   const [toggleEditorType, setToggleEditorType] = useState<EditorType | null>(
     null
   )
+  const [blogContentForEdit, setBlogContentForEdit] = useState<any>(null)
+  const [blogMetadataForEdit, setBlogMetadataForEdit] = useState<any>(null)
+  const [editType, setEditType] = useState<EditorType | null>(null)
   const [isOpen, setIsOpen] = useState<boolean>(false)
-
+  const dispatch = useDispatch()
   React.useEffect(() => {
-    if (!toggleEditorType) {
+    if (!toggleEditorType && mode !== 'edit') {
       setIsOpen(true)
     }
   }, [setIsOpen, toggleEditorType])
@@ -22,6 +46,54 @@ export const CreatePost = () => {
   const switchType = (type: EditorType) => {
     setIsOpen(true)
   }
+
+  const getBlogPost = React.useCallback(async () => {
+    try {
+      dispatch(setIsLoadingGlobal(true))
+      const url = `/arbitrary/BLOG_POST/${username}/${fullPostId}`
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      console.log({ response })
+      const responseData = await response.json()
+      if (checkStructure(responseData)) {
+        console.log({ responseData })
+        // setNewPostContent(responseData.postContent)
+        // setTitle(responseData?.title || '')
+        // setBlogInfo(responseData)
+        const blogType = responseData?.layoutGeneralSettings?.blogPostType
+
+        if (blogType) {
+          setEditType(blogType)
+          setBlogContentForEdit(responseData)
+        }
+        const url2 = `/arbitrary/resources/search?service=BLOG_POST&identifier=${fullPostId}&name=${username}&limit=1&includemetadata=true`
+        const responseBlogs = await fetch(url2, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        })
+
+        const dataMetadata = await responseBlogs.json()
+        if (dataMetadata && dataMetadata.length > 0) {
+          console.log({ dataMetadata })
+          setBlogMetadataForEdit(dataMetadata[0])
+        }
+      }
+    } catch (error) {
+    } finally {
+      dispatch(setIsLoadingGlobal(false))
+    }
+  }, [username, fullPostId])
+  React.useEffect(() => {
+    if (mode === 'edit') {
+      getBlogPost()
+    }
+  }, [mode])
 
   console.log(isOpen)
   return (
@@ -97,6 +169,20 @@ export const CreatePost = () => {
       )}
       {toggleEditorType === 'minimal' && <CreatePostMinimal />}
       {toggleEditorType === 'builder' && <CreatePostBuilder />}
+      {mode === 'edit' && editType === 'minimal' && (
+        <CreatePostMinimal
+          blogContentForEdit={blogContentForEdit}
+          postIdForEdit={fullPostId}
+          blogMetadataForEdit={blogMetadataForEdit}
+        />
+      )}
+      {mode === 'edit' && editType === 'builder' && (
+        <CreatePostBuilder
+          blogContentForEdit={blogContentForEdit}
+          postIdForEdit={fullPostId}
+          blogMetadataForEdit={blogMetadataForEdit}
+        />
+      )}
     </>
   )
 }

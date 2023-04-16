@@ -64,9 +64,8 @@ export const useFetchPosts = () => {
 
   const getBlogPosts = React.useCallback(async () => {
     try {
-      console.log({ posts })
       const offset = posts.length
-      console.log({ offset })
+
       dispatch(setIsLoadingGlobal(true))
       const url = `/arbitrary/resources/search?service=BLOG_POST&query=q-blog-&limit=20&includemetadata=true&offset=${offset}&reverse=true`
       const response = await fetch(url, {
@@ -109,9 +108,7 @@ export const useFetchPosts = () => {
   const getBlogPostsSubscriptions = React.useCallback(
     async (username: string) => {
       try {
-        console.log({ subscriptionPosts })
         const offset = subscriptionPosts.length
-        console.log({ offset })
         dispatch(setIsLoadingGlobal(true))
         const url = `/arbitrary/resources/search?service=BLOG_POST&query=q-blog-&limit=20&includemetadata=true&offset=${offset}&reverse=true&namefilter=q-blog-subscriptions-${username}`
         const response = await fetch(url, {
@@ -139,7 +136,6 @@ export const useFetchPosts = () => {
         for (const content of structureData) {
           if (content.user && content.id) {
             const res = checkAndUpdatePost(content)
-            console.log({ res })
             if (res) {
               getBlogPost(content.user, content.id, content)
             }
@@ -155,11 +151,8 @@ export const useFetchPosts = () => {
 
   const getBlogPostsFavorites = React.useCallback(async () => {
     try {
-      console.log({ posts, favoritesLocal })
       const offset = favorites.length
-      console.log({ offset, favoritesLocal })
       const favSlice = (favoritesLocal || []).slice(offset, 20)
-      console.log({ favSlice })
       let favs = []
       for (const item of favSlice) {
         try {
@@ -186,13 +179,11 @@ export const useFetchPosts = () => {
           })
           const data = await response.json()
           //
-          console.log({ data })
           if (data.length > 0) {
             favs.push(data[0])
           }
         } catch (error) {}
       }
-      console.log({ favs })
       const structureData = favs.map((post: any): BlogPost => {
         return {
           title: post?.metadata?.title,
@@ -211,7 +202,6 @@ export const useFetchPosts = () => {
       for (const content of structureData) {
         if (content.user && content.id) {
           const res = checkAndUpdatePost(content)
-          console.log({ res })
           if (res) {
             getBlogPost(content.user, content.id, content)
           }

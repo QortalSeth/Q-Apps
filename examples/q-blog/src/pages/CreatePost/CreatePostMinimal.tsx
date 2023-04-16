@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import BlogEditor from '../../components/editor/BlogEditor'
 import ShortUniqueId from 'short-unique-id'
 import ReadOnlySlate from '../../components/editor/ReadOnlySlate'
@@ -62,7 +62,16 @@ const BlogTitleInput = styled(TextField)(({ theme }) => ({
   }
 }))
 
-export const CreatePostMinimal = () => {
+interface CreatePostMinimalProps {
+  blogContentForEdit?: any
+  postIdForEdit?: string
+  blogMetadataForEdit?: any
+}
+export const CreatePostMinimal = ({
+  blogContentForEdit,
+  postIdForEdit,
+  blogMetadataForEdit
+}: CreatePostMinimalProps) => {
   const { user } = useSelector((state: RootState) => state.auth)
   const { currentBlog } = useSelector((state: RootState) => state.global)
   const [editingSection, setEditingSection] = React.useState<any>(null)
@@ -107,6 +116,20 @@ export const CreatePostMinimal = () => {
     })
     setEditorKey((prev) => prev + 1)
   }, [])
+
+  useEffect(() => {
+    if (blogContentForEdit && postIdForEdit && blogMetadataForEdit) {
+      setTitle(blogContentForEdit?.title || '')
+      setLayouts(
+        blogContentForEdit?.layouts || {
+          rows: []
+        }
+      )
+      setNewPostContent(blogContentForEdit?.postContent || [])
+      onChangePadding(blogContentForEdit?.layoutGeneralSettings?.padding || 5)
+    }
+  }, [blogContentForEdit, postIdForEdit, blogMetadataForEdit])
+  console.log({ blogContentForEdit })
 
   function objectToBase64(obj: any) {
     // Step 1: Convert the object to a JSON string
@@ -276,6 +299,111 @@ export const CreatePostMinimal = () => {
       )
 
       throw new Error('Failed to publish post')
+    }
+  }
+  async function updateQDNResource(params: any) {
+    if (!blogContentForEdit || !postIdForEdit || !blogMetadataForEdit) return
+    let address
+    let name
+    let errorMsg = ''
+
+    address = user?.address
+    name = user?.name || ''
+
+    const missingFields = []
+    if (!address) {
+      errorMsg = "Cannot post: your address isn't available"
+    }
+    if (!name) {
+      errorMsg = 'Cannot post without a name'
+    }
+    if (!title) missingFields.push('title')
+    if (missingFields.length > 0) {
+      const missingFieldsString = missingFields.join(', ')
+      const errMsg = `Missing: ${missingFieldsString}`
+      errorMsg = errMsg
+    }
+    if (newPostContent.length === 0) {
+      errorMsg = 'Your post has no content'
+    }
+
+    if (!currentBlog) {
+      errorMsg = 'Cannot publish without first creating a blog.'
+    }
+
+    if (errorMsg) {
+      dispatch(
+        setNotification({
+          msg: errorMsg,
+          alertType: 'error'
+        })
+      )
+      throw new Error(errorMsg)
+    }
+
+    const layoutGeneralSettings = {
+      padding: paddingValue ?? 0,
+      blogPostType: 'minimal'
+    }
+
+    const postObject = {
+      ...blogContentForEdit,
+      title,
+      postContent: newPostContent,
+      layouts,
+      layoutGeneralSettings
+    }
+    try {
+      if (!currentBlog) return
+
+      const identifier = postIdForEdit
+      const blogPostToBase64 = await objectToBase64(postObject)
+      let description = ''
+      const findText = newPostContent.find((data) => data?.type === 'editor')
+      if (findText && findText.content) {
+        description = extractTextFromSlate(findText?.content)
+        description = description.slice(0, 180)
+      }
+
+      let requestBody = {
+        action: 'PUBLISH_QDN_RESOURCE',
+        name: name,
+        service: 'BLOG_POST',
+        data64: blogPostToBase64,
+        title: title,
+        description: params?.description || description,
+        category: params?.category || '',
+        identifier: identifier
+      }
+
+      const formattedTags: { [key: string]: string } = {}
+      if (params?.tags) {
+        params.tags.forEach((tag: string, i: number) => {
+          formattedTags[`tag${i + 1}`] = tag
+        })
+
+        requestBody = {
+          ...requestBody,
+          ...formattedTags
+        }
+      }
+
+      const resourceResponse = await qortalRequest(requestBody)
+      dispatch(
+        setNotification({
+          msg: 'Blog post successfully updated',
+          alertType: 'success'
+        })
+      )
+    } catch (error: any) {
+      dispatch(
+        setNotification({
+          msg: error?.message || 'Failed to update post',
+          alertType: 'error'
+        })
+      )
+
+      throw new Error('Failed to update post')
     }
   }
   const addImage = (base64: string) => {
@@ -934,40 +1062,6 @@ export const CreatePostMinimal = () => {
                             description={section.content?.description}
                             author=""
                           />
-                          {/* <Box
-                            key={section.id}
-                            sx={{
-                              display: 'flex',
-                              padding: '5px',
-                              gap: 1,
-                              marginTop: '15px',
-                              cursor: 'pointer',
-                              width: '100%',
-                              margin: 0,
-                              height: '100%',
-                              flexDirection: 'column',
-                              justifyContent: 'center'
-                            }}
-                          >
-                            <Box
-                              sx={{
-                                display: 'flex',
-                                alignItems: 'center'
-                              }}
-                            >
-                              <Typography variant="h5" sx={{}}>
-                                {section.content?.title}
-                              </Typography>
-
-                              <AudiotrackIcon />
-                            </Box>
-
-                            <Box>
-                              <Typography variant="subtitle1" sx={{}}>
-                                {section.content?.description}
-                              </Typography>
-                            </Box>
-                          </Box> */}
                         </DynamicHeightItemMinimal>
                       </div>
                     )
@@ -991,320 +1085,6 @@ export const CreatePostMinimal = () => {
               </Box>
             )
           })}
-          {/* {newPostContent.map((section: any) => {
-            if (section.type === 'editor') {
-              return (
-                <div
-                  key={section.id}
-                  className="grid-item"
-                  style={{
-                    maxWidth: '800px',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    width: '100%'
-                  }}
-                >
-                  <DynamicHeightItemMinimal
-                    layouts={layouts}
-                    setLayouts={setLayouts}
-                    i={section.id}
-                    breakpoint={currentBreakpoint}
-                    count={count}
-                    padding={paddingValue}
-                  >
-                    {editingSection && editingSection.id === section.id ? (
-                      <BlogEditor
-                        editPostSection={editPostSection}
-                        defaultValue={section.content}
-                        section={section}
-                        value={value}
-                        setValue={setValue}
-                      />
-                    ) : (
-                      <Box
-                        sx={{
-                          position: 'relative',
-                          width: '100%',
-                          height: 'auto'
-                        }}
-                      >
-                        <ReadOnlySlate
-                          key={section.id}
-                          content={section.content}
-                        />
-                        <Box
-                          sx={{
-                            position: 'absolute',
-                            right: '5px',
-                            zIndex: 5,
-                            top: '50%',
-                            transform: 'translateY(-50%)',
-                            display: 'flex',
-                            // flexDirection: 'column',
-                            gap: 2,
-                            background: 'white',
-                            padding: '5px',
-                            borderRadius: '5px'
-                          }}
-                        >
-                          <RemoveCircleIcon
-                            onClick={() => removeSection(section)}
-                            sx={{
-                              cursor: 'pointer'
-                            }}
-                          />
-                          <EditIcon
-                            onClick={() => editSection(section)}
-                            sx={{
-                              cursor: 'pointer'
-                            }}
-                          />
-                        </Box>
-                      </Box>
-                    )}
-                    {editingSection && editingSection.id === section.id ? (
-                      <Box
-                        sx={{
-                          display: 'flex',
-                          width: '100%',
-                          justifyContent: 'flex-end'
-                        }}
-                      >
-                        <Button onClick={() => setEditingSection(null)}>
-                          Close
-                        </Button>
-                      </Box>
-                    ) : (
-                      <></>
-                    )}
-                  </DynamicHeightItemMinimal>
-                </div>
-              )
-            }
-            if (section.type === 'image') {
-              return (
-                <div key={section.id} className="grid-item">
-                  <DynamicHeightItemMinimal
-                    layouts={layouts}
-                    setLayouts={setLayouts}
-                    i={section.id}
-                    breakpoint={currentBreakpoint}
-                    count={count}
-                    type="image"
-                    padding={paddingValue}
-                  >
-                    {editingSection && editingSection.id === section.id ? (
-                      <ImageUploader
-                        onPick={(base64) => editImage(base64, section)}
-                      >
-                        Add Image
-                        <AddPhotoAlternateIcon />
-                      </ImageUploader>
-                    ) : (
-                      <Box
-                        sx={{
-                          position: 'relative',
-                          width: '100%',
-                          height: '100%'
-                        }}
-                      >
-                        <img
-                          src={section.content.image}
-                          className="post-image"
-                          style={{
-                            objectFit: 'contain',
-                            maxHeight: '50vh'
-                          }}
-                        />
-                        <Box
-                          sx={{
-                            position: 'absolute',
-                            right: '5px',
-                            zIndex: 5,
-                            top: '50%',
-                            transform: 'translateY(-50%)',
-                            display: 'flex',
-                            flexDirection: 'column',
-                            gap: 2,
-                            background: 'white',
-                            padding: '5px',
-                            borderRadius: '5px'
-                          }}
-                        >
-                          <RemoveCircleIcon
-                            onClick={() => removeSection(section)}
-                            sx={{
-                              cursor: 'pointer'
-                            }}
-                          />
-                          <ImageUploader
-                            onPick={(base64) => editImage(base64, section)}
-                          >
-                            <EditIcon
-                              sx={{
-                                cursor: 'pointer'
-                              }}
-                            />
-                          </ImageUploader>
-                        </Box>
-                      </Box>
-                    )}
-
-                    {editingSection && editingSection.id === section.id ? (
-                      <Button onClick={() => setEditingSection(null)}>
-                        Close
-                      </Button>
-                    ) : (
-                      <></>
-                    )}
-                  </DynamicHeightItemMinimal>
-                </div>
-              )
-            }
-
-            if (section.type === 'video') {
-              return (
-                <div key={section.id} className="grid-item">
-                  <DynamicHeightItemMinimal
-                    layouts={layouts}
-                    setLayouts={setLayouts}
-                    i={section.id}
-                    breakpoint={currentBreakpoint}
-                    count={count}
-                    padding={paddingValue}
-                  >
-                    {editingSection && editingSection.id === section.id ? (
-                      <VideoPanel
-                        width="24px"
-                        height="24px"
-                        onSelect={(video) =>
-                          editVideo(
-                            {
-                              name: video.name,
-                              identifier: video.identifier,
-                              service: video.service,
-                              title: video?.metadata?.title,
-                              description: video?.metadata?.description
-                            },
-                            section
-                          )
-                        }
-                      />
-                    ) : (
-                      <Box
-                        sx={{
-                          position: 'relative',
-                          width: '100%',
-                          height: '100%'
-                        }}
-                      >
-                        <VideoPlayer
-                          name={section.content.name}
-                          service={section.content.service}
-                          identifier={section.content.identifier}
-                          from="create"
-                        />
-                        <Box
-                          sx={{
-                            position: 'absolute',
-                            right: '5px',
-                            zIndex: 501,
-                            top: '50%',
-                            transform: 'translateY(-50%)',
-                            display: 'flex',
-                            flexDirection: 'column',
-                            gap: 2,
-                            background: 'white',
-                            padding: '5px',
-                            borderRadius: '5px'
-                          }}
-                        >
-                          <RemoveCircleIcon
-                            onClick={() => removeSection(section)}
-                            sx={{
-                              cursor: 'pointer'
-                            }}
-                          />
-                          <VideoPanel
-                            width="24px"
-                            height="24px"
-                            onSelect={(video) =>
-                              editVideo(
-                                {
-                                  name: video.name,
-                                  identifier: video.identifier,
-                                  service: video.service,
-                                  title: video?.metadata?.title,
-                                  description: video?.metadata?.description
-                                },
-                                section
-                              )
-                            }
-                          />
-                        </Box>
-                      </Box>
-                    )}
-                    {editingSection && editingSection.id === section.id ? (
-                      <Button onClick={() => setEditingSection(null)}>
-                        Close
-                      </Button>
-                    ) : (
-                      <></>
-                    )}
-                  </DynamicHeightItemMinimal>
-                </div>
-              )
-            }
-            if (section.type === 'audio') {
-              return (
-                <div key={section.id} className="grid-item">
-                  <DynamicHeightItemMinimal
-                    layouts={layouts}
-                    setLayouts={setLayouts}
-                    i={section.id}
-                    breakpoint={currentBreakpoint}
-                    count={count}
-                    padding={paddingValue}
-                  >
-                    <Box
-                      key={section.id}
-                      sx={{
-                        display: 'flex',
-                        padding: '5px',
-                        gap: 1,
-                        marginTop: '15px',
-                        cursor: 'pointer',
-                        width: '100%',
-                        margin: 0,
-                        height: '100%',
-                        flexDirection: 'column',
-                        justifyContent: 'center'
-                      }}
-                    >
-                      <Box
-                        sx={{
-                          display: 'flex',
-                          alignItems: 'center'
-                        }}
-                      >
-                        <Typography variant="h5" sx={{}}>
-                          {section.content?.title}
-                        </Typography>
-
-                        <AudiotrackIcon />
-                      </Box>
-
-                      <Box>
-                        <Typography variant="subtitle1" sx={{}}>
-                          {section.content?.description}
-                        </Typography>
-                      </Box>
-                    </Box>
-                  </DynamicHeightItemMinimal>
-                </div>
-              )
-            }
-          })} */}
 
           <Box
             sx={{
@@ -1344,14 +1124,29 @@ export const CreatePostMinimal = () => {
           <Button onClick={addSection}>Add Text</Button>
           <Button onClick={closeAddTextModal}>Close</Button>
         </ReusableModal>
-        <PostPublishModal
-          onClose={() => {
-            setIsOpenPostModal(false)
-          }}
-          open={isOpenPostModal}
-          post={post}
-          onPublish={publishQDNResource}
-        />
+        {!blogContentForEdit && (
+          <PostPublishModal
+            onClose={() => {
+              setIsOpenPostModal(false)
+            }}
+            open={isOpenPostModal}
+            post={post}
+            onPublish={publishQDNResource}
+          />
+        )}
+
+        {blogContentForEdit && blogMetadataForEdit?.metadata && (
+          <PostPublishModal
+            onClose={() => {
+              setIsOpenPostModal(false)
+            }}
+            open={isOpenPostModal}
+            post={post}
+            onPublish={updateQDNResource}
+            mode="edit"
+            metadata={blogMetadataForEdit?.metadata}
+          />
+        )}
       </Box>
     </>
   )

@@ -32,7 +32,10 @@ function App() {
                 path="/:user/:blog/:postId"
                 element={<BlogIndividualPost />}
               />
-              <Route path="/:user/:blog/:postId/edit" element={<EditPost />} />
+              <Route
+                path="/:user/:blog/:postId/edit"
+                element={<CreatePost mode="edit" />}
+              />
               <Route path="/:user/:blog" element={<BlogIndividualProfile />} />
               <Route path="/post/new" element={<CreatePost />} />
               <Route path="/profile/new" element={<CreatEditProfile />} />

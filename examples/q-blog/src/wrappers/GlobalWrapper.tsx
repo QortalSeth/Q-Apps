@@ -87,15 +87,27 @@ const GlobalWrapper: React.FC<Props> = ({ children }) => {
   }
 
   async function verifyIfBlogIdExtists(username: string, identifier: string) {
-    let doesExist = false
-    const url = `/arbitrary/metadata/BLOG/${username}/${identifier}}`
-    const responseBlogs = await fetch(url, {
+    let doesExist = true
+    const url2 = `/arbitrary/resources/search?service=BLOG&identifier=${identifier}&name=${username}&limit=1&includemetadata=true`
+    const responseBlogs = await fetch(url2, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json'
       }
     })
-    const responseDataBlogs = await responseBlogs.json()
+
+    const dataMetadata = await responseBlogs.json()
+    // const url = `/arbitrary/metadata/BLOG/${username}/${identifier}}`
+    // const responseBlogs = await fetch(url, {
+    //   method: 'GET',
+    //   headers: {
+    //     'Content-Type': 'application/json'
+    //   }
+    // })
+    // const responseDataBlogs = await responseBlogs.json()
+    if (dataMetadata.length === 0) {
+      doesExist = false
+    }
 
     return doesExist
   }
@@ -333,7 +345,10 @@ const GlobalWrapper: React.FC<Props> = ({ children }) => {
     try {
       const allItems: any[] = []
       console.log('favoritesLocalRef', favoritesLocalRef.current)
-      if (!favoritesLocalRef?.current) return
+      if (!favoritesLocalRef?.current) {
+        return
+      }
+
       favoritesLocalRef?.current
         .iterate(function (value: any, key: string) {
           // Handle each key-value pair here
