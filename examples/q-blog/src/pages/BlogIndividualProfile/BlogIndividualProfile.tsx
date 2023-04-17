@@ -19,6 +19,15 @@ import {
 import { useFetchPosts } from '../../hooks/useFetchPosts'
 import LazyLoad from '../../components/common/LazyLoad'
 import { addPrefix, removePrefix } from '../../utils/blogIdformats'
+import Masonry from 'react-masonry-css'
+
+const breakpointColumnsObj = {
+  default: 5,
+  1300: 4,
+  940: 3,
+  700: 2,
+  500: 1
+}
 export const BlogIndividualProfile = () => {
   const navigate = useNavigate()
   const { user } = useSelector((state: RootState) => state.auth)
@@ -200,13 +209,10 @@ export const BlogIndividualProfile = () => {
         )}
       </Box>
 
-      <List
-        sx={{
-          margin: '0px',
-          padding: '10px',
-          display: 'flex',
-          flexWrap: 'wrap'
-        }}
+      <Masonry
+        breakpointCols={breakpointColumnsObj}
+        className="my-masonry-grid"
+        columnClassName="my-masonry-grid_column"
       >
         {blogPosts.map((post, index) => {
           const existingPost = hashMapPosts[post.id]
@@ -215,17 +221,17 @@ export const BlogIndividualProfile = () => {
             blogPost = existingPost
           }
           return (
-            <ListItem
-              onClick={() => {}}
-              disablePadding
+            <Box
               sx={{
                 display: 'flex',
                 gap: 1,
                 alignItems: 'center',
                 width: 'auto',
-                position: 'relative'
+                position: 'relative',
+                ' @media (max-width: 450px)': {
+                  width: '100%'
+                }
               }}
-              key={blogPost.id}
             >
               <BlogPostPreview
                 onClick={() => {
@@ -263,10 +269,10 @@ export const BlogIndividualProfile = () => {
                   }}
                 />
               )}
-            </ListItem>
+            </Box>
           )
         })}
-      </List>
+      </Masonry>
       <LazyLoad onLoadMore={getPosts}></LazyLoad>
     </>
   )

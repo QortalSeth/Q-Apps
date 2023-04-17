@@ -37,8 +37,8 @@ interface BlogPostPreviewProps {
 
 const StyledCard = styled(Card)`
   max-width: 600px;
-  margin: 1rem;
-  width: 275px;
+  width: 100%;
+  margin: 10px 0px;
   cursor: pointer;
 
   @media (max-width: 450px) {
@@ -167,12 +167,19 @@ const BlogPostPreview: React.FC<BlogPostPreviewProps> = ({
           }
           subheader={`Author: ${author}`}
         />
-        <StyledCardMedia image={postImage} />
+        {/* <StyledCardMedia image={postImage} /> */}
+        <img
+          src={postImage}
+          style={{
+            width: '100%',
+            height: 'auto'
+          }}
+        />
         <CardContent>
           <Typography
             variant="body2"
             color="textSecondary"
-            className="line-clamp"
+            // className="line-clamp"
             component="p"
           >
             {/* {extractTextFromSlate(description)} */}
@@ -188,8 +195,8 @@ const BlogPostPreview: React.FC<BlogPostPreviewProps> = ({
       <Box
         sx={{
           position: 'absolute',
-          top: '15px',
-          right: '15px'
+          top: '10px',
+          right: '5px'
         }}
       >
         <Tooltip title="Block user content">

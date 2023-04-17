@@ -3,12 +3,20 @@ import { useNavigate } from 'react-router-dom'
 import { useDispatch, useSelector } from 'react-redux'
 import { RootState } from '../../state/store'
 import EditIcon from '@mui/icons-material/Edit'
-import { List, ListItem } from '@mui/material'
+import { Box, List, ListItem } from '@mui/material'
 import BlogPostPreview from './PostPreview'
 import { useFetchPosts } from '../../hooks/useFetchPosts'
 import LazyLoad from '../../components/common/LazyLoad'
 import { removePrefix } from '../../utils/blogIdformats'
+import Masonry from 'react-masonry-css'
 
+const breakpointColumnsObj = {
+  default: 5,
+  1300: 4,
+  940: 3,
+  700: 2,
+  500: 1
+}
 interface BlogListProps {
   mode?: string
 }
@@ -53,7 +61,7 @@ export const BlogList = ({ mode }: BlogListProps) => {
   // if (!favoritesLocal) return null
   return (
     <>
-      <List
+      {/* <List
         sx={{
           margin: '0px',
           padding: '10px',
@@ -61,6 +69,11 @@ export const BlogList = ({ mode }: BlogListProps) => {
           flexWrap: 'wrap',
           justifyContent: 'center'
         }}
+      > */}
+      <Masonry
+        breakpointCols={breakpointColumnsObj}
+        className="my-masonry-grid"
+        columnClassName="my-masonry-grid_column"
       >
         {posts.map((post, index) => {
           const existingPost = hashMapPosts[post.id]
@@ -69,8 +82,7 @@ export const BlogList = ({ mode }: BlogListProps) => {
             blogPost = existingPost
           }
           return (
-            <ListItem
-              disablePadding
+            <Box
               sx={{
                 display: 'flex',
                 gap: 1,
@@ -118,10 +130,11 @@ export const BlogList = ({ mode }: BlogListProps) => {
                   }}
                 />
               )}
-            </ListItem>
+            </Box>
           )
         })}
-      </List>
+      </Masonry>
+      {/* </List> */}
       <LazyLoad onLoadMore={getPosts}></LazyLoad>
     </>
   )
