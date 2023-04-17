@@ -8,12 +8,11 @@ import TextField from '@mui/material/TextField'
 import AddPhotoAlternateIcon from '@mui/icons-material/AddPhotoAlternate'
 import ImageUploader from '../../components/common/ImageUploader'
 import AudiotrackIcon from '@mui/icons-material/Audiotrack'
-
+import DeleteIcon from '@mui/icons-material/Delete'
 import { Button, Box, Typography } from '@mui/material'
 import { styled } from '@mui/system'
 import { Descendant } from 'slate'
 import EditIcon from '@mui/icons-material/Edit'
-import RemoveCircleIcon from '@mui/icons-material/RemoveCircle'
 import { extractTextFromSlate } from '../../utils/extractTextFromSlate'
 import { setNotification } from '../../state/features/notificationsSlice'
 import { VideoPanel } from '../../components/common/VideoPanel'
@@ -52,9 +51,11 @@ const initialValue: Descendant[] = [
 ]
 
 const BlogTitleInput = styled(TextField)(({ theme }) => ({
+  marginBottom: '15px',
   '& .MuiInputBase-input': {
     fontSize: '28px',
     height: '28px',
+    background: 'transparent',
     '&::placeholder': {
       fontSize: '28px',
       color: theme.palette.text.secondary
@@ -62,19 +63,37 @@ const BlogTitleInput = styled(TextField)(({ theme }) => ({
   },
   '& .MuiInputLabel-root': {
     fontSize: '28px'
+  },
+  '& .MuiInputBase-root': {
+    background: 'transparent',
+    '&:hover': {
+      background: 'transparent'
+    },
+    '&.Mui-focused': {
+      background: 'transparent'
+    }
+  },
+  '& .MuiOutlinedInput-root': {
+    '&:hover .MuiOutlinedInput-notchedOutline': {
+      borderColor: theme.palette.primary.main
+    },
+    '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+      borderColor: theme.palette.primary.main
+    }
   }
 }))
-
 interface CreatePostBuilderProps {
   blogContentForEdit?: any
   postIdForEdit?: string
   blogMetadataForEdit?: any
+  switchType?: () => void
 }
 
 export const CreatePostBuilder = ({
   blogContentForEdit,
   postIdForEdit,
-  blogMetadataForEdit
+  blogMetadataForEdit,
+  switchType
 }: CreatePostBuilderProps) => {
   const { user } = useSelector((state: RootState) => state.auth)
   const { currentBlog } = useSelector((state: RootState) => state.global)
@@ -87,6 +106,8 @@ export const CreatePostBuilder = ({
   const [newPostContent, setNewPostContent] = React.useState<any[]>([])
   const [title, setTitle] = React.useState<string>('')
   const [isOpenPostModal, setIsOpenPostModal] = React.useState<boolean>(false)
+  const [isOpenEditTextModal, setIsOpenEditTextModal] =
+    React.useState<boolean>(false)
   const [value, setValue] = React.useState(initialValue)
   const [editorKey, setEditorKey] = React.useState(1)
   const [count, setCount] = React.useState<number>(1)
@@ -620,6 +641,7 @@ export const CreatePostBuilder = ({
     }
   }
   const editSection = (section: any) => {
+    setIsOpenEditTextModal(true)
     setEditingSection(section)
     setValue(section.content)
   }
@@ -639,6 +661,7 @@ export const CreatePostBuilder = ({
       }
 
       setEditingSection(null)
+      setIsOpenEditTextModal(false)
     },
     [newPostContent]
   )
@@ -669,6 +692,11 @@ export const CreatePostBuilder = ({
 
   const closeAddTextModal = React.useCallback(() => {
     setIsOpenAddTextModal(false)
+  }, [])
+
+  const closeEditTextModal = React.useCallback(() => {
+    setIsOpenEditTextModal(false)
+    setEditingSection(null)
   }, [])
 
   const onResizeStop = (layout: any, layoutItem: any) => {
@@ -702,6 +730,7 @@ export const CreatePostBuilder = ({
         paddingValue={paddingValue}
         onChangePadding={onChangePadding}
         addNav={addNav}
+        switchType={switchType}
       />
       {navbarConfig && Array.isArray(navbarConfig?.navItems) && (
         <UserNavbar
@@ -776,15 +805,8 @@ export const CreatePostBuilder = ({
                       count={count}
                       padding={paddingValue}
                     >
-                      {editingSection && editingSection.id === section.id ? (
-                        <BlogEditor
-                          editPostSection={editPostSection}
-                          defaultValue={section.content}
-                          section={section}
-                          value={value}
-                          setValue={setValue}
-                        />
-                      ) : (
+                      {editingSection &&
+                      editingSection.id === section.id ? null : (
                         <Box
                           sx={{
                             position: 'relative',
@@ -796,7 +818,25 @@ export const CreatePostBuilder = ({
                             key={section.id}
                             content={section.content}
                           />
-                          <Box
+                          <EditButtons>
+                            <DeleteIcon
+                              onClick={() => removeSection(section)}
+                              sx={{
+                                cursor: 'pointer',
+                                height: '18px',
+                                width: 'auto'
+                              }}
+                            />
+                            <EditIcon
+                              onClick={() => editSection(section)}
+                              sx={{
+                                cursor: 'pointer',
+                                height: '18px',
+                                width: 'auto'
+                              }}
+                            />
+                          </EditButtons>
+                          {/* <Box
                             sx={{
                               position: 'absolute',
                               right: '5px',
@@ -811,7 +851,7 @@ export const CreatePostBuilder = ({
                               borderRadius: '5px'
                             }}
                           >
-                            <RemoveCircleIcon
+                            <DeleteIcon
                               onClick={() => removeSection(section)}
                               sx={{
                                 cursor: 'pointer'
@@ -823,23 +863,8 @@ export const CreatePostBuilder = ({
                                 cursor: 'pointer'
                               }}
                             />
-                          </Box>
+                          </Box> */}
                         </Box>
-                      )}
-                      {editingSection && editingSection.id === section.id ? (
-                        <Box
-                          sx={{
-                            display: 'flex',
-                            width: '100%',
-                            justifyContent: 'flex-end'
-                          }}
-                        >
-                          <Button onClick={() => setEditingSection(null)}>
-                            Close
-                          </Button>
-                        </Box>
-                      ) : (
-                        <></>
                       )}
                     </DynamicHeightItem>
                   </div>
@@ -876,7 +901,28 @@ export const CreatePostBuilder = ({
                             src={section.content.image}
                             className="post-image"
                           />
-                          <Box
+                          <EditButtons>
+                            <DeleteIcon
+                              onClick={() => removeSection(section)}
+                              sx={{
+                                cursor: 'pointer',
+                                height: '18px',
+                                width: 'auto'
+                              }}
+                            />
+                            <ImageUploader
+                              onPick={(base64) => editImage(base64, section)}
+                            >
+                              <EditIcon
+                                sx={{
+                                  cursor: 'pointer',
+                                  height: '18px',
+                                  width: 'auto'
+                                }}
+                              />
+                            </ImageUploader>
+                          </EditButtons>
+                          {/* <Box
                             sx={{
                               position: 'absolute',
                               right: '5px',
@@ -891,7 +937,7 @@ export const CreatePostBuilder = ({
                               borderRadius: '5px'
                             }}
                           >
-                            <RemoveCircleIcon
+                            <DeleteIcon
                               onClick={() => removeSection(section)}
                               sx={{
                                 cursor: 'pointer'
@@ -906,7 +952,7 @@ export const CreatePostBuilder = ({
                                 }}
                               />
                             </ImageUploader>
-                          </Box>
+                          </Box> */}
                         </Box>
                       )}
 
@@ -964,7 +1010,33 @@ export const CreatePostBuilder = ({
                             identifier={section.content.identifier}
                             from="create"
                           />
-                          <Box
+                          <EditButtons>
+                            <DeleteIcon
+                              onClick={() => removeSection(section)}
+                              sx={{
+                                cursor: 'pointer',
+                                height: '18px',
+                                width: 'auto'
+                              }}
+                            />
+                            <VideoPanel
+                              width="auto"
+                              height="18px"
+                              onSelect={(video) =>
+                                editVideo(
+                                  {
+                                    name: video.name,
+                                    identifier: video.identifier,
+                                    service: video.service,
+                                    title: video?.metadata?.title,
+                                    description: video?.metadata?.description
+                                  },
+                                  section
+                                )
+                              }
+                            />
+                          </EditButtons>
+                          {/* <Box
                             sx={{
                               position: 'absolute',
                               right: '5px',
@@ -979,7 +1051,7 @@ export const CreatePostBuilder = ({
                               borderRadius: '5px'
                             }}
                           >
-                            <RemoveCircleIcon
+                            <DeleteIcon
                               onClick={() => removeSection(section)}
                               sx={{
                                 cursor: 'pointer'
@@ -1001,7 +1073,7 @@ export const CreatePostBuilder = ({
                                 )
                               }
                             />
-                          </Box>
+                          </Box> */}
                         </Box>
                       )}
                       {editingSection && editingSection.id === section.id ? (
@@ -1033,40 +1105,6 @@ export const CreatePostBuilder = ({
                         description={section.content?.description}
                         author=""
                       />
-                      {/* <Box
-                        key={section.id}
-                        sx={{
-                          display: 'flex',
-                          padding: '5px',
-                          gap: 1,
-                          marginTop: '15px',
-                          cursor: 'pointer',
-                          width: '100%',
-                          margin: 0,
-                          height: '100%',
-                          flexDirection: 'column',
-                          justifyContent: 'center'
-                        }}
-                      >
-                        <Box
-                          sx={{
-                            display: 'flex',
-                            alignItems: 'center'
-                          }}
-                        >
-                          <Typography variant="h5" sx={{}}>
-                            {section.content?.title}
-                          </Typography>
-
-                          <AudiotrackIcon />
-                        </Box>
-
-                        <Box>
-                          <Typography variant="subtitle1" sx={{}}>
-                            {section.content?.description}
-                          </Typography>
-                        </Box>
-                      </Box> */}
                     </DynamicHeightItem>
                   </div>
                 )
@@ -1112,6 +1150,25 @@ export const CreatePostBuilder = ({
           <Button onClick={addSection}>Add Text</Button>
           <Button onClick={closeAddTextModal}>Close</Button>
         </ReusableModal>
+        <ReusableModal open={isOpenEditTextModal}>
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 1
+            }}
+          >
+            <BlogEditor
+              value={value}
+              setValue={setValue}
+              editorKey={editorKey}
+            />
+          </Box>
+          <Button onClick={() => editPostSection(value, editingSection)}>
+            Update Text
+          </Button>
+          <Button onClick={closeEditTextModal}>Close</Button>
+        </ReusableModal>
         <ReusableModal open={isEditNavOpen}>
           <Navbar
             saveNav={handleSaveNavBar}
@@ -1145,5 +1202,27 @@ export const CreatePostBuilder = ({
         )}
       </Box>
     </>
+  )
+}
+
+const EditButtons = ({ children }: any) => {
+  return (
+    <Box
+      sx={{
+        position: 'absolute',
+        right: '5px',
+        zIndex: 5,
+        top: '5px',
+        display: 'flex',
+        flexDirection: 'row',
+        gap: '8px',
+        background: 'white',
+        padding: '5px',
+        borderRadius: '5px',
+        alignItems: 'center'
+      }}
+    >
+      {children}
+    </Box>
   )
 }

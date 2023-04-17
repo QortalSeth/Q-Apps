@@ -9,7 +9,7 @@ import { CreatePost } from './pages/CreatePost/CreatePost'
 import { CreatEditProfile } from './pages/CreateEditProfile/CreatEditProfile'
 import { ThemeProvider } from '@mui/material/styles'
 import { CssBaseline } from '@mui/material'
-import theme from './styles/theme'
+import { lightTheme, darkTheme } from './styles/theme'
 import { store } from './state/store'
 import { Provider } from 'react-redux'
 import GlobalWrapper from './wrappers/GlobalWrapper'
@@ -17,11 +17,17 @@ import DownloadWrapper from './wrappers/DownloadWrapper'
 
 import { EditPost } from './pages/EditPost/EditPost'
 import Notification from './components/common/Notification/Notification'
+import { useState } from 'react'
 
 function App() {
+  const [isDarkMode, setIsDarkMode] = useState(false)
+
+  const toggleDarkMode = () => {
+    setIsDarkMode(!isDarkMode)
+  }
   return (
     <Provider store={store}>
-      <ThemeProvider theme={theme}>
+      <ThemeProvider theme={isDarkMode ? darkTheme : lightTheme}>
         <Notification />
         <GlobalWrapper>
           <DownloadWrapper>

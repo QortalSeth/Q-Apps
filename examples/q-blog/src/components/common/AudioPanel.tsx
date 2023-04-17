@@ -7,7 +7,8 @@ import {
   ListItemText,
   Typography,
   ButtonBase,
-  Button
+  Button,
+  Tooltip
 } from '@mui/material'
 import VideoCallIcon from '@mui/icons-material/VideoCall'
 import VideoModal from './VideoPublishModal'
@@ -108,15 +109,16 @@ export const AudioPanel: React.FC<VideoPanelProps> = ({
 
   return (
     <Box>
-      <AudioFileIcon
-        onClick={handleToggle}
-        sx={{
-          height: height || '40px',
-          width: width || '40px',
-          cursor: 'pointer'
-        }}
-      ></AudioFileIcon>
-
+      <Tooltip title="Add an audio file" arrow>
+        <AudioFileIcon
+          onClick={handleToggle}
+          sx={{
+            height: height || '30px',
+            width: width || 'auto',
+            cursor: 'pointer'
+          }}
+        ></AudioFileIcon>
+      </Tooltip>
       <Drawer
         anchor="right"
         open={isOpen}

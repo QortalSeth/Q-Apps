@@ -7,7 +7,8 @@ import {
   CardMedia,
   Typography,
   Box,
-  Button
+  Button,
+  Tooltip
 } from '@mui/material'
 import { styled } from '@mui/system'
 import moment from 'moment'
@@ -23,6 +24,7 @@ import BookmarkBorderIcon from '@mui/icons-material/BookmarkBorder'
 import BookmarkIcon from '@mui/icons-material/Bookmark'
 import { AppDispatch, RootState } from '../../state/store'
 import BlockIcon from '@mui/icons-material/Block'
+import { CustomIcon } from '../../components/common/CustomIcon'
 interface BlogPostPreviewProps {
   title: string
   createdAt: number | string
@@ -38,6 +40,10 @@ const StyledCard = styled(Card)`
   margin: 1rem;
   width: 275px;
   cursor: pointer;
+
+  @media (max-width: 450px) {
+    width: 100%;
+  }
 `
 
 const StyledCardMedia = styled(CardMedia)`
@@ -70,7 +76,7 @@ const BlogPostPreview: React.FC<BlogPostPreviewProps> = ({
   )
   const username = useSelector((state: RootState) => state.auth?.user?.name)
   const formatDate = (unixTimestamp: number): string => {
-    const date = moment(unixTimestamp, 'x').calendar()
+    const date = moment(unixTimestamp, 'x').fromNow()
 
     return date
   }
@@ -174,7 +180,7 @@ const BlogPostPreview: React.FC<BlogPostPreviewProps> = ({
           </Typography>
           <Box marginTop="1rem">
             <Typography variant="caption" color="textSecondary">
-              Created at: {formatDate(+createdAt)}
+              {formatDate(+createdAt)}
             </Typography>
           </Box>
         </CardContent>
@@ -186,11 +192,16 @@ const BlogPostPreview: React.FC<BlogPostPreviewProps> = ({
           right: '15px'
         }}
       >
-        <BlockIcon
-          onClick={() => {
-            blockUserFunc(blogPost.user)
-          }}
-        />
+        <Tooltip title="Block user content">
+          <Box>
+            <CustomIcon
+              component={BlockIcon}
+              onClick={() => {
+                blockUserFunc(blogPost.user)
+              }}
+            />
+          </Box>
+        </Tooltip>
         {username && isFavorite && (
           <BookmarkIcon
             sx={{

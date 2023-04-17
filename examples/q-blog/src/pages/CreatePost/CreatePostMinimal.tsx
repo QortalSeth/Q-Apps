@@ -52,6 +52,7 @@ const BlogTitleInput = styled(TextField)(({ theme }) => ({
   '& .MuiInputBase-input': {
     fontSize: '28px',
     height: '28px',
+    background: 'transparent',
     '&::placeholder': {
       fontSize: '28px',
       color: theme.palette.text.secondary
@@ -59,6 +60,23 @@ const BlogTitleInput = styled(TextField)(({ theme }) => ({
   },
   '& .MuiInputLabel-root': {
     fontSize: '28px'
+  },
+  '& .MuiInputBase-root': {
+    background: 'transparent',
+    '&:hover': {
+      background: 'transparent'
+    },
+    '&.Mui-focused': {
+      background: 'transparent'
+    }
+  },
+  '& .MuiOutlinedInput-root': {
+    '&:hover .MuiOutlinedInput-notchedOutline': {
+      borderColor: theme.palette.primary.main
+    },
+    '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+      borderColor: theme.palette.primary.main
+    }
   }
 }))
 
@@ -66,11 +84,13 @@ interface CreatePostMinimalProps {
   blogContentForEdit?: any
   postIdForEdit?: string
   blogMetadataForEdit?: any
+  switchType?: () => void
 }
 export const CreatePostMinimal = ({
   blogContentForEdit,
   postIdForEdit,
-  blogMetadataForEdit
+  blogMetadataForEdit,
+  switchType
 }: CreatePostMinimalProps) => {
   const { user } = useSelector((state: RootState) => state.auth)
   const { currentBlog } = useSelector((state: RootState) => state.global)
@@ -88,6 +108,9 @@ export const CreatePostMinimal = ({
   const [count, setCount] = React.useState<number>(1)
   const [isOpenAddTextModal, setIsOpenAddTextModal] =
     React.useState<boolean>(false)
+  const [isOpenEditTextModal, setIsOpenEditTextModal] =
+    React.useState<boolean>(false)
+
   const [paddingValue, onChangePadding] = React.useState(5)
   const dispatch = useDispatch()
   const addPostSection = React.useCallback((content: any) => {
@@ -588,14 +611,18 @@ export const CreatePostMinimal = ({
     }
   }
   const editSection = (section: any) => {
+    setIsOpenEditTextModal(true)
     setEditingSection(section)
     setValue(section.content)
   }
+  console.log({ editingSection })
   const editPostSection = React.useCallback(
     (content: any, section: any) => {
+      console.log({ content, section })
       const findSectionIndex = newPostContent.findIndex(
         (s) => s.id === section.id
       )
+      console.log({ findSectionIndex })
       if (findSectionIndex !== -1) {
         const copyNewPostContent = [...newPostContent]
         copyNewPostContent[findSectionIndex] = {
@@ -607,6 +634,7 @@ export const CreatePostMinimal = ({
       }
 
       setEditingSection(null)
+      setIsOpenEditTextModal(false)
     },
     [newPostContent]
   )
@@ -633,6 +661,10 @@ export const CreatePostMinimal = ({
 
   const closeAddTextModal = React.useCallback(() => {
     setIsOpenAddTextModal(false)
+  }, [])
+  const closeEditTextModal = React.useCallback(() => {
+    setIsOpenEditTextModal(false)
+    setEditingSection(null)
   }, [])
 
   const handleResize = () => {
@@ -697,6 +729,7 @@ export const CreatePostMinimal = ({
         paddingValue={paddingValue}
         onChangePadding={onChangePadding}
         isMinimal={true}
+        switchType={switchType}
       />
 
       <Box
@@ -764,6 +797,7 @@ export const CreatePostMinimal = ({
                   )
                   if (!section) return null
                   if (section.type === 'editor') {
+                    console.log({ section })
                     return (
                       <div
                         key={section.id}
@@ -784,15 +818,7 @@ export const CreatePostMinimal = ({
                           padding={paddingValue}
                         >
                           {editingSection &&
-                          editingSection.id === section.id ? (
-                            <BlogEditor
-                              editPostSection={editPostSection}
-                              defaultValue={section.content}
-                              section={section}
-                              value={value}
-                              setValue={setValue}
-                            />
-                          ) : (
+                          editingSection.id === section.id ? null : (
                             <Box
                               sx={{
                                 position: 'relative',
@@ -835,22 +861,6 @@ export const CreatePostMinimal = ({
                                 />
                               </Box>
                             </Box>
-                          )}
-                          {editingSection &&
-                          editingSection.id === section.id ? (
-                            <Box
-                              sx={{
-                                display: 'flex',
-                                width: '100%',
-                                justifyContent: 'flex-end'
-                              }}
-                            >
-                              <Button onClick={() => setEditingSection(null)}>
-                                Close
-                              </Button>
-                            </Box>
-                          ) : (
-                            <></>
                           )}
                         </DynamicHeightItemMinimal>
                       </div>
@@ -1123,6 +1133,25 @@ export const CreatePostMinimal = ({
           </Box>
           <Button onClick={addSection}>Add Text</Button>
           <Button onClick={closeAddTextModal}>Close</Button>
+        </ReusableModal>
+        <ReusableModal open={isOpenEditTextModal}>
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 1
+            }}
+          >
+            <BlogEditor
+              value={value}
+              setValue={setValue}
+              editorKey={editorKey}
+            />
+          </Box>
+          <Button onClick={() => editPostSection(value, editingSection)}>
+            Update Text
+          </Button>
+          <Button onClick={closeEditTextModal}>Close</Button>
         </ReusableModal>
         {!blogContentForEdit && (
           <PostPublishModal

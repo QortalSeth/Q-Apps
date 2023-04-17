@@ -58,7 +58,8 @@ export const BlogList = ({ mode }: BlogListProps) => {
           margin: '0px',
           padding: '10px',
           display: 'flex',
-          flexWrap: 'wrap'
+          flexWrap: 'wrap',
+          justifyContent: 'center'
         }}
       >
         {posts.map((post, index) => {
@@ -75,7 +76,10 @@ export const BlogList = ({ mode }: BlogListProps) => {
                 gap: 1,
                 alignItems: 'center',
                 width: 'auto',
-                position: 'relative'
+                position: 'relative',
+                ' @media (max-width: 450px)': {
+                  width: '100%'
+                }
               }}
               key={blogPost.id}
             >

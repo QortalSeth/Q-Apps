@@ -43,7 +43,7 @@ export const CreatePost = ({ mode }: CreatePostProps) => {
     }
   }, [setIsOpen, toggleEditorType])
 
-  const switchType = (type: EditorType) => {
+  const switchType = () => {
     setIsOpen(true)
   }
 
@@ -98,12 +98,12 @@ export const CreatePost = ({ mode }: CreatePostProps) => {
   console.log(isOpen)
   return (
     <>
-      {toggleEditorType === 'minimal' && (
-        <Button onClick={() => switchType('builder')}>Switch to Builder</Button>
+      {/* {toggleEditorType === 'minimal' && (
+        <Button onClick={() => switchType()}>Switch to Builder</Button>
       )}
       {toggleEditorType === 'builder' && (
-        <Button onClick={() => switchType('minimal')}>Switch to Minimal</Button>
-      )}
+        <Button onClick={() => switchType()}>Switch to Minimal</Button>
+      )} */}
       {isOpen && (
         <ReusableModal
           open={isOpen}
@@ -167,8 +167,12 @@ export const CreatePost = ({ mode }: CreatePostProps) => {
           <Button onClick={() => setIsOpen(false)}>Close</Button>
         </ReusableModal>
       )}
-      {toggleEditorType === 'minimal' && <CreatePostMinimal />}
-      {toggleEditorType === 'builder' && <CreatePostBuilder />}
+      {toggleEditorType === 'minimal' && (
+        <CreatePostMinimal switchType={switchType} />
+      )}
+      {toggleEditorType === 'builder' && (
+        <CreatePostBuilder switchType={switchType} />
+      )}
       {mode === 'edit' && editType === 'minimal' && (
         <CreatePostMinimal
           blogContentForEdit={blogContentForEdit}

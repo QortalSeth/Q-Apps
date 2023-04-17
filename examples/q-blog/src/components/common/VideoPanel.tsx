@@ -7,7 +7,8 @@ import {
   ListItemText,
   Typography,
   ButtonBase,
-  Button
+  Button,
+  Tooltip
 } from '@mui/material'
 import VideoCallIcon from '@mui/icons-material/VideoCall'
 import VideoModal from './VideoPublishModal'
@@ -105,15 +106,16 @@ export const VideoPanel: React.FC<VideoPanelProps> = ({
 
   return (
     <Box>
-      <VideoCallIcon
-        onClick={handleToggle}
-        sx={{
-          height: height || '40px',
-          width: width || '40px',
-          cursor: 'pointer'
-        }}
-      ></VideoCallIcon>
-
+      <Tooltip title="Add a video" arrow>
+        <VideoCallIcon
+          onClick={handleToggle}
+          sx={{
+            height: height || '30px',
+            width: width || 'auto',
+            cursor: 'pointer'
+          }}
+        ></VideoCallIcon>
+      </Tooltip>
       <Drawer
         anchor="right"
         open={isOpen}

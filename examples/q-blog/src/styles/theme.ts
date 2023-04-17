@@ -1,58 +1,83 @@
 import { createTheme } from '@mui/material/styles';
-
-const theme = createTheme({
-  palette: {
-    primary: {
-      main: '#3f51b5', // Customize the primary color
-    },
-    secondary: {
-      main: '#f50057', // Customize the secondary color
-    },
-    background: {
-      default: '#f3f3f3', // Customize the background color
-    },
-    text: {
-      primary: '#212121', // Customize the primary text color
-      secondary: '#757575', // Customize the secondary text color
-    },
-  },
+const commonThemeOptions = {
   typography: {
-    fontFamily: "'Roboto', 'Helvetica', 'Arial', sans-serif", // Customize the font family
+    fontFamily: "'Arial', 'Roboto', 'Arial', sans-serif",
     h1: {
       fontSize: '2rem',
-      fontWeight: 600,
+      fontWeight: 600
     },
     h2: {
       fontSize: '1.75rem',
-      fontWeight: 500,
+      fontWeight: 500
     },
     h3: {
       fontSize: '1.5rem',
-      fontWeight: 500,
+      fontWeight: 500
     },
     h4: {
       fontSize: '1.25rem',
-      fontWeight: 500,
+      fontWeight: 500
     },
     h5: {
       fontSize: '1rem',
-      fontWeight: 500,
+      fontWeight: 500
     },
     h6: {
       fontSize: '0.875rem',
-      fontWeight: 500,
+      fontWeight: 500
     },
     body1: {
-      fontSize: '1rem',
+      fontSize: '1rem'
     },
     body2: {
-      fontSize: '0.875rem',
-    },
+      fontSize: '0.875rem'
+    }
   },
-  spacing: 8, // Customize the base spacing unit (default is 8)
+  spacing: 8,
   shape: {
-    borderRadius: 4, // Customize the border radius of components
-  },
-});
+    borderRadius: 4
+  }
+}
 
-export default theme;
+const lightTheme = createTheme({
+  ...commonThemeOptions,
+  palette: {
+    mode: 'light',
+    primary: {
+      main: '#3f51b5'
+    },
+    secondary: {
+      main: '#f50057'
+    },
+    background: {
+      default: '#fafafa',
+      paper: '#f0f0f0'
+    },
+    text: {
+      primary: '#212121',
+      secondary: '#757575'
+    }
+  }
+})
+
+const darkTheme = createTheme({
+  ...commonThemeOptions,
+  palette: {
+    mode: 'dark',
+    primary: {
+      main: '#3f51b5'
+    },
+    secondary: {
+      main: '#f50057'
+    },
+    background: {
+      default: '#303030'
+    },
+    text: {
+      primary: '#ffffff',
+      secondary: '#b3b3b3'
+    }
+  }
+})
+
+export { lightTheme, darkTheme }

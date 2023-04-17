@@ -61,11 +61,16 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({ children, onPick }) => {
   });
 
   return (
-    <Box {...getRootProps()}>
+    <Box
+      {...getRootProps()}
+      sx={{
+        display: 'flex'
+      }}
+    >
       <input {...getInputProps()} />
       {children}
     </Box>
-  );
+  )
 };
 
 export default ImageUploader;

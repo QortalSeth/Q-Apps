@@ -38,8 +38,7 @@ function useQuery() {
 }
 
 const CustomAppBar = styled(AppBar)(({ theme }) => ({
-  backgroundColor: '#FFFFFF',
-  color: '#000000'
+  backgroundColor: theme.palette.background.default
 }))
 
 const CustomToolbar = styled(Toolbar)({
@@ -98,7 +97,7 @@ const NavBar: React.FC<Props> = ({
   const open = Boolean(anchorEl)
   const id = open ? 'simple-popover' : undefined
   return (
-    <CustomAppBar position="sticky">
+    <CustomAppBar position="sticky" elevation={2}>
       <CustomToolbar variant="dense">
         <CustomTitle
           variant="h6"

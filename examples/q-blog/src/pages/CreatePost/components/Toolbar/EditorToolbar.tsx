@@ -8,6 +8,8 @@ import ImageUploader from '../../../../components/common/ImageUploader'
 import AddPhotoAlternateIcon from '@mui/icons-material/AddPhotoAlternate'
 import { VideoPanel } from '../../../../components/common/VideoPanel'
 import MenuOpenIcon from '@mui/icons-material/MenuOpen'
+import HandymanRoundedIcon from '@mui/icons-material/HandymanRounded'
+import Tooltip from '@mui/material/Tooltip'
 
 const CustomToolbar = styled(Toolbar)({
   display: 'flex',
@@ -29,6 +31,7 @@ interface IEditorToolbar {
   onChangePadding: (padding: number) => void
   isMinimal?: boolean
   addNav?: () => void
+  switchType?: () => void
 }
 
 export const EditorToolbar = ({
@@ -39,7 +42,8 @@ export const EditorToolbar = ({
   paddingValue,
   onChangePadding,
   isMinimal = false,
-  addNav
+  addNav,
+  switchType
 }: IEditorToolbar) => {
   return (
     <CustomAppBar position="sticky">
@@ -48,7 +52,9 @@ export const EditorToolbar = ({
           sx={{
             display: 'flex',
             justifyContent: 'space-between',
-            width: '100%'
+            width: '100%',
+            flexWrap: 'wrap',
+            alignItems: 'center'
           }}
         >
           <Box
@@ -57,24 +63,31 @@ export const EditorToolbar = ({
               gap: '10px'
             }}
           >
-            <TextFieldsIcon
-              onClick={() => setIsOpenAddTextModal(true)}
-              sx={{
-                cursor: 'pointer',
-                width: '40px',
-                height: '40px'
-              }}
-            />
-            <ImageUploader onPick={addImage}>
-              <AddPhotoAlternateIcon
+            <Tooltip title="Add Text" arrow>
+              <TextFieldsIcon
+                onClick={() => setIsOpenAddTextModal(true)}
                 sx={{
                   cursor: 'pointer',
-                  width: '40px',
-                  height: '40px'
+                  width: 'auto',
+                  height: '30px'
                 }}
               />
+            </Tooltip>
+
+            <ImageUploader onPick={addImage}>
+              <Tooltip title="Add an image" arrow>
+                <AddPhotoAlternateIcon
+                  sx={{
+                    cursor: 'pointer',
+                    width: 'auto',
+                    height: '30px'
+                  }}
+                />
+              </Tooltip>
             </ImageUploader>
+
             <VideoPanel onSelect={onSelectVideo} />
+
             <AudioPanel onSelect={onSelectAudio} />
           </Box>
           <Box
@@ -84,31 +97,49 @@ export const EditorToolbar = ({
             }}
           >
             {!isMinimal && (
-              <MenuOpenIcon
-                onClick={addNav}
-                sx={{
-                  cursor: 'pointer',
-                  width: '40px',
-                  height: '40px'
-                }}
-              />
+              <Tooltip title="Adjust padding between elements" arrow>
+                <Box>
+                  <Slider
+                    size="small"
+                    value={paddingValue}
+                    onChange={(event: any) =>
+                      onChangePadding(event.target.value)
+                    }
+                    defaultValue={5}
+                    aria-label="Default"
+                    valueLabelDisplay="auto"
+                    min={0}
+                    max={40}
+                    sx={{
+                      width: '100px'
+                    }}
+                  />
+                </Box>
+              </Tooltip>
             )}
             {!isMinimal && (
-              <Box>
-                <Typography gutterBottom>Spacing</Typography>
-                <Slider
-                  value={paddingValue}
-                  onChange={(event: any) => onChangePadding(event.target.value)}
-                  defaultValue={5}
-                  aria-label="Default"
-                  valueLabelDisplay="auto"
-                  min={0}
-                  max={40}
+              <Tooltip title="Manage your custom navbar links" arrow>
+                <MenuOpenIcon
+                  onClick={addNav}
                   sx={{
-                    width: '100px'
+                    cursor: 'pointer',
+                    width: 'auto',
+                    height: '30px'
                   }}
                 />
-              </Box>
+              </Tooltip>
+            )}
+            {switchType && (
+              <Tooltip title="Switch editor type" arrow>
+                <HandymanRoundedIcon
+                  onClick={switchType}
+                  sx={{
+                    cursor: 'pointer',
+                    width: 'auto',
+                    height: '30px'
+                  }}
+                />
+              </Tooltip>
             )}
           </Box>
         </Box>

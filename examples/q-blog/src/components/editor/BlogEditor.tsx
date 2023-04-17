@@ -65,7 +65,7 @@ const BlogEditor: React.FC<MyComponentProps> = ({
   const isTextAlignmentActive = (editor: Editor, alignment: string) => {
     const [match] = Editor.nodes(editor, {
       match: (n) => {
-        return n?.textAlign === alignment.replace(/^align-/, '')
+        return n?.textAlign === alignment?.replace(/^align-/, '')
       }
     })
     return !!match
@@ -90,30 +90,21 @@ const BlogEditor: React.FC<MyComponentProps> = ({
     } else {
       const isActive = Editor.marks(editor)?.[format] === true
       if (isActive) {
-        Editor.removeMark(editor, format)
+        Editor?.removeMark(editor, format)
       } else {
-        Editor.addMark(editor, format, true)
+        Editor?.addMark(editor, format, true)
       }
     }
   }
 
-  const newValue = useMemo(
-    () => [
-      ...(value || initialValue),
-      {
-        type: 'paragraph',
-        children: [{ text: '' }]
-      }
-    ],
-    [value]
-  )
+  const newValue = useMemo(() => [...(value || initialValue)], [value])
 
   const types = ['paragraph', 'heading-2', 'heading-3']
 
   const setTextAlignment = (editor, alignment) => {
     const isActive = isTextAlignmentActive(editor, alignment)
     const alignmentType = ''
-    Transforms.setNodes(
+    Transforms?.setNodes(
       editor,
       {
         textAlign: isActive ? null : alignment
@@ -149,7 +140,7 @@ const BlogEditor: React.FC<MyComponentProps> = ({
         format === 'align-center' ||
         format === 'align-right'
       ) {
-        setTextAlignment(editor, format.replace(/^align-/, ''))
+        setTextAlignment(editor, format?.replace(/^align-/, ''))
       }
     }
 
@@ -168,7 +159,7 @@ const BlogEditor: React.FC<MyComponentProps> = ({
       format === 'underline' ||
       format === ''
     ) {
-      isActive = Editor.marks(editor)?.[format] === true
+      isActive = Editor?.marks(editor)?.[format] === true
     }
     console.log({ isActive })
     return (
@@ -220,19 +211,19 @@ const BlogEditor: React.FC<MyComponentProps> = ({
     editor: Editor
   }> = ({ format, label, editor }) => {
     const isActive =
-      Editor.nodes(editor, {
-        match: (n) => n.align === format
-      }).length > 0
+      Editor?.nodes(editor, {
+        match: (n) => n?.align === format
+      })?.length > 0
 
     return (
       <button
         className={`toolbar-button ${isActive ? 'active' : ''}`}
         onMouseDown={(event) => {
           event.preventDefault()
-          Transforms.setNodes(
+          Transforms?.setNodes(
             editor,
             { align: format },
-            { match: (n) => Editor.isBlock(editor, n) }
+            { match: (n) => Editor?.isBlock(editor, n) }
           )
         }}
       >
@@ -258,9 +249,9 @@ const BlogEditor: React.FC<MyComponentProps> = ({
         className={`toolbar-button ${isActive ? 'active' : ''}`}
         onMouseDown={(event) => {
           event.preventDefault()
-          const isActive2 = !!Editor.marks(editor)?.link
+          const isActive2 = !!Editor?.marks(editor)?.link
           if (isActive2) {
-            Editor.removeMark(editor, 'link')
+            Editor?.removeMark(editor, 'link')
             return
           }
           // const url = window.prompt('Enter the URL of the link:')
@@ -275,21 +266,21 @@ const BlogEditor: React.FC<MyComponentProps> = ({
   // Create a toggleBlock function and an isBlockActive function to handle block elements
   const toggleBlock = (editor: Editor, format: string) => {
     const isActive = isBlockActive(editor, format)
-    Transforms.unwrapNodes(editor, {
-      match: (n) => Editor.isBlock(editor, n),
+    Transforms?.unwrapNodes(editor, {
+      match: (n) => Editor?.isBlock(editor, n),
       split: true
     })
 
     if (isActive) {
-      Transforms.setNodes(editor, { type: 'paragraph' })
+      Transforms?.setNodes(editor, { type: 'paragraph' })
     } else {
-      Transforms.setNodes(editor, { type: format })
+      Transforms?.setNodes(editor, { type: format })
     }
   }
 
   const isBlockActive = (editor: Editor, format: string) => {
-    const [match] = Editor.nodes(editor, {
-      match: (n) => n.type === format
+    const [match] = Editor?.nodes(editor, {
+      match: (n) => n?.type === format
     })
     return !!match
   }
@@ -297,12 +288,12 @@ const BlogEditor: React.FC<MyComponentProps> = ({
   const handleKeyDown = (event: React.KeyboardEvent) => {
     if (event.key === 'Enter' && isBlockActive(editor, 'code-block')) {
       event.preventDefault()
-      editor.insertText('\n')
+      editor?.insertText('\n')
     }
 
     if (event.key === 'ArrowDown' && isBlockActive(editor, 'code-block')) {
       event.preventDefault()
-      Transforms.insertNodes(editor, {
+      Transforms?.insertNodes(editor, {
         type: 'paragraph',
         children: [{ text: '' }]
       })
@@ -310,15 +301,6 @@ const BlogEditor: React.FC<MyComponentProps> = ({
   }
 
   const handleChange = (newValue: Descendant[]) => {
-    if (newValue.length === 0) {
-      setValue([
-        {
-          type: 'paragraph',
-          children: [{ text: '' }]
-        }
-      ])
-      return
-    }
     setValue(newValue)
   }
 
@@ -326,13 +308,13 @@ const BlogEditor: React.FC<MyComponentProps> = ({
     const { selection } = editor
 
     if (selection && !Range.isCollapsed(selection)) {
-      const isLink = Editor.marks(editor)?.link === true
+      const isLink = Editor?.marks(editor)?.link === true
       const isInsideLink = isLinkActive(editor)
 
       if (isLink) {
-        Editor.removeMark(editor, 'link')
+        Editor?.removeMark(editor, 'link')
       } else if (url) {
-        Editor.addMark(editor, 'link', url)
+        Editor?.addMark(editor, 'link', url)
       }
     }
   }
@@ -343,23 +325,23 @@ const BlogEditor: React.FC<MyComponentProps> = ({
   const [inputValue, setInputValue] = useState(initialValue)
 
   const handleChangeLink = (event) => {
-    const newValue = event.target.value
-    if (newValue.startsWith(initialValue)) {
+    const newValue = event?.target?.value
+    if (newValue?.startsWith(initialValue)) {
       setInputValue(newValue)
     }
   }
   const isLinkActive = (editor: Editor) => {
-    const [link] = Editor.nodes(editor, {
-      match: (n) => n.type === 'link'
+    const [link] = Editor?.nodes(editor, {
+      match: (n) => n?.type === 'link'
     })
     return !!link
   }
   const handleSaveClick = () => {
-    const marks = Editor.marks(editor)
+    const marks = Editor?.marks(editor)
     const isLink = marks?.link === true
 
     if (isLink) {
-      Editor.removeMark(editor, 'link')
+      Editor?.removeMark(editor, 'link')
       return // Return early to skip the rest of the function
     }
     toggleLink(editor, inputValue)
@@ -372,29 +354,29 @@ const BlogEditor: React.FC<MyComponentProps> = ({
 
   const handlePaste = (event: React.ClipboardEvent) => {
     event.preventDefault()
-    const text = event.clipboardData.getData('text/plain')
+    const text = event?.clipboardData?.getData('text/plain')
     const isCodeBlock = isBlockActive(editor, 'code-block')
 
     if (isCodeBlock) {
-      const lines = text.split('\n')
+      const lines = text?.split('\n')
       const fragment: Descendant[] = [
         {
           type: 'code-block',
-          children: lines.map((line) => ({
+          children: lines?.map((line) => ({
             type: 'code-line',
             children: [{ text: line }]
           }))
         }
       ]
 
-      Transforms.insertFragment(editor, fragment)
-    } else {
-      const fragment = text.split('\n').map((line) => ({
+      Transforms?.insertFragment(editor, fragment)
+    } else if (text) {
+      const fragment = text?.split('\n').map((line) => ({
         type: 'paragraph',
         children: [{ text: line }]
       }))
 
-      Transforms.insertFragment(editor, fragment)
+      Transforms?.insertFragment(editor, fragment)
     }
   }
 
