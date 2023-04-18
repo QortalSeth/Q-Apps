@@ -26,6 +26,10 @@ import { VideoPlayer } from '../../components/common/VideoPlayer'
 import { EditorToolbar } from './components/Toolbar/EditorToolbar'
 import { DynamicHeightItemMinimal } from '../../components/DynamicHeightItemMinimal'
 import AudioElement from '../../components/AudioElement'
+import DeleteIcon from '@mui/icons-material/Delete'
+
+import { AudioPanel } from '../../components/common/AudioPanel'
+import { EditButtons } from './CreatePostBuilder'
 const ResponsiveGridLayout = WidthProvider(Responsive)
 const initialMinHeight = 2 // Define an initial minimum height for grid items
 const uid = new ShortUniqueId()
@@ -610,6 +614,32 @@ export const CreatePostMinimal = ({
       setNewPostContent(copyNewPostContent)
     }
   }
+
+  const editAudio = (
+    { name, identifier, service, description, title }: IaddVideo,
+    section: any
+  ) => {
+    const newSection = {
+      ...section,
+      content: {
+        name: name,
+        identifier: identifier,
+        service: service,
+        description,
+        title
+      }
+    }
+    const findSectionIndex = newPostContent.findIndex(
+      (s) => s.id === section.id
+    )
+    if (findSectionIndex !== -1) {
+      const copyNewPostContent = [...newPostContent]
+      copyNewPostContent[findSectionIndex] = newSection
+
+      setNewPostContent(copyNewPostContent)
+    }
+  }
+
   const editSection = (section: any) => {
     setIsOpenEditTextModal(true)
     setEditingSection(section)
@@ -830,36 +860,26 @@ export const CreatePostMinimal = ({
                                 key={section.id}
                                 content={section.content}
                               />
-                              <Box
-                                sx={{
-                                  position: 'absolute',
-                                  right: '5px',
-                                  zIndex: 5,
-                                  top: '50%',
-                                  transform: 'translateY(-50%)',
-                                  display: 'flex',
-                                  // flexDirection: 'column',
-                                  gap: 2,
-                                  background: 'white',
-                                  padding: '5px',
-                                  borderRadius: '5px'
-                                }}
-                              >
-                                <RemoveCircleIcon
+                              <EditButtons>
+                                <DeleteIcon
                                   onClick={() =>
                                     removeSection(section, rowIndex)
                                   }
                                   sx={{
-                                    cursor: 'pointer'
+                                    cursor: 'pointer',
+                                    height: '18px',
+                                    width: 'auto'
                                   }}
                                 />
                                 <EditIcon
                                   onClick={() => editSection(section)}
                                   sx={{
-                                    cursor: 'pointer'
+                                    cursor: 'pointer',
+                                    height: '18px',
+                                    width: 'auto'
                                   }}
                                 />
-                              </Box>
+                              </EditButtons>
                             </Box>
                           )}
                         </DynamicHeightItemMinimal>
@@ -878,76 +898,43 @@ export const CreatePostMinimal = ({
                           type="image"
                           padding={paddingValue}
                         >
-                          {editingSection &&
-                          editingSection.id === section.id ? (
-                            <ImageUploader
-                              onPick={(base64) => editImage(base64, section)}
-                            >
-                              Add Image
-                              <AddPhotoAlternateIcon />
-                            </ImageUploader>
-                          ) : (
-                            <Box
-                              sx={{
-                                position: 'relative',
-                                width: '100%',
-                                height: '100%'
+                          <Box
+                            sx={{
+                              position: 'relative',
+                              width: '100%',
+                              height: '100%'
+                            }}
+                          >
+                            <img
+                              src={section.content.image}
+                              className="post-image"
+                              style={{
+                                objectFit: 'contain',
+                                maxHeight: '50vh'
                               }}
-                            >
-                              <img
-                                src={section.content.image}
-                                className="post-image"
-                                style={{
-                                  objectFit: 'contain',
-                                  maxHeight: '50vh'
+                            />
+                            <EditButtons>
+                              <DeleteIcon
+                                onClick={() => removeSection(section, rowIndex)}
+                                sx={{
+                                  cursor: 'pointer',
+                                  height: '18px',
+                                  width: 'auto'
                                 }}
                               />
-                              <Box
-                                sx={{
-                                  position: 'absolute',
-                                  right: '5px',
-                                  zIndex: 5,
-                                  top: '50%',
-                                  transform: 'translateY(-50%)',
-                                  display: 'flex',
-                                  flexDirection: 'column',
-                                  gap: 2,
-                                  background: 'white',
-                                  padding: '5px',
-                                  borderRadius: '5px'
-                                }}
+                              <ImageUploader
+                                onPick={(base64) => editImage(base64, section)}
                               >
-                                <RemoveCircleIcon
-                                  onClick={() =>
-                                    removeSection(section, rowIndex)
-                                  }
+                                <EditIcon
                                   sx={{
-                                    cursor: 'pointer'
+                                    cursor: 'pointer',
+                                    height: '18px',
+                                    width: 'auto'
                                   }}
                                 />
-                                <ImageUploader
-                                  onPick={(base64) =>
-                                    editImage(base64, section)
-                                  }
-                                >
-                                  <EditIcon
-                                    sx={{
-                                      cursor: 'pointer'
-                                    }}
-                                  />
-                                </ImageUploader>
-                              </Box>
-                            </Box>
-                          )}
-
-                          {editingSection &&
-                          editingSection.id === section.id ? (
-                            <Button onClick={() => setEditingSection(null)}>
-                              Close
-                            </Button>
-                          ) : (
-                            <></>
-                          )}
+                              </ImageUploader>
+                            </EditButtons>
+                          </Box>
                         </DynamicHeightItemMinimal>
                       </div>
                     )
@@ -964,92 +951,49 @@ export const CreatePostMinimal = ({
                           count={count}
                           padding={paddingValue}
                         >
-                          {editingSection &&
-                          editingSection.id === section.id ? (
-                            <VideoPanel
-                              width="24px"
-                              height="24px"
-                              onSelect={(video) =>
-                                editVideo(
-                                  {
-                                    name: video.name,
-                                    identifier: video.identifier,
-                                    service: video.service,
-                                    title: video?.metadata?.title,
-                                    description: video?.metadata?.description
-                                  },
-                                  section
-                                )
-                              }
-                            />
-                          ) : (
-                            <Box
-                              sx={{
-                                position: 'relative',
-                                width: '100%',
-                                height: '100%'
+                          <Box
+                            sx={{
+                              position: 'relative',
+                              width: '100%',
+                              height: '100%'
+                            }}
+                          >
+                            <VideoPlayer
+                              name={section.content.name}
+                              service={section.content.service}
+                              identifier={section.content.identifier}
+                              from="create"
+                              customStyle={{
+                                height: '50vh'
                               }}
-                            >
-                              <VideoPlayer
-                                name={section.content.name}
-                                service={section.content.service}
-                                identifier={section.content.identifier}
-                                from="create"
-                                customStyle={{
-                                  height: '50vh'
+                            />
+                            <EditButtons>
+                              <DeleteIcon
+                                onClick={() => removeSection(section, rowIndex)}
+                                sx={{
+                                  cursor: 'pointer',
+                                  height: '18px',
+                                  width: 'auto'
                                 }}
                               />
-                              <Box
-                                sx={{
-                                  position: 'absolute',
-                                  right: '5px',
-                                  zIndex: 501,
-                                  top: '50%',
-                                  transform: 'translateY(-50%)',
-                                  display: 'flex',
-                                  flexDirection: 'column',
-                                  gap: 2,
-                                  background: 'white',
-                                  padding: '5px',
-                                  borderRadius: '5px'
-                                }}
-                              >
-                                <RemoveCircleIcon
-                                  onClick={() =>
-                                    removeSection(section, rowIndex)
-                                  }
-                                  sx={{
-                                    cursor: 'pointer'
-                                  }}
-                                />
-                                <VideoPanel
-                                  width="24px"
-                                  height="24px"
-                                  onSelect={(video) =>
-                                    editVideo(
-                                      {
-                                        name: video.name,
-                                        identifier: video.identifier,
-                                        service: video.service,
-                                        title: video?.metadata?.title,
-                                        description:
-                                          video?.metadata?.description
-                                      },
-                                      section
-                                    )
-                                  }
-                                />
-                              </Box>
-                            </Box>
-                          )}
-                          {editingSection &&
-                          editingSection.id === section.id ? (
-                            <Button onClick={() => setEditingSection(null)}>
-                              Close
-                            </Button>
-                          ) : (
-                            <></>
-                          )}
+                              <VideoPanel
+                                width="auto"
+                                height="18px"
+                                onSelect={(video) =>
+                                  editVideo(
+                                    {
+                                      name: video.name,
+                                      identifier: video.identifier,
+                                      service: video.service,
+                                      title: video?.metadata?.title,
+                                      description: video?.metadata?.description
+                                    },
+                                    section
+                                  )
+                                }
+                              />
+                            </EditButtons>
+                          </Box>
                         </DynamicHeightItemMinimal>
                       </div>
                     )
@@ -1065,13 +1009,47 @@ export const CreatePostMinimal = ({
                           count={count}
                           padding={paddingValue}
                         >
-                          <AudioElement
-                            key={section.id}
-                            onClick={() => {}}
-                            title={section.content?.title}
-                            description={section.content?.description}
-                            author=""
-                          />
+                          <Box
+                            sx={{
+                              position: 'relative',
+                              width: '100%',
+                              height: '100%'
+                            }}
+                          >
+                            <AudioElement
+                              key={section.id}
+                              onClick={() => {}}
+                              title={section.content?.title}
+                              description={section.content?.description}
+                              author=""
+                            />
+                            <EditButtons>
+                              <DeleteIcon
+                                onClick={() => removeSection(section, rowIndex)}
+                                sx={{
+                                  cursor: 'pointer',
+                                  height: '18px',
+                                  width: 'auto'
+                                }}
+                              />
+                              <AudioPanel
+                                width="auto"
+                                height="18px"
+                                onSelect={(audio) =>
+                                  editAudio(
+                                    {
+                                      name: audio.name,
+                                      identifier: audio.identifier,
+                                      service: audio.service,
+                                      title: audio?.metadata?.title,
+                                      description: audio?.metadata?.description
+                                    },
+                                    section
+                                  )
+                                }
+                              />
+                            </EditButtons>
+                          </Box>
                         </DynamicHeightItemMinimal>
                       </div>
                     )

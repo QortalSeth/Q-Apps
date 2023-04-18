@@ -28,6 +28,7 @@ import { Navbar } from './components/Navbar/NavbarBuilder'
 import { UserNavbar } from '../../components/common/UserNavbar'
 import { setCurrentBlog } from '../../state/features/globalSlice'
 import AudioElement from '../../components/AudioElement'
+import { AudioPanel } from '../../components/common/AudioPanel'
 const ResponsiveGridLayout = WidthProvider(Responsive)
 const initialMinHeight = 2 // Define an initial minimum height for grid items
 const uid = new ShortUniqueId()
@@ -545,6 +546,7 @@ export const CreatePostBuilder = ({
     title: string
     description: string
   }
+
   const addVideo = ({
     name,
     identifier,
@@ -617,6 +619,30 @@ export const CreatePostBuilder = ({
     }
   }
   const editVideo = (
+    { name, identifier, service, description, title }: IaddVideo,
+    section: any
+  ) => {
+    const newSection = {
+      ...section,
+      content: {
+        name: name,
+        identifier: identifier,
+        service: service,
+        description,
+        title
+      }
+    }
+    const findSectionIndex = newPostContent.findIndex(
+      (s) => s.id === section.id
+    )
+    if (findSectionIndex !== -1) {
+      const copyNewPostContent = [...newPostContent]
+      copyNewPostContent[findSectionIndex] = newSection
+
+      setNewPostContent(copyNewPostContent)
+    }
+  }
+  const editAudio = (
     { name, identifier, service, description, title }: IaddVideo,
     section: any
   ) => {
@@ -836,34 +862,6 @@ export const CreatePostBuilder = ({
                               }}
                             />
                           </EditButtons>
-                          {/* <Box
-                            sx={{
-                              position: 'absolute',
-                              right: '5px',
-                              zIndex: 5,
-                              top: '50%',
-                              transform: 'translateY(-50%)',
-                              display: 'flex',
-                              // flexDirection: 'column',
-                              gap: 2,
-                              background: 'white',
-                              padding: '5px',
-                              borderRadius: '5px'
-                            }}
-                          >
-                            <DeleteIcon
-                              onClick={() => removeSection(section)}
-                              sx={{
-                                cursor: 'pointer'
-                              }}
-                            />
-                            <EditIcon
-                              onClick={() => editSection(section)}
-                              sx={{
-                                cursor: 'pointer'
-                              }}
-                            />
-                          </Box> */}
                         </Box>
                       )}
                     </DynamicHeightItem>
@@ -882,87 +880,39 @@ export const CreatePostBuilder = ({
                       type="image"
                       padding={paddingValue}
                     >
-                      {editingSection && editingSection.id === section.id ? (
-                        <ImageUploader
-                          onPick={(base64) => editImage(base64, section)}
-                        >
-                          Add Image
-                          <AddPhotoAlternateIcon />
-                        </ImageUploader>
-                      ) : (
-                        <Box
-                          sx={{
-                            position: 'relative',
-                            width: '100%',
-                            height: '100%'
-                          }}
-                        >
-                          <img
-                            src={section.content.image}
-                            className="post-image"
+                      <Box
+                        sx={{
+                          position: 'relative',
+                          width: '100%',
+                          height: '100%'
+                        }}
+                      >
+                        <img
+                          src={section.content.image}
+                          className="post-image"
+                        />
+                        <EditButtons>
+                          <DeleteIcon
+                            onClick={() => removeSection(section)}
+                            sx={{
+                              cursor: 'pointer',
+                              height: '18px',
+                              width: 'auto'
+                            }}
                           />
-                          <EditButtons>
-                            <DeleteIcon
-                              onClick={() => removeSection(section)}
+                          <ImageUploader
+                            onPick={(base64) => editImage(base64, section)}
+                          >
+                            <EditIcon
                               sx={{
                                 cursor: 'pointer',
                                 height: '18px',
                                 width: 'auto'
                               }}
                             />
-                            <ImageUploader
-                              onPick={(base64) => editImage(base64, section)}
-                            >
-                              <EditIcon
-                                sx={{
-                                  cursor: 'pointer',
-                                  height: '18px',
-                                  width: 'auto'
-                                }}
-                              />
-                            </ImageUploader>
-                          </EditButtons>
-                          {/* <Box
-                            sx={{
-                              position: 'absolute',
-                              right: '5px',
-                              zIndex: 5,
-                              top: '50%',
-                              transform: 'translateY(-50%)',
-                              display: 'flex',
-                              flexDirection: 'column',
-                              gap: 2,
-                              background: 'white',
-                              padding: '5px',
-                              borderRadius: '5px'
-                            }}
-                          >
-                            <DeleteIcon
-                              onClick={() => removeSection(section)}
-                              sx={{
-                                cursor: 'pointer'
-                              }}
-                            />
-                            <ImageUploader
-                              onPick={(base64) => editImage(base64, section)}
-                            >
-                              <EditIcon
-                                sx={{
-                                  cursor: 'pointer'
-                                }}
-                              />
-                            </ImageUploader>
-                          </Box> */}
-                        </Box>
-                      )}
-
-                      {editingSection && editingSection.id === section.id ? (
-                        <Button onClick={() => setEditingSection(null)}>
-                          Close
-                        </Button>
-                      ) : (
-                        <></>
-                      )}
+                          </ImageUploader>
+                        </EditButtons>
+                      </Box>
                     </DynamicHeightItem>
                   </div>
                 )
@@ -979,110 +929,46 @@ export const CreatePostBuilder = ({
                       count={count}
                       padding={paddingValue}
                     >
-                      {editingSection && editingSection.id === section.id ? (
-                        <VideoPanel
-                          width="24px"
-                          height="24px"
-                          onSelect={(video) =>
-                            editVideo(
-                              {
-                                name: video.name,
-                                identifier: video.identifier,
-                                service: video.service,
-                                title: video?.metadata?.title,
-                                description: video?.metadata?.description
-                              },
-                              section
-                            )
-                          }
+                      <Box
+                        sx={{
+                          position: 'relative',
+                          width: '100%',
+                          height: '100%'
+                        }}
+                      >
+                        <VideoPlayer
+                          name={section.content.name}
+                          service={section.content.service}
+                          identifier={section.content.identifier}
+                          from="create"
                         />
-                      ) : (
-                        <Box
-                          sx={{
-                            position: 'relative',
-                            width: '100%',
-                            height: '100%'
-                          }}
-                        >
-                          <VideoPlayer
-                            name={section.content.name}
-                            service={section.content.service}
-                            identifier={section.content.identifier}
-                            from="create"
-                          />
-                          <EditButtons>
-                            <DeleteIcon
-                              onClick={() => removeSection(section)}
-                              sx={{
-                                cursor: 'pointer',
-                                height: '18px',
-                                width: 'auto'
-                              }}
-                            />
-                            <VideoPanel
-                              width="auto"
-                              height="18px"
-                              onSelect={(video) =>
-                                editVideo(
-                                  {
-                                    name: video.name,
-                                    identifier: video.identifier,
-                                    service: video.service,
-                                    title: video?.metadata?.title,
-                                    description: video?.metadata?.description
-                                  },
-                                  section
-                                )
-                              }
-                            />
-                          </EditButtons>
-                          {/* <Box
+                        <EditButtons>
+                          <DeleteIcon
+                            onClick={() => removeSection(section)}
                             sx={{
-                              position: 'absolute',
-                              right: '5px',
-                              zIndex: 501,
-                              top: '50%',
-                              transform: 'translateY(-50%)',
-                              display: 'flex',
-                              flexDirection: 'column',
-                              gap: 2,
-                              background: 'white',
-                              padding: '5px',
-                              borderRadius: '5px'
+                              cursor: 'pointer',
+                              height: '18px',
+                              width: 'auto'
                             }}
-                          >
-                            <DeleteIcon
-                              onClick={() => removeSection(section)}
-                              sx={{
-                                cursor: 'pointer'
-                              }}
-                            />
-                            <VideoPanel
-                              width="24px"
-                              height="24px"
-                              onSelect={(video) =>
-                                editVideo(
-                                  {
-                                    name: video.name,
-                                    identifier: video.identifier,
-                                    service: video.service,
-                                    title: video?.metadata?.title,
-                                    description: video?.metadata?.description
-                                  },
-                                  section
-                                )
-                              }
-                            />
-                          </Box> */}
-                        </Box>
-                      )}
-                      {editingSection && editingSection.id === section.id ? (
-                        <Button onClick={() => setEditingSection(null)}>
-                          Close
-                        </Button>
-                      ) : (
-                        <></>
-                      )}
+                          />
+                          <VideoPanel
+                            width="auto"
+                            height="18px"
+                            onSelect={(video) =>
+                              editVideo(
+                                {
+                                  name: video.name,
+                                  identifier: video.identifier,
+                                  service: video.service,
+                                  title: video?.metadata?.title,
+                                  description: video?.metadata?.description
+                                },
+                                section
+                              )
+                            }
+                          />
+                        </EditButtons>
+                      </Box>
                     </DynamicHeightItem>
                   </div>
                 )
@@ -1098,13 +984,47 @@ export const CreatePostBuilder = ({
                       count={count}
                       padding={paddingValue}
                     >
-                      <AudioElement
-                        key={section.id}
-                        onClick={() => {}}
-                        title={section.content?.title}
-                        description={section.content?.description}
-                        author=""
-                      />
+                      <Box
+                        sx={{
+                          position: 'relative',
+                          width: '100%',
+                          height: '100%'
+                        }}
+                      >
+                        <AudioElement
+                          key={section.id}
+                          onClick={() => {}}
+                          title={section.content?.title}
+                          description={section.content?.description}
+                          author=""
+                        />
+                        <EditButtons>
+                          <DeleteIcon
+                            onClick={() => removeSection(section)}
+                            sx={{
+                              cursor: 'pointer',
+                              height: '18px',
+                              width: 'auto'
+                            }}
+                          />
+                          <AudioPanel
+                            width="auto"
+                            height="18px"
+                            onSelect={(audio) =>
+                              editAudio(
+                                {
+                                  name: audio.name,
+                                  identifier: audio.identifier,
+                                  service: audio.service,
+                                  title: audio?.metadata?.title,
+                                  description: audio?.metadata?.description
+                                },
+                                section
+                              )
+                            }
+                          />
+                        </EditButtons>
+                      </Box>
                     </DynamicHeightItem>
                   </div>
                 )
@@ -1205,13 +1125,13 @@ export const CreatePostBuilder = ({
   )
 }
 
-const EditButtons = ({ children }: any) => {
+export const EditButtons = ({ children }: any) => {
   return (
     <Box
       sx={{
         position: 'absolute',
         right: '5px',
-        zIndex: 5,
+        zIndex: 500,
         top: '5px',
         display: 'flex',
         flexDirection: 'row',

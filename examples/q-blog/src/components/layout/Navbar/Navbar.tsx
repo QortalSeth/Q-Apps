@@ -24,6 +24,7 @@ import BookmarkIcon from '@mui/icons-material/Bookmark'
 import SubscriptionsIcon from '@mui/icons-material/Subscriptions'
 import SettingsIcon from '@mui/icons-material/Settings'
 import { BlockedNamesModal } from '../../common/BlockedNamesModal'
+import { CustomIcon } from '../../common/CustomIcon'
 interface Props {
   isAuthenticated: boolean
   hasBlog: boolean
@@ -184,7 +185,8 @@ const NavBar: React.FC<Props> = ({
             </>
           )}
           <Box onClick={handleClick}>
-            <SettingsIcon />
+            <CustomIcon component={SettingsIcon} />
+            {/* <SettingsIcon /> */}
           </Box>
           <Popover
             id={id}

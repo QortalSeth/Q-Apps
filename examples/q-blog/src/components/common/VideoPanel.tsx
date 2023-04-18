@@ -105,7 +105,11 @@ export const VideoPanel: React.FC<VideoPanelProps> = ({
   }
 
   return (
-    <Box>
+    <Box
+      sx={{
+        display: 'flex'
+      }}
+    >
       <Tooltip title="Add a video" arrow>
         <VideoCallIcon
           onClick={handleToggle}

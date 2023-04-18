@@ -108,7 +108,11 @@ export const AudioPanel: React.FC<VideoPanelProps> = ({
   }
 
   return (
-    <Box>
+    <Box
+      sx={{
+        display: 'flex'
+      }}
+    >
       <Tooltip title="Add an audio file" arrow>
         <AudioFileIcon
           onClick={handleToggle}
