@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect } from 'react'
+
 import BlogEditor from '../../components/editor/BlogEditor'
 import ShortUniqueId from 'short-unique-id'
 import ReadOnlySlate from '../../components/editor/ReadOnlySlate'
@@ -249,6 +250,26 @@ export const CreatePostBuilder = ({
     },
     []
   )
+
+  const handleRemoveNavBar = useCallback(async () => {
+    try {
+      const config = {
+        type: '',
+        title: '',
+        logo: '',
+        navItems: null
+      }
+      await editBlog(config)
+      setNavbarConfig(config)
+    } catch (error: any) {
+      dispatch(
+        setNotification({
+          msg: error?.message || 'Could not save the navbar',
+          alertType: 'error'
+        })
+      )
+    }
+  }, [])
 
   function objectToBase64(obj: any) {
     // Step 1: Convert the object to a JSON string
@@ -592,8 +613,8 @@ export const CreatePostBuilder = ({
   }
 
   const addSection = () => {
-    setValue(initialValue)
     addPostSection(value)
+    setValue(initialValue)
   }
 
   const removeSection = (section: any) => {
@@ -1092,7 +1113,7 @@ export const CreatePostBuilder = ({
         <ReusableModal open={isEditNavOpen}>
           <Navbar
             saveNav={handleSaveNavBar}
-            removeNav={() => {}}
+            removeNav={handleRemoveNavBar}
             close={() => setIsEditNavOpen(false)}
           />
         </ReusableModal>

@@ -21,6 +21,8 @@ import { styled } from '@mui/system'
 import { useSelector } from 'react-redux'
 import { RootState } from '../../../../state/store'
 import ShortUniqueId from 'short-unique-id'
+import DeleteIcon from '@mui/icons-material/Delete'
+import { CustomIcon } from '../../../../components/common/CustomIcon'
 
 const uid = new ShortUniqueId()
 interface INavbar {
@@ -86,7 +88,8 @@ export const Navbar = ({ saveNav, removeNav, close }: INavbar) => {
       {
         id: uid(),
         name: navTitle,
-        postId: blogPostOption.id
+        postId: blogPostOption.id,
+        postName: blogPostOption.name
       }
     ])
   }
@@ -165,8 +168,30 @@ export const Navbar = ({ saveNav, removeNav, close }: INavbar) => {
           }}
         >
           {navItems.map((navItem: any) => (
-            <ListItem key={navItem.id}>
-              <Typography>{navItem.name}</Typography>
+            <ListItem
+              key={navItem.id}
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '10px'
+              }}
+            >
+              <Typography
+                sx={{
+                  fontWeight: 'bold'
+                }}
+              >
+                {navItem.name}
+              </Typography>{' '}
+              <Typography>{navItem.postName}</Typography>{' '}
+              <CustomIcon
+                component={DeleteIcon}
+                onClick={() =>
+                  setNavItems((prev: any) =>
+                    prev.filter((item: any) => item.id !== navItem.id)
+                  )
+                }
+              />
             </ListItem>
           ))}
         </List>

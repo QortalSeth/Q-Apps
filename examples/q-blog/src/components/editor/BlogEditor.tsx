@@ -88,7 +88,7 @@ const BlogEditor: React.FC<MyComponentProps> = ({
     ) {
       toggleTextAlignment(editor, format)
     } else {
-      const isActive = Editor.marks(editor)?.[format] === true
+      const isActive = Editor?.marks(editor)?.[format] === true
       if (isActive) {
         Editor?.removeMark(editor, format)
       } else {
@@ -145,22 +145,26 @@ const BlogEditor: React.FC<MyComponentProps> = ({
     }
 
     let isActive = false
-    if (
-      format === 'align-left' ||
-      format === 'align-center' ||
-      format === 'align-right'
-    ) {
-      isActive = isTextAlignmentActive(editor, format)
-    } else if (format === 'heading-2' || format === 'heading-3') {
-      isActive = isBlockActive(editor, format)
-    } else if (
-      format === 'bold' ||
-      format === 'italic' ||
-      format === 'underline' ||
-      format === ''
-    ) {
-      isActive = Editor?.marks(editor)?.[format] === true
-    }
+
+    try {
+      if (
+        format === 'align-left' ||
+        format === 'align-center' ||
+        format === 'align-right'
+      ) {
+        isActive = isTextAlignmentActive(editor, format)
+      } else if (format === 'heading-2' || format === 'heading-3') {
+        isActive = isBlockActive(editor, format)
+      } else if (
+        format === 'bold' ||
+        format === 'italic' ||
+        format === 'underline' ||
+        format === ''
+      ) {
+        isActive = Editor?.marks(editor)?.[format] === true
+      }
+    } catch (error) {}
+
     console.log({ isActive })
     return (
       <button
@@ -188,9 +192,11 @@ const BlogEditor: React.FC<MyComponentProps> = ({
       }
     }
     let isActive = false
-    if (format === 'code-block') {
-      isActive = isBlockActive(editor, format)
-    }
+    try {
+      if (format === 'code-block') {
+        isActive = isBlockActive(editor, format)
+      }
+    } catch (error) {}
 
     return (
       <button
@@ -240,9 +246,11 @@ const BlogEditor: React.FC<MyComponentProps> = ({
     useSlate()
 
     let isActive = false
-    if (format === 'link') {
-      isActive = !!Editor.marks(editor)?.link
-    }
+    try {
+      if (format === 'link') {
+        isActive = !!Editor?.marks(editor)?.link
+      }
+    } catch (error) {}
 
     return (
       <button

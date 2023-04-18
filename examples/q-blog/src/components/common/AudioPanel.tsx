@@ -196,7 +196,7 @@ export const AudioPanel: React.FC<VideoPanelProps> = ({
               variant="contained"
               onClick={() => setIsOpenVideoModal(true)}
             >
-              Publish new video
+              Publish new audio file
             </PublishButton>
           </Box>
         </Panel>

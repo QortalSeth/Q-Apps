@@ -270,7 +270,7 @@ export const AudioModal: React.FC<VideoModalProps> = ({
     <StyledModal open={open} onClose={onClose}>
       <ModalContent>
         <Typography variant="h6" component="h2" gutterBottom>
-          Upload Video
+          Upload Audio
         </Typography>
         <Box
           {...getRootProps()}
@@ -285,11 +285,11 @@ export const AudioModal: React.FC<VideoModalProps> = ({
           <Typography>
             {file
               ? file.name
-              : 'Drag and drop a video file here or click to select a file'}
+              : 'Drag and drop an audio file here or click to select a file'}
           </Typography>
         </Box>
         <TextField
-          label="Video Title"
+          label="Audio Title"
           variant="outlined"
           fullWidth
           value={title}
@@ -298,7 +298,7 @@ export const AudioModal: React.FC<VideoModalProps> = ({
           sx={{ marginBottom: 2 }}
         />
         <TextField
-          label="Video Description"
+          label="Audio Description"
           variant="outlined"
           fullWidth
           multiline
