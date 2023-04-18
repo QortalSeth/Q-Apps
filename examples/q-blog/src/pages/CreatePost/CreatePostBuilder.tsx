@@ -185,10 +185,13 @@ export const CreatePostBuilder = ({
         console.log({ tag })
         formattedTags[`tag${i + 1}`] = tag
       })
-      const blogPostToBase64 = await objectToBase64({
+
+      const blogProps: any = {
         ...currentBlog,
         navbarConfig
-      })
+      }
+
+      const blogPostToBase64 = await objectToBase64(blogProps)
       try {
         const resourceResponse = await qortalRequest({
           action: 'PUBLISH_QDN_RESOURCE',
@@ -208,7 +211,8 @@ export const CreatePostBuilder = ({
           }, 1000)
         })
 
-        getBlog(name, currentBlog.blogId, currentBlog)
+        // getBlog(name, currentBlog.blogId, currentBlog)
+        dispatch(setCurrentBlog(blogProps))
         dispatch(
           setNotification({
             msg: 'Blog successfully updated',
@@ -238,6 +242,7 @@ export const CreatePostBuilder = ({
           navItems: navMenu
         }
         await editBlog(config)
+        setIsEditNavOpen(false)
         setNavbarConfig(config)
       } catch (error: any) {
         dispatch(
@@ -253,14 +258,9 @@ export const CreatePostBuilder = ({
 
   const handleRemoveNavBar = useCallback(async () => {
     try {
-      const config = {
-        type: '',
-        title: '',
-        logo: '',
-        navItems: null
-      }
-      await editBlog(config)
-      setNavbarConfig(config)
+      await editBlog(null)
+      setNavbarConfig(null)
+      setIsEditNavOpen(false)
     } catch (error: any) {
       dispatch(
         setNotification({
