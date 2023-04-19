@@ -82,7 +82,8 @@ export const useFetchPosts = () => {
           categoryName: post?.metadata?.categoryName,
           tags: post?.metadata?.tags || [],
           description: post?.metadata?.description,
-          createdAt: '',
+          createdAt: post?.created,
+          updated: post?.updated,
           user: post.name,
           postImage: '',
           id: post.identifier

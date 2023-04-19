@@ -28,6 +28,7 @@ import {
 import { DynamicHeightItemMinimal } from '../../components/DynamicHeightItemMinimal'
 import { ReusableModal } from '../../components/modals/ReusableModal'
 import AudioElement from '../../components/AudioElement'
+import ErrorBoundary from '../../components/common/ErrorBoundary'
 const ResponsiveGridLayout = WidthProvider(Responsive)
 const initialMinHeight = 2 // Define an initial minimum height for grid items
 
@@ -117,7 +118,7 @@ export const BlogIndividualPost = () => {
           (content: any) => content?.type === 'audio'
         )
 
-        const transformAudios = filteredAudios.map((fa: any) => {
+        const transformAudios = filteredAudios?.map((fa: any) => {
           return {
             ...(fa?.content || {}),
             id: fa?.id
@@ -150,13 +151,13 @@ export const BlogIndividualPost = () => {
 
   const switchPlayList = () => {
     const filteredAudios = (blogContent?.postContent || []).filter(
-      (content) => content.type === 'audio'
+      (content) => content?.type === 'audio'
     )
 
     const formatAudios = filteredAudios.map((fa) => {
       return {
-        ...fa.content,
-        id: fa.id
+        ...(fa?.content || {}),
+        id: fa?.id
       }
     })
     if (!blog || !postId) return
@@ -315,178 +316,154 @@ export const BlogIndividualPost = () => {
             handleLayoutChange={handleLayoutChange}
           >
             {blogContent?.postContent?.map((section: any) => {
-              if (section.type === 'editor') {
+              if (section?.type === 'editor') {
                 return (
-                  <div key={section.id} className="grid-item-view">
-                    <DynamicHeightItem
-                      layouts={layouts}
-                      setLayouts={setLayouts}
-                      i={section.id}
-                      breakpoint={currentBreakpoint}
-                      count={count}
-                      padding={layoutGeneralSettings?.padding}
+                  <div key={section?.id} className="grid-item-view">
+                    <ErrorBoundary
+                      fallback={
+                        <Typography>
+                          Error loading content: Invalid Data
+                        </Typography>
+                      }
                     >
-                      <ReadOnlySlate content={section.content} />
-                    </DynamicHeightItem>
+                      <DynamicHeightItem
+                        layouts={layouts}
+                        setLayouts={setLayouts}
+                        i={section.id}
+                        breakpoint={currentBreakpoint}
+                        count={count}
+                        padding={layoutGeneralSettings?.padding}
+                      >
+                        <ReadOnlySlate content={section.content} />
+                      </DynamicHeightItem>
+                    </ErrorBoundary>
                   </div>
                 )
               }
-              if (section.type === 'image') {
+              if (section?.type === 'image') {
                 return (
-                  <div key={section.id} className="grid-item-view">
-                    <DynamicHeightItem
-                      layouts={layouts}
-                      setLayouts={setLayouts}
-                      i={section.id}
-                      breakpoint={currentBreakpoint}
-                      count={count}
-                      padding={layoutGeneralSettings?.padding}
+                  <div key={section?.id} className="grid-item-view">
+                    <ErrorBoundary
+                      fallback={
+                        <Typography>
+                          Error loading content: Invalid Data
+                        </Typography>
+                      }
                     >
-                      <img src={section.content.image} className="post-image" />
-                    </DynamicHeightItem>
+                      <DynamicHeightItem
+                        layouts={layouts}
+                        setLayouts={setLayouts}
+                        i={section.id}
+                        breakpoint={currentBreakpoint}
+                        count={count}
+                        padding={layoutGeneralSettings?.padding}
+                      >
+                        <img
+                          src={section.content.image}
+                          className="post-image"
+                        />
+                      </DynamicHeightItem>
+                    </ErrorBoundary>
                   </div>
                 )
               }
-              if (section.type === 'video') {
+              if (section?.type === 'video') {
                 return (
-                  <div key={section.id} className="grid-item-view">
-                    <DynamicHeightItem
-                      layouts={layouts}
-                      setLayouts={setLayouts}
-                      i={section.id}
-                      breakpoint={currentBreakpoint}
-                      count={count}
-                      padding={layoutGeneralSettings?.padding}
+                  <div key={section?.id} className="grid-item-view">
+                    <ErrorBoundary
+                      fallback={
+                        <Typography>
+                          Error loading content: Invalid Data
+                        </Typography>
+                      }
                     >
-                      <VideoPlayer
-                        name={section.content.name}
-                        service={section.content.service}
-                        identifier={section.content.identifier}
-                        setCount={handleCount}
-                        user={user}
-                        postId={fullPostId}
-                      />
-                    </DynamicHeightItem>
+                      <DynamicHeightItem
+                        layouts={layouts}
+                        setLayouts={setLayouts}
+                        i={section.id}
+                        breakpoint={currentBreakpoint}
+                        count={count}
+                        padding={layoutGeneralSettings?.padding}
+                      >
+                        <VideoPlayer
+                          name={section.content.name}
+                          service={section.content.service}
+                          identifier={section.content.identifier}
+                          setCount={handleCount}
+                          user={user}
+                          postId={fullPostId}
+                        />
+                      </DynamicHeightItem>
+                    </ErrorBoundary>
                   </div>
                 )
               }
-              if (section.type === 'audio') {
+              if (section?.type === 'audio') {
                 return (
-                  <div key={section.id} className="grid-item-view">
-                    <DynamicHeightItem
-                      layouts={layouts}
-                      setLayouts={setLayouts}
-                      i={section.id}
-                      breakpoint={currentBreakpoint}
-                      count={count}
-                      padding={layoutGeneralSettings?.padding}
+                  <div key={section?.id} className="grid-item-view">
+                    <ErrorBoundary
+                      fallback={
+                        <Typography>
+                          Error loading content: Invalid Data
+                        </Typography>
+                      }
                     >
-                      <AudioElement
-                        key={section.id}
-                        onClick={() => {
-                          if (!blog || !postId) return
+                      <DynamicHeightItem
+                        layouts={layouts}
+                        setLayouts={setLayouts}
+                        i={section.id}
+                        breakpoint={currentBreakpoint}
+                        count={count}
+                        padding={layoutGeneralSettings?.padding}
+                      >
+                        <AudioElement
+                          key={section.id}
+                          onClick={() => {
+                            if (!blog || !postId) return
 
-                          const formBlogId = addPrefix(blog)
-                          const formPostId =
-                            buildIdentifierFromCreateTitleIdAndId(
-                              formBlogId,
-                              postId
-                            )
-                          if (audioPostId && formPostId !== audioPostId) {
-                            tempSaveAudio.current = {
-                              ...(tempSaveAudio.current || {}),
-                              currentSelection: section,
-                              message:
-                                'You are current on a playlist. Would you like to switch?'
-                            }
-                            setisOpenSwitchPlaylistModal(true)
-                          } else {
-                            if (!audios && saveAudio?.current) {
-                              const findIndex = (
-                                saveAudio?.current?.audios || []
-                              ).findIndex(
-                                (item: any) =>
+                            const formBlogId = addPrefix(blog)
+                            const formPostId =
+                              buildIdentifierFromCreateTitleIdAndId(
+                                formBlogId,
+                                postId
+                              )
+                            if (audioPostId && formPostId !== audioPostId) {
+                              tempSaveAudio.current = {
+                                ...(tempSaveAudio.current || {}),
+                                currentSelection: section,
+                                message:
+                                  'You are current on a playlist. Would you like to switch?'
+                              }
+                              setisOpenSwitchPlaylistModal(true)
+                            } else {
+                              if (!audios && saveAudio?.current) {
+                                const findIndex = (
+                                  saveAudio?.current?.audios || []
+                                ).findIndex(
+                                  (item: any) =>
+                                    item.identifier ===
+                                    section.content.identifier
+                                )
+                                dispatch(setAudio(saveAudio?.current))
+                                dispatch(setCurrAudio(findIndex))
+                                return
+                              }
+
+                              const findIndex = (audios || []).findIndex(
+                                (item) =>
                                   item.identifier === section.content.identifier
                               )
-                              dispatch(setAudio(saveAudio?.current))
-                              dispatch(setCurrAudio(findIndex))
-                              return
+                              if (findIndex >= 0) {
+                                dispatch(setCurrAudio(findIndex))
+                              }
                             }
-
-                            const findIndex = (audios || []).findIndex(
-                              (item) =>
-                                item.identifier === section.content.identifier
-                            )
-                            if (findIndex >= 0) {
-                              dispatch(setCurrAudio(findIndex))
-                            }
-                          }
-                        }}
-                        title={section.content?.title}
-                        description={section.content?.description}
-                        author=""
-                      />
-                      {/* <Box
-                        onClick={() => {
-                          if (!blog || !postId) return
-                          const formBlogId = addPrefix(blog)
-                          const formPostId =
-                            buildIdentifierFromCreateTitleIdAndId(
-                              formBlogId,
-                              postId
-                            )
-                          if (formPostId !== audioPostId) {
-                            tempSaveAudio.current = {
-                              ...(tempSaveAudio.current || {}),
-                              currentSelection: section,
-                              message:
-                                'You are current on a playlist. Would you like to switch?'
-                            }
-                            setisOpenSwitchPlaylistModal(true)
-                          } else {
-                            const findIndex = (audios || []).findIndex(
-                              (item) =>
-                                item.identifier === section.content.identifier
-                            )
-                            if (findIndex >= 0) {
-                              dispatch(setCurrAudio(findIndex))
-                            }
-                          }
-                        }}
-                        key={section.id}
-                        sx={{
-                          display: 'flex',
-                          padding: '5px',
-                          gap: 1,
-                          marginTop: '15px',
-                          cursor: 'pointer',
-                          width: '100%',
-                          margin: 0,
-                          height: '100%',
-                          flexDirection: 'column',
-                          justifyContent: 'center'
-                        }}
-                      >
-                        <Box
-                          sx={{
-                            display: 'flex',
-                            alignItems: 'center'
                           }}
-                        >
-                          <Typography variant="h5" sx={{}}>
-                            {section.content?.title}
-                          </Typography>
-
-                          <AudiotrackIcon />
-                        </Box>
-
-                        <Box>
-                          <Typography variant="subtitle1" sx={{}}>
-                            {section.content?.description}
-                          </Typography>
-                        </Box>
-                      </Box> */}
-                    </DynamicHeightItem>
+                          title={section.content?.title}
+                          description={section.content?.description}
+                          author=""
+                        />
+                      </DynamicHeightItem>
+                    </ErrorBoundary>
                   </div>
                 )
               }
@@ -508,15 +485,15 @@ export const BlogIndividualPost = () => {
                     gap: 2
                   }}
                 >
-                  {row.ids.map((elementId: string) => {
+                  {row?.ids?.map((elementId: string) => {
                     const section: any = blogContent?.postContent?.find(
-                      (el) => el.id === elementId
+                      (el) => el?.id === elementId
                     )
                     if (!section) return null
-                    if (section.type === 'editor') {
+                    if (section?.type === 'editor') {
                       return (
                         <div
-                          key={section.id}
+                          key={section?.id}
                           className="grid-item"
                           style={{
                             maxWidth: '800px',
@@ -525,167 +502,165 @@ export const BlogIndividualPost = () => {
                             width: '100%'
                           }}
                         >
-                          <DynamicHeightItemMinimal
-                            layouts={layouts}
-                            setLayouts={setLayouts}
-                            i={section.id}
-                            breakpoint={currentBreakpoint}
-                            count={count}
-                            padding={0}
+                          <ErrorBoundary
+                            fallback={
+                              <Typography>
+                                Error loading content: Invalid Data
+                              </Typography>
+                            }
                           >
-                            <ReadOnlySlate
-                              key={section.id}
-                              content={section.content}
-                            />
-                          </DynamicHeightItemMinimal>
-                        </div>
-                      )
-                    }
-                    if (section.type === 'image') {
-                      return (
-                        <div key={section.id} className="grid-item">
-                          <DynamicHeightItemMinimal
-                            layouts={layouts}
-                            setLayouts={setLayouts}
-                            i={section.id}
-                            breakpoint={currentBreakpoint}
-                            count={count}
-                            type="image"
-                            padding={0}
-                          >
-                            <Box
-                              sx={{
-                                position: 'relative',
-                                width: '100%',
-                                height: '100%'
-                              }}
+                            <DynamicHeightItemMinimal
+                              layouts={layouts}
+                              setLayouts={setLayouts}
+                              i={section.id}
+                              breakpoint={currentBreakpoint}
+                              count={count}
+                              padding={0}
                             >
-                              <img
-                                src={section.content.image}
-                                className="post-image"
-                                style={{
-                                  objectFit: 'contain',
-                                  maxHeight: '50vh'
-                                }}
+                              <ReadOnlySlate
+                                key={section.id}
+                                content={section.content}
                               />
-                            </Box>
-                          </DynamicHeightItemMinimal>
+                            </DynamicHeightItemMinimal>
+                          </ErrorBoundary>
                         </div>
                       )
                     }
-
-                    if (section.type === 'video') {
+                    if (section?.type === 'image') {
                       return (
                         <div key={section.id} className="grid-item">
-                          <DynamicHeightItemMinimal
-                            layouts={layouts}
-                            setLayouts={setLayouts}
-                            i={section.id}
-                            breakpoint={currentBreakpoint}
-                            count={count}
-                            padding={0}
+                          <ErrorBoundary
+                            fallback={
+                              <Typography>
+                                Error loading content: Invalid Data
+                              </Typography>
+                            }
                           >
-                            <Box
-                              sx={{
-                                position: 'relative',
-                                width: '100%',
-                                height: '100%'
-                              }}
-                            >
-                              <VideoPlayer
-                                name={section.content.name}
-                                service={section.content.service}
-                                identifier={section.content.identifier}
-                                customStyle={{
-                                  height: '50vh'
-                                }}
-                                user={user}
-                                postId={fullPostId}
-                              />
-                            </Box>
-                          </DynamicHeightItemMinimal>
-                        </div>
-                      )
-                    }
-                    if (section.type === 'audio') {
-                      return (
-                        <div key={section.id} className="grid-item">
-                          <DynamicHeightItemMinimal
-                            layouts={layouts}
-                            setLayouts={setLayouts}
-                            i={section.id}
-                            breakpoint={currentBreakpoint}
-                            count={count}
-                            padding={0}
-                          >
-                            <AudioElement
-                              key={section.id}
-                              onClick={() => {
-                                if (!blog || !postId) return
-                                const formBlogId = addPrefix(blog)
-                                const formPostId =
-                                  buildIdentifierFromCreateTitleIdAndId(
-                                    formBlogId,
-                                    postId
-                                  )
-                                if (formPostId !== audioPostId) {
-                                  tempSaveAudio.current = {
-                                    ...(tempSaveAudio.current || {}),
-                                    currentSelection: section,
-                                    message:
-                                      'You are current on a playlist. Would you like to switch?'
-                                  }
-                                  setisOpenSwitchPlaylistModal(true)
-                                } else {
-                                  const findIndex = (audios || []).findIndex(
-                                    (item) =>
-                                      item.identifier ===
-                                      section.content.identifier
-                                  )
-                                  if (findIndex >= 0) {
-                                    dispatch(setCurrAudio(findIndex))
-                                  }
-                                }
-                              }}
-                              title={section.content?.title}
-                              description={section.content?.description}
-                              author=""
-                            />
-                            {/* <Box
-                              key={section.id}
-                              sx={{
-                                display: 'flex',
-                                padding: '5px',
-                                gap: 1,
-                                marginTop: '15px',
-                                cursor: 'pointer',
-                                width: '100%',
-                                margin: 0,
-                                height: '100%',
-                                flexDirection: 'column',
-                                justifyContent: 'center'
-                              }}
+                            <DynamicHeightItemMinimal
+                              layouts={layouts}
+                              setLayouts={setLayouts}
+                              i={section.id}
+                              breakpoint={currentBreakpoint}
+                              count={count}
+                              type="image"
+                              padding={0}
                             >
                               <Box
                                 sx={{
-                                  display: 'flex',
-                                  alignItems: 'center'
+                                  position: 'relative',
+                                  width: '100%',
+                                  height: '100%'
                                 }}
                               >
-                                <Typography variant="h5" sx={{}}>
-                                  {section.content?.title}
-                                </Typography>
-
-                                <AudiotrackIcon />
+                                <img
+                                  src={section.content.image}
+                                  className="post-image"
+                                  style={{
+                                    objectFit: 'contain',
+                                    maxHeight: '50vh'
+                                  }}
+                                />
                               </Box>
+                            </DynamicHeightItemMinimal>
+                          </ErrorBoundary>
+                        </div>
+                      )
+                    }
 
-                              <Box>
-                                <Typography variant="subtitle1" sx={{}}>
-                                  {section.content?.description}
-                                </Typography>
+                    if (section?.type === 'video') {
+                      return (
+                        <div key={section?.id} className="grid-item">
+                          <ErrorBoundary
+                            fallback={
+                              <Typography>
+                                Error loading content: Invalid Data
+                              </Typography>
+                            }
+                          >
+                            <DynamicHeightItemMinimal
+                              layouts={layouts}
+                              setLayouts={setLayouts}
+                              i={section.id}
+                              breakpoint={currentBreakpoint}
+                              count={count}
+                              padding={0}
+                            >
+                              <Box
+                                sx={{
+                                  position: 'relative',
+                                  width: '100%',
+                                  height: '100%'
+                                }}
+                              >
+                                <VideoPlayer
+                                  name={section.content.name}
+                                  service={section.content.service}
+                                  identifier={section.content.identifier}
+                                  customStyle={{
+                                    height: '50vh'
+                                  }}
+                                  user={user}
+                                  postId={fullPostId}
+                                />
                               </Box>
-                            </Box> */}
-                          </DynamicHeightItemMinimal>
+                            </DynamicHeightItemMinimal>
+                          </ErrorBoundary>
+                        </div>
+                      )
+                    }
+                    if (section?.type === 'audio') {
+                      return (
+                        <div key={section?.id} className="grid-item">
+                          <ErrorBoundary
+                            fallback={
+                              <Typography>
+                                Error loading content: Invalid Data
+                              </Typography>
+                            }
+                          >
+                            <DynamicHeightItemMinimal
+                              layouts={layouts}
+                              setLayouts={setLayouts}
+                              i={section.id}
+                              breakpoint={currentBreakpoint}
+                              count={count}
+                              padding={0}
+                            >
+                              <AudioElement
+                                key={section.id}
+                                onClick={() => {
+                                  if (!blog || !postId) return
+                                  const formBlogId = addPrefix(blog)
+                                  const formPostId =
+                                    buildIdentifierFromCreateTitleIdAndId(
+                                      formBlogId,
+                                      postId
+                                    )
+                                  if (formPostId !== audioPostId) {
+                                    tempSaveAudio.current = {
+                                      ...(tempSaveAudio.current || {}),
+                                      currentSelection: section,
+                                      message:
+                                        'You are current on a playlist. Would you like to switch?'
+                                    }
+                                    setisOpenSwitchPlaylistModal(true)
+                                  } else {
+                                    const findIndex = (audios || []).findIndex(
+                                      (item) =>
+                                        item.identifier ===
+                                        section.content.identifier
+                                    )
+                                    if (findIndex >= 0) {
+                                      dispatch(setCurrAudio(findIndex))
+                                    }
+                                  }
+                                }}
+                                title={section.content?.title}
+                                description={section.content?.description}
+                                author=""
+                              />
+                            </DynamicHeightItemMinimal>
+                          </ErrorBoundary>
                         </div>
                       )
                     }
@@ -729,25 +704,31 @@ const Content = ({
 }: any) => {
   if (layouts && blogContent?.layouts) {
     return (
-      <ResponsiveGridLayout
-        layouts={layouts}
-        breakpoints={{ md: 996, sm: 768, xs: 480 }}
-        cols={{ md: 4, sm: 3, xs: 1 }}
-        measureBeforeMount={false}
-        onLayoutChange={handleLayoutChange}
-        autoSize={true}
-        compactType={null}
-        isBounded={true}
-        resizeHandles={['se', 'sw', 'ne', 'nw']}
-        rowHeight={25}
-        onResizeStop={onResizeStop}
-        onBreakpointChange={onBreakpointChange}
-        isDraggable={false}
-        isResizable={false}
-        margin={[0, 0]}
+      <ErrorBoundary
+        fallback={
+          <Typography>Error loading content: Invalid Layout</Typography>
+        }
       >
-        {children}
-      </ResponsiveGridLayout>
+        <ResponsiveGridLayout
+          layouts={layouts}
+          breakpoints={{ md: 996, sm: 768, xs: 480 }}
+          cols={{ md: 4, sm: 3, xs: 1 }}
+          measureBeforeMount={false}
+          onLayoutChange={handleLayoutChange}
+          autoSize={true}
+          compactType={null}
+          isBounded={true}
+          resizeHandles={['se', 'sw', 'ne', 'nw']}
+          rowHeight={25}
+          onResizeStop={onResizeStop}
+          onBreakpointChange={onBreakpointChange}
+          isDraggable={false}
+          isResizable={false}
+          margin={[0, 0]}
+        >
+          {children}
+        </ResponsiveGridLayout>
+      </ErrorBoundary>
     )
   }
   return children
