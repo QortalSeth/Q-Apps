@@ -1,16 +1,15 @@
 import React, { useMemo } from 'react'
+import { Avatar, Typography, Box, Tooltip, useTheme } from '@mui/material'
+
 import {
-  Avatar,
-  Card,
-  CardContent,
-  CardHeader,
-  CardMedia,
-  Typography,
-  Box,
-  Button,
-  Tooltip
-} from '@mui/material'
-import { styled } from '@mui/system'
+  CardContentContainer,
+  StyledCard,
+  StyledCardContent,
+  TitleText,
+  AuthorText,
+  StyledCardHeader,
+  StyledCardCol
+} from './PostPreview-styles'
 import moment from 'moment'
 import {
   blockUser,
@@ -35,28 +34,6 @@ interface BlogPostPreviewProps {
   onClick?: () => void
 }
 
-const StyledCard = styled(Card)`
-  max-width: 600px;
-  width: 100%;
-  margin: 10px 0px;
-  cursor: pointer;
-
-  @media (max-width: 450px) {
-    width: 100%;
-  }
-`
-
-const StyledCardMedia = styled(CardMedia)`
-  height: 0;
-  padding-top: 56.25%; // 16:9 aspect ratio
-`
-const EllipsisTypography = styled(Typography)`
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  width: 100%;
-`
-
 const BlogPostPreview: React.FC<BlogPostPreviewProps> = ({
   title,
   createdAt,
@@ -68,6 +45,7 @@ const BlogPostPreview: React.FC<BlogPostPreviewProps> = ({
 }) => {
   const [avatarUrl, setAvatarUrl] = React.useState<string>('')
   const dispatch = useDispatch<AppDispatch>()
+  const theme = useTheme()
   const favoritesLocal = useSelector(
     (state: RootState) => state.blog.favoritesLocal
   )
@@ -109,6 +87,7 @@ const BlogPostPreview: React.FC<BlogPostPreviewProps> = ({
       setAvatarUrl(url)
     } catch (error) {}
   }, [author])
+
   React.useEffect(() => {
     getAvatar()
   }, [])
@@ -150,47 +129,59 @@ const BlogPostPreview: React.FC<BlogPostPreviewProps> = ({
       }
     } catch (error) {}
   }
+
+  console.log({ theme })
+
   return (
     <>
       <StyledCard onClick={onClick}>
-        <CardHeader
-          sx={{
-            '& .MuiCardHeader-content': {
-              overflow: 'hidden'
-            }
-          }}
-          avatar={<Avatar src={avatarUrl} alt={`${author}'s avatar`} />}
-          title={
-            <EllipsisTypography noWrap variant="h6">
-              {title}
-            </EllipsisTypography>
-          }
-          subheader={`Author: ${author}`}
-        />
-        {/* <StyledCardMedia image={postImage} /> */}
-        <img
-          src={postImage}
-          style={{
-            width: '100%',
-            height: 'auto'
-          }}
-        />
-        <CardContent>
-          <Typography
-            variant="body2"
-            color="textSecondary"
-            // className="line-clamp"
-            component="p"
-          >
-            {/* {extractTextFromSlate(description)} */}
-            {description}
-          </Typography>
-          <Box marginTop="1rem">
-            <Typography variant="caption" color="textSecondary">
-              {formatDate(+createdAt)}
-            </Typography>
+        {postImage && (
+          <Box sx={{ padding: '2px' }}>
+            <img
+              src={postImage}
+              style={{
+                width: '100%',
+                height: 'auto',
+                borderRadius: '8px'
+              }}
+            />
           </Box>
-        </CardContent>
+        )}
+        <CardContentContainer>
+          <StyledCardHeader
+            sx={{
+              '& .MuiCardHeader-content': {
+                overflow: 'hidden'
+              }
+            }}
+          >
+            <Box>
+              <Avatar src={avatarUrl} alt={`${author}'s avatar`} />
+            </Box>
+            <StyledCardCol>
+              <TitleText
+                color={theme.palette.text.primary}
+                noWrap
+                variant="body1"
+              >
+                {title}
+              </TitleText>
+              <AuthorText color={theme.palette.text.secondary}>
+                {author}
+              </AuthorText>
+            </StyledCardCol>
+          </StyledCardHeader>
+          <StyledCardContent>
+            <Typography variant="body2" color={theme.palette.text.primary}>
+              {description}
+            </Typography>
+            <Box sx={{ textAlign: 'flex-start', width: '100%' }}>
+              <Typography variant="h6" color={theme.palette.text.primary}>
+                {formatDate(+createdAt)}
+              </Typography>
+            </Box>
+          </StyledCardContent>
+        </CardContentContainer>
       </StyledCard>
       <Box
         sx={{

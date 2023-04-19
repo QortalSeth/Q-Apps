@@ -20,14 +20,17 @@ import Notification from './components/common/Notification/Notification'
 import { useState } from 'react'
 
 function App() {
-  const [isDarkMode, setIsDarkMode] = useState(false)
+  // const themeColor = window._qdnTheme
 
-  const toggleDarkMode = () => {
-    setIsDarkMode(!isDarkMode)
-  }
+  const [colorTheme, setColorTheme] = useState('light')
+
+  // const toggleDarkMode = () => {
+  //   setIsDarkMode("dark");
+  // }
+
   return (
     <Provider store={store}>
-      <ThemeProvider theme={isDarkMode ? darkTheme : lightTheme}>
+      <ThemeProvider theme={colorTheme === 'light' ? lightTheme : darkTheme}>
         <Notification />
         <GlobalWrapper>
           <DownloadWrapper>

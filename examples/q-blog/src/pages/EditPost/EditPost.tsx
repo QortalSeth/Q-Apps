@@ -1,23 +1,23 @@
 import React from 'react'
-import { useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom'
 import BlogEditor from '../../components/editor/BlogEditor'
-import ShortUniqueId from 'short-unique-id';
-import { Button, TextField } from '@mui/material';
-import ReadOnlySlate from '../../components/editor/ReadOnlySlate';
-import { useDispatch, useSelector } from 'react-redux';
-import { RootState } from "../../state/store";
-import { Box } from '@mui/material';
-import ImageUploader from '../../components/common/ImageUploader';
-import AddPhotoAlternateIcon from '@mui/icons-material/AddPhotoAlternate';
-import { checkStructure } from '../../utils/checkStructure';
-import { BlogContent } from '../../interfaces/interfaces';
-import PostAddIcon from '@mui/icons-material/PostAdd';
-import RemoveCircleIcon from '@mui/icons-material/RemoveCircle';
-import EditIcon from '@mui/icons-material/Edit';
-import { createEditor, Descendant, Editor, Transforms } from 'slate';
-import { styled } from '@mui/system';
-import { setIsLoadingGlobal } from '../../state/features/globalSlice';
-import { extractTextFromSlate } from '../../utils/extractTextFromSlate';
+import ShortUniqueId from 'short-unique-id'
+import { Button, TextField } from '@mui/material'
+import ReadOnlySlate from '../../components/editor/ReadOnlySlate'
+import { useDispatch, useSelector } from 'react-redux'
+import { RootState } from '../../state/store'
+import { Box } from '@mui/material'
+import ImageUploader from '../../components/common/ImageUploader'
+import AddPhotoAlternateIcon from '@mui/icons-material/AddPhotoAlternate'
+import { checkStructure } from '../../utils/checkStructure'
+import { BlogContent } from '../../interfaces/interfaces'
+import PostAddIcon from '@mui/icons-material/PostAdd'
+import RemoveCircleIcon from '@mui/icons-material/RemoveCircle'
+import EditIcon from '@mui/icons-material/Edit'
+import { createEditor, Descendant, Editor, Transforms } from 'slate'
+import { styled } from '@mui/system'
+import { setIsLoadingGlobal } from '../../state/features/globalSlice'
+import { extractTextFromSlate } from '../../utils/extractTextFromSlate'
 import { VideoContent } from '../../components/common/VideoContent'
 import { VideoPanel } from '../../components/common/VideoPanel'
 
