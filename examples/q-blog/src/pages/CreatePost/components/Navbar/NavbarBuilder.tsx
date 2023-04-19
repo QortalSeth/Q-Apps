@@ -54,11 +54,10 @@ export const Navbar = ({ saveNav, removeNav, close }: INavbar) => {
   }, [currentBlog])
 
   const getOptions = useCallback(async () => {
-    // if(!user || !currentBlog) return
-    // const name = user?.name
-    // const blog = currentBlog?.blogId
-    const name = 'Phil'
-    const blog = 'q-blog-EnWmcZ'
+    if (!user || !currentBlog) return
+    const name = user?.name
+    const blog = currentBlog?.blogId
+
     try {
       const url = `/arbitrary/resources/search?service=BLOG_POST&query=${blog}-post-&limit=20&name=${name}&includemetadata=true&reverse=true`
       const response = await fetch(url, {

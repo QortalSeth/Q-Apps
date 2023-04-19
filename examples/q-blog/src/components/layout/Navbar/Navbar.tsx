@@ -32,6 +32,7 @@ interface Props {
   userAvatar: string | null
   blog: any
   authenticate: () => void
+  hasAttemptedToFetchBlogInitial: boolean
 }
 
 function useQuery() {
@@ -63,7 +64,8 @@ const NavBar: React.FC<Props> = ({
   userName,
   userAvatar,
   blog,
-  authenticate
+  authenticate,
+  hasAttemptedToFetchBlogInitial
 }) => {
   const navigate = useNavigate()
   const dispatch = useDispatch()
@@ -150,17 +152,20 @@ const NavBar: React.FC<Props> = ({
               </StyledButton>
             </>
           )}
-          {isAuthenticated && userName && !hasBlog && (
-            <StyledButton
-              color="primary"
-              startIcon={<AddBoxIcon />}
-              onClick={() => {
-                dispatch(togglePublishBlogModal(true))
-              }}
-            >
-              Create Blog
-            </StyledButton>
-          )}
+          {isAuthenticated &&
+            userName &&
+            hasAttemptedToFetchBlogInitial &&
+            !hasBlog && (
+              <StyledButton
+                color="primary"
+                startIcon={<AddBoxIcon />}
+                onClick={() => {
+                  dispatch(togglePublishBlogModal(true))
+                }}
+              >
+                Create Blog
+              </StyledButton>
+            )}
           {isAuthenticated && userName && hasBlog && (
             <>
               <StyledButton

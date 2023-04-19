@@ -28,6 +28,7 @@ import { useFetchPosts } from '../hooks/useFetchPosts'
 import { setNotification } from '../state/features/notificationsSlice'
 import { AudioPlayer } from '../components/common/AudioPlayer'
 import localForage from 'localforage'
+import ConsentModal from '../components/modals/ConsentModal'
 
 interface Props {
   children: React.ReactNode
@@ -41,6 +42,8 @@ const GlobalWrapper: React.FC<Props> = ({ children }) => {
   const { user } = useSelector((state: RootState) => state.auth)
   const { audios, currAudio } = useSelector((state: RootState) => state.global)
   const { getBlogPosts } = useFetchPosts()
+  const [hasAttemptedToFetchBlogInitial, setHasAttemptedToFetchBlogInitial] =
+    useState(false)
   const favoritesLocalRef = useRef<any>(null)
 
   useEffect(() => {
@@ -120,8 +123,8 @@ const GlobalWrapper: React.FC<Props> = ({ children }) => {
       }
     })
     const responseDataBlogs = await responseBlogs.json()
-    const filterOut = responseDataBlogs.filter(
-      (blog: any) => blog.identifier.split('-').length === 3
+    const filterOut = responseDataBlogs.filter((blog: any) =>
+      blog.identifier.startsWith('q-blog-')
     )
     let blog
     if (filterOut.length === 0) return
@@ -169,6 +172,7 @@ const GlobalWrapper: React.FC<Props> = ({ children }) => {
       dispatch(addUser({ ...account, name }))
 
       const blog = await getBlog(name)
+      setHasAttemptedToFetchBlogInitial(true)
     } catch (error) {
       console.error(error)
     }
@@ -224,12 +228,14 @@ const GlobalWrapper: React.FC<Props> = ({ children }) => {
         console.log({ tag })
         formattedTags[`tag${i + 1}`] = tag
       })
-      const blogPostToBase64 = objectToBase64({
+
+      const blogobj = {
         title,
         description,
         blogImage: '',
         createdAt: Date.now()
-      })
+      }
+      const blogPostToBase64 = objectToBase64(blogobj)
       try {
         const resourceResponse = await qortalRequest({
           action: 'PUBLISH_QDN_RESOURCE',
@@ -249,7 +255,15 @@ const GlobalWrapper: React.FC<Props> = ({ children }) => {
           }, 1000)
         })
 
-        getBlog(name)
+        const blogfullObj = {
+          ...blogobj,
+          blogId: identifier,
+          category,
+          tags
+        }
+
+        dispatch(setCurrentBlog(blogfullObj))
+        // getBlog(name)
         dispatch(
           setNotification({
             msg: 'Blog successfully created',
@@ -287,11 +301,13 @@ const GlobalWrapper: React.FC<Props> = ({ children }) => {
         console.log({ tag })
         formattedTags[`tag${i + 1}`] = tag
       })
-      const blogPostToBase64 = objectToBase64({
+
+      const blogobj = {
         ...currentBlog,
         title,
         description
-      })
+      }
+      const blogPostToBase64 = objectToBase64(blogobj)
       try {
         const resourceResponse = await qortalRequest({
           action: 'PUBLISH_QDN_RESOURCE',
@@ -310,8 +326,15 @@ const GlobalWrapper: React.FC<Props> = ({ children }) => {
             res()
           }, 1000)
         })
-
-        getBlog(name)
+        const blogfullObj = {
+          ...blogobj,
+          tags,
+          category
+        }
+        // blogobj.tags = tags
+        // blogobj.category = category
+        // getBlog(name)
+        dispatch(setCurrentBlog(blogfullObj))
         dispatch(
           setNotification({
             msg: 'Blog successfully updated',
@@ -396,7 +419,9 @@ const GlobalWrapper: React.FC<Props> = ({ children }) => {
         userAvatar=""
         blog={currentBlog}
         authenticate={askForAccountInformation}
+        hasAttemptedToFetchBlogInitial={hasAttemptedToFetchBlogInitial}
       />
+      <ConsentModal />
       {children}
 
       {audios && audios.length > 0 && (

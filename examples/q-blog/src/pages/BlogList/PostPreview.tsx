@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react'
+import React, { useMemo, useState } from 'react'
 import {
   Avatar,
   Card,
@@ -10,6 +10,11 @@ import {
   Button,
   Tooltip
 } from '@mui/material'
+import Dialog from '@mui/material/Dialog'
+import DialogActions from '@mui/material/DialogActions'
+import DialogContent from '@mui/material/DialogContent'
+import DialogContentText from '@mui/material/DialogContentText'
+import DialogTitle from '@mui/material/DialogTitle'
 import { styled } from '@mui/system'
 import moment from 'moment'
 import {
@@ -33,6 +38,7 @@ interface BlogPostPreviewProps {
   description: any
   blogPost: BlogPost
   onClick?: () => void
+  isValid?: boolean
 }
 
 const StyledCard = styled(Card)`
@@ -64,13 +70,15 @@ const BlogPostPreview: React.FC<BlogPostPreviewProps> = ({
   postImage,
   description,
   onClick,
-  blogPost
+  blogPost,
+  isValid
 }) => {
   const [avatarUrl, setAvatarUrl] = React.useState<string>('')
   const dispatch = useDispatch<AppDispatch>()
   const favoritesLocal = useSelector(
     (state: RootState) => state.blog.favoritesLocal
   )
+  const [isOpenAlert, setIsOpenAlert] = useState<boolean>(false)
   const subscriptions = useSelector(
     (state: RootState) => state.blog.subscriptions
   )
@@ -119,7 +127,7 @@ const BlogPostPreview: React.FC<BlogPostPreviewProps> = ({
   }, [favoritesLocal, blogPost?.id])
 
   const blockUserFunc = async (user: string) => {
-    if (user === 'q-blog' || user === 'Phil') return
+    if (user === 'q-blog') return
     if (subscriptions.includes(user) && username) {
       try {
         const listName = `q-blog-subscriptions-${username}`
@@ -150,9 +158,22 @@ const BlogPostPreview: React.FC<BlogPostPreviewProps> = ({
       }
     } catch (error) {}
   }
+
+  const continueToPost = () => {
+    if (isValid === false) {
+      setIsOpenAlert(true)
+      return
+    }
+    if (!onClick) return
+    onClick()
+  }
+
+  const handleClose = () => {
+    setIsOpenAlert(false)
+  }
   return (
     <>
-      <StyledCard onClick={onClick}>
+      <StyledCard onClick={continueToPost}>
         <CardHeader
           sx={{
             '& .MuiCardHeader-content': {
@@ -228,13 +249,28 @@ const BlogPostPreview: React.FC<BlogPostPreviewProps> = ({
         )}
       </Box>
 
-      {/* <Button
-        onClick={() => {
-          dispatch(upsertFavorites([blogPost]))
-        }}
+      <Dialog
+        open={isOpenAlert}
+        onClose={handleClose}
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
       >
-        + Fav
-      </Button> */}
+        <DialogTitle id="alert-dialog-title">
+          Invalid Content Structure
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText id="alert-dialog-description">
+            This post seems to contain an invalid content structure. Click
+            continue to proceed
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleClose}>Close</Button>
+          <Button onClick={onClick} autoFocus>
+            Continue
+          </Button>
+        </DialogActions>
+      </Dialog>
     </>
   )
 }

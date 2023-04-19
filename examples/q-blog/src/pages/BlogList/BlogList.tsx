@@ -110,6 +110,7 @@ export const BlogList = ({ mode }: BlogListProps) => {
                 author={blogPost.user}
                 postImage={blogPost?.postImage}
                 blogPost={blogPost}
+                isValid={blogPost?.isValid}
               />
 
               {blogPost.user === user?.name && (

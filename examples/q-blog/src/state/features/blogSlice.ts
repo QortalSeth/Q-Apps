@@ -36,6 +36,7 @@ export interface BlogPost {
   categoryName?: string
   tags?: string[]
   updated?: number | string
+  isValid?: boolean
 }
 
 export const removeFavorites = createAsyncThunk<

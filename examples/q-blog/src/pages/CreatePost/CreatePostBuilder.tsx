@@ -779,14 +779,14 @@ export const CreatePostBuilder = ({
         addNav={addNav}
         switchType={switchType}
       />
-      {navbarConfig && Array.isArray(navbarConfig?.navItems) && (
+      {/* {navbarConfig && Array.isArray(navbarConfig?.navItems) && (
         <UserNavbar
           title="Test"
           menuItems={navbarConfig?.navItems || []}
           name=""
           blogId=""
         />
-      )}
+      )} */}
       <Box
         sx={{
           display: 'flex',

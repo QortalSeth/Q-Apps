@@ -3,7 +3,7 @@
 
 import React, { useMemo, useState, useCallback } from 'react';
 import { createEditor, Descendant, Editor, Transforms, Range } from 'slate'
-
+import SvgIcon from '@material-ui/core/SvgIcon'
 import {
   Slate,
   Editable,
@@ -17,6 +17,16 @@ import { CustomElement, CustomText, FormatMark } from './customTypes'
 import './BlogEditor.css'
 import { Modal, Box, TextField, Button } from '@mui/material'
 import PostAddIcon from '@mui/icons-material/PostAdd'
+import boldSvg from '../../assets/svgs/bold.svg'
+import italicSvg from '../../assets/svgs/italic.svg'
+import underlineSvg from '../../assets/svgs/underline.svg'
+import h2Svg from '../../assets/svgs/h2.svg'
+import h3Svg from '../../assets/svgs/h3.svg'
+import alignLeftSvg from '../../assets/svgs/alignLeft.svg'
+import alignCenterSvg from '../../assets/svgs/alignCenter.svg'
+import alignRightSvg from '../../assets/svgs/alignRight.svg'
+import codeBlockSvg from '../../assets/svgs/codeBlock.svg'
+import linkSvg from '../../assets/svgs/link.svg'
 
 const initialValue: Descendant[] = [
   {
@@ -122,7 +132,8 @@ const BlogEditor: React.FC<MyComponentProps> = ({
     format: FormatMark | string
     label: string
     editor: Editor
-  }> = ({ format, label, editor }) => {
+    children: React.ReactNode
+  }> = ({ format, label, editor, children }) => {
     useSlate()
 
     let onClick = () => {
@@ -174,7 +185,7 @@ const BlogEditor: React.FC<MyComponentProps> = ({
           onClick()
         }}
       >
-        {label}
+        {children ? children : label}
       </button>
     )
   }
@@ -183,7 +194,8 @@ const BlogEditor: React.FC<MyComponentProps> = ({
     format: FormatMark | string
     label: string
     editor: Editor
-  }> = ({ format, label, editor }) => {
+    children: React.ReactNode
+  }> = ({ format, label, editor, children }) => {
     const editor2 = useSlate()
 
     let onClick = () => {
@@ -206,7 +218,7 @@ const BlogEditor: React.FC<MyComponentProps> = ({
           onClick()
         }}
       >
-        {label}
+        {children ? children : label}
       </button>
     )
   }
@@ -242,7 +254,8 @@ const BlogEditor: React.FC<MyComponentProps> = ({
     format: FormatMark | string
     label: string
     editor: Editor
-  }> = ({ format, label, editor }) => {
+    children: React.ReactNode
+  }> = ({ format, label, editor, children }) => {
     useSlate()
 
     let isActive = false
@@ -266,7 +279,7 @@ const BlogEditor: React.FC<MyComponentProps> = ({
           setOpen(true)
         }}
       >
-        {label}
+        {children ? children : label}
       </button>
     )
   }
@@ -405,21 +418,102 @@ const BlogEditor: React.FC<MyComponentProps> = ({
         key={editorKey || 1}
       >
         <div className="toolbar">
-          <ToolbarButton format="bold" label="B" editor={editor} />
-          <ToolbarButton format="italic" label="I" editor={editor} />
-          <ToolbarButton format="underline" label="U" editor={editor} />
-          <ToolbarButton format="heading-2" label="H2" editor={editor} />
-          <ToolbarButton format="heading-3" label="H3" editor={editor} />
-          <ToolbarButton format="align-left" label="L" editor={editor} />
-          <ToolbarButton format="align-center" label="C" editor={editor} />
-          <ToolbarButton format="align-right" label="R" editor={editor} />
+          <ToolbarButton format="bold" label="B" editor={editor}>
+            <img
+              style={{
+                height: '24px',
+                width: 'auto'
+              }}
+              src={boldSvg}
+            />
+          </ToolbarButton>
+          <ToolbarButton format="italic" label="I" editor={editor}>
+            <img
+              style={{
+                height: '24px',
+                width: 'auto'
+              }}
+              src={italicSvg}
+            />
+          </ToolbarButton>
+          <ToolbarButton format="underline" label="U" editor={editor}>
+            <img
+              style={{
+                height: '24px',
+                width: 'auto'
+              }}
+              src={underlineSvg}
+            />
+          </ToolbarButton>
+
+          <ToolbarButton format="heading-2" label="H2" editor={editor}>
+            <img
+              style={{
+                height: '24px',
+                width: 'auto'
+              }}
+              src={h2Svg}
+            />
+          </ToolbarButton>
+          <ToolbarButton format="heading-3" label="H3" editor={editor}>
+            <img
+              style={{
+                height: '24px',
+                width: 'auto'
+              }}
+              src={h3Svg}
+            />
+          </ToolbarButton>
+          <ToolbarButton format="align-left" label="L" editor={editor}>
+            <img
+              style={{
+                height: '24px',
+                width: 'auto'
+              }}
+              src={alignLeftSvg}
+            />
+          </ToolbarButton>
+          <ToolbarButton format="align-center" label="C" editor={editor}>
+            <img
+              style={{
+                height: '24px',
+                width: 'auto'
+              }}
+              src={alignCenterSvg}
+            />
+          </ToolbarButton>
+          <ToolbarButton format="align-right" label="R" editor={editor}>
+            <img
+              style={{
+                height: '24px',
+                width: 'auto'
+              }}
+              src={alignRightSvg}
+            />
+          </ToolbarButton>
 
           <ToolbarButtonCodeBlock
             format="code-block"
             label="Code"
             editor={editor}
-          />
-          <ToolbarButtonCodeLink format="link" label="Link" editor={editor} />
+          >
+            <img
+              style={{
+                height: '24px',
+                width: 'auto'
+              }}
+              src={codeBlockSvg}
+            />
+          </ToolbarButtonCodeBlock>
+          <ToolbarButtonCodeLink format="link" label="Link" editor={editor}>
+            <img
+              style={{
+                height: '24px',
+                width: 'auto'
+              }}
+              src={linkSvg}
+            />
+          </ToolbarButtonCodeLink>
 
           {/* <button
             className="toolbar-button"
