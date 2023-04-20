@@ -65,6 +65,11 @@ export interface IPlaylist {
   title: string
   description: string
 }
+interface CustomWindow extends Window {
+  _qdnTheme: any // Replace 'any' with the appropriate type if you know it
+}
+const customWindow = window as unknown as CustomWindow
+const themeColor = customWindow?._qdnTheme
 
 export const AudioPlayer: React.FC<VideoPlayerProps> = ({
   playlist,
@@ -153,6 +158,9 @@ export const AudioPlayer: React.FC<VideoPlayerProps> = ({
   return (
     <VideoContainer>
       <AudioPlyr
+        rootContainerProps={{
+          defaultColorScheme: themeColor === 'dark' ? 'dark' : 'light'
+        }}
         currentIndex={currAudio}
         playList={playlistFormatted}
         activeUI={{

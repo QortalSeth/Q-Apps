@@ -32,5 +32,6 @@ declare function qortalRequestWithTimeout(
 declare global {
   interface Window {
     _qdnBase: any // Replace 'any' with the appropriate type if you know it
+    _qdnTheme: string
   }
 }
