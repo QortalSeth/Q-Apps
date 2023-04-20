@@ -127,7 +127,7 @@ const BlogPostPreview: React.FC<BlogPostPreviewProps> = ({
   }, [favoritesLocal, blogPost?.id])
 
   const blockUserFunc = async (user: string) => {
-    if (user === 'q-blog') return
+    if (user === 'Q-Blog') return
     if (subscriptions.includes(user) && username) {
       try {
         const listName = `q-blog-subscriptions-${username}`
