@@ -18,8 +18,13 @@ const CustomToolbar = styled(Toolbar)({
 })
 
 const CustomAppBar = styled(AppBar)(({ theme }) => ({
-  backgroundColor: '#FFFFFF',
-  color: '#000000'
+  backgroundColor:
+    theme.palette.mode === 'light'
+      ? theme.palette.background.default
+      : '#999696',
+  filter: 'brightness(1.1)'
+  // backgroundColor: '#FFFFFF',
+  // color: '#000000'
 }))
 
 interface IEditorToolbar {
