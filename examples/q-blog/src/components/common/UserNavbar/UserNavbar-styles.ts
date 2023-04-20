@@ -20,8 +20,8 @@ export const CustomToolbar = styled(Toolbar)({
 
 export const CustomTitle = styled(Typography)(({ theme }) => ({
   color: theme.palette.text.primary,
-  fontFamily: "Cambon Light",
-  fontSize: "18px"
+  fontFamily: 'CambonLight, Raleway, Arial',
+  fontSize: '18px'
 }))
 
 export const StyledAppBar = styled(AppBar)(({ theme }) => ({

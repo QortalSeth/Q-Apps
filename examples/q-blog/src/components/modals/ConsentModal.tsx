@@ -6,11 +6,14 @@ import DialogContent from '@mui/material/DialogContent'
 import DialogContentText from '@mui/material/DialogContentText'
 import DialogTitle from '@mui/material/DialogTitle'
 import localForage from 'localforage'
+import { useTheme } from '@mui/material'
 const generalLocal = localForage.createInstance({
   name: 'q-blog-general'
 })
 
 export default function ConsentModal() {
+  const theme = useTheme()
+
   const [open, setOpen] = React.useState(false)
 
   const handleClose = () => {
@@ -49,7 +52,15 @@ export default function ConsentModal() {
           </DialogContentText>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleClose} autoFocus>
+          <Button
+            sx={{
+              backgroundColor: theme.palette.primary.light,
+              color: theme.palette.text.primary,
+              fontFamily: 'Arial'
+            }}
+            onClick={handleClose}
+            autoFocus
+          >
             Close
           </Button>
         </DialogActions>

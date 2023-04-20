@@ -3,7 +3,14 @@ import { useNavigate } from 'react-router-dom'
 import { useDispatch, useSelector } from 'react-redux'
 import { RootState } from '../../state/store'
 import EditIcon from '@mui/icons-material/Edit'
-import { Box, Button, List, ListItem, Typography } from '@mui/material'
+import {
+  Box,
+  Button,
+  List,
+  ListItem,
+  Typography,
+  useTheme
+} from '@mui/material'
 import BlogPostPreview from './PostPreview'
 import { useFetchPosts } from '../../hooks/useFetchPosts'
 import LazyLoad from '../../components/common/LazyLoad'
@@ -22,6 +29,8 @@ interface BlogListProps {
   mode?: string
 }
 export const BlogList = ({ mode }: BlogListProps) => {
+  const theme = useTheme()
+
   const { user } = useSelector((state: RootState) => state.auth)
   const hashMapPosts = useSelector(
     (state: RootState) => state.blog.hashMapPosts
@@ -114,7 +123,16 @@ export const BlogList = ({ mode }: BlogListProps) => {
               ? `There is ${countNewPosts} new post`
               : `There are ${countNewPosts} new posts`}
           </Typography>
-          <Button onClick={getNewPosts}>Load new Posts</Button>
+          <Button
+            sx={{
+              backgroundColor: theme.palette.primary.light,
+              color: theme.palette.text.primary,
+              fontFamily: 'Arial'
+            }}
+            onClick={getNewPosts}
+          >
+            Load new Posts
+          </Button>
         </Box>
       )}
 

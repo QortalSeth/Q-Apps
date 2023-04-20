@@ -208,9 +208,36 @@ export const Navbar = ({ saveNav, removeNav, close }: INavbar) => {
           ))}
         </List>
       </Box>
-      <Button onClick={handleSaveNav}>Save Navbar</Button>
-      <Button onClick={removeNav}>Remove Navbar</Button>
-      <Button onClick={close}>Close</Button>
+      <Button
+        sx={{
+          backgroundColor: theme.palette.primary.light,
+          color: theme.palette.text.primary,
+          fontFamily: 'Arial'
+        }}
+        onClick={handleSaveNav}
+      >
+        Save Navbar
+      </Button>
+      <Button
+        sx={{
+          backgroundColor: theme.palette.primary.light,
+          color: theme.palette.text.primary,
+          fontFamily: 'Arial'
+        }}
+        onClick={removeNav}
+      >
+        Remove Navbar
+      </Button>
+      <Button
+        sx={{
+          backgroundColor: theme.palette.primary.light,
+          color: theme.palette.text.primary,
+          fontFamily: 'Arial'
+        }}
+        onClick={close}
+      >
+        Close
+      </Button>
     </>
   )
 }

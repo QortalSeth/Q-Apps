@@ -204,10 +204,28 @@ export const BlogIndividualProfile = () => {
           ></EditIcon>
         )}
         {subscriptions.includes(username) && (
-          <Button onClick={unsubscribe}>Unsubscribe</Button>
+          <Button
+            sx={{
+              backgroundColor: theme.palette.primary.light,
+              color: theme.palette.text.primary,
+              fontFamily: 'Arial'
+            }}
+            onClick={unsubscribe}
+          >
+            Unsubscribe
+          </Button>
         )}
         {!subscriptions.includes(username) && (
-          <Button onClick={subscribe}>Subscribe</Button>
+          <Button
+            sx={{
+              backgroundColor: theme.palette.primary.light,
+              color: theme.palette.text.primary,
+              fontFamily: 'Arial'
+            }}
+            onClick={subscribe}
+          >
+            Subscribe
+          </Button>
         )}
       </Box>
 

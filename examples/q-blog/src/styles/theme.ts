@@ -19,7 +19,14 @@ const commonThemeOptions = {
     }
   },
   typography: {
-    fontFamily: ['Cambon Light', 'Raleway, sans-serif', 'Oxygen', 'Catamaran', 'Cairo', 'Arial'].join(','),
+    fontFamily: [
+      'CambonLight',
+      'Raleway, sans-serif',
+      'Oxygen',
+      'Catamaran',
+      'Cairo',
+      'Arial'
+    ].join(','),
     h1: {
       fontSize: '2rem',
       fontWeight: 600
@@ -54,7 +61,7 @@ const commonThemeOptions = {
 
     body2: {
       fontSize: '18px',
-      fontFamily: 'Cambon Light',
+      fontFamily: 'CambonLight, Raleway, Arial',
       fontWeight: 400,
       lineHeight: 1.4,
       letterSpacing: '0.2px'
@@ -70,9 +77,9 @@ const commonThemeOptions = {
       sm: 600,
       md: 900,
       lg: 1200,
-      xl: 1536,
-    },
-  },
+      xl: 1536
+    }
+  }
 }
 
 const lightTheme = createTheme({

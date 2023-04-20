@@ -6,7 +6,8 @@ import {
   Typography,
   SelectChangeEvent,
   ListItem,
-  List
+  List,
+  useTheme
 } from '@mui/material'
 import {
   StyledModal,
@@ -24,7 +25,7 @@ export const BlockedNamesModal: React.FC<PostModalProps> = ({
   onClose
 }) => {
   const [blockedNames, setBlockedNames] = useState<string[]>([])
-
+  const theme = useTheme()
   const getBlockedNames = React.useCallback(async () => {
     try {
       const listName = `blockedNames_q-blog`
@@ -77,7 +78,16 @@ export const BlockedNamesModal: React.FC<PostModalProps> = ({
               }}
             >
               <Typography>{name}</Typography>
-              <Button onClick={() => removeFromBlockList(name)}>Remove</Button>
+              <Button
+                sx={{
+                  backgroundColor: theme.palette.primary.light,
+                  color: theme.palette.text.primary,
+                  fontFamily: 'Arial'
+                }}
+                onClick={() => removeFromBlockList(name)}
+              >
+                Remove
+              </Button>
             </ListItem>
           ))}
         </List>

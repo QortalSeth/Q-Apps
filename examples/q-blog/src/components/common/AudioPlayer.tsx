@@ -159,7 +159,8 @@ export const AudioPlayer: React.FC<VideoPlayerProps> = ({
     <VideoContainer>
       <AudioPlyr
         rootContainerProps={{
-          defaultColorScheme: themeColor === 'dark' ? 'dark' : 'light'
+          defaultColorScheme: themeColor === 'dark' ? 'dark' : 'light',
+          colorScheme: themeColor === 'dark' ? 'dark' : 'light'
         }}
         currentIndex={currAudio}
         playList={playlistFormatted}
