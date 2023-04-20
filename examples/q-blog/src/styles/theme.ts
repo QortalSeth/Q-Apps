@@ -1,7 +1,25 @@
-import { createTheme } from '@mui/material/styles';
+import { createTheme } from '@mui/material/styles'
+
 const commonThemeOptions = {
+  components: {
+    MuiCard: {
+      styleOverrides: {
+        root: {
+          boxShadow:
+            'rgba(0, 0, 0, 0.1) 0px 1px 3px 0px, rgba(0, 0, 0, 0.06) 0px 1px 2px 0px;',
+          borderRadius: '8px',
+          transition: 'all 0.3s ease-in-out',
+          '&:hover': {
+            cursor: 'pointer',
+            boxShadow:
+              'rgba(0, 0, 0, 0.1) 0px 4px 6px -1px, rgba(0, 0, 0, 0.06) 0px 2px 4px -1px;'
+          }
+        }
+      }
+    }
+  },
   typography: {
-    fontFamily: "'Arial', 'Roboto', 'Arial', sans-serif",
+    fontFamily: ['Cambon Light', 'Raleway, sans-serif', 'Oxygen', 'Catamaran', 'Cairo', 'Arial'].join(','),
     h1: {
       fontSize: '2rem',
       fontWeight: 600
@@ -27,16 +45,34 @@ const commonThemeOptions = {
       fontWeight: 500
     },
     body1: {
-      fontSize: '1rem'
+      fontSize: '23px',
+      fontFamily: 'Raleway',
+      fontWeight: 400,
+      lineHeight: 1.5,
+      letterSpacing: '0.5px'
     },
+
     body2: {
-      fontSize: '0.875rem'
+      fontSize: '18px',
+      fontFamily: 'Cambon Light',
+      fontWeight: 400,
+      lineHeight: 1.4,
+      letterSpacing: '0.2px'
     }
   },
   spacing: 8,
   shape: {
     borderRadius: 4
-  }
+  },
+  breakpoints: {
+    values: {
+      xs: 0,
+      sm: 600,
+      md: 900,
+      lg: 1200,
+      xl: 1536,
+    },
+  },
 }
 
 const lightTheme = createTheme({
@@ -44,18 +80,20 @@ const lightTheme = createTheme({
   palette: {
     mode: 'light',
     primary: {
-      main: '#3f51b5'
+      main: '#f4f4fb',
+      dark: '#eaecf4',
+      light: '#f9f9fd'
     },
     secondary: {
-      main: '#f50057'
+      main: '#1EAAF1'
     },
     background: {
       default: '#fafafa',
       paper: '#f0f0f0'
     },
     text: {
-      primary: '#212121',
-      secondary: '#757575'
+      primary: '#000000',
+      secondary: '#525252'
     }
   }
 })
@@ -65,13 +103,16 @@ const darkTheme = createTheme({
   palette: {
     mode: 'dark',
     primary: {
-      main: '#3f51b5'
+      main: '#2e3d60',
+      dark: "#1a2744",
+      light: "#3f4b66",
     },
     secondary: {
-      main: '#f50057'
+      main: '#45adff'
     },
+    
     background: {
-      default: '#303030'
+      default: '#bdbdbd'
     },
     text: {
       primary: '#ffffff',

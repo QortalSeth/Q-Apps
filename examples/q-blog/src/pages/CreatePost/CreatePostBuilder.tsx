@@ -10,7 +10,7 @@ import AddPhotoAlternateIcon from '@mui/icons-material/AddPhotoAlternate'
 import ImageUploader from '../../components/common/ImageUploader'
 import AudiotrackIcon from '@mui/icons-material/Audiotrack'
 import DeleteIcon from '@mui/icons-material/Delete'
-import { Button, Box, Typography } from '@mui/material'
+import { Button, Box, useTheme } from '@mui/material'
 import { styled } from '@mui/system'
 import { Descendant } from 'slate'
 import EditIcon from '@mui/icons-material/Edit'
@@ -26,7 +26,7 @@ import { ReusableModal } from '../../components/modals/ReusableModal'
 import { VideoPlayer } from '../../components/common/VideoPlayer'
 import { EditorToolbar } from './components/Toolbar/EditorToolbar'
 import { Navbar } from './components/Navbar/NavbarBuilder'
-import { UserNavbar } from '../../components/common/UserNavbar'
+import { UserNavbar } from '../../components/common/UserNavbar/UserNavbar'
 import { setCurrentBlog } from '../../state/features/globalSlice'
 import AudioElement from '../../components/AudioElement'
 import { AudioPanel } from '../../components/common/AudioPanel'
@@ -66,7 +66,7 @@ const BlogTitleInput = styled(TextField)(({ theme }) => ({
     background: 'transparent',
     '&::placeholder': {
       fontSize: '28px',
-      color: theme.palette.text.secondary
+      color: theme.palette.text.primary
     }
   },
   '& .MuiInputLabel-root': {
@@ -103,6 +103,7 @@ export const CreatePostBuilder = ({
   blogMetadataForEdit,
   switchType
 }: CreatePostBuilderProps) => {
+  const theme = useTheme()
   const { user } = useSelector((state: RootState) => state.auth)
   const { currentBlog } = useSelector((state: RootState) => state.global)
   const [editingSection, setEditingSection] = React.useState<any>(null)
@@ -1126,8 +1127,26 @@ export const CreatePostBuilder = ({
               editorKey={editorKey}
             />
           </Box>
-          <Button onClick={addSection}>Add Text</Button>
-          <Button onClick={closeAddTextModal}>Close</Button>
+          <Button
+            sx={{
+              backgroundColor: theme.palette.primary.light,
+              color: theme.palette.text.primary,
+              fontFamily: 'Arial'
+            }}
+            onClick={addSection}
+          >
+            Add Text
+          </Button>
+          <Button
+            sx={{
+              backgroundColor: theme.palette.primary.light,
+              color: theme.palette.text.primary,
+              fontFamily: 'Arial'
+            }}
+            onClick={closeAddTextModal}
+          >
+            Close
+          </Button>
         </ReusableModal>
         <ReusableModal open={isOpenEditTextModal}>
           <Box

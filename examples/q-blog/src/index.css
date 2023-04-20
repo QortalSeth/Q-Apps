@@ -1,3 +1,28 @@
+@font-face {
+  font-family: 'Cambon Light';
+  src: url("./styles/fonts/Cambon-Light.ttf") format("truetype");
+}
+
+@font-face {
+  font-family: 'Raleway';
+  src: url("./styles/fonts/Raleway.ttf") format("truetype");
+}
+
+@font-face {
+  font-family: 'Catamaran';
+  src: url("./styles/fonts/Catamaran.ttf") format("truetype");
+}
+
+@font-face {
+  font-family: 'Oxygen';
+  src: url("./styles/fonts/Oxygen.ttf") format("truetype");
+}
+
+@font-face {
+  font-family: 'Cairo';
+  src: url("./styles/fonts/Cairo.ttf") format("truetype");
+}
+
 :root {
   padding: 0px;
   margin: 0px;
@@ -114,7 +139,9 @@ body::-webkit-scrollbar-track {
     display: flex;
     margin-left: -20px; /* gutter size offset */
     width: auto;
+    padding: 15px 20px;
   }
+
   .my-masonry-grid_column {
     padding-left: 20px; /* gutter size */
     background-clip: padding-box;

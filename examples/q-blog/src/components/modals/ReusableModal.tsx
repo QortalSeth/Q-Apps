@@ -1,5 +1,5 @@
 import React from 'react'
-import { Box, Modal } from '@mui/material'
+import { Box, Modal, useTheme } from '@mui/material'
 
 interface MyModalProps {
   open: boolean
@@ -16,6 +16,7 @@ export const ReusableModal: React.FC<MyModalProps> = ({
   children,
   customStyles = {}
 }) => {
+  const theme = useTheme()
   return (
     <Modal
       open={open}
@@ -30,7 +31,7 @@ export const ReusableModal: React.FC<MyModalProps> = ({
           left: '50%',
           transform: 'translate(-50%, -50%)',
           width: '75%',
-          bgcolor: 'background.paper',
+          bgcolor: theme.palette.primary.main,
           boxShadow: 24,
           p: 4,
           display: 'flex',

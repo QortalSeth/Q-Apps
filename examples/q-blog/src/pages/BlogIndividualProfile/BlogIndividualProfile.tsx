@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useDispatch, useSelector } from 'react-redux'
 import { RootState } from '../../state/store'
 import { useParams } from 'react-router-dom'
-import { List, ListItem, Typography, Box, Button } from '@mui/material'
+import { Typography, Box, Button, useTheme } from '@mui/material'
 import EditIcon from '@mui/icons-material/Edit'
 import BlogPostPreview from '../BlogList/PostPreview'
 import {
@@ -23,13 +23,15 @@ import Masonry from 'react-masonry-css'
 
 const breakpointColumnsObj = {
   default: 5,
-  1300: 4,
-  940: 3,
-  700: 2,
+  1600: 4,
+  1300: 3,
+  940: 2,
+  700: 1,
   500: 1
 }
 export const BlogIndividualProfile = () => {
   const navigate = useNavigate()
+  const theme = useTheme()
   const { user } = useSelector((state: RootState) => state.auth)
   const { currentBlog } = useSelector((state: RootState) => state.global)
   const subscriptions = useSelector(
@@ -213,6 +215,7 @@ export const BlogIndividualProfile = () => {
         breakpointCols={breakpointColumnsObj}
         className="my-masonry-grid"
         columnClassName="my-masonry-grid_column"
+        style={{ backgroundColor: theme.palette.background.default }}
       >
         {blogPosts.map((post, index) => {
           const existingPost = hashMapPosts[post.id]

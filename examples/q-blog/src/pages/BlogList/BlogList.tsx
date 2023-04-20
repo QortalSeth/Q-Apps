@@ -12,9 +12,10 @@ import Masonry from 'react-masonry-css'
 
 const breakpointColumnsObj = {
   default: 5,
-  1300: 4,
-  940: 3,
-  700: 2,
+  1600: 4,
+  1300: 3,
+  940: 2,
+  700: 1,
   500: 1
 }
 interface BlogListProps {

@@ -1,7 +1,6 @@
 // @ts-nocheck
 
 import { Routes, Route } from 'react-router-dom'
-import { Home } from './pages/Home/Home'
 import { BlogIndividualPost } from './pages/BlogIndividualPost/BlogIndividualPost'
 import { BlogIndividualProfile } from './pages/BlogIndividualProfile/BlogIndividualProfile'
 import { BlogList } from './pages/BlogList/BlogList'
@@ -14,20 +13,21 @@ import { store } from './state/store'
 import { Provider } from 'react-redux'
 import GlobalWrapper from './wrappers/GlobalWrapper'
 import DownloadWrapper from './wrappers/DownloadWrapper'
-
-import { EditPost } from './pages/EditPost/EditPost'
 import Notification from './components/common/Notification/Notification'
 import { useState } from 'react'
 
 function App() {
-  const [isDarkMode, setIsDarkMode] = useState(false)
+  const themeColor = window._qdnTheme
 
-  const toggleDarkMode = () => {
-    setIsDarkMode(!isDarkMode)
-  }
+  // const [colorTheme, setColorTheme] = useState('dark')
+
+  // const toggleDarkMode = () => {
+  //   setIsDarkMode("dark");
+  // }
+
   return (
     <Provider store={store}>
-      <ThemeProvider theme={isDarkMode ? darkTheme : lightTheme}>
+      <ThemeProvider theme={themeColor === 'light' ? lightTheme : darkTheme}>
         <Notification />
         <GlobalWrapper>
           <DownloadWrapper>
