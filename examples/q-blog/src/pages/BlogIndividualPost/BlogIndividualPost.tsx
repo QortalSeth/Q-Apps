@@ -1,6 +1,13 @@
 import React, { useMemo, useRef, useState } from 'react'
 import { useParams } from 'react-router-dom'
-import { Button, Box, Typography, CardHeader, Avatar } from '@mui/material'
+import {
+  Button,
+  Box,
+  Typography,
+  CardHeader,
+  Avatar,
+  useTheme
+} from '@mui/material'
 import { useNavigate } from 'react-router-dom'
 import { styled } from '@mui/system'
 import AudiotrackIcon from '@mui/icons-material/Audiotrack'
@@ -62,6 +69,7 @@ export const BlogIndividualPost = () => {
   const [avatarUrl, setAvatarUrl] = React.useState<string>('')
   const dispatch = useDispatch()
   const navigate = useNavigate()
+  const theme = useTheme()
   // const [currAudio, setCurrAudio] = React.useState<number | null>(null)
   const [layouts, setLayouts] = React.useState<any>({ md, sm, xs })
   const [count, setCount] = React.useState<number>(1)
@@ -294,7 +302,12 @@ export const BlogIndividualPost = () => {
             padding: '10px 0px'
           }}
           avatar={<Avatar src={avatarUrl} alt={`${user}'s avatar`} />}
-          subheader={`Author: ${user}`}
+          subheader={
+            <Typography
+              sx={{ fontFamily: 'Cairo', fontSize: '25px' }}
+              color={theme.palette.text.primary}
+            >{`Author: ${user}`}</Typography>
+          }
         />
         <Typography
           variant="h1"

@@ -1,14 +1,5 @@
-import React from 'react';
-import {
-  AppBar,
-  Toolbar,
-  Typography,
-  Button,
-  IconButton,
-  Box,
-  Popover
-} from '@mui/material'
-import { styled } from '@mui/system'
+import React from 'react'
+import { Typography, Box, Popover, useTheme } from '@mui/material'
 import AccountCircle from '@mui/icons-material/AccountCircle'
 import AddBoxIcon from '@mui/icons-material/AddBox'
 import ExitToAppIcon from '@mui/icons-material/ExitToApp'
@@ -17,14 +8,28 @@ import { togglePublishBlogModal } from '../../../state/features/globalSlice'
 import { useDispatch, useSelector } from 'react-redux'
 import AutoStoriesIcon from '@mui/icons-material/AutoStories'
 import { RootState } from '../../../state/store'
-import { UserNavbar } from '../../common/UserNavbar'
-import { addPrefix, removePrefix } from '../../../utils/blogIdformats'
+import { UserNavbar } from '../../common/UserNavbar/UserNavbar'
+import { removePrefix } from '../../../utils/blogIdformats'
 import { useLocation } from 'react-router-dom'
 import BookmarkIcon from '@mui/icons-material/Bookmark'
 import SubscriptionsIcon from '@mui/icons-material/Subscriptions'
-import SettingsIcon from '@mui/icons-material/Settings'
-import { BlockedNamesModal } from '../../common/BlockedNamesModal'
-import { CustomIcon } from '../../common/CustomIcon'
+import { BlockedNamesModal } from '../../common/BlockedNamesModal/BlockedNamesModal'
+import {
+  AvatarContainer,
+  CreateBlogButton,
+  CustomAppBar,
+  CustomToolbar,
+  DropdownContainer,
+  DropdownText,
+  QblogLogoContainer,
+  StyledButton,
+  AuthenticateButton,
+  NavbarName
+} from './Navbar-styles'
+import QblogLogo from '../../../assets/img/qBlogLogo.png'
+import NewWindowIcon from '../../../assets/icons/newWindow.svg'
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
+import PersonOffIcon from '@mui/icons-material/PersonOff'
 interface Props {
   isAuthenticated: boolean
   hasBlog: boolean
@@ -38,25 +43,6 @@ function useQuery() {
   return new URLSearchParams(useLocation().search)
 }
 
-const CustomAppBar = styled(AppBar)(({ theme }) => ({
-  backgroundColor: theme.palette.background.default
-}))
-
-const CustomToolbar = styled(Toolbar)({
-  display: 'flex',
-  justifyContent: 'space-between',
-  alignItems: 'center'
-})
-
-const CustomTitle = styled(Typography)({
-  fontWeight: 600,
-  color: '#000000'
-})
-
-const StyledButton = styled(Button)({
-  fontWeight: 600
-})
-
 const NavBar: React.FC<Props> = ({
   isAuthenticated,
   hasBlog,
@@ -67,6 +53,7 @@ const NavBar: React.FC<Props> = ({
 }) => {
   const navigate = useNavigate()
   const dispatch = useDispatch()
+  const theme = useTheme()
   const query = useQuery()
   const { visitingBlog } = useSelector((state: RootState) => state.global)
   const location = useLocation()
@@ -97,69 +84,47 @@ const NavBar: React.FC<Props> = ({
   }
   const open = Boolean(anchorEl)
   const id = open ? 'simple-popover' : undefined
+
+  console.log({ theme })
   return (
     <CustomAppBar position="sticky" elevation={2}>
       <CustomToolbar variant="dense">
-        <CustomTitle
-          variant="h6"
-          sx={{
-            cursor: 'pointer'
-          }}
+        <QblogLogoContainer
+          src={QblogLogo}
+          alt="Qblog Logo"
           onClick={() => {
             navigate(`/`)
           }}
-        >
-          Q-Blog
-        </CustomTitle>
+        />
         <Box
           sx={{
             display: 'flex',
             alignItems: 'center'
           }}
         >
+          {/* Add isAuthenticated && before username and wrap StyledButton in this condition*/}
           {!isAuthenticated && (
-            <StyledButton
-              color="primary"
-              startIcon={<ExitToAppIcon />}
-              onClick={authenticate}
-            >
+            <AuthenticateButton onClick={authenticate}>
+              <ExitToAppIcon />
               Authenticate
-            </StyledButton>
-          )}
-          {isAuthenticated && userName && (
-            <>
-              <StyledButton
-                color="primary"
-                startIcon={
-                  <BookmarkIcon
-                    sx={{
-                      color: 'red'
-                    }}
-                  />
-                }
-                onClick={() => navigate('/favorites')}
-              >
-                Favorites
-              </StyledButton>
-              <StyledButton
-                color="primary"
-                startIcon={<SubscriptionsIcon />}
-                onClick={() => navigate('/subscriptions')}
-              >
-                Subscriptions
-              </StyledButton>
-            </>
+            </AuthenticateButton>
           )}
           {isAuthenticated && userName && !hasBlog && (
-            <StyledButton
-              color="primary"
-              startIcon={<AddBoxIcon />}
+            <CreateBlogButton
               onClick={() => {
                 dispatch(togglePublishBlogModal(true))
               }}
             >
+              <img
+                src={NewWindowIcon}
+                style={{
+                  width: '18px',
+                  height: '18px',
+                  fill: '#FFFFFF'
+                }}
+              />
               Create Blog
-            </StyledButton>
+            </CreateBlogButton>
           )}
           {isAuthenticated && userName && hasBlog && (
             <>
@@ -184,10 +149,22 @@ const NavBar: React.FC<Props> = ({
               </StyledButton>
             </>
           )}
-          <Box onClick={handleClick}>
-            <CustomIcon component={SettingsIcon} />
-            {/* <SettingsIcon /> */}
-          </Box>
+          {isAuthenticated && userName && (
+            <AvatarContainer onClick={handleClick}>
+              <NavbarName>{userName}</NavbarName>
+              {!userAvatar ? (
+                <AccountCircle />
+              ) : (
+                <img
+                  src={userAvatar}
+                  alt="User Avatar"
+                  width="32"
+                  height="32"
+                />
+              )}
+              <ExpandMoreIcon id="expand-icon" sx={{ color: '#ACB6BF' }} />
+            </AvatarContainer>
+          )}
           <Popover
             id={id}
             open={open}
@@ -198,28 +175,36 @@ const NavBar: React.FC<Props> = ({
               horizontal: 'left'
             }}
           >
-            <Typography
-              sx={{ p: 2, cursor: 'pointer' }}
-              onClick={() => setIsOpenModal(true)}
+            <DropdownContainer onClick={() => navigate('/favorites')}>
+              <BookmarkIcon
+                sx={{
+                  color: '#50e3c2'
+                }}
+              />
+              <DropdownText>Favorites</DropdownText>
+            </DropdownContainer>
+            <DropdownContainer onClick={() => navigate('/subscriptions')}>
+              <SubscriptionsIcon
+                sx={{
+                  color: '#5f50e3'
+                }}
+              />
+              <DropdownText>Subscriptions</DropdownText>
+            </DropdownContainer>
+            <DropdownContainer
+              onClick={() => {
+                setIsOpenModal(true)
+                handleClose()
+              }}
             >
-              Blocked Names
-            </Typography>
+              <PersonOffIcon
+                sx={{
+                  color: '#e35050'
+                }}
+              />
+              <DropdownText>Blocked Names</DropdownText>
+            </DropdownContainer>
           </Popover>
-          {/* {isAuthenticated && userName && (
-          <Box sx={{
-            display: 'flex',
-            alignItems: 'center'
-          }}>
-            <Typography variant="subtitle1" style={{ marginRight: '1rem' }}>{userName}</Typography>
-            {!userAvatar ? (
-              <IconButton>
-                <AccountCircle />
-              </IconButton>
-            ) : (
-              <img src={userAvatar} alt="User Avatar" width="32" height="32" />
-            )}
-          </Box>
-        )} */}
           <BlockedNamesModal open={isOpenModal} onClose={onClose} />
         </Box>
       </CustomToolbar>
@@ -227,4 +212,4 @@ const NavBar: React.FC<Props> = ({
   )
 }
 
-export default NavBar;
+export default NavBar

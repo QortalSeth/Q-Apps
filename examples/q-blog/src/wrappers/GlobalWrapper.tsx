@@ -38,6 +38,9 @@ const uid = new ShortUniqueId()
 const GlobalWrapper: React.FC<Props> = ({ children }) => {
   const navigate = useNavigate()
   const dispatch = useDispatch()
+
+  const [userAvatar, setUserAvatar] = useState<string | null>(null)
+
   const { user } = useSelector((state: RootState) => state.auth)
   const { audios, currAudio } = useSelector((state: RootState) => state.global)
   const { getBlogPosts } = useFetchPosts()
@@ -51,7 +54,22 @@ const GlobalWrapper: React.FC<Props> = ({ children }) => {
     })
     getFavorites()
     getSubscriptions()
+    getAvatar()
   }, [user?.name])
+
+  const getAvatar = async () => {
+    try {
+      let url = await qortalRequest({
+        action: 'GET_QDN_RESOURCE_URL',
+        name: user?.name,
+        service: 'THUMBNAIL',
+        identifier: 'qortal_avatar'
+      })
+
+      console.log({ url })
+      setUserAvatar(url)
+    } catch (error) {}
+  }
 
   const getSubscriptions = async () => {
     try {
@@ -393,7 +411,7 @@ const GlobalWrapper: React.FC<Props> = ({ children }) => {
         isAuthenticated={!!user}
         hasBlog={!!currentBlog}
         userName={user?.name || ''}
-        userAvatar=""
+        userAvatar={userAvatar}
         blog={currentBlog}
         authenticate={askForAccountInformation}
       />

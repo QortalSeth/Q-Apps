@@ -19,7 +19,7 @@ const commonThemeOptions = {
     }
   },
   typography: {
-    fontFamily: ['Cambon Light', 'Raleway, sans-serif', 'Oxygen', 'Catamaran', 'Cairo'].join(','),
+    fontFamily: ['Cambon Light', 'Raleway, sans-serif', 'Oxygen', 'Catamaran', 'Cairo', 'Arial'].join(','),
     h1: {
       fontSize: '2rem',
       fontWeight: 600
@@ -63,7 +63,16 @@ const commonThemeOptions = {
   spacing: 8,
   shape: {
     borderRadius: 4
-  }
+  },
+  breakpoints: {
+    values: {
+      xs: 0,
+      sm: 600,
+      md: 900,
+      lg: 1200,
+      xl: 1536,
+    },
+  },
 }
 
 const lightTheme = createTheme({
@@ -76,7 +85,7 @@ const lightTheme = createTheme({
       light: '#f9f9fd'
     },
     secondary: {
-      main: '#008fff'
+      main: '#1EAAF1'
     },
     background: {
       default: '#fafafa',
@@ -96,14 +105,14 @@ const darkTheme = createTheme({
     primary: {
       main: '#2e3d60',
       dark: "#1a2744",
-      light: "#455781",
+      light: "#3f4b66",
     },
     secondary: {
       main: '#45adff'
     },
     
     background: {
-      default: '#303030'
+      default: '#bdbdbd'
     },
     text: {
       primary: '#ffffff',

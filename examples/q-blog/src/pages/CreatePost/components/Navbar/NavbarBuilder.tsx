@@ -15,7 +15,7 @@ import {
   OutlinedInput,
   List,
   ListItem,
-  Menu
+  useTheme
 } from '@mui/material'
 import { styled } from '@mui/system'
 import { useSelector } from 'react-redux'
@@ -32,6 +32,7 @@ interface INavbar {
 export const Navbar = ({ saveNav, removeNav, close }: INavbar) => {
   const { user } = useSelector((state: RootState) => state.auth)
   const { currentBlog } = useSelector((state: RootState) => state.global)
+  const theme = useTheme()
   const [navTitle, setNavTitle] = React.useState<string>('')
   const [blogPostOption, setBlogPostOption] = React.useState<any | null>(null)
   const [options, setOptions] = React.useState<any>([])
@@ -123,11 +124,23 @@ export const Navbar = ({ saveNav, removeNav, close }: INavbar) => {
                 setNavTitle(e.target.value)
               }
               inputProps={{ maxLength: 40 }}
-              sx={{ marginBottom: 2 }}
+              sx={{
+                marginBottom: 2,
+                backgroundColor: theme.palette.background.default,
+                border: `1px solid ${theme.palette.text.primary}`
+              }}
             />
           </Box>
           <Box>
-            <FormControl fullWidth sx={{ marginBottom: 2, width: '150px' }}>
+            <FormControl
+              fullWidth
+              sx={{
+                marginBottom: 2,
+                width: '150px',
+                backgroundColor: theme.palette.background.default,
+                border: `1px solid ${theme.palette.text.primary}`
+              }}
+            >
               <InputLabel id="Post">Select a Post</InputLabel>
               <Select
                 labelId="Post"

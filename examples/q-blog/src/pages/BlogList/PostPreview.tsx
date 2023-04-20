@@ -8,7 +8,10 @@ import {
   TitleText,
   AuthorText,
   StyledCardHeader,
-  StyledCardCol
+  StyledCardCol,
+  IconsBox,
+  BlockIconContainer,
+  BookmarkIconContainer
 } from './PostPreview-styles'
 import moment from 'moment'
 import {
@@ -44,6 +47,8 @@ const BlogPostPreview: React.FC<BlogPostPreviewProps> = ({
   blogPost
 }) => {
   const [avatarUrl, setAvatarUrl] = React.useState<string>('')
+  const [showIcons, setShowIcons] = React.useState<boolean>(false)
+
   const dispatch = useDispatch<AppDispatch>()
   const theme = useTheme()
   const favoritesLocal = useSelector(
@@ -130,11 +135,13 @@ const BlogPostPreview: React.FC<BlogPostPreviewProps> = ({
     } catch (error) {}
   }
 
-  console.log({ theme })
-
   return (
     <>
-      <StyledCard onClick={onClick}>
+      <StyledCard
+        onClick={onClick}
+        onMouseEnter={() => setShowIcons(true)}
+        onMouseLeave={() => setShowIcons(false)}
+      >
         {postImage && (
           <Box sx={{ padding: '2px' }}>
             <img
@@ -166,7 +173,13 @@ const BlogPostPreview: React.FC<BlogPostPreviewProps> = ({
               >
                 {title}
               </TitleText>
-              <AuthorText color={theme.palette.text.secondary}>
+              <AuthorText
+                color={
+                  theme.palette.mode === 'light'
+                    ? theme.palette.text.secondary
+                    : '#d6e8ff'
+                }
+              >
                 {author}
               </AuthorText>
             </StyledCardCol>
@@ -183,41 +196,55 @@ const BlogPostPreview: React.FC<BlogPostPreviewProps> = ({
           </StyledCardContent>
         </CardContentContainer>
       </StyledCard>
-      <Box
-        sx={{
-          position: 'absolute',
-          top: '10px',
-          right: '5px'
-        }}
+      <IconsBox
+        sx={{ opacity: showIcons ? 1 : 0 }}
+        onMouseEnter={() => setShowIcons(true)}
+        onMouseLeave={() => setShowIcons(false)}
       >
-        <Tooltip title="Block user content">
-          <Box>
-            <CustomIcon
-              component={BlockIcon}
+        {username && isFavorite && (
+          <Tooltip title="Remove from favorites" placement="top">
+            <BookmarkIconContainer
+              onMouseEnter={() => setShowIcons(true)}
+              onMouseLeave={() => setShowIcons(false)}
+            >
+              <BookmarkIcon
+                sx={{
+                  color: 'red'
+                }}
+                onClick={() => {
+                  dispatch(removeFavorites(blogPost.id))
+                }}
+              />
+            </BookmarkIconContainer>
+          </Tooltip>
+        )}
+        {username && !isFavorite && (
+          <Tooltip title="Save to favorites" placement="top">
+            <BookmarkIconContainer
+              onMouseEnter={() => setShowIcons(true)}
+              onMouseLeave={() => setShowIcons(false)}
+            >
+              <BookmarkBorderIcon
+                onClick={() => {
+                  dispatch(upsertFavorites([blogPost]))
+                }}
+              />
+            </BookmarkIconContainer>
+          </Tooltip>
+        )}
+        <Tooltip title="Block user content" placement="top">
+          <BlockIconContainer
+            onMouseEnter={() => setShowIcons(true)}
+            onMouseLeave={() => setShowIcons(false)}
+          >
+            <BlockIcon
               onClick={() => {
                 blockUserFunc(blogPost.user)
               }}
             />
-          </Box>
+          </BlockIconContainer>
         </Tooltip>
-        {username && isFavorite && (
-          <BookmarkIcon
-            sx={{
-              color: 'red'
-            }}
-            onClick={() => {
-              dispatch(removeFavorites(blogPost.id))
-            }}
-          />
-        )}
-        {username && !isFavorite && (
-          <BookmarkBorderIcon
-            onClick={() => {
-              dispatch(upsertFavorites([blogPost]))
-            }}
-          />
-        )}
-      </Box>
+      </IconsBox>
 
       {/* <Button
         onClick={() => {

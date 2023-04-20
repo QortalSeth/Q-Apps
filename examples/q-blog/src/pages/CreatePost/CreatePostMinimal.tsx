@@ -9,7 +9,7 @@ import AddPhotoAlternateIcon from '@mui/icons-material/AddPhotoAlternate'
 import ImageUploader from '../../components/common/ImageUploader'
 import AudiotrackIcon from '@mui/icons-material/Audiotrack'
 import AddCircleRoundedIcon from '@mui/icons-material/AddCircleRounded'
-import { Button, Box, Typography } from '@mui/material'
+import { Button, Box, useTheme } from '@mui/material'
 import { styled } from '@mui/system'
 import { Descendant } from 'slate'
 import EditIcon from '@mui/icons-material/Edit'
@@ -59,7 +59,7 @@ const BlogTitleInput = styled(TextField)(({ theme }) => ({
     background: 'transparent',
     '&::placeholder': {
       fontSize: '28px',
-      color: theme.palette.text.secondary
+      color: theme.palette.text.primary
     }
   },
   '& .MuiInputLabel-root': {
@@ -98,6 +98,7 @@ export const CreatePostMinimal = ({
 }: CreatePostMinimalProps) => {
   const { user } = useSelector((state: RootState) => state.auth)
   const { currentBlog } = useSelector((state: RootState) => state.global)
+  const theme = useTheme()
   const [editingSection, setEditingSection] = React.useState<any>(null)
   const [layouts, setLayouts] = React.useState<any>({
     rows: []
@@ -1109,8 +1110,26 @@ export const CreatePostMinimal = ({
               editorKey={editorKey}
             />
           </Box>
-          <Button onClick={addSection}>Add Text</Button>
-          <Button onClick={closeAddTextModal}>Close</Button>
+          <Button
+            sx={{
+              backgroundColor: theme.palette.primary.light,
+              color: theme.palette.text.primary,
+              fontFamily: 'Arial'
+            }}
+            onClick={addSection}
+          >
+            Add Text
+          </Button>
+          <Button
+            sx={{
+              backgroundColor: theme.palette.primary.light,
+              color: theme.palette.text.primary,
+              fontFamily: 'Arial'
+            }}
+            onClick={closeAddTextModal}
+          >
+            Close
+          </Button>
         </ReusableModal>
         <ReusableModal open={isOpenEditTextModal}>
           <Box

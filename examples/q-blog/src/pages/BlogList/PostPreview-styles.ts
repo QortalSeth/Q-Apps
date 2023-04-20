@@ -2,7 +2,7 @@ import { styled } from "@mui/system";
 import { Card, Box, Typography } from "@mui/material";
 
 export const StyledCard = styled(Card)(({ theme }) => ({ 
-  backgroundColor: theme.palette.primary.main,
+  backgroundColor: theme.palette.mode === "light" ? theme.palette.primary.main : theme.palette.primary.dark,
   maxWidth: "600px",
   width: "100%",
   margin: "10px 0px",
@@ -13,7 +13,7 @@ export const StyledCard = styled(Card)(({ theme }) => ({
 }));
 
 export const CardContentContainer = styled(Box)(({ theme }) => ({ 
-  backgroundColor: theme.palette.primary.dark,
+  backgroundColor: theme.palette.mode === "light" ? theme.palette.primary.dark : theme.palette.primary.light,
   margin: "5px 10px",
   borderRadius: "15px",
 }));
@@ -58,4 +58,41 @@ export const AuthorText = styled(Typography)({
   fontFamily: "Raleway, sans-serif",
   fontSize: "16px",
   lineHeight: "1.2",
+})
+
+export const IconsBox = styled(Box)({
+  display: 'flex',
+  gap: "3px",
+  position: 'absolute',
+  top: '12px',
+  right: '5px',
+  transition: 'all 0.3s ease-in-out',
+});
+
+export const BookmarkIconContainer = styled(Box)({
+  display: 'flex',
+  boxShadow: "rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;",
+  backgroundColor: '#fbfbfb',
+  color: "#50e3c2",
+  padding: '5px',
+  borderRadius: '3px',
+  transition: 'all 0.3s ease-in-out',
+  "&:hover": {
+    cursor: 'pointer',
+    transform: "scale(1.1)",
+  }
+})
+
+export const BlockIconContainer = styled(Box)({
+  display: 'flex',
+  boxShadow: "rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;",
+  backgroundColor: '#fbfbfb',
+  color: "#c25252",
+  padding: '5px',
+  borderRadius: '3px',
+  transition: 'all 0.3s ease-in-out',
+  "&:hover": {
+    cursor: 'pointer',
+    transform: "scale(1.1)",
+  }
 })
