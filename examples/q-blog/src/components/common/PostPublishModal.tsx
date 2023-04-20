@@ -92,13 +92,16 @@ const PostPublishModal: React.FC<PostModalProps> = ({
     if (post.title) {
       setTitle(post.title)
     }
-    if (post.description) {
-      setDescription(post.description)
-    }
+    // if (post.description) {
+    //   setDescription(post.description)
+    // }
   }, [post])
 
   React.useEffect(() => {
     if (mode === 'edit' && metadata) {
+      if (metadata.description) {
+        setDescription(metadata.description)
+      }
       console.log({ metadata })
       const findCategory = options.find(
         (option) => option.id === metadata?.category
@@ -139,7 +142,6 @@ const PostPublishModal: React.FC<PostModalProps> = ({
       formattedTags[`tag${i + 1}`] = tag
     })
 
-    console.log({ formattedTags })
     try {
       await onPublish({
         title,
@@ -157,6 +159,7 @@ const PostPublishModal: React.FC<PostModalProps> = ({
   const handleInputChange = (event: any) => {
     setInputValue(event.target.value)
   }
+  console.log({ post, metadata })
 
   const handleInputKeyDown = (event: any) => {
     if (event.key === 'Enter' && inputValue !== '') {

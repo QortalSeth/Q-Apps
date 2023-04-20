@@ -1,10 +1,13 @@
 import React from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import {
+  addPosts,
   addToHashMap,
   BlogPost,
   populateFavorites,
+  setCountNewPosts,
   upsertPosts,
+  upsertPostsBeginning,
   upsertSubscriptionPosts
 } from '../state/features/blogSlice'
 import {
@@ -61,6 +64,92 @@ export const useFetchPosts = () => {
 
     dispatch(addToHashMap(res))
   }
+
+  const checkNewMessages = React.useCallback(async () => {
+    try {
+      const url = `/arbitrary/resources/search?service=BLOG_POST&query=q-blog-&limit=20&includemetadata=true&reverse=true&excludeblocked=true`
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      const responseData = await response.json()
+      const latestPost = posts[0]
+      console.log({ responseData, latestPost, posts })
+      if (!latestPost) return
+      const findPost = responseData?.findIndex(
+        (item: any) => item?.identifier === latestPost?.id
+      )
+      if (findPost === -1) {
+        dispatch(setCountNewPosts(responseData.length))
+        return
+      }
+      const newArray = responseData.slice(0, findPost)
+      dispatch(setCountNewPosts(newArray.length))
+      return
+    } catch (error) {}
+  }, [posts])
+
+  const getNewPosts = React.useCallback(async () => {
+    try {
+      dispatch(setIsLoadingGlobal(true))
+      dispatch(setCountNewPosts(0))
+      const url = `/arbitrary/resources/search?service=BLOG_POST&query=q-blog-&limit=20&includemetadata=true&reverse=true&excludeblocked=true`
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      const responseData = await response.json()
+      const latestPost = posts[0]
+      if (!latestPost) return
+      const findPost = responseData?.findIndex(
+        (item: any) => item?.identifier === latestPost?.id
+      )
+      let fetchAll = responseData
+      let willFetchAll = true
+      if (findPost !== -1) {
+        willFetchAll = false
+        fetchAll = responseData.slice(0, findPost)
+      }
+
+      const structureData = fetchAll.map((post: any): BlogPost => {
+        return {
+          title: post?.metadata?.title,
+          category: post?.metadata?.category,
+          categoryName: post?.metadata?.categoryName,
+          tags: post?.metadata?.tags || [],
+          description: post?.metadata?.description,
+          createdAt: post?.created,
+          updated: post?.updated,
+          user: post.name,
+          postImage: '',
+          id: post.identifier
+        }
+      })
+      if (!willFetchAll) {
+        dispatch(upsertPostsBeginning(structureData))
+      }
+      if (willFetchAll) {
+        dispatch(addPosts(structureData))
+      }
+
+      for (const content of structureData) {
+        if (content.user && content.id) {
+          const res = checkAndUpdatePost(content)
+          console.log({ res })
+          if (res) {
+            getBlogPost(content.user, content.id, content)
+          }
+        }
+      }
+    } catch (error) {
+    } finally {
+      dispatch(setIsLoadingGlobal(false))
+    }
+  }, [posts, hashMapPosts])
 
   const getBlogPosts = React.useCallback(async () => {
     try {
@@ -218,6 +307,8 @@ export const useFetchPosts = () => {
     getBlogPostsSubscriptions,
     checkAndUpdatePost,
     getBlogPost,
-    hashMapPosts
+    hashMapPosts,
+    checkNewMessages,
+    getNewPosts
   }
 }

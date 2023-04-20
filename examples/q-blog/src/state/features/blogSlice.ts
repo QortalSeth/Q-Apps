@@ -14,6 +14,7 @@ interface GlobalState {
   favoritesLocal: any[] | null
   subscriptions: any[]
   subscriptionPosts: any[]
+  countNewPosts: number
 }
 const initialState: GlobalState = {
   posts: [],
@@ -22,7 +23,8 @@ const initialState: GlobalState = {
   favorites: [],
   favoritesLocal: null,
   subscriptions: [],
-  subscriptionPosts: []
+  subscriptionPosts: [],
+  countNewPosts: 0
 }
 
 export interface BlogPost {
@@ -112,6 +114,9 @@ export const blogSlice = createSlice({
     setBlogListPageNumber: (state, action) => {
       state.blogListPageNumber = action.payload
     },
+    setCountNewPosts: (state, action) => {
+      state.countNewPosts = action.payload
+    },
     addPosts: (state, action) => {
       state.posts = action.payload
     },
@@ -138,6 +143,9 @@ export const blogSlice = createSlice({
     removePost: (state, action) => {
       const idToDelete = action.payload
       state.posts = state.posts.filter((item) => item.id !== idToDelete)
+    },
+    addPostToBeginning: (state, action) => {
+      state.posts.unshift(action.payload)
     },
     updatePost: (state, action) => {
       const { id } = action.payload
@@ -172,6 +180,16 @@ export const blogSlice = createSlice({
           state.posts[index] = post
         } else {
           state.posts.push(post)
+        }
+      })
+    },
+    upsertPostsBeginning: (state, action) => {
+      action.payload.reverse().forEach((post: BlogPost) => {
+        const index = state.posts.findIndex((p) => p.id === post.id)
+        if (index !== -1) {
+          state.posts[index] = post
+        } else {
+          state.posts.unshift(post)
         }
       })
     },
@@ -265,7 +283,10 @@ export const {
   removeSubscription,
   addSubscription,
   upsertSubscriptionPosts,
-  blockUser
+  blockUser,
+  addPostToBeginning,
+  setCountNewPosts,
+  upsertPostsBeginning
 } = blogSlice.actions
 
 export default blogSlice.reducer

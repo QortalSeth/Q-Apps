@@ -263,9 +263,11 @@ export const BlogIndividualProfile = () => {
                   }}
                   onClick={() => {
                     const str = blogPost.id
-                    const arr = str.split('-post')
+                    const arr = str.split('-post-')
                     const str1 = arr[0]
-                    navigate(`/${blogPost.user}/${str1}/${blogPost.id}/edit`)
+                    const str2 = arr[1]
+                    const blogId = removePrefix(str1)
+                    navigate(`/${blogPost.user}/${blogId}/${str2}/edit`)
                   }}
                 />
               )}

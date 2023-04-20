@@ -57,7 +57,7 @@ export const usePublishVideo = () => {
     try {
       const id = uid()
 
-      const identifier = `q-blog-video-${id}`
+      const identifier = `qvideo_qblog_${id}`
 
       const resourceResponse = await qortalRequest({
         action: 'PUBLISH_QDN_RESOURCE',

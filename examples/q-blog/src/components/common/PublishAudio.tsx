@@ -57,7 +57,7 @@ export const usePublishAudio = () => {
     try {
       const id = uid()
 
-      const identifier = `q-blog-audio-${id}`
+      const identifier = `qaudio_qblog_${id}`
 
       const resourceResponse = await qortalRequest({
         action: 'PUBLISH_QDN_RESOURCE',

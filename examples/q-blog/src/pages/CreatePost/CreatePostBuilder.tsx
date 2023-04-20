@@ -30,6 +30,12 @@ import { UserNavbar } from '../../components/common/UserNavbar'
 import { setCurrentBlog } from '../../state/features/globalSlice'
 import AudioElement from '../../components/AudioElement'
 import { AudioPanel } from '../../components/common/AudioPanel'
+import {
+  addPostToBeginning,
+  addToHashMap,
+  updateInHashMap,
+  updatePost
+} from '../../state/features/blogSlice'
 const ResponsiveGridLayout = WidthProvider(Responsive)
 const initialMinHeight = 2 // Define an initial minimum height for grid items
 const uid = new ShortUniqueId()
@@ -424,6 +430,25 @@ export const CreatePostBuilder = ({
       }
 
       const resourceResponse = await qortalRequest(requestBody)
+
+      const findImage: any = postObject?.postContent?.find(
+        (data: any) => data?.type === 'image'
+      )
+      const postobj: any = {
+        ...postObject,
+        title: title,
+        description: params?.description || description,
+        category: params?.category || '',
+        tags: params?.tags || [],
+        id: identifier,
+        user: name,
+        postImage: findImage ? findImage?.content?.image : ''
+      }
+
+      const withoutImage = { ...postobj }
+      delete withoutImage.postImage
+      dispatch(addPostToBeginning(withoutImage))
+      dispatch(addToHashMap(postobj))
       dispatch(
         setNotification({
           msg: 'Blog post successfully published',
@@ -530,6 +555,19 @@ export const CreatePostBuilder = ({
       }
 
       const resourceResponse = await qortalRequest(requestBody)
+      const postobj = {
+        ...postObject,
+        title: title,
+        description: params?.description || description,
+        category: params?.category || '',
+        tags: params?.tags || [],
+        id: identifier,
+        user: name
+      }
+      const withoutImage = { ...postobj }
+      delete withoutImage.postImage
+      dispatch(updatePost(withoutImage))
+      dispatch(updateInHashMap(postobj))
       dispatch(
         setNotification({
           msg: 'Blog post successfully updated',

@@ -30,6 +30,12 @@ import DeleteIcon from '@mui/icons-material/Delete'
 
 import { AudioPanel } from '../../components/common/AudioPanel'
 import { EditButtons } from './CreatePostBuilder'
+import {
+  addPostToBeginning,
+  addToHashMap,
+  updateInHashMap,
+  updatePost
+} from '../../state/features/blogSlice'
 const ResponsiveGridLayout = WidthProvider(Responsive)
 const initialMinHeight = 2 // Define an initial minimum height for grid items
 const uid = new ShortUniqueId()
@@ -311,6 +317,24 @@ export const CreatePostMinimal = ({
       }
 
       const resourceResponse = await qortalRequest(requestBody)
+      const findImage: any = postObject?.postContent?.find(
+        (data: any) => data?.type === 'image'
+      )
+      const postobj: any = {
+        ...postObject,
+        title: title,
+        description: params?.description || description,
+        category: params?.category || '',
+        tags: params?.tags || [],
+        id: identifier,
+        user: name,
+        postImage: findImage ? findImage?.content?.image : ''
+      }
+
+      const withoutImage = { ...postobj }
+      delete withoutImage.postImage
+      dispatch(addPostToBeginning(withoutImage))
+      dispatch(addToHashMap(postobj))
       dispatch(
         setNotification({
           msg: 'Blog post successfully published',
@@ -416,6 +440,20 @@ export const CreatePostMinimal = ({
       }
 
       const resourceResponse = await qortalRequest(requestBody)
+
+      const postobj = {
+        ...postObject,
+        title: title,
+        description: params?.description || description,
+        category: params?.category || '',
+        tags: params?.tags || [],
+        user: name,
+        id: identifier
+      }
+      const withoutImage = { ...postobj }
+      delete withoutImage.postImage
+      dispatch(updatePost(withoutImage))
+      dispatch(updateInHashMap(postobj))
       dispatch(
         setNotification({
           msg: 'Blog post successfully updated',
