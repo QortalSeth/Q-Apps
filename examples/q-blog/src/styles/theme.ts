@@ -62,6 +62,23 @@ const commonThemeOptions = {
       lg: 1200,
       xl: 1536
     }
+  },
+  components: {
+    MuiButton: {
+      styleOverrides: {
+        root: {
+          backgroundColor: 'inherit',
+          transition: 'filter 0.3s ease-in-out',
+          '&:hover': {
+            filter: 'brightness(1.1)',
+          },
+        },
+      },
+      defaultProps: {
+        disableElevation: true,
+        disableRipple: true,
+      },
+    },
   }
 }
 
@@ -101,6 +118,13 @@ const lightTheme = createTheme({
           }
         }
       }
+    },
+    MuiIcon:{
+      defaultProps: {
+        style: {
+          color: '#000000'
+        }
+      }
     }
   },
 })
@@ -120,6 +144,7 @@ const darkTheme = createTheme({
     
     background: {
       default: '#313338',
+      paper: "#1e1e20"
     },
     text: {
       primary: '#ffffff',
@@ -138,6 +163,13 @@ const darkTheme = createTheme({
             boxShadow:
               ' 0px 3px 4px 0px hsla(0,0%,0%,0.14), 0px 3px 3px -2px hsla(0,0%,0%,0.12), 0px 1px 8px 0px hsla(0,0%,0%,0.2);'
           }
+        }
+      }
+    },
+    MuiIcon:{
+      defaultProps: {
+        style: {
+          color: '#ffffff'
         }
       }
     }

@@ -33,13 +33,23 @@ export const StyledToolbar = styled(Toolbar)(({ theme }) => ({
 }))
 
 export const StyledMenu = styled(Menu)(({ theme }) => ({
-  marginTop: theme.spacing(2)
+  marginTop: theme.spacing(2),
+  overflow: 'hidden',
+  padding: 0,
 }))
 
 export const StyledMenuItem = styled(MenuItem)(({ theme }) => ({
   width: '100%',
   whiteSpace: 'nowrap',
-  maxWidth: '250px',
+  maxWidth: '300px',
   overflow: 'hidden',
-  textOverflow: 'ellipsis'
+  textOverflow: 'ellipsis',
+  fontSize: "16px",
+  fontFamily: "Arial",
+  padding: "12px 10px",
+  transition: "all 0.3s ease-in-out",
+  "&:hover": {
+    cursor: "pointer",
+    filter: "brightness(1.1)"
+  }
 }))

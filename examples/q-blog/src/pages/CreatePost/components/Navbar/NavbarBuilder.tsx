@@ -128,7 +128,8 @@ export const Navbar = ({ saveNav, removeNav, close }: INavbar) => {
               inputProps={{ maxLength: 40 }}
               sx={{
                 marginBottom: 2,
-                backgroundColor: theme.palette.background.default,
+                backgroundColor: theme.palette.primary.light,
+                color: theme.palette.text.primary,
                 border: `1px solid ${theme.palette.text.primary}`
               }}
             />
@@ -139,11 +140,14 @@ export const Navbar = ({ saveNav, removeNav, close }: INavbar) => {
               sx={{
                 marginBottom: 2,
                 width: '150px',
-                backgroundColor: theme.palette.background.default,
+                backgroundColor: theme.palette.primary.light,
+                color: theme.palette.text.primary,
                 border: `1px solid ${theme.palette.text.primary}`
               }}
             >
-              <InputLabel id="Post">Select a Post</InputLabel>
+              <InputLabel sx={{ color: theme.palette.text.primary }} id="Post">
+                Select a Post
+              </InputLabel>
               <Select
                 labelId="Post"
                 input={<OutlinedInput label="Select a Post" />}
@@ -151,12 +155,18 @@ export const Navbar = ({ saveNav, removeNav, close }: INavbar) => {
                 onChange={handleOptionChange}
                 MenuProps={{
                   sx: {
-                    maxHeight: '300px' // Adjust this value to set the max height
+                    maxHeight: '300px', // Adjust this value to set the max height,
+                    backgroundColor: theme.palette.primary.light,
+                    border: `1px solid ${theme.palette.text.primary}`
                   }
                 }}
               >
                 {options.map((option: any) => (
-                  <MenuItem key={option.id} value={option.id}>
+                  <MenuItem
+                    sx={{ color: theme.palette.text.primary }}
+                    key={option.id}
+                    value={option.id}
+                  >
                     {option.name}
                   </MenuItem>
                 ))}
@@ -165,7 +175,16 @@ export const Navbar = ({ saveNav, removeNav, close }: INavbar) => {
           </Box>
         </Box>
         <Box>
-          <Button onClick={addToNav}>Add</Button>
+          <Button
+            sx={{
+              backgroundColor: theme.palette.primary.light,
+              color: theme.palette.text.primary,
+              border: `1px solid ${theme.palette.text.primary}`
+            }}
+            onClick={addToNav}
+          >
+            Add
+          </Button>
         </Box>
       </Box>
 
@@ -210,7 +229,7 @@ export const Navbar = ({ saveNav, removeNav, close }: INavbar) => {
       </Box>
       <Button
         sx={{
-          backgroundColor: theme.palette.primary.light,
+          backgroundColor: theme.palette.primary.dark,
           color: theme.palette.text.primary,
           fontFamily: 'Arial'
         }}
@@ -220,7 +239,7 @@ export const Navbar = ({ saveNav, removeNav, close }: INavbar) => {
       </Button>
       <Button
         sx={{
-          backgroundColor: theme.palette.primary.light,
+          backgroundColor: theme.palette.primary.dark,
           color: theme.palette.text.primary,
           fontFamily: 'Arial'
         }}
@@ -230,7 +249,7 @@ export const Navbar = ({ saveNav, removeNav, close }: INavbar) => {
       </Button>
       <Button
         sx={{
-          backgroundColor: theme.palette.primary.light,
+          backgroundColor: theme.palette.primary.dark,
           color: theme.palette.text.primary,
           fontFamily: 'Arial'
         }}

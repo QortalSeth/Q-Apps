@@ -35,7 +35,7 @@ interface Props {
   isAuthenticated: boolean
   hasBlog: boolean
   userName: string | null
-  userAvatar: string | null
+  userAvatar: string
   blog: any
   authenticate: () => void
   hasAttemptedToFetchBlogInitial: boolean

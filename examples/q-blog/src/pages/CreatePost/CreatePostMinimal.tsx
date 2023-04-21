@@ -36,6 +36,7 @@ import {
   updateInHashMap,
   updatePost
 } from '../../state/features/blogSlice'
+import { BuilderButton } from './CreatePost-styles'
 const ResponsiveGridLayout = WidthProvider(Responsive)
 const initialMinHeight = 2 // Define an initial minimum height for grid items
 const uid = new ShortUniqueId()
@@ -1148,26 +1149,8 @@ export const CreatePostMinimal = ({
               editorKey={editorKey}
             />
           </Box>
-          <Button
-            sx={{
-              backgroundColor: theme.palette.primary.light,
-              color: theme.palette.text.primary,
-              fontFamily: 'Arial'
-            }}
-            onClick={addSection}
-          >
-            Add Text
-          </Button>
-          <Button
-            sx={{
-              backgroundColor: theme.palette.primary.light,
-              color: theme.palette.text.primary,
-              fontFamily: 'Arial'
-            }}
-            onClick={closeAddTextModal}
-          >
-            Close
-          </Button>
+          <BuilderButton onClick={addSection}>Add Text</BuilderButton>
+          <BuilderButton onClick={closeAddTextModal}>Close</BuilderButton>
         </ReusableModal>
         <ReusableModal open={isOpenEditTextModal}>
           <Box
@@ -1183,10 +1166,10 @@ export const CreatePostMinimal = ({
               editorKey={editorKey}
             />
           </Box>
-          <Button onClick={() => editPostSection(value, editingSection)}>
+          <BuilderButton onClick={() => editPostSection(value, editingSection)}>
             Update Text
-          </Button>
-          <Button onClick={closeEditTextModal}>Close</Button>
+          </BuilderButton>
+          <BuilderButton onClick={closeEditTextModal}>Close</BuilderButton>
         </ReusableModal>
         {!blogContentForEdit && (
           <PostPublishModal
