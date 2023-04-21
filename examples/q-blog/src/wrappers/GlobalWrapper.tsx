@@ -109,7 +109,9 @@ const GlobalWrapper: React.FC<Props> = ({ children }) => {
 
   async function verifyIfBlogIdExtists(username: string, identifier: string) {
     let doesExist = true
-    const url2 = `/arbitrary/resources/search?service=BLOG&identifier=${identifier}&name=${username}&limit=1&includemetadata=true`
+    //TODO - SHOULD REMOVE NAME FILTER AND IDENTIFIER SHOULD BE EXACT
+    // const url2 = `/arbitrary/resources/search?service=BLOG&identifier=${identifier}&name=${username}&limit=1&includemetadata=true`
+    const url2 = `/arbitrary/resources?service=BLOG&identifier=${identifier}&limit=1&includemetadata=true`
     const responseBlogs = await fetch(url2, {
       method: 'GET',
       headers: {
@@ -133,7 +135,8 @@ const GlobalWrapper: React.FC<Props> = ({ children }) => {
     return doesExist
   }
   async function getBlog(name: string) {
-    const url = `/arbitrary/resources/search?service=BLOG&identifier=q-blog-&name=${name}&prefix=true&limit=20&includemetadata=true`
+    //TODO NAME SHOULD BE EXACT
+    const url = `/arbitrary/resources/search?service=BLOG&identifier=q-blog-&exactmatchnames=true&name=${name}&prefix=true&limit=20&includemetadata=true`
     const responseBlogs = await fetch(url, {
       method: 'GET',
       headers: {

@@ -260,7 +260,8 @@ export const useFetchPosts = () => {
           //     offset: 0,
           //     reverse: true
           // });
-          const url = `/arbitrary/resources/search?service=BLOG_POST&identifier=${item.id}&name=${item.user}&limit=20&includemetadata=true&reverse=true&excludeblocked=true`
+          //TODO - NAME SHOULD BE EXACT
+          const url = `/arbitrary/resources/search?service=BLOG_POST&identifier=${item.id}&exactmatchnames=true&name=${item.user}&limit=20&includemetadata=true&reverse=true&excludeblocked=true`
           const response = await fetch(url, {
             method: 'GET',
             headers: {

@@ -60,7 +60,8 @@ export const Navbar = ({ saveNav, removeNav, close }: INavbar) => {
     const blog = currentBlog?.blogId
 
     try {
-      const url = `/arbitrary/resources/search?service=BLOG_POST&query=${blog}-post-&limit=20&name=${name}&includemetadata=true&reverse=true&limit=0`
+      //TODO - NAME SHOULD BE EXACT
+      const url = `/arbitrary/resources/search?service=BLOG_POST&query=${blog}-post-&exactmatchnames=true&name=${name}&includemetadata=true&reverse=true&limit=0`
       const response = await fetch(url, {
         method: 'GET',
         headers: {
