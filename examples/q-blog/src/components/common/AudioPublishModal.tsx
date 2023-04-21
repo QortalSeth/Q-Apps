@@ -333,10 +333,10 @@ export const AudioModal: React.FC<VideoModalProps> = ({
               value={inputValue}
               onChange={handleInputChange}
               onKeyDown={handleInputKeyDown}
-              disabled={chips.length === 5}
+              disabled={chips.length === 3}
             />
 
-            <IconButton onClick={addChip} disabled={chips.length === 5}>
+            <IconButton onClick={addChip} disabled={chips.length === 3}>
               <AddIcon />
             </IconButton>
           </Box>

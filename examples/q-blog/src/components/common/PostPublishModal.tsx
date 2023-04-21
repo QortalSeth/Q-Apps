@@ -106,10 +106,13 @@ const PostPublishModal: React.FC<PostModalProps> = ({
       const findCategory = options.find(
         (option) => option.id === metadata?.category
       )
-      if (!findCategory) return
-      setSelectedOption(findCategory)
+      if (findCategory) {
+        setSelectedOption(findCategory)
+      }
+
       if (!metadata?.tags || !Array.isArray(metadata?.tags)) return
-      setChips(metadata.tags)
+      console.log({ metadata })
+      setChips(metadata.tags.slice(0, -2))
     }
   }, [mode, metadata, options])
 
@@ -173,7 +176,7 @@ const PostPublishModal: React.FC<PostModalProps> = ({
   }
 
   const addChip = () => {
-    if (chips.length < 5) {
+    if (chips.length < 3) {
       setChips([...chips, inputValue])
       setInputValue('')
     }
@@ -250,10 +253,10 @@ const PostPublishModal: React.FC<PostModalProps> = ({
               value={inputValue}
               onChange={handleInputChange}
               onKeyDown={handleInputKeyDown}
-              disabled={chips.length === 5}
+              disabled={chips.length === 3}
             />
 
-            <IconButton onClick={addChip} disabled={chips.length === 5}>
+            <IconButton onClick={addChip} disabled={chips.length === 3}>
               <AddIcon />
             </IconButton>
           </Box>

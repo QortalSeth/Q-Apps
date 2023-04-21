@@ -5,6 +5,8 @@
     padding: 1rem;
     line-height: 1.5;
     font-size: 18px;
+    max-height: 50vh;
+    overflow-y: auto;
   }
   
   .toolbar {

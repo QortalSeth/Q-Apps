@@ -294,7 +294,7 @@ export const CreatePostMinimal = ({
         description = description.slice(0, 180)
       }
 
-      let requestBody = {
+      let requestBody: any = {
         action: 'PUBLISH_QDN_RESOURCE',
         name: name,
         service: 'BLOG_POST',
@@ -306,27 +306,57 @@ export const CreatePostMinimal = ({
       }
 
       const formattedTags: { [key: string]: string } = {}
+      let tag4 = ''
+      let tag5 = ''
       if (params?.tags) {
-        params.tags.forEach((tag: string, i: number) => {
+        params.tags.slice(0, 3).forEach((tag: string, i: number) => {
           formattedTags[`tag${i + 1}`] = tag
         })
-
-        requestBody = {
-          ...requestBody,
-          ...formattedTags
-        }
       }
 
-      const resourceResponse = await qortalRequest(requestBody)
+      const findVideo: any = postObject?.postContent?.find(
+        (data: any) => data?.type === 'video'
+      )
+      const findAudio: any = postObject?.postContent?.find(
+        (data: any) => data?.type === 'audio'
+      )
       const findImage: any = postObject?.postContent?.find(
         (data: any) => data?.type === 'image'
       )
+
+      const tag5Array = ['t']
+      if (findVideo) tag5Array.push('v')
+      if (findAudio) tag5Array.push('a')
+      if (findImage) {
+        tag5Array.push('i')
+        const imageElement = document.querySelector(
+          `#${findImage.id} img`
+        ) as HTMLImageElement | null
+        if (imageElement) {
+          tag4 = `v1.${imageElement?.width}x${imageElement?.height}`
+        } else {
+          tag4 = 'v1.0x0'
+        }
+      }
+      if (!findImage) {
+        tag4 = 'v1.0x0'
+      }
+      tag5 = tag5Array.join(', ')
+      requestBody = {
+        ...requestBody,
+        ...formattedTags,
+        tag4: tag4,
+        tag5: tag5
+      }
+
+      const resourceResponse = await qortalRequest(requestBody)
+   
       const postobj: any = {
         ...postObject,
         title: title,
         description: params?.description || description,
         category: params?.category || '',
-        tags: params?.tags || [],
+        tags: [...(params?.tags || []), tag4, tag5],
         id: identifier,
         user: name,
         postImage: findImage ? findImage?.content?.image : ''
@@ -417,7 +447,7 @@ export const CreatePostMinimal = ({
         description = description.slice(0, 180)
       }
 
-      let requestBody = {
+      let requestBody: any = {
         action: 'PUBLISH_QDN_RESOURCE',
         name: name,
         service: 'BLOG_POST',
@@ -429,15 +459,47 @@ export const CreatePostMinimal = ({
       }
 
       const formattedTags: { [key: string]: string } = {}
+      let tag4 = ''
+      let tag5 = ''
       if (params?.tags) {
-        params.tags.forEach((tag: string, i: number) => {
+        params.tags.slice(0, 3).forEach((tag: string, i: number) => {
           formattedTags[`tag${i + 1}`] = tag
         })
+      }
 
-        requestBody = {
-          ...requestBody,
-          ...formattedTags
+      const findVideo: any = postObject?.postContent?.find(
+        (data: any) => data?.type === 'video'
+      )
+      const findAudio: any = postObject?.postContent?.find(
+        (data: any) => data?.type === 'audio'
+      )
+      const findImage: any = postObject?.postContent?.find(
+        (data: any) => data?.type === 'image'
+      )
+
+      const tag5Array = ['t']
+      if (findVideo) tag5Array.push('v')
+      if (findAudio) tag5Array.push('a')
+      if (findImage) {
+        tag5Array.push('i')
+        const imageElement = document.querySelector(
+          `#${findImage.id} img`
+        ) as HTMLImageElement | null
+        if (imageElement) {
+          tag4 = `v1.${imageElement?.width}x${imageElement?.height}`
+        } else {
+          tag4 = 'v1.0x0'
         }
+      }
+      if (!findImage) {
+        tag4 = 'v1.0x0'
+      }
+      tag5 = tag5Array.join(', ')
+      requestBody = {
+        ...requestBody,
+        ...formattedTags,
+        tag4: tag4,
+        tag5: tag5
       }
 
       const resourceResponse = await qortalRequest(requestBody)
@@ -447,7 +509,7 @@ export const CreatePostMinimal = ({
         title: title,
         description: params?.description || description,
         category: params?.category || '',
-        tags: params?.tags || [],
+        tags: [...(params?.tags || []), tag4, tag5],
         user: name,
         id: identifier
       }
@@ -927,7 +989,11 @@ export const CreatePostMinimal = ({
                   }
                   if (section.type === 'image') {
                     return (
-                      <div key={section.id} className="grid-item">
+                      <div
+                        id={section.id}
+                        key={section.id}
+                        className="grid-item"
+                      >
                         <DynamicHeightItemMinimal
                           layouts={layouts}
                           setLayouts={setLayouts}
