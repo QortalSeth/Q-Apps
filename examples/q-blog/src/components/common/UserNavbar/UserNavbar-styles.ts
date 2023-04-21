@@ -8,7 +8,7 @@ import {
 } from '@mui/material'
 
 export const CustomAppBar = styled(AppBar)(({ theme }) => ({
-  backgroundColor: theme.palette.mode === "light" ? theme.palette.background.default : "#999696",
+  backgroundColor: theme.palette.mode === "light" ? theme.palette.background.default : "#19191b",
   color: theme.palette.text.primary
 }))
 

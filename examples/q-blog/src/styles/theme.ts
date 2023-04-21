@@ -1,23 +1,6 @@
 import { createTheme } from '@mui/material/styles'
 
 const commonThemeOptions = {
-  components: {
-    MuiCard: {
-      styleOverrides: {
-        root: {
-          boxShadow:
-            'rgba(0, 0, 0, 0.1) 0px 1px 3px 0px, rgba(0, 0, 0, 0.06) 0px 1px 2px 0px;',
-          borderRadius: '8px',
-          transition: 'all 0.3s ease-in-out',
-          '&:hover': {
-            cursor: 'pointer',
-            boxShadow:
-              'rgba(0, 0, 0, 0.1) 0px 4px 6px -1px, rgba(0, 0, 0, 0.06) 0px 2px 4px -1px;'
-          }
-        }
-      }
-    }
-  },
   typography: {
     fontFamily: [
       'CambonLight',
@@ -102,7 +85,24 @@ const lightTheme = createTheme({
       primary: '#000000',
       secondary: '#525252'
     }
-  }
+  },
+  components: {
+    MuiCard: {
+      styleOverrides: {
+        root: {
+          boxShadow:
+            'rgba(0, 0, 0, 0.1) 0px 1px 3px 0px, rgba(0, 0, 0, 0.06) 0px 1px 2px 0px;',
+          borderRadius: '8px',
+          transition: 'all 0.3s ease-in-out',
+          '&:hover': {
+            cursor: 'pointer',
+            boxShadow:
+              'rgba(0, 0, 0, 0.1) 0px 4px 6px -1px, rgba(0, 0, 0, 0.06) 0px 2px 4px -1px;'
+          }
+        }
+      }
+    }
+  },
 })
 
 const darkTheme = createTheme({
@@ -119,13 +119,29 @@ const darkTheme = createTheme({
     },
     
     background: {
-      default: '#bdbdbd'
+      default: '#313338',
     },
     text: {
       primary: '#ffffff',
       secondary: '#b3b3b3'
     }
-  }
+  },
+  components: {
+    MuiCard: {
+      styleOverrides: {
+        root: {
+          boxShadow:  "none",
+          borderRadius: '8px',
+          transition: 'all 0.3s ease-in-out',
+          '&:hover': {
+            cursor: 'pointer',
+            boxShadow:
+              ' 0px 3px 4px 0px hsla(0,0%,0%,0.14), 0px 3px 3px -2px hsla(0,0%,0%,0.12), 0px 1px 8px 0px hsla(0,0%,0%,0.2);'
+          }
+        }
+      }
+    }
+  },
 })
 
 export { lightTheme, darkTheme }

@@ -120,13 +120,10 @@ const DownloadWrapper: React.FC<Props> = ({ children }) => {
         clearInterval(intervalId)
       }
     }, 3000) // 1 second interval
-    console.log('hello before')
     fetch(url)
       .then((response) => response.blob())
       .then((blob) => {
-        console.log('hello after')
         const url = URL.createObjectURL(blob)
-        console.log({ url })
         dispatch(
           updateDownloads({
             name,

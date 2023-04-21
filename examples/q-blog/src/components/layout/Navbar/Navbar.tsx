@@ -26,10 +26,11 @@ import {
   AuthenticateButton,
   NavbarName
 } from './Navbar-styles'
+import { AccountCircleSVG } from '../../../assets/svgs/AccountCircleSVG'
 import QblogLogo from '../../../assets/img/qBlogLogo.png'
-import NewWindowIcon from '../../../assets/icons/newWindow.svg'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import PersonOffIcon from '@mui/icons-material/PersonOff'
+import { NewWindowSVG } from '../../../assets/svgs/NewWindowSVG'
 interface Props {
   isAuthenticated: boolean
   hasBlog: boolean
@@ -87,7 +88,6 @@ const NavBar: React.FC<Props> = ({
   const open = Boolean(anchorEl)
   const id = open ? 'simple-popover' : undefined
 
-  console.log({ theme })
   return (
     <CustomAppBar position="sticky" elevation={2}>
       <CustomToolbar variant="dense">
@@ -111,23 +111,19 @@ const NavBar: React.FC<Props> = ({
               Authenticate
             </AuthenticateButton>
           )}
-          {isAuthenticated && userName && hasAttemptedToFetchBlogInitial && !hasBlog && (
-            <CreateBlogButton
-              onClick={() => {
-                dispatch(togglePublishBlogModal(true))
-              }}
-            >
-              <img
-                src={NewWindowIcon}
-                style={{
-                  width: '18px',
-                  height: '18px',
-                  fill: '#FFFFFF'
+          {isAuthenticated &&
+            userName &&
+            hasAttemptedToFetchBlogInitial &&
+            !hasBlog && (
+              <CreateBlogButton
+                onClick={() => {
+                  dispatch(togglePublishBlogModal(true))
                 }}
-              />
-              Create Blog
-            </CreateBlogButton>
-          )}
+              >
+                <NewWindowSVG color="#fff" width="18" height="18" />
+                Create Blog
+              </CreateBlogButton>
+            )}
           {isAuthenticated && userName && hasBlog && (
             <>
               <StyledButton
@@ -151,11 +147,16 @@ const NavBar: React.FC<Props> = ({
               </StyledButton>
             </>
           )}
+
           {isAuthenticated && userName && (
             <AvatarContainer onClick={handleClick}>
               <NavbarName>{userName}</NavbarName>
               {!userAvatar ? (
-                <AccountCircle />
+                <AccountCircleSVG
+                  color={theme.palette.text.primary}
+                  width="32"
+                  height="32"
+                />
               ) : (
                 <img
                   src={userAvatar}

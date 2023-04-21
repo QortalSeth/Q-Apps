@@ -24,6 +24,8 @@ import {
 import { useNavigate } from 'react-router-dom'
 import { Menu as MenuIcon } from '@mui/icons-material'
 import { removePrefix } from '../../../utils/blogIdformats'
+import { QblogLogoContainer } from '../../layout/Navbar/Navbar-styles'
+import QblogLogo from '../../../assets/img/qBlogLogo.png'
 
 interface Props {
   title: string
@@ -119,17 +121,13 @@ export const UserNavbar: React.FC<Props> = ({
             alignItems: 'center'
           }}
         >
-          <CustomTitle
-            variant="h6"
-            sx={{
-              cursor: 'pointer'
-            }}
+          <QblogLogoContainer
+            src={QblogLogo}
+            alt="Qblog Logo"
             onClick={() => {
               navigate(`/`)
             }}
-          >
-            Q-Blog
-          </CustomTitle>
+          />
         </Box>
       </CustomToolbar>
     </CustomAppBar>
