@@ -68,6 +68,8 @@ const GlobalWrapper: React.FC<Props> = ({ children }) => {
         identifier: 'qortal_avatar'
       })
 
+      if (url === 'Resource does not exist') return
+
       console.log({ url })
       setUserAvatar(url)
     } catch (error) {

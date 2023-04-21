@@ -283,6 +283,7 @@ export const BlogIndividualPost = () => {
       >
         {user === userState?.name && (
           <Button
+            sx={{ backgroundColor: theme.palette.secondary.main }}
             onClick={() => {
               navigate(`/${user}/${blog}/${postId}/edit`)
             }}

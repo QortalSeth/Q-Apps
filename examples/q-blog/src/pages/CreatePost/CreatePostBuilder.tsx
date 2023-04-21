@@ -38,6 +38,7 @@ import {
 } from '../../state/features/blogSlice'
 import { removePrefix } from '../../utils/blogIdformats'
 import { useNavigate } from 'react-router-dom'
+import { BuilderButton } from './CreatePost-styles'
 const ResponsiveGridLayout = WidthProvider(Responsive)
 const initialMinHeight = 2 // Define an initial minimum height for grid items
 const uid = new ShortUniqueId()
@@ -1198,26 +1199,8 @@ export const CreatePostBuilder = ({
               editorKey={editorKey}
             />
           </Box>
-          <Button
-            sx={{
-              backgroundColor: theme.palette.primary.light,
-              color: theme.palette.text.primary,
-              fontFamily: 'Arial'
-            }}
-            onClick={addSection}
-          >
-            Add Text
-          </Button>
-          <Button
-            sx={{
-              backgroundColor: theme.palette.primary.light,
-              color: theme.palette.text.primary,
-              fontFamily: 'Arial'
-            }}
-            onClick={closeAddTextModal}
-          >
-            Close
-          </Button>
+          <BuilderButton onClick={addSection}>Add Text</BuilderButton>
+          <BuilderButton onClick={closeAddTextModal}>Close</BuilderButton>
         </ReusableModal>
         <ReusableModal open={isOpenEditTextModal}>
           <Box
@@ -1233,10 +1216,10 @@ export const CreatePostBuilder = ({
               editorKey={editorKey}
             />
           </Box>
-          <Button onClick={() => editPostSection(value, editingSection)}>
+          <BuilderButton onClick={() => editPostSection(value, editingSection)}>
             Update Text
-          </Button>
-          <Button onClick={closeEditTextModal}>Close</Button>
+          </BuilderButton>
+          <BuilderButton onClick={closeEditTextModal}>Close</BuilderButton>
         </ReusableModal>
         <ReusableModal open={isEditNavOpen}>
           <Navbar
@@ -1275,6 +1258,7 @@ export const CreatePostBuilder = ({
 }
 
 export const EditButtons = ({ children }: any) => {
+  const theme = useTheme()
   return (
     <Box
       sx={{
@@ -1288,7 +1272,8 @@ export const EditButtons = ({ children }: any) => {
         background: 'white',
         padding: '5px',
         borderRadius: '5px',
-        alignItems: 'center'
+        alignItems: 'center',
+        backgroundColor: theme.palette.background.paper
       }}
     >
       {children}
