@@ -16,7 +16,6 @@ const LazyLoad: React.FC<Props> = ({ onLoadMore }) => {
 
   useEffect(() => {
     if (inView) {
-      console.log({ inView })
       setIsFetching(true)
       onLoadMore().finally(() => {
         setIsFetching(false)

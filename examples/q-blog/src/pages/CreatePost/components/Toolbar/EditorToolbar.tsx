@@ -2,7 +2,7 @@ import React from 'react'
 import TextFieldsIcon from '@mui/icons-material/TextFields'
 import Slider from '@mui/material/Slider'
 import { AudioPanel } from '../../../../components/common/AudioPanel'
-import { Button, Box, Typography, Toolbar, AppBar } from '@mui/material'
+import { Box, Toolbar, AppBar, useTheme } from '@mui/material'
 import { styled } from '@mui/system'
 import ImageUploader from '../../../../components/common/ImageUploader'
 import AddPhotoAlternateIcon from '@mui/icons-material/AddPhotoAlternate'
@@ -21,10 +21,7 @@ const CustomAppBar = styled(AppBar)(({ theme }) => ({
   backgroundColor:
     theme.palette.mode === 'light'
       ? theme.palette.background.default
-      : '#999696',
-  filter: 'brightness(1.1)'
-  // backgroundColor: '#FFFFFF',
-  // color: '#000000'
+      : '#19191b'
 }))
 
 interface IEditorToolbar {
@@ -50,6 +47,7 @@ export const EditorToolbar = ({
   addNav,
   switchType
 }: IEditorToolbar) => {
+  const theme = useTheme()
   return (
     <CustomAppBar position="sticky">
       <CustomToolbar variant="dense">
@@ -116,6 +114,7 @@ export const EditorToolbar = ({
                     min={0}
                     max={40}
                     sx={{
+                      color: theme.palette.text.primary,
                       width: '100px'
                     }}
                   />

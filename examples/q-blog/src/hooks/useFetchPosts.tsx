@@ -76,7 +76,6 @@ export const useFetchPosts = () => {
       })
       const responseData = await response.json()
       const latestPost = posts[0]
-      console.log({ responseData, latestPost, posts })
       if (!latestPost) return
       const findPost = responseData?.findIndex(
         (item: any) => item?.identifier === latestPost?.id
@@ -139,7 +138,6 @@ export const useFetchPosts = () => {
       for (const content of structureData) {
         if (content.user && content.id) {
           const res = checkAndUpdatePost(content)
-          console.log({ res })
           if (res) {
             getBlogPost(content.user, content.id, content)
           }
@@ -183,7 +181,6 @@ export const useFetchPosts = () => {
       for (const content of structureData) {
         if (content.user && content.id) {
           const res = checkAndUpdatePost(content)
-          console.log({ res })
           if (res) {
             getBlogPost(content.user, content.id, content)
           }

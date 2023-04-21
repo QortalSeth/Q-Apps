@@ -10,7 +10,7 @@ export const QblogLogoContainer = styled('img')({
 })
 
 export const CustomAppBar = styled(AppBar)(({ theme }) => ({
-  backgroundColor: theme.palette.mode === "light" ? theme.palette.background.default : "#999696",
+  backgroundColor: theme.palette.mode === "light" ? theme.palette.background.default : "#19191b",
   [theme.breakpoints.only('xs')]: {
     gap: '15px',
   },

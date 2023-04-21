@@ -108,7 +108,6 @@ const BlogPostPreview: React.FC<BlogPostPreviewProps> = ({
         identifier: 'qortal_avatar'
       })
 
-      console.log({ url })
       setAvatarUrl(url)
     } catch (error) {}
   }, [author])

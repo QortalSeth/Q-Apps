@@ -4,13 +4,12 @@ import {
   AccordionDetails,
   AccordionSummary,
   Box,
-  IconButton,
   LinearProgress,
   List,
   ListItem,
   ListItemIcon,
-  ListItemText,
-  Typography
+  Typography,
+  useTheme
 } from '@mui/material'
 import { Movie, ArrowDropDown } from '@mui/icons-material'
 import { SxProps } from '@mui/system'
@@ -29,6 +28,7 @@ type DownloadItem = {
 
 export const DownloadTaskManager: React.FC = () => {
   const { downloads } = useSelector((state: RootState) => state.global)
+  const theme = useTheme()
   const [visible, setVisible] = useState(false)
   const [hidden, setHidden] = useState(true)
   const navigate = useNavigate()
@@ -72,7 +72,8 @@ export const DownloadTaskManager: React.FC = () => {
     <Box sx={{ position: 'fixed', top: '50px', right: '5px', zIndex: 1000 }}>
       <Accordion
         sx={{
-          width: '200px'
+          width: '200px',
+          backgroundColor: theme.palette.primary.main
         }}
       >
         <AccordionSummary
@@ -82,6 +83,7 @@ export const DownloadTaskManager: React.FC = () => {
           sx={{
             minHeight: 'unset',
             height: '36px',
+            backgroundColor: theme.palette.primary.light,
             '&.MuiAccordionSummary-content': {
               padding: 0,
               margin: 0
@@ -94,6 +96,8 @@ export const DownloadTaskManager: React.FC = () => {
         >
           <Typography
             sx={{
+              fontFamily: 'Arial',
+              color: theme.palette.text.primary,
               fontSize: '14px'
             }}
           >
@@ -123,7 +127,8 @@ export const DownloadTaskManager: React.FC = () => {
                     flexDirection: 'column',
                     width: '100%',
                     justifyContent: 'center',
-                    background: 'whitesmoke',
+                    background: theme.palette.primary.main,
+                    color: theme.palette.text.primary,
                     cursor: 'pointer',
                     padding: '2px'
                   }}
@@ -145,7 +150,7 @@ export const DownloadTaskManager: React.FC = () => {
                     }}
                   >
                     <ListItemIcon>
-                      <Movie />
+                      <Movie sx={{ color: theme.palette.text.primary }} />
                     </ListItemIcon>
 
                     <Box sx={{ width: '100px', marginLeft: 1, marginRight: 1 }}>
@@ -153,19 +158,26 @@ export const DownloadTaskManager: React.FC = () => {
                         variant="determinate"
                         value={progress}
                         sx={{
-                          borderRadius: '5px'
+                          borderRadius: '5px',
+                          color: theme.palette.secondary.main
                         }}
                       />
                     </Box>
-                    <Typography variant="caption">{`${progress?.toFixed(
-                      0
-                    )}%`}</Typography>
+                    <Typography
+                      sx={{
+                        fontFamily: 'Arial',
+                        color: theme.palette.text.primary
+                      }}
+                      variant="caption"
+                    >{`${progress?.toFixed(0)}%`}</Typography>
                   </Box>
                   <Typography
                     sx={{
                       fontSize: '10px',
                       width: '100%',
-                      textAlign: 'end'
+                      textAlign: 'end',
+                      fontFamily: 'Arial',
+                      color: theme.palette.text.primary
                     }}
                   >
                     {downloadObj?.identifier}

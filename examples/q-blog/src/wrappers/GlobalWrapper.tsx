@@ -40,11 +40,10 @@ const GlobalWrapper: React.FC<Props> = ({ children }) => {
   const navigate = useNavigate()
   const dispatch = useDispatch()
 
-  const [userAvatar, setUserAvatar] = useState<string | null>(null)
+  const [userAvatar, setUserAvatar] = useState<string>('')
 
   const { user } = useSelector((state: RootState) => state.auth)
   const { audios, currAudio } = useSelector((state: RootState) => state.global)
-  const { getBlogPosts } = useFetchPosts()
   const [hasAttemptedToFetchBlogInitial, setHasAttemptedToFetchBlogInitial] =
     useState(false)
   const favoritesLocalRef = useRef<any>(null)
@@ -71,7 +70,9 @@ const GlobalWrapper: React.FC<Props> = ({ children }) => {
 
       console.log({ url })
       setUserAvatar(url)
-    } catch (error) {}
+    } catch (error) {
+      console.error(error)
+    }
   }
 
   const getSubscriptions = async () => {
@@ -405,14 +406,6 @@ const GlobalWrapper: React.FC<Props> = ({ children }) => {
         })
     } catch (error) {}
   }, [user?.name])
-
-  // React.useEffect(() => {
-  //   console.log('hello fav2', user)
-  //   // if (user?.name) {
-  //   console.log('hello fav')
-  //   getFavorites('string')
-  //   // }
-  // }, [user])
 
   return (
     <>

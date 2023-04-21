@@ -151,3 +151,7 @@ body::-webkit-scrollbar-track {
   .my-masonry-grid_column > li { /* change div to reference your elements you put in <Masonry> */
     margin-bottom: 30px;
   }
+
+  .my-svg path {
+    fill: red
+  }
