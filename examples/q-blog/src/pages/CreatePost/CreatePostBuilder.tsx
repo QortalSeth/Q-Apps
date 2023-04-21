@@ -36,6 +36,8 @@ import {
   updateInHashMap,
   updatePost
 } from '../../state/features/blogSlice'
+import { removePrefix } from '../../utils/blogIdformats'
+import { useNavigate } from 'react-router-dom'
 const ResponsiveGridLayout = WidthProvider(Responsive)
 const initialMinHeight = 2 // Define an initial minimum height for grid items
 const uid = new ShortUniqueId()
@@ -103,6 +105,8 @@ export const CreatePostBuilder = ({
   blogMetadataForEdit,
   switchType
 }: CreatePostBuilderProps) => {
+  const navigate = useNavigate()
+
   const theme = useTheme()
   const { user } = useSelector((state: RootState) => state.auth)
   const { currentBlog } = useSelector((state: RootState) => state.global)
@@ -485,6 +489,12 @@ export const CreatePostBuilder = ({
           alertType: 'success'
         })
       )
+      const str = identifier
+      const arr = str.split('-post-')
+      const str1 = arr[0]
+      const str2 = arr[1]
+      const blogId = removePrefix(str1)
+      navigate(`/${name}/${blogId}/${str2}`)
     } catch (error: any) {
       dispatch(
         setNotification({

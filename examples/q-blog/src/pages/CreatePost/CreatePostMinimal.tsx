@@ -36,6 +36,8 @@ import {
   updateInHashMap,
   updatePost
 } from '../../state/features/blogSlice'
+import { useNavigate } from 'react-router-dom'
+import { removePrefix } from '../../utils/blogIdformats'
 const ResponsiveGridLayout = WidthProvider(Responsive)
 const initialMinHeight = 2 // Define an initial minimum height for grid items
 const uid = new ShortUniqueId()
@@ -102,6 +104,7 @@ export const CreatePostMinimal = ({
   blogMetadataForEdit,
   switchType
 }: CreatePostMinimalProps) => {
+  const navigate = useNavigate()
   const { user } = useSelector((state: RootState) => state.auth)
   const { currentBlog } = useSelector((state: RootState) => state.global)
   const theme = useTheme()
@@ -350,7 +353,7 @@ export const CreatePostMinimal = ({
       }
 
       const resourceResponse = await qortalRequest(requestBody)
-   
+
       const postobj: any = {
         ...postObject,
         title: title,
@@ -372,6 +375,12 @@ export const CreatePostMinimal = ({
           alertType: 'success'
         })
       )
+      const str = identifier
+      const arr = str.split('-post-')
+      const str1 = arr[0]
+      const str2 = arr[1]
+      const blogId = removePrefix(str1)
+      navigate(`/${name}/${blogId}/${str2}`)
     } catch (error: any) {
       dispatch(
         setNotification({
