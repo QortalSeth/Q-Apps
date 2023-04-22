@@ -78,12 +78,26 @@ export const usePublishAudio = () => {
       )
       return resourceResponse
     } catch (error: any) {
-      dispatch(
-        setNotification({
-          msg: error?.message || 'Failed to publish post',
+      let notificationObj = null
+      if (typeof error === 'string') {
+        notificationObj = {
+          msg: error || 'Failed to publish audio',
           alertType: 'error'
-        })
-      )
+        }
+      } else if (typeof error?.error === 'string') {
+        notificationObj = {
+          msg: error?.error || 'Failed to publish audio',
+          alertType: 'error'
+        }
+      } else {
+        notificationObj = {
+          msg: error?.message || error?.message || 'Failed to publish audio',
+          alertType: 'error'
+        }
+      }
+      if (!notificationObj) return
+      dispatch(setNotification(notificationObj))
+     
     }
   }
   return {

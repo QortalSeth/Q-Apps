@@ -290,7 +290,26 @@ const GlobalWrapper: React.FC<Props> = ({ children }) => {
             alertType: 'success'
           })
         )
-      } catch (error) {
+      } catch (error: any) {
+        let notificationObj: any = null
+        if (typeof error === 'string') {
+          notificationObj = {
+            msg: error || 'Failed to publish blog',
+            alertType: 'error'
+          }
+        } else if (typeof error?.error === 'string') {
+          notificationObj = {
+            msg: error?.error || 'Failed to publish blog',
+            alertType: 'error'
+          }
+        } else {
+          notificationObj = {
+            msg: error?.message || 'Failed to publish blog',
+            alertType: 'error'
+          }
+        }
+        if (!notificationObj) return
+        dispatch(setNotification(notificationObj))
         if (error instanceof Error) {
           throw new Error(error.message)
         } else {
@@ -360,7 +379,26 @@ const GlobalWrapper: React.FC<Props> = ({ children }) => {
             alertType: 'success'
           })
         )
-      } catch (error) {
+      } catch (error: any) {
+        let notificationObj: any = null
+        if (typeof error === 'string') {
+          notificationObj = {
+            msg: error || 'Failed to update blog',
+            alertType: 'error'
+          }
+        } else if (typeof error?.error === 'string') {
+          notificationObj = {
+            msg: error?.error || 'Failed to update blog',
+            alertType: 'error'
+          }
+        } else {
+          notificationObj = {
+            msg: error?.message || 'Failed to update blog',
+            alertType: 'error'
+          }
+        }
+        if (!notificationObj) return
+        dispatch(setNotification(notificationObj))
         if (error instanceof Error) {
           throw new Error(error.message)
         } else {

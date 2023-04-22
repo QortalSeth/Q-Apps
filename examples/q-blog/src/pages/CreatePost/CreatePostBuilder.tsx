@@ -230,7 +230,26 @@ export const CreatePostBuilder = ({
             alertType: 'success'
           })
         )
-      } catch (error) {
+      } catch (error: any) {
+        let notificationObj: any = null
+        if (typeof error === 'string') {
+          notificationObj = {
+            msg: error || 'Failed to save blog',
+            alertType: 'error'
+          }
+        } else if (typeof error?.error === 'string') {
+          notificationObj = {
+            msg: error?.error || 'Failed to save blog',
+            alertType: 'error'
+          }
+        } else {
+          notificationObj = {
+            msg: error?.message || 'Failed to save blog',
+            alertType: 'error'
+          }
+        }
+        if (!notificationObj) return
+        dispatch(setNotification(notificationObj))
         if (error instanceof Error) {
           throw new Error(error.message)
         } else {
@@ -446,7 +465,7 @@ export const CreatePostBuilder = ({
       if (findImage) {
         tag5Array.push('i')
         const imageElement = document.querySelector(
-          `#${findImage.id} img`
+          `[id="${findImage.id}"] img`
         ) as HTMLImageElement | null
         if (imageElement) {
           tag4 = `v1.${imageElement?.width}x${imageElement?.height}`
@@ -495,12 +514,25 @@ export const CreatePostBuilder = ({
       const blogId = removePrefix(str1)
       navigate(`/${name}/${blogId}/${str2}`)
     } catch (error: any) {
-      dispatch(
-        setNotification({
+      let notificationObj = null
+      if (typeof error === 'string') {
+        notificationObj = {
+          msg: error || 'Failed to publish post',
+          alertType: 'error'
+        }
+      } else if (typeof error?.error === 'string') {
+        notificationObj = {
+          msg: error?.error || 'Failed to publish post',
+          alertType: 'error'
+        }
+      } else {
+        notificationObj = {
           msg: error?.message || 'Failed to publish post',
           alertType: 'error'
-        })
-      )
+        }
+      }
+      if (!notificationObj) return
+      dispatch(setNotification(notificationObj))
 
       throw new Error('Failed to publish post')
     }
@@ -606,7 +638,7 @@ export const CreatePostBuilder = ({
       if (findImage) {
         tag5Array.push('i')
         const imageElement = document.querySelector(
-          `#${findImage.id} img`
+          `[id="${findImage.id}"] img`
         ) as HTMLImageElement | null
         if (imageElement) {
           tag4 = `v1.${imageElement?.width}x${imageElement?.height}`
@@ -646,12 +678,25 @@ export const CreatePostBuilder = ({
         })
       )
     } catch (error: any) {
-      dispatch(
-        setNotification({
+      let notificationObj = null
+      if (typeof error === 'string') {
+        notificationObj = {
+          msg: error || 'Failed to update post',
+          alertType: 'error'
+        }
+      } else if (typeof error?.error === 'string') {
+        notificationObj = {
+          msg: error?.error || 'Failed to update post',
+          alertType: 'error'
+        }
+      } else {
+        notificationObj = {
           msg: error?.message || 'Failed to update post',
           alertType: 'error'
-        })
-      )
+        }
+      }
+      if (!notificationObj) return
+      dispatch(setNotification(notificationObj))
 
       throw new Error('Failed to update post')
     }

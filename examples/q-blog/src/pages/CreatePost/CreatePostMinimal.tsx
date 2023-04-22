@@ -334,7 +334,7 @@ export const CreatePostMinimal = ({
       if (findImage) {
         tag5Array.push('i')
         const imageElement = document.querySelector(
-          `#${findImage.id} img`
+          `[id="${findImage.id}"] img`
         ) as HTMLImageElement | null
         if (imageElement) {
           tag4 = `v1.${imageElement?.width}x${imageElement?.height}`
@@ -383,12 +383,25 @@ export const CreatePostMinimal = ({
       const blogId = removePrefix(str1)
       navigate(`/${name}/${blogId}/${str2}`)
     } catch (error: any) {
-      dispatch(
-        setNotification({
+      let notificationObj = null
+      if (typeof error === 'string') {
+        notificationObj = {
+          msg: error || 'Failed to publish post',
+          alertType: 'error'
+        }
+      } else if (typeof error?.error === 'string') {
+        notificationObj = {
+          msg: error?.error || 'Failed to publish post',
+          alertType: 'error'
+        }
+      } else {
+        notificationObj = {
           msg: error?.message || 'Failed to publish post',
           alertType: 'error'
-        })
-      )
+        }
+      }
+      if (!notificationObj) return
+      dispatch(setNotification(notificationObj))
 
       throw new Error('Failed to publish post')
     }
@@ -493,7 +506,7 @@ export const CreatePostMinimal = ({
       if (findImage) {
         tag5Array.push('i')
         const imageElement = document.querySelector(
-          `#${findImage.id} img`
+          `[id="${findImage.id}"] img`
         ) as HTMLImageElement | null
         if (imageElement) {
           tag4 = `v1.${imageElement?.width}x${imageElement?.height}`
@@ -534,12 +547,25 @@ export const CreatePostMinimal = ({
         })
       )
     } catch (error: any) {
-      dispatch(
-        setNotification({
-          msg: error?.message || 'Failed to update post',
+      let notificationObj = null
+      if (typeof error === 'string') {
+        notificationObj = {
+          msg: error || 'Failed to publish post',
           alertType: 'error'
-        })
-      )
+        }
+      } else if (typeof error?.error === 'string') {
+        notificationObj = {
+          msg: error?.error || 'Failed to publish post',
+          alertType: 'error'
+        }
+      } else {
+        notificationObj = {
+          msg: error?.message || 'Failed to publish post',
+          alertType: 'error'
+        }
+      }
+      if (!notificationObj) return
+      dispatch(setNotification(notificationObj))
 
       throw new Error('Failed to update post')
     }
