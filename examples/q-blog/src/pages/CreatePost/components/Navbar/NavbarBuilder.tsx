@@ -156,9 +156,7 @@ export const Navbar = ({ saveNav, removeNav, close }: INavbar) => {
                 onChange={handleOptionChange}
                 MenuProps={{
                   sx: {
-                    maxHeight: '300px', // Adjust this value to set the max height,
-                    backgroundColor: theme.palette.primary.light,
-                    border: `1px solid ${theme.palette.text.primary}`
+                    maxHeight: '300px' // Adjust this value to set the max height,
                   }
                 }}
               >
