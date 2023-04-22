@@ -208,7 +208,9 @@ const NavBar: React.FC<Props> = ({
               <DropdownText>Blocked Names</DropdownText>
             </DropdownContainer>
           </Popover>
-          <BlockedNamesModal open={isOpenModal} onClose={onClose} />
+          {isOpenModal && (
+            <BlockedNamesModal open={isOpenModal} onClose={onClose} />
+          )}
         </Box>
       </CustomToolbar>
     </CustomAppBar>
