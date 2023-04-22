@@ -66,20 +66,20 @@ async function addAudioCoverImage(
       .split('')
       .map((char) => char.charCodeAt(0))
   )
-  console.log({ audioData })
+
   const decoder: TextDecoder = new TextDecoder('utf-8')
   const decodedAudioData: string = decoder.decode(audioData)
-  console.log({ decodedAudioData })
+
   // Create a Blob object from the decoded audio data
   const blob: Blob = new Blob([decodedAudioData], { type: 'audio/mpeg' })
-  console.log({ blob })
+
   // Create a new file name for the audio with cover image
   const fileName: string = 'audio-with-cover.mp3'
 
   // Create a new FormData object to hold the file and metadata
   const formData: FormData = new FormData()
   formData.append('file', blob, fileName)
-  console.log({ formData })
+
   // Create a new image object from the base64 data
   const image: HTMLImageElement = new Image()
   image.src = `data:image/png;base64,${coverImageBase64}`
@@ -114,7 +114,7 @@ async function addAudioCoverImage(
 
   // Create a new URL object for the file
   const url: string = URL.createObjectURL(blob)
-  console.log({ url })
+
   // Create a download link for the file
   const link: HTMLAnchorElement = document.createElement('a')
   link.href = url
@@ -201,11 +201,9 @@ export const AudioModal: React.FC<VideoModalProps> = ({
 
     const formattedTags: { [key: string]: string } = {}
     chips.forEach((tag, i) => {
-      console.log({ tag })
       formattedTags[`tag${i + 1}`] = tag
     })
 
-    console.log({ formattedTags })
     try {
       const base64 = await toBase64(file)
       if (typeof base64 !== 'string') return

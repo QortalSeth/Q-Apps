@@ -217,7 +217,6 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
     const handleLeavePictureInPicture = async (event: any) => {
       const target = event?.target
       if (target) {
-        console.log({ target })
         target.pause()
         if (setPlaying) {
           setPlaying(false)
@@ -289,7 +288,6 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
       videoElement.style.height = 'auto'
       videoElement.style.width = '300px'
 
-      console.log({ videoElement })
       document.body.appendChild(videoWrapper)
     }
 

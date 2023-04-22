@@ -57,10 +57,9 @@ export const CreatePost = ({ mode }: CreatePostProps) => {
           'Content-Type': 'application/json'
         }
       })
-      console.log({ response })
+
       const responseData = await response.json()
       if (checkStructure(responseData)) {
-        console.log({ responseData })
         // setNewPostContent(responseData.postContent)
         // setTitle(responseData?.title || '')
         // setBlogInfo(responseData)
@@ -83,7 +82,6 @@ export const CreatePost = ({ mode }: CreatePostProps) => {
 
         const dataMetadata = await responseBlogs.json()
         if (dataMetadata && dataMetadata.length > 0) {
-          console.log({ dataMetadata })
           setBlogMetadataForEdit(dataMetadata[0])
         }
       }
@@ -98,7 +96,7 @@ export const CreatePost = ({ mode }: CreatePostProps) => {
     }
   }, [mode])
 
-  console.log(isOpen)
+  
   return (
     <>
       {/* {toggleEditorType === 'minimal' && (

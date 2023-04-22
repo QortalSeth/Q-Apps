@@ -23,7 +23,7 @@ const LazyLoad: React.FC<Props> = ({ onLoadMore }) => {
       })
     }
   }, [inView])
-  console.log('lazyLoad')
+
   return (
     <div
       ref={ref}

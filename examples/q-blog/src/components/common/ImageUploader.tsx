@@ -20,36 +20,34 @@ interface ImageUploaderProps {
 
 const ImageUploader: React.FC<ImageUploaderProps> = ({ children, onPick }) => {
   const onDrop = useCallback(async (acceptedFiles: File[]) => {
-    console.log({acceptedFiles})
+    
     if (acceptedFiles.length > 1) {
-      return;
+      return
     }
-    let compressedFile: File | undefined;
+    let compressedFile: File | undefined
 
     try {
-      const image = acceptedFiles[0];
+      const image = acceptedFiles[0]
       await new Promise<void>((resolve) => {
         new Compressor(image, {
           quality: 0.6,
           maxWidth: 1200,
           success(result) {
             const file = new File([result], 'name', {
-              type: image.type,
-            });
-            compressedFile = file;
-            resolve();
+              type: image.type
+            })
+            compressedFile = file
+            resolve()
           },
-          error(err) {
-            console.log(err.message);
-          },
-        });
-      });
-      if (!compressedFile) return;
-      const base64Img = await toBase64(compressedFile);
-      console.log({base64Img})
-      onPick(base64Img as string);
+          error(err) {}
+        })
+      })
+      if (!compressedFile) return
+      const base64Img = await toBase64(compressedFile)
+
+      onPick(base64Img as string)
     } catch (error) {
-      console.error(error);
+      console.error(error)
     }
   }, [onPick]);
 

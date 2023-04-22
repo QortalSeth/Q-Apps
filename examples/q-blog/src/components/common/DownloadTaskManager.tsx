@@ -118,7 +118,7 @@ export const DownloadTaskManager: React.FC = () => {
             {Object.keys(downloads).map((download: any) => {
               const downloadObj = downloads[download]
               const progress = downloads[download]?.status?.percentLoaded || 0
-              console.log({ downloadObj })
+
               return (
                 <ListItem
                   key={downloadObj?.identifier}

@@ -96,7 +96,7 @@ export const BlogIndividualProfile = () => {
       for (const content of structureData) {
         if (content.user && content.id) {
           const res = checkAndUpdatePost(content)
-          console.log({ res })
+
           if (res) {
             getBlogPost(content.user, content.id, content)
           }
@@ -132,7 +132,6 @@ export const BlogIndividualProfile = () => {
   const getPosts = React.useCallback(async () => {
     await getBlogPosts()
   }, [getBlogPosts])
-  console.log({ currentBlog })
 
   const subscribe = async () => {
     try {
@@ -151,9 +150,7 @@ export const BlogIndividualProfile = () => {
       if (response === true) {
         dispatch(addSubscription(username))
       }
-    } catch (error) {
-      console.log({ error })
-    }
+    } catch (error) {}
   }
   const unsubscribe = async () => {
     try {
@@ -169,9 +166,7 @@ export const BlogIndividualProfile = () => {
       if (response === true) {
         dispatch(removeSubscription(username))
       }
-    } catch (error) {
-      console.log({ error })
-    }
+    } catch (error) {}
   }
   if (!userBlog) return null
   return (

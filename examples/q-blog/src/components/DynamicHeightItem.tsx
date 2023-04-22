@@ -57,23 +57,13 @@ const DynamicHeightItem: React.FC<DynamicHeightItemProps> = ({
     //   newBreakpoint = getBreakpoint(widthWin)
     // }
 
-    console.log({ newBreakpoint })
     setLayouts((prev: any) => {
-      console.log({ prev })
       const newLayouts: any = { ...prev }
       newLayouts[newBreakpoint] = newLayouts[newBreakpoint]?.map(
         (item: Layout) => {
           if (item.i === i) {
             let constantNum = 25
 
-            console.log({
-              item,
-              height,
-              minHeight: Math.ceil(height / (rows * constantNum))
-            })
-            // if (type === 'image') {
-            //   constantNum = 39
-            // }
             return {
               ...item,
               h: Math.ceil(height / (rows * constantNum)) // Adjust this value based on your rowHeight and the number of rows the element spans
@@ -86,7 +76,7 @@ const DynamicHeightItem: React.FC<DynamicHeightItemProps> = ({
     })
   }, [height, breakpoint, count, setLayouts])
 
-  console.log({ height, breakpoint, layouts })
+  
 
   return (
     <div ref={ref} style={{ width: '100%', height: 'auto' }}>

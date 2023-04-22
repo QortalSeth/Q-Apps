@@ -70,7 +70,6 @@ const GlobalWrapper: React.FC<Props> = ({ children }) => {
 
       if (url === 'Resource does not exist') return
 
-      console.log({ url })
       setUserAvatar(url)
     } catch (error) {
       console.error(error)
@@ -85,11 +84,9 @@ const GlobalWrapper: React.FC<Props> = ({ children }) => {
         action: 'GET_LIST_ITEMS',
         list_name: listName
       })
-      console.log({ response })
+
       dispatch(addSubscriptions(response))
-    } catch (error) {
-      console.log({ error })
-    }
+    } catch (error) {}
   }
 
   const {
@@ -163,7 +160,7 @@ const GlobalWrapper: React.FC<Props> = ({ children }) => {
       }
     })
     const responseData = await response.json()
-    console.log({ responseData })
+
     dispatch(
       setCurrentBlog({
         createdAt: responseData?.createdAt || '',
@@ -249,7 +246,6 @@ const GlobalWrapper: React.FC<Props> = ({ children }) => {
 
       const formattedTags: { [key: string]: string } = {}
       tags.forEach((tag: string, i: number) => {
-        console.log({ tag })
         formattedTags[`tag${i + 1}`] = tag
       })
 
@@ -322,7 +318,6 @@ const GlobalWrapper: React.FC<Props> = ({ children }) => {
       const name = user.name
       const formattedTags: { [key: string]: string } = {}
       tags.forEach((tag: string, i: number) => {
-        console.log({ tag })
         formattedTags[`tag${i + 1}`] = tag
       })
 
@@ -365,7 +360,6 @@ const GlobalWrapper: React.FC<Props> = ({ children }) => {
             alertType: 'success'
           })
         )
-        console.log({ resourceResponse })
       } catch (error) {
         if (error instanceof Error) {
           throw new Error(error.message)
@@ -391,7 +385,7 @@ const GlobalWrapper: React.FC<Props> = ({ children }) => {
   const getFavorites = useCallback(async () => {
     try {
       const allItems: any[] = []
-      console.log('favoritesLocalRef', favoritesLocalRef.current)
+
       if (!favoritesLocalRef?.current) {
         return
       }
@@ -399,7 +393,7 @@ const GlobalWrapper: React.FC<Props> = ({ children }) => {
       favoritesLocalRef?.current
         .iterate(function (value: any, key: string) {
           // Handle each key-value pair here
-          console.log({ key, value })
+
           allItems.push({ id: key, ...(value || {}) })
         })
         .then(function () {
@@ -407,7 +401,6 @@ const GlobalWrapper: React.FC<Props> = ({ children }) => {
         })
         .catch(function (error: any) {
           // Handle any errors here
-          console.log(error)
         })
     } catch (error) {}
   }, [user?.name])

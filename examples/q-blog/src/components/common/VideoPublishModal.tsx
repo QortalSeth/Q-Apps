@@ -119,11 +119,10 @@ const VideoModal: React.FC<VideoModalProps> = ({
 
     const formattedTags: { [key: string]: string } = {}
     chips.forEach((tag, i) => {
-      console.log({ tag })
       formattedTags[`tag${i + 1}`] = tag
     })
 
-    console.log({ formattedTags })
+    
     try {
       const base64 = await toBase64(file)
       if (typeof base64 !== 'string') return

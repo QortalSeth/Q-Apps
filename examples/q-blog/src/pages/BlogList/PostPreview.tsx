@@ -85,7 +85,6 @@ const BlogPostPreview: React.FC<BlogPostPreviewProps> = ({
   }
 
   function extractTextFromSlate(nodes: any) {
-    console.log({ nodes })
     if (!Array.isArray(nodes)) return ''
     let text = ''
 
@@ -135,9 +134,7 @@ const BlogPostPreview: React.FC<BlogPostPreviewProps> = ({
         if (response === true) {
           dispatch(removeSubscription(user))
         }
-      } catch (error) {
-        console.log({ error })
-      }
+      } catch (error) {}
     }
 
     try {

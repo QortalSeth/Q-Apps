@@ -194,7 +194,6 @@ export const CreatePostBuilder = ({
       const title = currentBlog?.title || ''
       const description = currentBlog?.description || ''
       tags.forEach((tag: string, i: number) => {
-        console.log({ tag })
         formattedTags[`tag${i + 1}`] = tag
       })
 
@@ -231,7 +230,6 @@ export const CreatePostBuilder = ({
             alertType: 'success'
           })
         )
-        console.log({ resourceResponse })
       } catch (error) {
         if (error instanceof Error) {
           throw new Error(error.message)

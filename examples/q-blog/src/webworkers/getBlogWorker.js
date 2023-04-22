@@ -64,7 +64,7 @@ self.onmessage = async (event) => {
 
   const res = await getBlogPost()
   self.postMessage(res)
-  // console.log({event})
+  // 
   //   const { data } = event;
   //   // Perform your computation using the data
   //   const result = data.map((x) => x * 2);

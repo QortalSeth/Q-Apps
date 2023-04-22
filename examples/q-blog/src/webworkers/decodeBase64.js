@@ -1,5 +1,5 @@
 self.addEventListener('message', async (event) => {
-  // console.log('hello worker', event)
+  // 
 
   // const qortalRequest = event.data.qortalRequest
   // const name = event.data.name
@@ -29,11 +29,11 @@ self.addEventListener('message', async (event) => {
   // fetch(url2)
   //   .then(response => response.blob())
   //   .then(blob => {
-  //     console.log({ blob });
+  //     
 
   //     // Create a new Blob with the 'video/mp4' MIME type
   //     const mp4Blob = new Blob([blob], { type: 'video/mp4' });
-  //     console.log({ mp4Blob });
+  //     
 
   //     // Generate an object URL from the new Blob
   //     const url = URL.createObjectURL(mp4Blob);
@@ -43,9 +43,9 @@ self.addEventListener('message', async (event) => {
   // const response = await fetch(url2, {
   //   method: 'GET'
   // })
-  // console.log('final')
+  // 
   // const responseData = await response.json()
-  // console.log(responseData)
+  // 
   // const base64Data = responseData
   // const decodedData = atob(base64Data);
   // const byteNumbers = new Array(decodedData.length);

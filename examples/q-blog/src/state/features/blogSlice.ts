@@ -235,7 +235,6 @@ export const blogSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder.addCase(removeFavorites.fulfilled, (state, action) => {
-      console.log({ action })
       const idToDelete = action.payload
       if (!idToDelete) return state
       state.favorites = state.favorites.filter((item) => item.id !== idToDelete)

@@ -176,7 +176,6 @@ const BlogEditor: React.FC<MyComponentProps> = ({
       }
     } catch (error) {}
 
-    console.log({ isActive })
     return (
       <button
         className={`toolbar-button ${isActive ? 'active' : ''}`}

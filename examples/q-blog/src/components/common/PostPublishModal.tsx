@@ -102,7 +102,7 @@ const PostPublishModal: React.FC<PostModalProps> = ({
       if (metadata.description) {
         setDescription(metadata.description)
       }
-      console.log({ metadata })
+
       const findCategory = options.find(
         (option) => option.id === metadata?.category
       )
@@ -111,7 +111,7 @@ const PostPublishModal: React.FC<PostModalProps> = ({
       }
 
       if (!metadata?.tags || !Array.isArray(metadata?.tags)) return
-      console.log({ metadata })
+
       setChips(metadata.tags.slice(0, -2))
     }
   }, [mode, metadata, options])
@@ -141,7 +141,6 @@ const PostPublishModal: React.FC<PostModalProps> = ({
   const handleSubmit = async () => {
     const formattedTags: { [key: string]: string } = {}
     chips.forEach((tag, i) => {
-      console.log({ tag })
       formattedTags[`tag${i + 1}`] = tag
     })
 
@@ -162,7 +161,7 @@ const PostPublishModal: React.FC<PostModalProps> = ({
   const handleInputChange = (event: any) => {
     setInputValue(event.target.value)
   }
-  console.log({ post, metadata })
+  
 
   const handleInputKeyDown = (event: any) => {
     if (event.key === 'Enter' && inputValue !== '') {

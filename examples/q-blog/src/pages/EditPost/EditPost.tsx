@@ -77,13 +77,11 @@ export const EditPost = () => {
   }, [])
   const editPostSection = React.useCallback(
     (content: any, section: any) => {
-      console.log({ content, section })
       const findSectionIndex = newPostContent.findIndex(
         (s) => s.id === section.id
       )
-      console.log({ findSectionIndex, newPostContent })
+
       if (findSectionIndex !== -1) {
-        console.log('hello entered')
         const copyNewPostContent = [...newPostContent]
         copyNewPostContent[findSectionIndex] = {
           ...section,
@@ -139,7 +137,7 @@ export const EditPost = () => {
       },
       id: uid()
     }
-    console.log({ section })
+
     setNewPostContent((prev) => [...prev, section])
   }
 
@@ -193,7 +191,6 @@ export const EditPost = () => {
         metaData: 'description=destriptontest&category=catTest',
         identifier: postId
       })
-      console.log({ resourceResponse })
     } catch (error) {
       console.error(error)
     }
@@ -213,7 +210,7 @@ export const EditPost = () => {
           'Content-Type': 'application/json'
         }
       })
-      console.log({ response })
+
       const responseData = await response.json()
       if (checkStructure(responseData)) {
         setNewPostContent(responseData.postContent)
@@ -230,7 +227,6 @@ export const EditPost = () => {
   }, [])
 
   const editSection = (section: any) => {
-    console.log({ section })
     setEditingSection(section)
     setValue(section.content)
   }

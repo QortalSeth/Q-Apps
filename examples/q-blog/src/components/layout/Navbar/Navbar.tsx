@@ -163,6 +163,9 @@ const NavBar: React.FC<Props> = ({
                   alt="User Avatar"
                   width="32"
                   height="32"
+                  style={{
+                    borderRadius: '50%'
+                  }}
                 />
               )}
               <ExpandMoreIcon id="expand-icon" sx={{ color: '#ACB6BF' }} />

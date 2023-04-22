@@ -75,7 +75,7 @@ export const Navbar = ({ saveNav, removeNav, close }: INavbar) => {
           name: option?.metadata.title
         }
       })
-      console.log({ responseData })
+
       setOptions(formatOptions)
     } catch (error) {}
   }, [])

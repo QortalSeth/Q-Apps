@@ -167,7 +167,7 @@ export const CreatePostMinimal = ({
       onChangePadding(blogContentForEdit?.layoutGeneralSettings?.padding || 5)
     }
   }, [blogContentForEdit, postIdForEdit, blogMetadataForEdit])
-  console.log({ blogContentForEdit })
+  
 
   function objectToBase64(obj: any) {
     // Step 1: Convert the object to a JSON string
@@ -756,14 +756,13 @@ export const CreatePostMinimal = ({
     setEditingSection(section)
     setValue(section.content)
   }
-  console.log({ editingSection })
+
   const editPostSection = React.useCallback(
     (content: any, section: any) => {
-      console.log({ content, section })
       const findSectionIndex = newPostContent.findIndex(
         (s) => s.id === section.id
       )
-      console.log({ findSectionIndex })
+
       if (findSectionIndex !== -1) {
         const copyNewPostContent = [...newPostContent]
         copyNewPostContent[findSectionIndex] = {
@@ -858,8 +857,6 @@ export const CreatePostMinimal = ({
     setNewPostContent((prev) => [...prev, section])
   }
 
-  console.log({ layouts, newPostContent })
-
   return (
     <>
       <EditorToolbar
@@ -938,7 +935,6 @@ export const CreatePostMinimal = ({
                   )
                   if (!section) return null
                   if (section.type === 'editor') {
-                    console.log({ section })
                     return (
                       <div
                         key={section.id}

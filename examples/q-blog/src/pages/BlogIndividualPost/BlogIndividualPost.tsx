@@ -111,9 +111,9 @@ export const BlogIndividualPost = () => {
           'Content-Type': 'application/json'
         }
       })
-      console.log({ response })
+
       const responseData = await response.json()
-      console.log({ responseData })
+
       if (checkStructure(responseData)) {
         setBlogContent(responseData)
         if (responseData?.layouts) {
@@ -133,7 +133,6 @@ export const BlogIndividualPost = () => {
           }
         })
 
-        console.log({ transformAudios })
         if (!audios && transformAudios.length > 0) {
           saveAudio.current = { audios: transformAudios, postId: formPostId }
           dispatch(setAudio({ audios: transformAudios, postId: formPostId }))
@@ -206,7 +205,6 @@ export const BlogIndividualPost = () => {
   }, [])
 
   const onResizeStop = React.useCallback((layout: any, layoutItem: any) => {
-    console.log({ layoutItem })
     // Update the layout state with the new position and size of the component
     setCount((prev) => prev + 1)
   }, [])
@@ -223,7 +221,6 @@ export const BlogIndividualPost = () => {
   //     }
   //   })
   // }, [blogContent])
-  console.log({ blogContent, audios })
 
   const handleResize = () => {
     setCount((prev) => prev + 1)

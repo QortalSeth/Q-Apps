@@ -99,7 +99,6 @@ export const AudioPlayer: React.FC<VideoPlayerProps> = ({
   )
 
   const fetchPlaylistData = React.useCallback(async () => {
-    console.log({ playlist })
     setIsLoading(true)
     const playlistAudio = await Promise.all(
       playlist?.map(async (audio: IPlaylist, index) => {
@@ -121,7 +120,7 @@ export const AudioPlayer: React.FC<VideoPlayerProps> = ({
     fetchPlaylistData()
   }, [fetchPlaylistData])
 
-  console.log({ playlistFormatted, playlist })
+  
 
   if (isLoading)
     return (
