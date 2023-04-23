@@ -118,7 +118,7 @@ export const DownloadTaskManager: React.FC = () => {
             {Object.keys(downloads).map((download: any) => {
               const downloadObj = downloads[download]
               const progress = downloads[download]?.status?.percentLoaded || 0
-
+              const status = downloads[download]?.status?.status
               return (
                 <ListItem
                   key={downloadObj?.identifier}
@@ -169,7 +169,10 @@ export const DownloadTaskManager: React.FC = () => {
                         color: theme.palette.text.primary
                       }}
                       variant="caption"
-                    >{`${progress?.toFixed(0)}%`}</Typography>
+                    >
+                      {`${progress?.toFixed(0)}%`}{' '}
+                      {status && status === 'REFETCHING' && '- refetching'}
+                    </Typography>
                   </Box>
                   <Typography
                     sx={{

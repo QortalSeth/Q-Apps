@@ -83,6 +83,7 @@ const DownloadWrapper: React.FC<Props> = ({ children }) => {
     identifier,
     blogPost
   }: IDownloadVideoParams) => {
+   
     dispatch(
       setAddToDownloads({
         name,
@@ -94,6 +95,8 @@ const DownloadWrapper: React.FC<Props> = ({ children }) => {
 
     const url = `/arbitrary/${service}/${name}/${identifier}`
     let isCalling = false
+    let percentLoaded = 0
+    let timer = 25
     const intervalId = setInterval(async () => {
       if (isCalling) return
       isCalling = true
@@ -105,6 +108,53 @@ const DownloadWrapper: React.FC<Props> = ({ children }) => {
       })
       isCalling = false
       if (res.localChunkCount) {
+        if (res.percentLoaded) {
+          if (
+            res.percentLoaded === percentLoaded &&
+            res.percentLoaded !== 100
+          ) {
+            timer = timer - 3
+          } else {
+            timer = 25
+          }
+          if (timer < 0) {
+            timer = 25
+            isCalling = true
+            dispatch(
+              updateDownloads({
+                name,
+                service,
+                identifier,
+                status: {
+                  ...res,
+                  status: 'REFETCHING'
+                }
+              })
+            )
+            setTimeout(() => {
+              isCalling = false
+              fetch(url)
+                .then((response) => response.blob())
+                .then((blob) => {
+                  const url = URL.createObjectURL(blob)
+                  dispatch(
+                    updateDownloads({
+                      name,
+                      service,
+                      identifier,
+                      url
+                    })
+                  )
+                })
+                .catch((error) => {
+                  console.error('Error fetching the video:', error)
+                  // clearInterval(intervalId)
+                })
+            }, 120000)
+            return
+          }
+          percentLoaded = res.percentLoaded
+        }
         dispatch(
           updateDownloads({
             name,

@@ -350,7 +350,22 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
                 fontSize: '18px'
               }}
             >
-              {resourceStatus?.status !== 'READY' ? (
+              {resourceStatus?.status === 'REFETCHING' ? (
+                <>
+                  <>
+                    {(
+                      (resourceStatus?.localChunkCount /
+                        resourceStatus?.totalChunkCount) *
+                      100
+                    )?.toFixed(0)}
+                    %
+                  </>
+
+                  <> Refetching in 2 minutes</>
+                </>
+              ) : resourceStatus?.status === 'DOWNLOADED' ? (
+                <>Download Completed: building video...</>
+              ) : resourceStatus?.status !== 'READY' ? (
                 <>
                   {(
                     (resourceStatus?.localChunkCount /
@@ -404,7 +419,7 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
         onTimeUpdate={updateProgress}
         autoPlay={autoplay}
         onEnded={handleEnded}
-        onLoadedMetadata={handleLoadedMetadata}
+        // onLoadedMetadata={handleLoadedMetadata}
         onCanPlay={handleCanPlay}
         preload="metadata"
         style={{
