@@ -27,6 +27,16 @@ import alignCenterSvg from '../../assets/svgs/alignCenter.svg'
 import alignRightSvg from '../../assets/svgs/alignRight.svg'
 import codeBlockSvg from '../../assets/svgs/codeBlock.svg'
 import linkSvg from '../../assets/svgs/link.svg'
+import { AlignCenterSVG } from '../../assets/svgs/AlignCenterSVG'
+import { BoldSVG } from '../../assets/svgs/BoldSVG'
+import { ItalicSVG } from '../../assets/svgs/italicSVG'
+import { UnderlineSVG } from '../../assets/svgs/underlineSVG'
+import { H2SVG } from '../../assets/svgs/h2SVG'
+import { H3SVG } from '../../assets/svgs/h3SVG'
+import { AlignLeftSVG } from '../../assets/svgs/AlignLeftSVG'
+import { AlignRightSVG } from '../../assets/svgs/AlignRightSVG'
+import { CodeBlockSVG } from '../../assets/svgs/CodeBlockSVG'
+import { LinkSVG } from '../../assets/svgs/linkSVG'
 
 const initialValue: Descendant[] = [
   {
@@ -418,77 +428,29 @@ const BlogEditor: React.FC<MyComponentProps> = ({
       >
         <div className="toolbar">
           <ToolbarButton format="bold" label="B" editor={editor}>
-            <img
-              style={{
-                height: '24px',
-                width: 'auto'
-              }}
-              src={boldSvg}
-            />
+            <BoldSVG height="24px" width="auto" />
           </ToolbarButton>
           <ToolbarButton format="italic" label="I" editor={editor}>
-            <img
-              style={{
-                height: '24px',
-                width: 'auto'
-              }}
-              src={italicSvg}
-            />
+            <ItalicSVG height="24px" width="auto" />
           </ToolbarButton>
           <ToolbarButton format="underline" label="U" editor={editor}>
-            <img
-              style={{
-                height: '24px',
-                width: 'auto'
-              }}
-              src={underlineSvg}
-            />
+            <UnderlineSVG height="24px" width="auto" />
           </ToolbarButton>
 
           <ToolbarButton format="heading-2" label="H2" editor={editor}>
-            <img
-              style={{
-                height: '24px',
-                width: 'auto'
-              }}
-              src={h2Svg}
-            />
+            <H2SVG height="24px" width="auto" />
           </ToolbarButton>
           <ToolbarButton format="heading-3" label="H3" editor={editor}>
-            <img
-              style={{
-                height: '24px',
-                width: 'auto'
-              }}
-              src={h3Svg}
-            />
+            <H3SVG height="24px" width="auto" />
           </ToolbarButton>
           <ToolbarButton format="align-left" label="L" editor={editor}>
-            <img
-              style={{
-                height: '24px',
-                width: 'auto'
-              }}
-              src={alignLeftSvg}
-            />
+            <AlignLeftSVG height="24px" width="auto" />
           </ToolbarButton>
           <ToolbarButton format="align-center" label="C" editor={editor}>
-            <img
-              style={{
-                height: '24px',
-                width: 'auto'
-              }}
-              src={alignCenterSvg}
-            />
+            <AlignCenterSVG height="24px" width="auto" />
           </ToolbarButton>
           <ToolbarButton format="align-right" label="R" editor={editor}>
-            <img
-              style={{
-                height: '24px',
-                width: 'auto'
-              }}
-              src={alignRightSvg}
-            />
+            <AlignRightSVG height="24px" width="auto" />
           </ToolbarButton>
 
           <ToolbarButtonCodeBlock
@@ -496,33 +458,11 @@ const BlogEditor: React.FC<MyComponentProps> = ({
             label="Code"
             editor={editor}
           >
-            <img
-              style={{
-                height: '24px',
-                width: 'auto'
-              }}
-              src={codeBlockSvg}
-            />
+            <CodeBlockSVG height="24px" width="auto" />
           </ToolbarButtonCodeBlock>
           <ToolbarButtonCodeLink format="link" label="Link" editor={editor}>
-            <img
-              style={{
-                height: '24px',
-                width: 'auto'
-              }}
-              src={linkSvg}
-            />
+            <LinkSVG height="24px" width="auto" />
           </ToolbarButtonCodeLink>
-
-          {/* <button
-            className="toolbar-button"
-            onMouseDown={(event) => {
-              event.preventDefault()
-              toggleBlock(editor, 'code-block')
-            }}
-          >
-            Code
-          </button> */}
         </div>
         <Editable
           className="blog-editor"
