@@ -172,6 +172,7 @@ export const DownloadTaskManager: React.FC = () => {
                     >
                       {`${progress?.toFixed(0)}%`}{' '}
                       {status && status === 'REFETCHING' && '- refetching'}
+                      {status && status === 'DOWNLOADED' && '- building'}
                     </Typography>
                   </Box>
                   <Typography

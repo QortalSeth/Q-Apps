@@ -36,6 +36,7 @@ import { DynamicHeightItemMinimal } from '../../components/DynamicHeightItemMini
 import { ReusableModal } from '../../components/modals/ReusableModal'
 import AudioElement from '../../components/AudioElement'
 import ErrorBoundary from '../../components/common/ErrorBoundary'
+import { CommentSection } from '../../components/common/Comments/CommentSection'
 const ResponsiveGridLayout = WidthProvider(Responsive)
 const initialMinHeight = 2 // Define an initial minimum height for grid items
 
@@ -307,15 +308,26 @@ export const BlogIndividualPost = () => {
             >{`Author: ${user}`}</Typography>
           }
         />
-        <Typography
-          variant="h1"
-          color="textPrimary"
+        <Box
           sx={{
-            textAlign: 'center'
+            display: 'flex',
+            gap: 1,
+            alignItems: 'center',
+            justifyContent: 'center'
           }}
         >
-          {blogContent?.title}
-        </Typography>
+          <Typography
+            variant="h1"
+            color="textPrimary"
+            sx={{
+              textAlign: 'center'
+            }}
+          >
+            {blogContent?.title}
+          </Typography>
+          <CommentSection postId={fullPostId} />
+        </Box>
+
         {(layoutGeneralSettings?.blogPostType === 'builder' ||
           !layoutGeneralSettings?.blogPostType) && (
           <Content
@@ -694,10 +706,15 @@ export const BlogIndividualPost = () => {
                 : 'You are current on a playlist. Would you like to switch?'}
             </Typography>
           </Box>
-          <Button onClick={() => setisOpenSwitchPlaylistModal(false)}>
+          <Button
+            variant="contained"
+            onClick={() => setisOpenSwitchPlaylistModal(false)}
+          >
             Cancel
           </Button>
-          <Button onClick={switchPlayList}>Switch</Button>
+          <Button variant="contained" onClick={switchPlayList}>
+            Switch
+          </Button>
         </ReusableModal>
       </Box>
     </Box>

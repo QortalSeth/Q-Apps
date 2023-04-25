@@ -1,5 +1,5 @@
 self.addEventListener('message', async (event) => {
-  // 
+  //
 
   // const qortalRequest = event.data.qortalRequest
   // const name = event.data.name
