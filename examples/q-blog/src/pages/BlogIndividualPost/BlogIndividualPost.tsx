@@ -37,6 +37,7 @@ import { ReusableModal } from '../../components/modals/ReusableModal'
 import AudioElement from '../../components/AudioElement'
 import ErrorBoundary from '../../components/common/ErrorBoundary'
 import { CommentSection } from '../../components/common/Comments/CommentSection'
+import { Tipping } from '../../components/common/Tipping/Tipping'
 const ResponsiveGridLayout = WidthProvider(Responsive)
 const initialMinHeight = 2 // Define an initial minimum height for grid items
 
@@ -289,25 +290,44 @@ export const BlogIndividualPost = () => {
             Edit Post
           </Button>
         )}
-        <CardHeader
-          onClick={() => {
-            navigate(`/${user}/${blog}`)
-          }}
+        <Box
           sx={{
-            cursor: 'pointer',
-            '& .MuiCardHeader-content': {
-              overflow: 'hidden'
-            },
-            padding: '10px 0px'
+            display: 'flex',
+            alignItems: 'center',
+            gap: 1
           }}
-          avatar={<Avatar src={avatarUrl} alt={`${user}'s avatar`} />}
-          subheader={
-            <Typography
-              sx={{ fontFamily: 'Cairo', fontSize: '25px' }}
-              color={theme.palette.text.primary}
-            >{`Author: ${user}`}</Typography>
-          }
-        />
+        >
+          <CardHeader
+            onClick={() => {
+              navigate(`/${user}/${blog}`)
+            }}
+            sx={{
+              cursor: 'pointer',
+              '& .MuiCardHeader-content': {
+                overflow: 'hidden'
+              },
+              padding: '10px 0px'
+            }}
+            avatar={<Avatar src={avatarUrl} alt={`${user}'s avatar`} />}
+            subheader={
+              <Typography
+                sx={{ fontFamily: 'Cairo', fontSize: '25px' }}
+                color={theme.palette.text.primary}
+              >{`Author: ${user}`}</Typography>
+            }
+          />
+          {user && (
+            <Tipping
+              name={user || ''}
+              onSubmit={() => {
+                // setNameTip('')
+              }}
+              onClose={() => {
+                // setNameTip('')
+              }}
+            />
+          )}
+        </Box>
         <Box
           sx={{
             display: 'flex',
@@ -440,6 +460,9 @@ export const BlogIndividualPost = () => {
                       >
                         <AudioElement
                           key={section.id}
+                          audioInfo={section.content}
+                          postId={fullPostId}
+                          user={user ? user : ''}
                           onClick={() => {
                             if (!blog || !postId) return
 
@@ -650,6 +673,9 @@ export const BlogIndividualPost = () => {
                             >
                               <AudioElement
                                 key={section.id}
+                                audioInfo={section.content}
+                                postId={fullPostId}
+                                user={user ? user : ''}
                                 onClick={() => {
                                   if (!blog || !postId) return
                                   const formBlogId = addPrefix(blog)

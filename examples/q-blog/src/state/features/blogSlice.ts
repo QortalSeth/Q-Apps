@@ -8,6 +8,7 @@ const instanceCache = new Map<string, LocalForage>()
 
 interface GlobalState {
   posts: BlogPost[]
+  filteredPosts: BlogPost[]
   hashMapPosts: Record<string, BlogPost>
   blogListPageNumber: number
   favorites: any[]
@@ -15,16 +16,21 @@ interface GlobalState {
   subscriptions: any[]
   subscriptionPosts: any[]
   countNewPosts: number
+  isFiltering: boolean
+  filterValue: string
 }
 const initialState: GlobalState = {
   posts: [],
+  filteredPosts: [],
   hashMapPosts: {},
   blogListPageNumber: 0,
   favorites: [],
   favoritesLocal: null,
   subscriptions: [],
   subscriptionPosts: [],
-  countNewPosts: 0
+  countNewPosts: 0,
+  isFiltering: false,
+  filterValue: ''
 }
 
 export interface BlogPost {
@@ -114,11 +120,20 @@ export const blogSlice = createSlice({
     setBlogListPageNumber: (state, action) => {
       state.blogListPageNumber = action.payload
     },
+    setIsFiltering: (state, action) => {
+      state.isFiltering = action.payload
+    },
+    setFilterValue: (state, action) => {
+      state.filterValue = action.payload
+    },
     setCountNewPosts: (state, action) => {
       state.countNewPosts = action.payload
     },
     addPosts: (state, action) => {
       state.posts = action.payload
+    },
+    addFilteredPosts: (state, action) => {
+      state.filteredPosts = action.payload
     },
     addSubscriptions: (state, action) => {
       state.subscriptions = action.payload
@@ -143,6 +158,9 @@ export const blogSlice = createSlice({
     removePost: (state, action) => {
       const idToDelete = action.payload
       state.posts = state.posts.filter((item) => item.id !== idToDelete)
+      state.filteredPosts = state.filteredPosts.filter(
+        (item) => item.id !== idToDelete
+      )
     },
     addPostToBeginning: (state, action) => {
       state.posts.unshift(action.payload)
@@ -152,6 +170,10 @@ export const blogSlice = createSlice({
       const index = state.posts.findIndex((post) => post.id === id)
       if (index !== -1) {
         state.posts[index] = { ...action.payload }
+      }
+      const index2 = state.filteredPosts.findIndex((post) => post.id === id)
+      if (index2 !== -1) {
+        state.filteredPosts[index2] = { ...action.payload }
       }
     },
     addToHashMap: (state, action) => {
@@ -180,6 +202,16 @@ export const blogSlice = createSlice({
           state.posts[index] = post
         } else {
           state.posts.push(post)
+        }
+      })
+    },
+    upsertFilteredPosts: (state, action) => {
+      action.payload.forEach((post: BlogPost) => {
+        const index = state.filteredPosts.findIndex((p) => p.id === post.id)
+        if (index !== -1) {
+          state.filteredPosts[index] = post
+        } else {
+          state.filteredPosts.push(post)
         }
       })
     },
@@ -216,6 +248,9 @@ export const blogSlice = createSlice({
     blockUser: (state, action) => {
       const username = action.payload
       state.posts = state.posts.filter((item) => item.user !== username)
+      state.filteredPosts = state.filteredPosts.filter(
+        (item) => item.user !== username
+      )
       state.favorites = state.favorites.filter((item) => item.user !== username)
       state.subscriptionPosts = state.subscriptionPosts.filter(
         (item) => item.user !== username
@@ -285,7 +320,11 @@ export const {
   blockUser,
   addPostToBeginning,
   setCountNewPosts,
-  upsertPostsBeginning
+  upsertPostsBeginning,
+  upsertFilteredPosts,
+  addFilteredPosts,
+  setIsFiltering,
+  setFilterValue
 } = blogSlice.actions
 
 export default blogSlice.reducer

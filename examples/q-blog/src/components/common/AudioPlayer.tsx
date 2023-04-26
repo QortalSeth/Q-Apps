@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { Box, IconButton, Slider } from '@mui/material'
 import { CircularProgress, Typography } from '@mui/material'
 import AudioPlyr from 'philliplm-react-modern-audio-player'
@@ -12,8 +12,12 @@ import {
   PictureInPicture
 } from '@mui/icons-material'
 import { styled } from '@mui/system'
-import { removeAudio } from '../../state/features/globalSlice'
-import { useDispatch } from 'react-redux'
+import {
+  removeAudio,
+  setShowingAudioPlayer
+} from '../../state/features/globalSlice'
+import { useDispatch, useSelector } from 'react-redux'
+import { RootState } from '../../state/store'
 
 const VideoContainer = styled(Box)`
   position: relative;
@@ -77,6 +81,41 @@ export const AudioPlayer: React.FC<VideoPlayerProps> = ({
 }) => {
   const [playlistFormatted, setPlaylistFormatted] = useState<any>([])
   const [isLoading, setIsLoading] = useState<boolean>(false)
+  const { downloads, showingAudioPlayer } = useSelector(
+    (state: RootState) => state.global
+  )
+
+  const audioPlayList = useMemo(() => {
+    const filterAudios = Object.keys(downloads)
+      .map((item) => {
+        return downloads[item]
+      })
+      .filter(
+        (download: any) =>
+          download?.service === 'AUDIO' &&
+          download?.url &&
+          download?.status?.status === 'READY'
+      )
+    return filterAudios.map((audio: any, index: number) => {
+      return {
+        name: audio?.blogPost?.audioTitle,
+        src: audio?.url,
+        id: index + 1,
+        identifier: audio?.identifier,
+        description: audio?.blogPost?.audioDescription || ''
+      }
+    })
+  }, [downloads])
+
+  const currAudioMemo: number | null = useMemo(() => {
+    const findIndex = audioPlayList.findIndex(
+      (item) => item?.identifier === currAudio
+    )
+    if (findIndex !== -1) {
+      return findIndex
+    }
+    return null
+  }, [audioPlayList, currAudio])
   const dispatch = useDispatch()
   const getSrc = React.useCallback(
     async (name: string, identifier: string, service: string) => {
@@ -116,11 +155,31 @@ export const AudioPlayer: React.FC<VideoPlayerProps> = ({
     setIsLoading(false)
   }, [playlist])
 
-  React.useEffect(() => {
-    fetchPlaylistData()
-  }, [fetchPlaylistData])
+  // React.useEffect(() => {
+  //   fetchPlaylistData()
+  // }, [fetchPlaylistData])
 
-  
+  // useEffect(() => {
+  //   if (!showingAudioPlayer) {
+  //     return
+  //   }
+  //   if (document.getElementById('rm-audio-player')) return
+  //   setIsLoading(true)
+  //   const checkForDiv = () => {
+  //     const targetDiv = document.getElementById('rm-audio-player')
+  //     if (targetDiv) {
+  //       setIsLoading(false)
+  //       clearInterval(intervalId)
+  //     }
+  //   }
+
+  //   const intervalId = setInterval(checkForDiv, 100) // Adjust the interval duration as needed
+
+  //   // Clean up the interval when the component is unmounted
+  //   return () => {
+  //     clearInterval(intervalId)
+  //   }
+  // }, [showingAudioPlayer])
 
   if (isLoading)
     return (
@@ -153,7 +212,7 @@ export const AudioPlayer: React.FC<VideoPlayerProps> = ({
         />
       </Box>
     )
-  if (playlistFormatted.length === 0) return null
+  if (audioPlayList.length === 0 || !showingAudioPlayer) return null
   return (
     <VideoContainer>
       <AudioPlyr
@@ -161,8 +220,8 @@ export const AudioPlayer: React.FC<VideoPlayerProps> = ({
           defaultColorScheme: themeColor === 'dark' ? 'dark' : 'light',
           colorScheme: themeColor === 'dark' ? 'dark' : 'light'
         }}
-        currentIndex={currAudio}
-        playList={playlistFormatted}
+        currentIndex={currAudioMemo}
+        playList={audioPlayList}
         activeUI={{
           all: true
         }}
@@ -173,7 +232,7 @@ export const AudioPlayer: React.FC<VideoPlayerProps> = ({
           volumeSlider: 'top'
         }}
         closeCallback={() => {
-          dispatch(removeAudio({}))
+          dispatch(setShowingAudioPlayer(false))
         }}
         // rootContainerProps={{
         //   colorScheme: theme,

@@ -15,6 +15,7 @@ import {
   addPrefix,
   buildIdentifierFromCreateTitleIdAndId
 } from '../../utils/blogIdformats'
+import { Tipping } from '../../components/common/Tipping/Tipping'
 type EditorType = 'minimal' | 'builder'
 interface CreatePostProps {
   mode?: string
@@ -96,7 +97,6 @@ export const CreatePost = ({ mode }: CreatePostProps) => {
     }
   }, [mode])
 
-  
   return (
     <>
       {/* {toggleEditorType === 'minimal' && (
@@ -168,6 +168,7 @@ export const CreatePost = ({ mode }: CreatePostProps) => {
           <Button onClick={() => setIsOpen(false)}>Close</Button>
         </ReusableModal>
       )}
+
       {toggleEditorType === 'minimal' && (
         <CreatePostMinimal switchType={switchType} />
       )}

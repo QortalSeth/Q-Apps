@@ -26,6 +26,9 @@ interface QortalRequestOptions {
   tag3?: string
   tag4?: string
   tag5?: string
+  coin?: string
+  destinationAddress?: string
+  amount?: number
 }
 
 declare function qortalRequest(options: QortalRequestOptions): Promise<any>

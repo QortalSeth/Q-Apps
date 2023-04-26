@@ -30,7 +30,7 @@ interface BlogListProps {
 }
 export const BlogList = ({ mode }: BlogListProps) => {
   const theme = useTheme()
-
+  const prevVal = useRef('')
   const { user } = useSelector((state: RootState) => state.auth)
   const hashMapPosts = useSelector(
     (state: RootState) => state.blog.hashMapPosts
@@ -44,6 +44,11 @@ export const BlogList = ({ mode }: BlogListProps) => {
   const countNewPosts = useSelector(
     (state: RootState) => state.blog.countNewPosts
   )
+  const isFiltering = useSelector((state: RootState) => state.blog.isFiltering)
+  const filterValue = useSelector((state: RootState) => state.blog.filterValue)
+  const filteredPosts = useSelector(
+    (state: RootState) => state.blog.filteredPosts
+  )
 
   const { posts: globalPosts, favorites } = useSelector(
     (state: RootState) => state.blog
@@ -54,9 +59,14 @@ export const BlogList = ({ mode }: BlogListProps) => {
     getBlogPostsFavorites,
     getBlogPostsSubscriptions,
     checkNewMessages,
-    getNewPosts
+    getNewPosts,
+    getBlogFilteredPosts
   } = useFetchPosts()
   const getPosts = React.useCallback(async () => {
+    if (isFiltering) {
+      getBlogFilteredPosts(filterValue)
+      return
+    }
     if (mode === 'favorites') {
       getBlogPostsFavorites()
       return
@@ -66,7 +76,7 @@ export const BlogList = ({ mode }: BlogListProps) => {
       return
     }
     await getBlogPosts()
-  }, [getBlogPosts, mode, favoritesLocal, user?.name])
+  }, [getBlogPosts, mode, favoritesLocal, user?.name, isFiltering, filterValue])
 
   let posts = globalPosts
 
@@ -75,6 +85,9 @@ export const BlogList = ({ mode }: BlogListProps) => {
   }
   if (mode === 'subscriptions') {
     posts = subscriptionPosts
+  }
+  if (isFiltering) {
+    posts = filteredPosts
   }
   const interval = useRef<any>(null)
 
@@ -98,6 +111,13 @@ export const BlogList = ({ mode }: BlogListProps) => {
       }
     }
   }, [mode, checkNewMessagesFunc])
+
+  useEffect(() => {
+    if (isFiltering && filterValue !== prevVal?.current) {
+      prevVal.current = filterValue
+      getPosts()
+    }
+  }, [filterValue, isFiltering, filteredPosts])
   // if (!favoritesLocal) return null
   return (
     <>
@@ -110,7 +130,7 @@ export const BlogList = ({ mode }: BlogListProps) => {
           justifyContent: 'center'
         }}
       > */}
-      {!mode && countNewPosts > 0 && (
+      {!mode && countNewPosts > 0 && !isFiltering && (
         <Box
           sx={{
             display: 'flex',

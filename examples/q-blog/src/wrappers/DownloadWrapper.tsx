@@ -168,6 +168,14 @@ const DownloadWrapper: React.FC<Props> = ({ children }) => {
       // check if progress is 100% and clear interval if true
       if (res?.status === 'READY') {
         clearInterval(intervalId)
+        dispatch(
+          updateDownloads({
+            name,
+            service,
+            identifier,
+            status: res
+          })
+        )
       }
     }, 3000) // 1 second interval
     fetch(url)

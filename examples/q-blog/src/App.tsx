@@ -29,8 +29,8 @@ function App() {
     <Provider store={store}>
       <ThemeProvider theme={themeColor === 'light' ? lightTheme : darkTheme}>
         <Notification />
-        <GlobalWrapper>
-          <DownloadWrapper>
+        <DownloadWrapper>
+          <GlobalWrapper>
             <CssBaseline />
 
             <Routes>
@@ -55,8 +55,8 @@ function App() {
               />
               <Route path="/" element={<BlogList />} />
             </Routes>
-          </DownloadWrapper>
-        </GlobalWrapper>
+          </GlobalWrapper>
+        </DownloadWrapper>
       </ThemeProvider>
     </Provider>
   )

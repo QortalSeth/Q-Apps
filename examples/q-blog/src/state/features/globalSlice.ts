@@ -31,6 +31,7 @@ interface GlobalState {
   currAudio: any
   audioPostId: string
   downloads: any
+  showingAudioPlayer: boolean
 }
 const initialState: GlobalState = {
   isOpenPublishBlogModal: false,
@@ -42,7 +43,8 @@ const initialState: GlobalState = {
   audios: null,
   currAudio: null,
   audioPostId: '',
-  downloads: {}
+  downloads: {},
+  showingAudioPlayer: false
 }
 
 export const globalSlice = createSlice({
@@ -58,6 +60,9 @@ export const globalSlice = createSlice({
     setCurrentBlog: (state, action) => {
       state.currentBlog = action.payload
       state.isLoadingCurrentBlog = false
+    },
+    setShowingAudioPlayer: (state, action) => {
+      state.showingAudioPlayer = action.payload
     },
     setVisitingBlog: (state, action) => {
       state.visitingBlog = action.payload
@@ -104,7 +109,8 @@ export const {
   setCurrAudio,
   removeAudio,
   setAddToDownloads,
-  updateDownloads
+  updateDownloads,
+  setShowingAudioPlayer
 } = globalSlice.actions
 
 export default globalSlice.reducer;

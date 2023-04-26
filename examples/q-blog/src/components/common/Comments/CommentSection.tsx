@@ -118,7 +118,6 @@ export const CommentSection = ({ postId }: CommentSectionProps) => {
 
   const structuredCommentList = useMemo(() => {
     return listComments.reduce((acc, curr, index, array) => {
-      console.log({ acc })
       if (curr?.identifier?.includes('_reply_')) {
         return acc
       }
@@ -137,7 +136,6 @@ export const CommentSection = ({ postId }: CommentSectionProps) => {
   const checkNewComments = useCallback(async () => {
     try {
       const offset = listComments.length
-      console.log({ offset })
       const url = `/arbitrary/resources/search?service=BLOG_COMMENT&query=qcomment_v1_qblog_${postId.slice(
         -12
       )}&limit=20&includemetadata=true&offset=${offset}&reverse=false&excludeblocked=true`
@@ -172,7 +170,6 @@ export const CommentSection = ({ postId }: CommentSectionProps) => {
     }
   }, [checkNewMessagesFunc])
 
-  console.log({ structuredCommentList })
   return (
     <>
       <Box

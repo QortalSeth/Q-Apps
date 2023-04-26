@@ -111,7 +111,7 @@ const GlobalWrapper: React.FC<Props> = ({ children }) => {
     let doesExist = true
     //TODO - SHOULD REMOVE NAME FILTER AND IDENTIFIER SHOULD BE EXACT
     // const url2 = `/arbitrary/resources/search?service=BLOG&identifier=${identifier}&name=${username}&limit=1&includemetadata=true`
-    const url2 = `/arbitrary/resources?service=BLOG&identifier=${identifier}&limit=1&includemetadata=true`
+    const url2 = `/arbitrary/resources?service=BLOG&identifier=${identifier}&name=${username}&limit=1&includemetadata=true`
     const responseBlogs = await fetch(url2, {
       method: 'GET',
       headers: {
@@ -237,6 +237,9 @@ const GlobalWrapper: React.FC<Props> = ({ children }) => {
       }
       if (formatBlogIdentifier.startsWith('-')) {
         formatBlogIdentifier = formatBlogIdentifier.slice(1)
+      }
+      if (!formatBlogIdentifier) {
+        throw new Error('Please insert a valid blog id')
       }
       const identifier = `q-blog-${formatBlogIdentifier}`
       const doesExitst = await verifyIfBlogIdExtists(name, identifier)
@@ -447,12 +450,15 @@ const GlobalWrapper: React.FC<Props> = ({ children }) => {
     <>
       {isLoadingGlobal && <PageLoader />}
 
-      <PublishBlogModal
-        open={isOpenPublishBlogModal}
-        onClose={onClosePublishBlogModal}
-        onPublish={createBlog}
-        username={user?.name || ''}
-      />
+      {isOpenPublishBlogModal && user?.name && (
+        <PublishBlogModal
+          open={isOpenPublishBlogModal}
+          onClose={onClosePublishBlogModal}
+          onPublish={createBlog}
+          username={user?.name || ''}
+        />
+      )}
+
       <EditBlogModal
         open={isOpenEditBlogModal}
         onClose={onCloseEditBlogModal}

@@ -6,6 +6,7 @@ import {
   BlogPost,
   populateFavorites,
   setCountNewPosts,
+  upsertFilteredPosts,
   upsertPosts,
   upsertPostsBeginning,
   upsertSubscriptionPosts
@@ -23,6 +24,9 @@ export const useFetchPosts = () => {
     (state: RootState) => state.blog.hashMapPosts
   )
   const posts = useSelector((state: RootState) => state.blog.posts)
+  const filteredPosts = useSelector(
+    (state: RootState) => state.blog.filteredPosts
+  )
   const favoritesLocal = useSelector(
     (state: RootState) => state.blog.favoritesLocal
   )
@@ -191,6 +195,51 @@ export const useFetchPosts = () => {
       dispatch(setIsLoadingGlobal(false))
     }
   }, [posts, hashMapPosts])
+  const getBlogFilteredPosts = React.useCallback(
+    async (filterValue: string) => {
+      try {
+        const offset = filteredPosts.length
+
+        dispatch(setIsLoadingGlobal(true))
+        const url = `/arbitrary/resources/search?service=BLOG_POST&query=q-blog-&limit=20&includemetadata=true&offset=${offset}&reverse=true&excludeblocked=true&name=${filterValue}`
+        const response = await fetch(url, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        })
+        const responseData = await response.json()
+        const structureData = responseData.map((post: any): BlogPost => {
+          return {
+            title: post?.metadata?.title,
+            category: post?.metadata?.category,
+            categoryName: post?.metadata?.categoryName,
+            tags: post?.metadata?.tags || [],
+            description: post?.metadata?.description,
+            createdAt: post?.created,
+            updated: post?.updated,
+            user: post.name,
+            postImage: '',
+            id: post.identifier
+          }
+        })
+        dispatch(upsertFilteredPosts(structureData))
+
+        for (const content of structureData) {
+          if (content.user && content.id) {
+            const res = checkAndUpdatePost(content)
+            if (res) {
+              getBlogPost(content.user, content.id, content)
+            }
+          }
+        }
+      } catch (error) {
+      } finally {
+        dispatch(setIsLoadingGlobal(false))
+      }
+    },
+    [filteredPosts, hashMapPosts]
+  )
 
   const getBlogPostsSubscriptions = React.useCallback(
     async (username: string) => {
@@ -307,6 +356,7 @@ export const useFetchPosts = () => {
     getBlogPost,
     hashMapPosts,
     checkNewMessages,
-    getNewPosts
+    getNewPosts,
+    getBlogFilteredPosts
   }
 }

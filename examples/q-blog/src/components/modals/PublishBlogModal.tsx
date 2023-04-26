@@ -60,7 +60,7 @@ const MyModal: React.FC<MyModalProps> = ({
   )
   const [inputValue, setInputValue] = useState<string>('')
   const [chips, setChips] = useState<string[]>([])
-  const [blogIdentifier, setBlogIdentifier] = useState('')
+  const [blogIdentifier, setBlogIdentifier] = useState(username || '')
   const [options, setOptions] = useState<SelectOption[]>([])
   const handlePublish = async (): Promise<void> => {
     try {

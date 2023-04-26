@@ -1,5 +1,12 @@
-import React from 'react'
-import { Typography, Box, Popover, useTheme } from '@mui/material'
+import React, { useRef, useState } from 'react'
+import {
+  Typography,
+  Box,
+  Popover,
+  useTheme,
+  Button,
+  Input
+} from '@mui/material'
 import AccountCircle from '@mui/icons-material/AccountCircle'
 import AddBoxIcon from '@mui/icons-material/AddBox'
 import ExitToAppIcon from '@mui/icons-material/ExitToApp'
@@ -14,6 +21,8 @@ import { useLocation } from 'react-router-dom'
 import BookmarkIcon from '@mui/icons-material/Bookmark'
 import SubscriptionsIcon from '@mui/icons-material/Subscriptions'
 import { BlockedNamesModal } from '../../common/BlockedNamesModal/BlockedNamesModal'
+import SearchIcon from '@mui/icons-material/Search'
+import BackspaceIcon from '@mui/icons-material/Backspace'
 import {
   AvatarContainer,
   CreateBlogButton,
@@ -31,6 +40,11 @@ import QblogLogo from '../../../assets/img/qBlogLogo.png'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import PersonOffIcon from '@mui/icons-material/PersonOff'
 import { NewWindowSVG } from '../../../assets/svgs/NewWindowSVG'
+import {
+  addFilteredPosts,
+  setFilterValue,
+  setIsFiltering
+} from '../../../state/features/blogSlice'
 interface Props {
   isAuthenticated: boolean
   hasBlog: boolean
@@ -62,6 +76,9 @@ const NavBar: React.FC<Props> = ({
   const location = useLocation()
   const [anchorEl, setAnchorEl] = React.useState<HTMLButtonElement | null>(null)
   const [isOpenModal, setIsOpenModal] = React.useState<boolean>(false)
+  const [searchVal, setSearchVal] = useState<string>('')
+  const searchValRef = useRef('')
+  const inputRef = useRef<HTMLInputElement>(null)
   const stripBlogId = removePrefix(visitingBlog?.blogId || '')
   if (visitingBlog?.navbarConfig && location?.pathname?.includes(stripBlogId)) {
     return (
@@ -96,8 +113,83 @@ const NavBar: React.FC<Props> = ({
           alt="Qblog Logo"
           onClick={() => {
             navigate(`/`)
+            dispatch(setIsFiltering(false))
+            dispatch(setFilterValue(''))
+            dispatch(addFilteredPosts([]))
+            searchValRef.current = ''
+            if (!inputRef.current) return
+            inputRef.current.value = ''
           }}
         />
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 1
+          }}
+        >
+          <Input
+            id="standard-adornment-name"
+            inputRef={inputRef}
+            onChange={(e) => {
+              searchValRef.current = e.target.value
+            }}
+            onKeyDown={(event) => {
+              if (event.key === 'Enter' || event.keyCode === 13) {
+                if (!searchValRef.current) return
+                navigate('/')
+                dispatch(setIsFiltering(true))
+                dispatch(addFilteredPosts([]))
+                dispatch(setFilterValue(searchValRef.current))
+              }
+            }}
+            placeholder="Filter by name"
+            sx={{
+              '&&:before': {
+                borderBottom: 'none'
+              },
+              '&&:after': {
+                borderBottom: 'none'
+              },
+              '&&:hover:before': {
+                borderBottom: 'none'
+              },
+              '&&.Mui-focused:before': {
+                borderBottom: 'none'
+              },
+              '&&.Mui-focused': {
+                outline: 'none'
+              },
+              fontSize: '18px'
+            }}
+          />
+
+          <SearchIcon
+            sx={{
+              cursor: 'pointer'
+            }}
+            onClick={() => {
+              if (!searchValRef.current) return
+              navigate('/')
+              dispatch(setIsFiltering(true))
+              dispatch(addFilteredPosts([]))
+              dispatch(setFilterValue(searchValRef.current))
+            }}
+          />
+          <BackspaceIcon
+            sx={{
+              cursor: 'pointer'
+            }}
+            onClick={() => {
+              dispatch(setIsFiltering(false))
+              dispatch(setFilterValue(''))
+              dispatch(addFilteredPosts([]))
+              searchValRef.current = ''
+              if (!inputRef.current) return
+              inputRef.current.value = ''
+            }}
+          />
+        </Box>
         <Box
           sx={{
             display: 'flex',

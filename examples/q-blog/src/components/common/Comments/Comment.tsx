@@ -19,6 +19,7 @@ import { StyledCardContentComment } from '../../../pages/BlogList/PostPreview-st
 import { useSelector } from 'react-redux'
 import { RootState } from '../../../state/store'
 import Portal from '../Portal'
+import { Tipping } from '../Tipping/Tipping'
 interface CommentProps {
   comment: any
   postId: string
@@ -35,7 +36,6 @@ export const Comment = ({ comment, postId, onSubmit }: CommentProps) => {
     setIsReplying(false)
   }, [])
 
-  console.log({ currentEdit })
   return (
     <Box
       sx={{
@@ -206,6 +206,18 @@ const CommentCard = ({
             {name}
           </AuthorTextComment>
         </StyledCardColComment>
+        {name && (
+          <Tipping
+            name={name}
+            onSubmit={() => {
+              // setNameTip('')
+            }}
+            onClose={() => {
+              // setNameTip('')
+            }}
+            onlyIcon={true}
+          />
+        )}
       </StyledCardHeaderComment>
       <StyledCardContentComment>
         <Typography

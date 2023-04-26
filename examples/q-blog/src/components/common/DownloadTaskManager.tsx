@@ -14,11 +14,16 @@ import {
 import { Movie, ArrowDropDown } from '@mui/icons-material'
 import { SxProps } from '@mui/system'
 import { Theme } from '@mui/material/styles'
-import { useSelector } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import { RootState } from '../../state/store'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import { removePrefix } from '../../utils/blogIdformats'
 import { useNavigate } from 'react-router-dom'
+import AudiotrackIcon from '@mui/icons-material/Audiotrack'
+import {
+  setCurrAudio,
+  setShowingAudioPlayer
+} from '../../state/features/globalSlice'
 
 type DownloadItem = {
   id: string
@@ -28,6 +33,7 @@ type DownloadItem = {
 
 export const DownloadTaskManager: React.FC = () => {
   const { downloads } = useSelector((state: RootState) => state.global)
+  const dispatch = useDispatch()
   const theme = useTheme()
   const [visible, setVisible] = useState(false)
   const [hidden, setHidden] = useState(true)
@@ -101,7 +107,7 @@ export const DownloadTaskManager: React.FC = () => {
               fontSize: '14px'
             }}
           >
-            Video downloads
+            Downloads
           </Typography>
         </AccordionSummary>
         <AccordionDetails
@@ -119,6 +125,7 @@ export const DownloadTaskManager: React.FC = () => {
               const downloadObj = downloads[download]
               const progress = downloads[download]?.status?.percentLoaded || 0
               const status = downloads[download]?.status?.status
+              const service = downloads[download]?.service
               return (
                 <ListItem
                   key={downloadObj?.identifier}
@@ -133,6 +140,11 @@ export const DownloadTaskManager: React.FC = () => {
                     padding: '2px'
                   }}
                   onClick={() => {
+                    if (service === 'AUDIO' && downloadObj?.identifier) {
+                      dispatch(setCurrAudio(downloadObj?.identifier))
+                      dispatch(setShowingAudioPlayer(true))
+                      return
+                    }
                     const str = downloadObj?.blogPost?.postId
                     if (!str) return
                     const arr = str.split('-post-')
@@ -150,7 +162,14 @@ export const DownloadTaskManager: React.FC = () => {
                     }}
                   >
                     <ListItemIcon>
-                      <Movie sx={{ color: theme.palette.text.primary }} />
+                      {service === 'AUDIO' && (
+                        <AudiotrackIcon
+                          sx={{ color: theme.palette.text.primary }}
+                        />
+                      )}
+                      {service === 'VIDEO' && (
+                        <Movie sx={{ color: theme.palette.text.primary }} />
+                      )}
                     </ListItemIcon>
 
                     <Box sx={{ width: '100px', marginLeft: 1, marginRight: 1 }}>
