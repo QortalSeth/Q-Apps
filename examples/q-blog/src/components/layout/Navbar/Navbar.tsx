@@ -136,7 +136,15 @@ const NavBar: React.FC<Props> = ({
             }}
             onKeyDown={(event) => {
               if (event.key === 'Enter' || event.keyCode === 13) {
-                if (!searchValRef.current) return
+                if (!searchValRef.current) {
+                  dispatch(setIsFiltering(false))
+                  dispatch(setFilterValue(''))
+                  dispatch(addFilteredPosts([]))
+                  searchValRef.current = ''
+                  if (!inputRef.current) return
+                  inputRef.current.value = ''
+                  return
+                }
                 navigate('/')
                 dispatch(setIsFiltering(true))
                 dispatch(addFilteredPosts([]))
@@ -169,7 +177,15 @@ const NavBar: React.FC<Props> = ({
               cursor: 'pointer'
             }}
             onClick={() => {
-              if (!searchValRef.current) return
+              if (!searchValRef.current) {
+                dispatch(setIsFiltering(false))
+                dispatch(setFilterValue(''))
+                dispatch(addFilteredPosts([]))
+                searchValRef.current = ''
+                if (!inputRef.current) return
+                inputRef.current.value = ''
+                return
+              }
               navigate('/')
               dispatch(setIsFiltering(true))
               dispatch(addFilteredPosts([]))
