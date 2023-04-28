@@ -107,8 +107,10 @@ export const CommentEditor = ({
           alertType: 'error'
         }
       }
-      if (!notificationObj) return
+      if (!notificationObj) throw new Error('Failed to publish comment')
+
       dispatch(setNotification(notificationObj))
+      throw new Error('Failed to publish comment')
     }
   }
   const handleSubmit = async () => {
