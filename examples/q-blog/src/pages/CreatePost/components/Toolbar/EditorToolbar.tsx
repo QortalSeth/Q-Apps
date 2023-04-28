@@ -10,6 +10,7 @@ import { VideoPanel } from '../../../../components/common/VideoPanel'
 import MenuOpenIcon from '@mui/icons-material/MenuOpen'
 import HandymanRoundedIcon from '@mui/icons-material/HandymanRounded'
 import Tooltip from '@mui/material/Tooltip'
+import { FilePanel } from '../../../../components/common/FilePanel'
 
 const CustomToolbar = styled(Toolbar)({
   display: 'flex',
@@ -29,6 +30,7 @@ interface IEditorToolbar {
   addImage: (base64: string) => void
   onSelectVideo: (video: any) => void
   onSelectAudio: (audio: any) => void
+  onSelectFile: (file: any) => void
   paddingValue: number
   onChangePadding: (padding: number) => void
   isMinimal?: boolean
@@ -41,6 +43,7 @@ export const EditorToolbar = ({
   addImage,
   onSelectVideo,
   onSelectAudio,
+  onSelectFile,
   paddingValue,
   onChangePadding,
   isMinimal = false,
@@ -92,6 +95,7 @@ export const EditorToolbar = ({
             <VideoPanel onSelect={onSelectVideo} />
 
             <AudioPanel onSelect={onSelectAudio} />
+            <FilePanel onSelect={onSelectFile} />
           </Box>
           <Box
             sx={{

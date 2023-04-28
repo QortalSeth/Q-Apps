@@ -604,6 +604,7 @@ export const CreatePostMinimal = ({
     service: string
     title: string
     description: string
+    mimeType?: string
   }
   const addVideo = ({
     name,
@@ -698,7 +699,44 @@ export const CreatePostMinimal = ({
       }
     })
   }
-
+  const addFile = ({
+    name,
+    identifier,
+    service,
+    title,
+    description,
+    mimeType
+  }: IaddVideo) => {
+    const id = uid()
+    const type = 'file'
+    const section = {
+      type,
+      version: 1,
+      content: {
+        name: name,
+        identifier: identifier,
+        service: service,
+        title,
+        description,
+        mimeType
+      },
+      id
+    }
+    setNewPostContent((prev) => [...prev, section])
+    setLayouts((prev: any) => {
+      return {
+        ...prev,
+        rows: [
+          ...prev.rows,
+          {
+            ids: [id],
+            id: uid(),
+            type
+          }
+        ]
+      }
+    })
+  }
   const addSection = () => {
     setValue(initialValue)
     addPostSection(value)
@@ -824,6 +862,16 @@ export const CreatePostMinimal = ({
       description: video?.metadata?.description
     })
   }, [])
+  const onSelectFile = React.useCallback((video: any) => {
+    addFile({
+      name: video.name,
+      identifier: video.identifier,
+      service: video.service,
+      title: video?.metadata?.title,
+      description: video?.metadata?.description,
+      mimeType: video?.metadata?.mimeType
+    })
+  }, [])
 
   const closeAddTextModal = React.useCallback(() => {
     setIsOpenAddTextModal(false)
@@ -890,6 +938,7 @@ export const CreatePostMinimal = ({
         addImage={addImage}
         onSelectVideo={onSelectVideo}
         onSelectAudio={onSelectAudio}
+        onSelectFile={onSelectFile}
         paddingValue={paddingValue}
         onChangePadding={onChangePadding}
         isMinimal={true}
@@ -1136,6 +1185,62 @@ export const CreatePostMinimal = ({
                     )
                   }
                   if (section.type === 'audio') {
+                    return (
+                      <div key={section.id} className="grid-item">
+                        <DynamicHeightItemMinimal
+                          layouts={layouts}
+                          setLayouts={setLayouts}
+                          i={section.id}
+                          breakpoint={currentBreakpoint}
+                          count={count}
+                          padding={paddingValue}
+                        >
+                          <Box
+                            sx={{
+                              position: 'relative',
+                              width: '100%',
+                              height: '100%'
+                            }}
+                          >
+                            <AudioElement
+                              key={section.id}
+                              onClick={() => {}}
+                              title={section.content?.title}
+                              description={section.content?.description}
+                              author=""
+                            />
+                            <EditButtons>
+                              <DeleteIcon
+                                onClick={() => removeSection(section, rowIndex)}
+                                sx={{
+                                  cursor: 'pointer',
+                                  height: '18px',
+                                  width: 'auto'
+                                }}
+                              />
+                              <AudioPanel
+                                width="auto"
+                                height="18px"
+                                onSelect={(audio) =>
+                                  editAudio(
+                                    {
+                                      name: audio.name,
+                                      identifier: audio.identifier,
+                                      service: audio.service,
+                                      title: audio?.metadata?.title,
+                                      description: audio?.metadata?.description
+                                    },
+                                    section
+                                  )
+                                }
+                              />
+                            </EditButtons>
+                          </Box>
+                        </DynamicHeightItemMinimal>
+                      </div>
+                    )
+                  }
+                  if (section.type === 'file') {
                     return (
                       <div key={section.id} className="grid-item">
                         <DynamicHeightItemMinimal

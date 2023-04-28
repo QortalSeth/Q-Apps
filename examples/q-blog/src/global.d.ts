@@ -43,3 +43,11 @@ declare global {
     _qdnTheme: string
   }
 }
+
+declare global {
+  interface Window {
+    showSaveFilePicker: (
+      options?: SaveFilePickerOptions
+    ) => Promise<FileSystemFileHandle>
+  }
+}

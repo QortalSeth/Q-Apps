@@ -38,6 +38,7 @@ import AudioElement from '../../components/AudioElement'
 import ErrorBoundary from '../../components/common/ErrorBoundary'
 import { CommentSection } from '../../components/common/Comments/CommentSection'
 import { Tipping } from '../../components/common/Tipping/Tipping'
+import FileElement from '../../components/FileElement'
 const ResponsiveGridLayout = WidthProvider(Responsive)
 const initialMinHeight = 2 // Define an initial minimum height for grid items
 
@@ -672,6 +673,65 @@ export const BlogIndividualPost = () => {
                               padding={0}
                             >
                               <AudioElement
+                                key={section.id}
+                                audioInfo={section.content}
+                                postId={fullPostId}
+                                user={user ? user : ''}
+                                onClick={() => {
+                                  if (!blog || !postId) return
+                                  const formBlogId = addPrefix(blog)
+                                  const formPostId =
+                                    buildIdentifierFromCreateTitleIdAndId(
+                                      formBlogId,
+                                      postId
+                                    )
+                                  if (formPostId !== audioPostId) {
+                                    tempSaveAudio.current = {
+                                      ...(tempSaveAudio.current || {}),
+                                      currentSelection: section,
+                                      message:
+                                        'You are current on a playlist. Would you like to switch?'
+                                    }
+                                    setisOpenSwitchPlaylistModal(true)
+                                  } else {
+                                    const findIndex = (audios || []).findIndex(
+                                      (item) =>
+                                        item.identifier ===
+                                        section.content.identifier
+                                    )
+                                    if (findIndex >= 0) {
+                                      dispatch(setCurrAudio(findIndex))
+                                    }
+                                  }
+                                }}
+                                title={section.content?.title}
+                                description={section.content?.description}
+                                author=""
+                              />
+                            </DynamicHeightItemMinimal>
+                          </ErrorBoundary>
+                        </div>
+                      )
+                    }
+                    if (section?.type === 'file') {
+                      return (
+                        <div key={section?.id} className="grid-item">
+                          <ErrorBoundary
+                            fallback={
+                              <Typography>
+                                Error loading content: Invalid Data
+                              </Typography>
+                            }
+                          >
+                            <DynamicHeightItemMinimal
+                              layouts={layouts}
+                              setLayouts={setLayouts}
+                              i={section.id}
+                              breakpoint={currentBreakpoint}
+                              count={count}
+                              padding={0}
+                            >
+                              <FileElement
                                 key={section.id}
                                 audioInfo={section.content}
                                 postId={fullPostId}

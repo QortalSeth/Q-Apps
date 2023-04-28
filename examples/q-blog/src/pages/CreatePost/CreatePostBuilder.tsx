@@ -928,6 +928,7 @@ export const CreatePostBuilder = ({
         addImage={addImage}
         onSelectVideo={onSelectVideo}
         onSelectAudio={onSelectAudio}
+        onSelectFile={() => {}}
         paddingValue={paddingValue}
         onChangePadding={onChangePadding}
         addNav={addNav}
