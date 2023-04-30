@@ -8,7 +8,7 @@ import {
 
 export const fetchAndEvaluateMail = async (data: any) => {
   const getBlogPost = async () => {
-    const { user, messageIdentifier, content } = data
+    const { user, messageIdentifier, content, otherUser } = data
     console.log('2', user, messageIdentifier, content)
     let obj: any = {
       ...content,
@@ -29,7 +29,7 @@ export const fetchAndEvaluateMail = async (data: any) => {
       const toUnit8Array = base64ToUint8Array(res)
       const resName = await qortalRequest({
         action: 'GET_NAME_DATA',
-        name: user
+        name: otherUser
       })
       if (!resName?.owner) return obj
 

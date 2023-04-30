@@ -97,12 +97,19 @@ export const NewMessage = ({ setReplyTo, replyTo }: NewMessageProps) => {
         thread: []
       }
     }
-    if (replyTo?.id && mailObject?.generalData?.thread) {
-      mailObject.generalData.thread.push(replyTo.id)
+    if (replyTo?.id) {
+      const previousTread = Array.isArray(replyTo?.generalData?.thread)
+        ? replyTo?.generalData?.thread
+        : []
+      mailObject.generalData.thread = [...previousTread, replyTo.id]
     }
-    if (replyTo?.id && !mailObject?.generalData?.thread) {
-      mailObject.generalData.thread = [replyTo.id]
-    }
+
+    // if (replyTo?.id && mailObject?.generalData?.thread) {
+    //   mailObject.generalData.thread.push(replyTo.id)
+    // }
+    // if (replyTo?.id && !mailObject?.generalData?.thread) {
+    //   mailObject.generalData.thread = [replyTo.id]
+    // }
     try {
       if (!destinationName) return
       const id = uid()

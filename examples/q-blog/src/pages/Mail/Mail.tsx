@@ -76,7 +76,8 @@ export const Mail = () => {
       const res = await fetchAndEvaluateMail({
         user,
         messageIdentifier,
-        content
+        content,
+        otherUser: user
       })
       console.log({ res })
       setMessage(res)

@@ -175,7 +175,7 @@ export default function ReactVirtualizedTable({
   )
 }
 
-const AvatarWrapper = ({ user }: any) => {
+export const AvatarWrapper = ({ user }: any) => {
   const userAvatarHash = useSelector(
     (state: RootState) => state.global.userAvatarHash
   )

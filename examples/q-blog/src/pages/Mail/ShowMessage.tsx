@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { ReusableModal } from '../../components/modals/ReusableModal'
-import { Box, Input, Typography } from '@mui/material'
+import { Box, Button, Input, Typography } from '@mui/material'
 import { BuilderButton } from '../CreatePost/CreatePost-styles'
 import BlogEditor from '../../components/editor/BlogEditor'
 import EmailIcon from '@mui/icons-material/Email'
@@ -35,8 +35,10 @@ export const ShowMessage = ({
   const [title, setTitle] = useState<string>('')
   const [attachments, setAttachments] = useState<any[]>([])
   const [description, setDescription] = useState<string>('')
+  const [isOpenMailThread, setIsOpenMailThread] = useState<boolean>(false)
+
   const [destinationName, setDestinationName] = useState('')
-  const { user } = useSelector((state: RootState) => state.auth)
+  const user = useSelector((state: RootState) => state.auth?.user)
   const dispatch = useDispatch()
   const openModal = () => {
     setIsOpen(true)
@@ -188,25 +190,48 @@ export const ShowMessage = ({
       <ReusableModal
         open={isOpen}
         customStyles={{
-          width: '90%',
+          width: '96%',
           maxWidth: 1500,
-          height: '90%'
+          height: '96%'
         }}
       >
-        <MailThread />
         <Box
           sx={{
             display: 'flex',
-            gap: 1,
-            justifyContent: 'space-between',
+            justifyContent: 'flex-end',
+            width: '100%',
             alignItems: 'center'
           }}
         >
-          <Box>{message?.user}</Box>
-          <Box>
-            <Typography>{message?.description}</Typography>
-          </Box>
+          {isOpenMailThread &&
+            message?.generalData?.thread &&
+            message?.user &&
+            user?.name && (
+              <Button
+                variant="contained"
+                onClick={() => {
+                  setIsOpenMailThread(false)
+                }}
+              >
+                Hide message threads
+              </Button>
+            )}
+
+          {!isOpenMailThread &&
+            message?.generalData?.thread?.length > 0 &&
+            message?.user &&
+            user?.name && (
+              <Button
+                variant="contained"
+                onClick={() => {
+                  setIsOpenMailThread(true)
+                }}
+              >
+                Show message threads
+              </Button>
+            )}
         </Box>
+
         <Box
           sx={{
             display: 'flex',
@@ -214,9 +239,34 @@ export const ShowMessage = ({
             flexDirection: 'column',
             gap: 1,
             flexGrow: 1,
-            overflow: 'auto'
+            overflow: 'auto',
+            width: '100%'
           }}
         >
+          {isOpenMailThread &&
+            message?.generalData?.thread?.length > 0 &&
+            message?.user &&
+            user?.name && (
+              <MailThread
+                thread={message?.generalData?.thread}
+                users={[message.user, user.name]}
+                otherUser={message?.user}
+              />
+            )}
+          <Box
+            sx={{
+              display: 'flex',
+              gap: 1,
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              width: '100%'
+            }}
+          >
+            <Box>{message?.user}</Box>
+            <Box>
+              <Typography>{message?.description}</Typography>
+            </Box>
+          </Box>
           {message?.textContent && (
             <ReadOnlySlate content={message.textContent} />
           )}
