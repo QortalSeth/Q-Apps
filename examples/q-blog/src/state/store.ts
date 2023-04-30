@@ -4,6 +4,7 @@ import notificationsReducer from "./features/notificationsSlice";
 import authReducer from "./features/authSlice";
 import globalReducer from "./features/globalSlice";
 import blogReducer from "./features/blogSlice";
+import mailReducer from './features/mailSlice'
 
 export const store = configureStore({
   reducer: {
@@ -11,14 +12,15 @@ export const store = configureStore({
     notifications: notificationsReducer,
     auth: authReducer,
     global: globalReducer,
-    blog: blogReducer
+    blog: blogReducer,
+    mail: mailReducer
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
-      serializableCheck: false,
+      serializableCheck: false
     }),
-  preloadedState: undefined, // optional, can be any valid state object
-});
+  preloadedState: undefined // optional, can be any valid state object
+})
 
 // Define the RootState type, which is the type of the entire Redux state tree.
 // This is useful when you need to access the state in a component or elsewhere.

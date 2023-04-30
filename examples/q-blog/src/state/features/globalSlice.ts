@@ -32,6 +32,7 @@ interface GlobalState {
   audioPostId: string
   downloads: any
   showingAudioPlayer: boolean
+  userAvatarHash: Record<string, string>
 }
 const initialState: GlobalState = {
   isOpenPublishBlogModal: false,
@@ -44,7 +45,8 @@ const initialState: GlobalState = {
   currAudio: null,
   audioPostId: '',
   downloads: {},
-  showingAudioPlayer: false
+  showingAudioPlayer: false,
+  userAvatarHash: {}
 }
 
 export const globalSlice = createSlice({
@@ -95,6 +97,12 @@ export const globalSlice = createSlice({
         ...state.downloads[identifier],
         ...download
       }
+    },
+    setUserAvatarHash: (state, action) => {
+      const avatar = action.payload
+      if (avatar?.name && avatar?.url) {
+        state.userAvatarHash[avatar?.name] = avatar?.url
+      }
     }
   }
 })
@@ -110,7 +118,8 @@ export const {
   removeAudio,
   setAddToDownloads,
   updateDownloads,
-  setShowingAudioPlayer
+  setShowingAudioPlayer,
+  setUserAvatarHash
 } = globalSlice.actions
 
 export default globalSlice.reducer;

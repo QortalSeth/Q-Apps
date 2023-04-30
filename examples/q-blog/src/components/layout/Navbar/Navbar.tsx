@@ -22,6 +22,8 @@ import BookmarkIcon from '@mui/icons-material/Bookmark'
 import SubscriptionsIcon from '@mui/icons-material/Subscriptions'
 import { BlockedNamesModal } from '../../common/BlockedNamesModal/BlockedNamesModal'
 import SearchIcon from '@mui/icons-material/Search'
+import EmailIcon from '@mui/icons-material/Email'
+
 import BackspaceIcon from '@mui/icons-material/Backspace'
 import {
   AvatarContainer,
@@ -317,6 +319,14 @@ const NavBar: React.FC<Props> = ({
                 }}
               />
               <DropdownText>Blocked Names</DropdownText>
+            </DropdownContainer>
+            <DropdownContainer onClick={() => navigate('/mail')}>
+              <EmailIcon
+                sx={{
+                  color: '#50e3c2'
+                }}
+              />
+              <DropdownText>My Mail</DropdownText>
             </DropdownContainer>
           </Popover>
           {isOpenModal && (

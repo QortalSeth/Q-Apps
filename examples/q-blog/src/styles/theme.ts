@@ -44,7 +44,7 @@ const commonThemeOptions = {
 
     body2: {
       fontSize: '18px',
-      fontFamily: 'CambonLight, Raleway, Arial',
+      fontFamily: 'Raleway, Arial',
       fontWeight: 400,
       lineHeight: 1.4,
       letterSpacing: '0.2px'
@@ -70,15 +70,15 @@ const commonThemeOptions = {
           backgroundColor: 'inherit',
           transition: 'filter 0.3s ease-in-out',
           '&:hover': {
-            filter: 'brightness(1.1)',
-          },
-        },
+            filter: 'brightness(1.1)'
+          }
+        }
       },
       defaultProps: {
         disableElevation: true,
-        disableRipple: true,
-      },
-    },
+        disableRipple: true
+      }
+    }
   }
 }
 
