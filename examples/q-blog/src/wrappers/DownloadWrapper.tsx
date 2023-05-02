@@ -77,13 +77,45 @@ const DownloadWrapper: React.FC<Props> = ({ children }) => {
     } catch (error) {}
   }
 
+  const fetchResource = async ({ name, service, identifier }: any) => {
+    try {
+      await qortalRequest({
+        action: 'GET_QDN_RESOURCE_PROPERTIES',
+        name,
+        service,
+        identifier
+      })
+    } catch (error) {}
+  }
+
+  const fetchVideoUrl = async ({ name, service, identifier }: any) => {
+    try {
+      fetchResource({ name, service, identifier })
+      let url = await qortalRequest({
+        action: 'GET_QDN_RESOURCE_URL',
+        service: service,
+        name: name,
+        identifier: identifier
+      })
+      if (url) {
+        dispatch(
+          updateDownloads({
+            name,
+            service,
+            identifier,
+            url
+          })
+        )
+      }
+    } catch (error) {}
+  }
+
   const performDownload = ({
     name,
     service,
     identifier,
     blogPost
   }: IDownloadVideoParams) => {
-   
     dispatch(
       setAddToDownloads({
         name,
@@ -133,23 +165,11 @@ const DownloadWrapper: React.FC<Props> = ({ children }) => {
             )
             setTimeout(() => {
               isCalling = false
-              fetch(url)
-                .then((response) => response.blob())
-                .then((blob) => {
-                  const url = URL.createObjectURL(blob)
-                  dispatch(
-                    updateDownloads({
-                      name,
-                      service,
-                      identifier,
-                      url
-                    })
-                  )
-                })
-                .catch((error) => {
-                  console.error('Error fetching the video:', error)
-                  // clearInterval(intervalId)
-                })
+              fetchResource({
+                name,
+                service,
+                identifier
+              })
             }, 120000)
             return
           }
@@ -178,23 +198,13 @@ const DownloadWrapper: React.FC<Props> = ({ children }) => {
         )
       }
     }, 3000) // 1 second interval
-    fetch(url)
-      .then((response) => response.blob())
-      .then((blob) => {
-        const url = URL.createObjectURL(blob)
-        dispatch(
-          updateDownloads({
-            name,
-            service,
-            identifier,
-            url
-          })
-        )
-      })
-      .catch((error) => {
-        console.error('Error fetching the video:', error)
-        // clearInterval(intervalId)
-      })
+
+    fetchVideoUrl({
+      name,
+      service,
+      identifier
+    })
+ 
   }
 
   const downloadVideo = async ({
@@ -204,9 +214,7 @@ const DownloadWrapper: React.FC<Props> = ({ children }) => {
     blogPost
   }: IDownloadVideoParams) => {
     try {
-      // if (downloads.length > 3) return 'continue'
-      // const willAdd = await addToPile({ name, service, identifier })
-      // if (willAdd === false) return 'continue'
+
 
       performDownload({
         name,
