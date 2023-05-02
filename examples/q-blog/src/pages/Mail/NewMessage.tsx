@@ -1,6 +1,6 @@
 import React, { Dispatch, useEffect, useState } from 'react'
 import { ReusableModal } from '../../components/modals/ReusableModal'
-import { Box, Input } from '@mui/material'
+import { Box, Input, Typography } from '@mui/material'
 import { BuilderButton } from '../CreatePost/CreatePost-styles'
 import BlogEditor from '../../components/editor/BlogEditor'
 import EmailIcon from '@mui/icons-material/Email'
@@ -8,11 +8,16 @@ import { Descendant } from 'slate'
 import ShortUniqueId from 'short-unique-id'
 import { useDispatch, useSelector } from 'react-redux'
 import { RootState } from '../../state/store'
+import { useDropzone } from 'react-dropzone'
+import AttachFileIcon from '@mui/icons-material/AttachFile'
+import CloseIcon from '@mui/icons-material/Close'
+
 import { setNotification } from '../../state/features/notificationsSlice'
 import {
   objectToBase64,
   objectToUint8Array,
   objectToUint8ArrayFromResponse,
+  processFileInChunks,
   uint8ArrayToBase64
 } from '../../utils/toBase64'
 const initialValue: Descendant[] = [
@@ -34,9 +39,17 @@ export const NewMessage = ({ setReplyTo, replyTo }: NewMessageProps) => {
   const [title, setTitle] = useState<string>('')
   const [attachments, setAttachments] = useState<any[]>([])
   const [description, setDescription] = useState<string>('')
+  const [subject, setSubject] = useState<string>('')
   const [destinationName, setDestinationName] = useState('')
   const { user } = useSelector((state: RootState) => state.auth)
   const dispatch = useDispatch()
+  const { getRootProps, getInputProps } = useDropzone({
+    onDrop: (acceptedFiles) => {
+      setAttachments((prev) => [...prev, ...acceptedFiles])
+    }
+  })
+
+  console.log({ attachments })
   const openModal = () => {
     setIsOpen(true)
 
@@ -52,14 +65,14 @@ export const NewMessage = ({ setReplyTo, replyTo }: NewMessageProps) => {
     }
   }, [replyTo])
   async function publishQDNResource() {
-    let address
-    let name
+    let address: string = ''
+    let name: string = ''
     let errorMsg = ''
 
-    address = user?.address
+    address = user?.address || ''
     name = user?.name || ''
 
-    const missingFields = []
+    const missingFields: string[] = []
     if (!address) {
       errorMsg = "Cannot send: your address isn't available"
     }
@@ -69,7 +82,7 @@ export const NewMessage = ({ setReplyTo, replyTo }: NewMessageProps) => {
     if (!destinationName) {
       errorMsg = 'Cannot send a message without a recipient name'
     }
-    if (!description) missingFields.push('subject')
+    // if (!description) missingFields.push('subject')
     if (missingFields.length > 0) {
       const missingFieldsString = missingFields.join(', ')
       const errMsg = `Missing: ${missingFieldsString}`
@@ -86,9 +99,21 @@ export const NewMessage = ({ setReplyTo, replyTo }: NewMessageProps) => {
       throw new Error(errorMsg)
     }
 
+    // const attachmentArray = attachments.map((attach) => {
+    //   const id = uid()
+
+    //   const identifier = `attachments_qmail_${id}`
+    //   return {
+    //     fileName: attach.name,
+    //     identifier,
+    //     file: attach
+    //   }
+    // })
+
     const mailObject: any = {
       title,
-      description,
+      // description,
+      subject,
       createdAt: Date.now(),
       version: 1,
       attachments,
@@ -128,6 +153,57 @@ export const NewMessage = ({ setReplyTo, replyTo }: NewMessageProps) => {
       if (!resAddress?.publicKey) return
       const recipientPublicKey = resAddress.publicKey
 
+      // START OF ATTACHMENT LOGIC
+
+      const attachmentArray = []
+      for (const attachment of attachments) {
+        const dataUint8Array = await processFileInChunks(attachment)
+        let requestEncryptBodyAttachment: any = {
+          action: 'ENCRYPT_DATA',
+          Uint8ArrayData: dataUint8Array,
+          destinationPublicKey: recipientPublicKey
+        }
+        const responseEncryptAttachment = await qortalRequest(
+          requestEncryptBodyAttachment
+        )
+        console.log({ responseEncryptAttachment })
+        const convertToArrayAttachment = objectToUint8ArrayFromResponse(
+          responseEncryptAttachment.encryptedData
+        )
+        console.log({ convertToArrayAttachment })
+        const encryptedDataBase64 = uint8ArrayToBase64(convertToArrayAttachment)
+        console.log({ encryptedDataBase64 })
+        const id = uid()
+        const id2 = uid()
+        const identifier = `attachments_qmail_${id}_${id2}`
+        const fileExtension = attachment?.name?.split('.')?.pop()
+        if (!fileExtension) {
+          throw new Error('One of your attachments does not have an extension')
+        }
+        const obj = {
+          name: name,
+          service: 'ATTACHMENT',
+          filename: `${id}.${fileExtension}`,
+          identifier,
+          data64: encryptedDataBase64
+        }
+
+        attachmentArray.push(obj)
+      }
+
+      //END OF ATTACHMENT LOGIC
+
+      if (attachmentArray?.length > 0) {
+        mailObject.attachments = attachmentArray.map((item) => {
+          return {
+            identifier: item.identifier,
+            name,
+            service: 'ATTACHMENT',
+            filename: item.filename
+          }
+        })
+      }
+
       const blogPostToUnit8Array = objectToUint8Array(mailObject)
 
       let requestEncryptBody: any = {
@@ -153,11 +229,16 @@ export const NewMessage = ({ setReplyTo, replyTo }: NewMessageProps) => {
         service: 'DOCUMENT',
         data64: encryptedDataBase64,
         title: title,
-        description: description,
-        tag1: `attach: ${attachments?.length?.toString()}`,
+        // description: description,
         identifier
       }
-      const resourceResponse = await qortalRequest(requestBody)
+      const multiplePublish = {
+        action: 'PUBLISH_MULTIPLE_QDN_RESOURCES',
+        resources: [...attachmentArray]
+      }
+
+      await qortalRequest(multiplePublish)
+      await qortalRequest(requestBody)
       dispatch(
         setNotification({
           msg: 'Message sent',
@@ -216,24 +297,98 @@ export const NewMessage = ({ setReplyTo, replyTo }: NewMessageProps) => {
             gap: 1
           }}
         >
-          <Input
-            id="standard-adornment-name"
-            value={destinationName}
-            disabled={!!replyTo}
-            onChange={(e) => {
-              setDestinationName(e.target.value)
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'flex-start',
+              flexDirection: 'column',
+              gap: 2,
+              width: '100%'
             }}
-            placeholder="To (name) -public"
+          >
+            <Input
+              id="standard-adornment-name"
+              value={destinationName}
+              disabled={!!replyTo}
+              onChange={(e) => {
+                setDestinationName(e.target.value)
+              }}
+              placeholder="To (name) -public"
+              sx={{
+                width: '100%',
+                fontSize: '16px'
+              }}
+            />
+            <Input
+              id="standard-adornment-name"
+              value={subject}
+              onChange={(e) => {
+                setSubject(e.target.value)
+              }}
+              placeholder="Subject"
+              sx={{
+                width: '100%',
+                fontSize: '16px'
+              }}
+            />
+            <Box
+              {...getRootProps()}
+              sx={{
+                border: '1px dashed gray',
+                padding: 2,
+                textAlign: 'center',
+                marginBottom: 2
+              }}
+            >
+              <input {...getInputProps()} />
+              <AttachFileIcon
+                sx={{
+                  height: '20px',
+                  width: 'auto',
+                  cursor: 'pointer'
+                }}
+              ></AttachFileIcon>
+            </Box>
+            <Box>
+              {attachments.map((file, index) => {
+                return (
+                  <Box
+                    sx={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '15px'
+                    }}
+                  >
+                    <Typography
+                      sx={{
+                        fontSize: '16px'
+                      }}
+                    >
+                      {file?.name}
+                    </Typography>
+                    <CloseIcon
+                      onClick={() =>
+                        setAttachments((prev) =>
+                          prev.filter((item, itemIndex) => itemIndex !== index)
+                        )
+                      }
+                      sx={{
+                        height: '16px',
+                        width: 'auto',
+                        cursor: 'pointer'
+                      }}
+                    />
+                  </Box>
+                )
+              })}
+            </Box>
+          </Box>
+          <BlogEditor
+            mode="mail"
+            value={value}
+            setValue={setValue}
+            editorKey={1}
           />
-          <Input
-            id="standard-adornment-name"
-            value={description}
-            onChange={(e) => {
-              setDescription(e.target.value)
-            }}
-            placeholder="Subject -public"
-          />
-          <BlogEditor value={value} setValue={setValue} editorKey={1} />
         </Box>
         <BuilderButton onClick={sendMail}>
           {replyTo ? 'Send reply mail' : 'Send mail'}

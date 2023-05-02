@@ -19,7 +19,11 @@ import {
 import { RootState } from '../state/store'
 import { fetchAndEvaluatePosts } from '../utils/fetchPosts'
 import { fetchAndEvaluateMail } from '../utils/fetchMail'
-import { addToHashMapMail, upsertMessages } from '../state/features/mailSlice'
+import {
+  addToHashMapMail,
+  upsertMessages,
+  upsertMessagesBeginning
+} from '../state/features/mailSlice'
 
 export const useFetchMail = () => {
   const dispatch = useDispatch()
@@ -89,30 +93,49 @@ export const useFetchMail = () => {
     dispatch(addToHashMapMail(res))
   }
 
-  const checkNewMessages = React.useCallback(async () => {
-    try {
-      const url = `/arbitrary/resources/search?service=BLOG_POST&query=q-blog-&limit=20&includemetadata=true&reverse=true&excludeblocked=true`
-      const response = await fetch(url, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json'
+  const checkNewMessages = React.useCallback(
+    async (recipientName: string, recipientAddress: string) => {
+      try {
+        const query = `qblog_qmail_${recipientName.slice(
+          0,
+          20
+        )}_${recipientAddress.slice(-6)}_mail_`
+        const url = `/arbitrary/resources/search?service=DOCUMENT&query=${query}&limit=20&includemetadata=true&reverse=true&excludeblocked=true`
+        const response = await fetch(url, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        })
+        const responseData = await response.json()
+        const latestPost = mailMessages[0]
+        if (!latestPost) return
+        const findPost = responseData?.findIndex(
+          (item: any) => item?.identifier === latestPost?.id
+        )
+        if (findPost === -1) {
+          return
         }
-      })
-      const responseData = await response.json()
-      const latestPost = posts[0]
-      if (!latestPost) return
-      const findPost = responseData?.findIndex(
-        (item: any) => item?.identifier === latestPost?.id
-      )
-      if (findPost === -1) {
-        dispatch(setCountNewPosts(responseData.length))
+        const newArray = responseData.slice(0, findPost)
+        const structureData = newArray.map((post: any): BlogPost => {
+          return {
+            title: post?.metadata?.title,
+            category: post?.metadata?.category,
+            categoryName: post?.metadata?.categoryName,
+            tags: post?.metadata?.tags || [],
+            description: post?.metadata?.description,
+            createdAt: post?.created,
+            updated: post?.updated,
+            user: post.name,
+            id: post.identifier
+          }
+        })
+        dispatch(upsertMessagesBeginning(structureData))
         return
-      }
-      const newArray = responseData.slice(0, findPost)
-      dispatch(setCountNewPosts(newArray.length))
-      return
-    } catch (error) {}
-  }, [posts])
+      } catch (error) {}
+    },
+    [mailMessages]
+  )
 
   const getNewPosts = React.useCallback(async () => {
     try {

@@ -53,19 +53,35 @@ export const toBase64 = (file: File): Promise<string | ArrayBuffer | null> =>
     return uint8Array
   }
 
+  // export function uint8ArrayToBase64(uint8Array: Uint8Array): string {
+  //   console.log({ uint8Array })
+  //   // Convert the Uint8Array to a regular array of numbers
+  //   const numberArray: number[] = Array.from(uint8Array)
+
+  //   // Convert the array of numbers to a binary string
+  //   const binaryString: string = String.fromCharCode.apply(null, numberArray)
+
+  //   // Convert the binary string to a base64-encoded string
+  //   const base64String: string = btoa(binaryString)
+  //   console.log({ base64String })
+  //   return base64String
+  // }
+
   export function uint8ArrayToBase64(uint8Array: Uint8Array): string {
-    console.log({ uint8Array })
-    // Convert the Uint8Array to a regular array of numbers
-    const numberArray: number[] = Array.from(uint8Array)
-
-    // Convert the array of numbers to a binary string
-    const binaryString: string = String.fromCharCode.apply(null, numberArray)
-
-    // Convert the binary string to a base64-encoded string
-    const base64String: string = btoa(binaryString)
-    console.log({ base64String })
-    return base64String
+    const length = uint8Array.length;
+    let base64String = '';
+    const chunkSize = 1024 * 1024; // Process 1MB at a time
+  
+    for (let i = 0; i < length; i += chunkSize) {
+      const chunkEnd = Math.min(i + chunkSize, length);
+      const chunk = uint8Array.subarray(i, chunkEnd);
+      const binaryString: string = chunk.reduce((acc, byte) => acc + String.fromCharCode(byte), '');
+      base64String += btoa(binaryString);
+    }
+  
+    return base64String;
   }
+  
 
   export function objectToUint8ArrayFromResponse(obj: any) {
     const len = Object.keys(obj).length
@@ -111,3 +127,54 @@ export const toBase64 = (file: File): Promise<string | ArrayBuffer | null> =>
 
     return obj
   }
+
+  export function processFileInChunks(file: File): Promise<Uint8Array> {
+    return new Promise((resolve: (value: Uint8Array) => void, reject: (reason?: any) => void) => {
+      const reader = new FileReader();
+
+      reader.onload = function (event: ProgressEvent<FileReader>) {
+        const arrayBuffer = event.target?.result as ArrayBuffer;
+        const uint8Array = new Uint8Array(arrayBuffer);
+        resolve(uint8Array);
+      };
+
+      reader.onerror = function (error: ProgressEvent<FileReader>) {
+        reject(error);
+      };
+
+      reader.readAsArrayBuffer(file);
+    });
+  }
+
+  // export async function processFileInChunks(file: File, chunkSize = 1024 * 1024): Promise<Uint8Array> {
+  //   const fileStream = file.stream();
+  //   const reader = fileStream.getReader();
+  //   const totalLength = file.size;
+  
+  //   if (totalLength <= 0 || isNaN(totalLength)) {
+  //     throw new Error('Invalid file size');
+  //   }
+  
+  //   const combinedArray = new Uint8Array(totalLength);
+  //   let offset = 0;
+  
+  //   while (offset < totalLength) {
+  //     const { value, done } = await reader.read();
+  
+  //     if (done) {
+  //       break;
+  //     }
+  
+  //     const chunk = new Uint8Array(value.buffer, value.byteOffset, value.byteLength);
+  
+  //     // Set elements one by one instead of using combinedArray.set(chunk, offset)
+  //     for (let i = 0; i < chunk.length; i++) {
+  //       combinedArray[offset + i] = chunk[i];
+  //     }
+  
+  //     offset += chunk.length;
+  //   }
+  
+  //   return combinedArray;
+  // }
+  

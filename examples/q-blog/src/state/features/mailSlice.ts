@@ -229,6 +229,16 @@ export const mailSlice = createSlice({
         }
       })
     },
+    upsertMessagesBeginning: (state, action) => {
+      action.payload.reverse().forEach((message: BlogPost) => {
+        const index = state.mailMessages.findIndex((p) => p.id === message.id)
+        if (index !== -1) {
+          state.mailMessages[index] = message
+        } else {
+          state.mailMessages.unshift(message)
+        }
+      })
+    },
     upsertSubscriptionPosts: (state, action) => {
       action.payload.forEach((post: BlogPost) => {
         const index = state.subscriptionPosts.findIndex((p) => p.id === post.id)
@@ -328,7 +338,8 @@ export const {
   setIsFiltering,
   setFilterValue,
   upsertMessages,
-  addToHashMapMail
+  addToHashMapMail,
+  upsertMessagesBeginning
 } = mailSlice.actions
 
 export default mailSlice.reducer

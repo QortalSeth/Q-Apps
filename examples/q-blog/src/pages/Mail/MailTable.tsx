@@ -12,6 +12,7 @@ import { Avatar, Box } from '@mui/material'
 import { useSelector } from 'react-redux'
 import { RootState } from '../../state/store'
 
+const tableCellFontSize = '16px'
 interface Data {
   name: string
   description: string
@@ -19,6 +20,7 @@ interface Data {
   user: string
   id: string
   tags: string[]
+  subject?: string
 }
 interface ColumnData {
   dataKey: keyof Data
@@ -68,7 +70,24 @@ const rows: Data[] = [
 
 const VirtuosoTableComponents: TableComponents<Data> = {
   Scroller: React.forwardRef<HTMLDivElement>((props, ref) => (
-    <TableContainer component={Paper} {...props} ref={ref} />
+    <TableContainer
+      component={Paper}
+      {...props}
+      ref={ref}
+      sx={{
+        '&::-webkit-scrollbar': {
+          width: '8px',
+          height: '8px'
+        },
+        '&::-webkit-scrollbar-thumb': {
+          backgroundColor: '#888',
+          borderRadius: '4px'
+        },
+        '&::-webkit-scrollbar-thumb:hover': {
+          backgroundColor: '#555'
+        }
+      }}
+    />
   )),
   Table: (props) => (
     <Table
@@ -87,7 +106,6 @@ function fixedHeaderContent() {
   return (
     <TableRow>
       {columns.map((column) => {
-        console.log({ column })
         return (
           <TableCell
             key={column.dataKey}
@@ -95,7 +113,9 @@ function fixedHeaderContent() {
             align={column.numeric || false ? 'right' : 'left'}
             style={{ width: column.width }}
             sx={{
-              backgroundColor: 'background.paper'
+              backgroundColor: 'background.paper',
+              fontSize: tableCellFontSize,
+              padding: '7px'
             }}
           >
             {column.label}
@@ -109,39 +129,51 @@ function fixedHeaderContent() {
 function rowContent(_index: number, row: Data, openMessage: any) {
   return (
     <React.Fragment>
-      {columns.map((column) => (
-        <TableCell
-          onClick={() => openMessage(row?.user, row?.id, row)}
-          key={column.dataKey}
-          align={column.numeric || false ? 'right' : 'left'}
-          style={{ width: column.width, cursor: 'pointer' }}
-        >
-          {column.dataKey === 'user' && (
-            <Box
-              sx={{
-                display: 'flex',
-                gap: '5px',
-                width: '100%',
-                alignItems: 'center',
-                flexWrap: 'wrap',
-                textOverflow: 'ellipsis',
-                overflow: 'hidden',
-                whiteSpace: 'nowrap'
-              }}
-            >
-              <AvatarWrapper user={row?.user}></AvatarWrapper>
-              {row[column.dataKey]}
-            </Box>
-          )}
-          {column.dataKey !== 'user' && (
-            <>
-              {column.dataKey === 'createdAt'
-                ? formatTimestamp(row[column.dataKey])
-                : row[column.dataKey]}
-            </>
-          )}
-        </TableCell>
-      ))}
+      {columns.map((column) => {
+        let subject = '-'
+        if (column.dataKey === 'description' && row['subject']) {
+          subject = row['subject']
+        }
+        return (
+          <TableCell
+            onClick={() => openMessage(row?.user, row?.id, row)}
+            key={column.dataKey}
+            align={column.numeric || false ? 'right' : 'left'}
+            style={{ width: column.width, cursor: 'pointer' }}
+            sx={{
+              fontSize: tableCellFontSize,
+              padding: '7px'
+            }}
+          >
+            {column.dataKey === 'user' && (
+              <Box
+                sx={{
+                  display: 'flex',
+                  gap: '5px',
+                  width: '100%',
+                  alignItems: 'center',
+                  flexWrap: 'wrap',
+                  textOverflow: 'ellipsis',
+                  overflow: 'hidden',
+                  whiteSpace: 'nowrap'
+                }}
+              >
+                <AvatarWrapper user={row?.user}></AvatarWrapper>
+                {row[column.dataKey]}
+              </Box>
+            )}
+            {column.dataKey !== 'user' && (
+              <>
+                {column.dataKey === 'createdAt'
+                  ? formatTimestamp(row[column.dataKey])
+                  : column.dataKey === 'description'
+                  ? subject
+                  : row[column.dataKey]}
+              </>
+            )}
+          </TableCell>
+        )
+      })}
     </React.Fragment>
   )
 }
@@ -160,7 +192,7 @@ export default function ReactVirtualizedTable({
   loadMoreData
 }: ReactVirtualizedTableProps) {
   return (
-    <Paper style={{ height: 'calc(100vh - 150px)', width: '100%' }}>
+    <Paper style={{ height: 'calc(100vh - 105px)', width: '100%' }}>
       <TableVirtuoso
         data={data}
         components={VirtuosoTableComponents}

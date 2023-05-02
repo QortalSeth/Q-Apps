@@ -313,7 +313,7 @@ export const BlogIndividualPost = () => {
               <Typography
                 sx={{ fontFamily: 'Cairo', fontSize: '25px' }}
                 color={theme.palette.text.primary}
-              >{`Author: ${user}`}</Typography>
+              >{` ${user}`}</Typography>
             }
           />
           {user && (

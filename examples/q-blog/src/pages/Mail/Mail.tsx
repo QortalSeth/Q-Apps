@@ -1,4 +1,11 @@
-import React, { FC, useCallback, useEffect, useRef, useState } from 'react'
+import React, {
+  FC,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState
+} from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useDispatch, useSelector } from 'react-redux'
 import { RootState } from '../../state/store'
@@ -15,7 +22,6 @@ import { fetchAndEvaluateMail } from '../../utils/fetchMail'
 import { addToHashMapMail } from '../../state/features/mailSlice'
 
 export const Mail = () => {
-  console.log('MAIL')
   const theme = useTheme()
   const { user } = useSelector((state: RootState) => state.auth)
   const [isOpen, setIsOpen] = useState<boolean>(false)
@@ -31,36 +37,47 @@ export const Mail = () => {
   const mailMessages = useSelector(
     (state: RootState) => state.mail.mailMessages
   )
+
+  const fullMailMessages = useMemo(() => {
+    return mailMessages.map((msg) => {
+      let message = msg
+      const existingMessage = hashMapMailMessages[msg.id]
+      if (existingMessage) {
+        message = existingMessage
+      }
+      return message
+    })
+  }, [mailMessages, hashMapMailMessages])
   const dispatch = useDispatch()
   const navigate = useNavigate()
 
-  const { getMailMessages } = useFetchMail()
+  const { getMailMessages, checkNewMessages } = useFetchMail()
   const getMessages = React.useCallback(async () => {
     if (!user?.name || !user?.address) return
     await getMailMessages(user.name, user.address)
-    // await getMailMessages('Phil', 'QbpZL12Lh7K2y6xPZure4pix5jH6ViVrF2')
   }, [getMailMessages, user])
 
   const interval = useRef<any>(null)
 
-  // const checkNewMessagesFunc = useCallback(() => {
-  //   let isCalling = false
-  //   interval.current = setInterval(async () => {
-  //     if (isCalling) return
-  //     isCalling = true
-  //     const res = await checkNewMessages()
-  //     isCalling = false
-  //   }, 30000) // 1 second interval
-  // }, [checkNewMessages])
+  const checkNewMessagesFunc = useCallback(() => {
+    if (!user?.name || !user?.address) return
+    let isCalling = false
+    interval.current = setInterval(async () => {
+      if (isCalling || !user?.name || !user?.address) return
+      isCalling = true
+      const res = await checkNewMessages(user?.name, user.address)
+      isCalling = false
+    }, 30000)
+  }, [checkNewMessages, user])
 
-  // useEffect(() => {
-  //   // checkNewMessagesFunc()
-  //   return () => {
-  //     if (interval?.current) {
-  //       clearInterval(interval.current)
-  //     }
-  //   }
-  // }, [checkNewMessagesFunc])
+  useEffect(() => {
+    checkNewMessagesFunc()
+    return () => {
+      if (interval?.current) {
+        clearInterval(interval.current)
+      }
+    }
+  }, [checkNewMessagesFunc])
 
   const openMessage = async (
     user: string,
@@ -99,7 +116,8 @@ export const Mail = () => {
       sx={{
         display: 'flex',
         width: '100%',
-        flexDirection: 'column'
+        flexDirection: 'column',
+        backgroundColor: 'background.paper'
       }}
     >
       <NewMessage replyTo={replyTo} setReplyTo={setReplyTo} />
@@ -136,7 +154,7 @@ export const Mail = () => {
       )} */}
       <ReactVirtualizedTable
         openMessage={openMessage}
-        data={mailMessages}
+        data={fullMailMessages}
         loadMoreData={getMessages}
       >
         {/* <LazyLoad onLoadMore={getMessages}></LazyLoad> */}

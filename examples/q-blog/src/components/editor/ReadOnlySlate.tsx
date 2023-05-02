@@ -4,18 +4,22 @@ import { withReact, Slate, Editable, RenderElementProps, RenderLeafProps  } from
 import { renderElement, renderLeaf } from './BlogEditor';
 
 interface ReadOnlySlateProps {
-  content: any;
+  content: any
+  mode?: string
 }
-
-const ReadOnlySlate: React.FC<ReadOnlySlateProps> = ({ content }) => {
-  const editor = useMemo(() => withReact(createEditor()), []);
-  const value = useMemo(() => content, [content]);
+const ReadOnlySlate: React.FC<ReadOnlySlateProps> = ({ content, mode }) => {
+  const editor = useMemo(() => withReact(createEditor()), [])
+  const value = useMemo(() => content, [content])
 
   return (
     <Slate editor={editor} value={value} onChange={() => {}}>
-      <Editable readOnly renderElement={renderElement} renderLeaf={renderLeaf} />
+      <Editable
+        readOnly
+        renderElement={(props) => renderElement({ ...props, mode })}
+        renderLeaf={renderLeaf}
+      />
     </Slate>
-  );
-};
+  )
+}
 
 export default ReadOnlySlate;

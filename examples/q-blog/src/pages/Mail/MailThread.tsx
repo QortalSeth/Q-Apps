@@ -30,7 +30,7 @@ const Accordion = styled((props: AccordionProps) => (
 
 const AccordionSummary = styled((props: AccordionSummaryProps) => (
   <MuiAccordionSummary
-    expandIcon={<ArrowForwardIosSharpIcon sx={{ fontSize: '0.9rem' }} />}
+    expandIcon={<ArrowForwardIosSharpIcon sx={{ fontSize: '16px' }} />}
     {...props}
   />
 ))(({ theme }) => ({
@@ -141,6 +141,10 @@ export default function MailThread({
             <AccordionSummary
               aria-controls="panel1d-content"
               id="panel1d-header"
+              sx={{
+                fontSize: '16px',
+                height: '36px'
+              }}
             >
               <Box
                 sx={{
@@ -158,7 +162,13 @@ export default function MailThread({
                   }}
                 >
                   <AvatarWrapper user={findMessage?.user} />
-                  <Typography>{findMessage?.user}</Typography>
+                  <Typography
+                    sx={{
+                      fontSize: '16px'
+                    }}
+                  >
+                    {findMessage?.user}
+                  </Typography>
                   <Typography>{findMessage?.description}</Typography>
                 </Box>
                 <Box
@@ -167,7 +177,11 @@ export default function MailThread({
                     alignItems: 'center'
                   }}
                 >
-                  <Typography>
+                  <Typography
+                    sx={{
+                      fontSize: '16px'
+                    }}
+                  >
                     {formatTimestamp(findMessage?.createdAt)}
                   </Typography>
                 </Box>
@@ -175,7 +189,7 @@ export default function MailThread({
             </AccordionSummary>
             <AccordionDetails>
               {findMessage?.textContent && (
-                <ReadOnlySlate content={findMessage.textContent} />
+                <ReadOnlySlate content={findMessage.textContent} mode="mail" />
               )}
             </AccordionDetails>
           </Accordion>

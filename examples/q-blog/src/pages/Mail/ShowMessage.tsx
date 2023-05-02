@@ -8,6 +8,8 @@ import { Descendant } from 'slate'
 import ShortUniqueId from 'short-unique-id'
 import { useDispatch, useSelector } from 'react-redux'
 import { RootState } from '../../state/store'
+import AttachFileIcon from '@mui/icons-material/AttachFile'
+
 import { setNotification } from '../../state/features/notificationsSlice'
 import {
   objectToBase64,
@@ -17,6 +19,8 @@ import {
 } from '../../utils/toBase64'
 import ReadOnlySlate from '../../components/editor/ReadOnlySlate'
 import MailThread from './MailThread'
+import { AvatarWrapper } from './MailTable'
+import { formatTimestamp } from '../../utils/time'
 const initialValue: Descendant[] = [
   {
     type: 'paragraph',
@@ -45,6 +49,7 @@ export const ShowMessage = ({
   }
   const closeModal = () => {
     setIsOpen(false)
+    setIsOpenMailThread(false)
   }
 
   async function publishQDNResource() {
@@ -262,13 +267,93 @@ export const ShowMessage = ({
               width: '100%'
             }}
           >
-            <Box>{message?.user}</Box>
-            <Box>
-              <Typography>{message?.description}</Typography>
+            <Box
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '10px'
+              }}
+            >
+              <AvatarWrapper user={message?.user} />
+              <Typography
+                sx={{
+                  fontSize: '16px'
+                }}
+              >
+                {message?.user}
+              </Typography>
+            </Box>
+            <Box
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '10px'
+              }}
+            >
+              <Typography
+                sx={{
+                  fontSize: '16px'
+                }}
+              >
+                {message?.subject}
+              </Typography>
+              <Typography
+                sx={{
+                  fontSize: '16px'
+                }}
+              >
+                {formatTimestamp(message?.createdAt)}
+              </Typography>
             </Box>
           </Box>
+          {message?.attachments?.length > 0 && (
+            <Box
+              sx={{
+                width: '100%',
+                marginTop: '10px'
+              }}
+            >
+              {message?.attachments.map((file: any) => {
+                return (
+                  <Box
+                    sx={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'flex-start',
+                      width: '100%'
+                    }}
+                  >
+                    <Box
+                      sx={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '5px',
+                        cursor: 'pointer',
+                        width: 'auto'
+                      }}
+                    >
+                      <AttachFileIcon
+                        sx={{
+                          height: '16px',
+                          width: 'auto'
+                        }}
+                      ></AttachFileIcon>
+                      <Typography
+                        sx={{
+                          fontSize: '16px'
+                        }}
+                      >
+                        {file?.filename}
+                      </Typography>
+                    </Box>
+                  </Box>
+                )
+              })}
+            </Box>
+          )}
+
           {message?.textContent && (
-            <ReadOnlySlate content={message.textContent} />
+            <ReadOnlySlate content={message.textContent} mode="mail" />
           )}
         </Box>
         <Box
