@@ -75,14 +75,25 @@ interface CustomWindow extends Window {
 const customWindow = window as unknown as CustomWindow
 const themeColor = customWindow?._qdnTheme
 
-export const AudioPlayer: React.FC<VideoPlayerProps> = ({
-  playlist,
-  currAudio
-}) => {
-  const [playlistFormatted, setPlaylistFormatted] = useState<any>([])
+export const AudioPlayer: React.FC<VideoPlayerProps> = ({ currAudio }) => {
   const [isLoading, setIsLoading] = useState<boolean>(false)
   const { downloads, showingAudioPlayer } = useSelector(
     (state: RootState) => state.global
+  )
+  const dispatch = useDispatch()
+  const downloadsLength: number = useMemo(
+    () =>
+      Object.keys(downloads)
+        .map((item) => {
+          return downloads[item]
+        })
+        .filter(
+          (download: any) =>
+            download?.service === 'AUDIO' &&
+            download?.status?.status === 'READY' &&
+            !!download.url
+        ).length,
+    [downloads]
   )
 
   const audioPlayList = useMemo(() => {
@@ -105,7 +116,7 @@ export const AudioPlayer: React.FC<VideoPlayerProps> = ({
         description: audio?.blogPost?.audioDescription || ''
       }
     })
-  }, [downloads])
+  }, [downloadsLength])
 
   const currAudioMemo: number | null = useMemo(() => {
     const findIndex = audioPlayList.findIndex(
@@ -116,70 +127,6 @@ export const AudioPlayer: React.FC<VideoPlayerProps> = ({
     }
     return null
   }, [audioPlayList, currAudio])
-  const dispatch = useDispatch()
-  const getSrc = React.useCallback(
-    async (name: string, identifier: string, service: string) => {
-      if (!name || !identifier || !service) return
-      try {
-        let videoData = await qortalRequest({
-          action: 'FETCH_QDN_RESOURCE',
-          name: name,
-          service: service,
-          identifier: identifier,
-          encoding: 'base64'
-        })
-        const src = 'data:audio/mp3;base64,' + videoData
-        return src
-      } catch (error) {
-        return ''
-      }
-    },
-    []
-  )
-
-  const fetchPlaylistData = React.useCallback(async () => {
-    setIsLoading(true)
-    const playlistAudio = await Promise.all(
-      playlist?.map(async (audio: IPlaylist, index) => {
-        const src = await getSrc(audio.name, audio.identifier, audio.service)
-        return {
-          name: audio.title,
-          src: src,
-          id: index + 1,
-
-          description: audio?.description || ''
-        }
-      }) ?? []
-    )
-    setPlaylistFormatted(playlistAudio.filter((pa) => !!pa.src))
-    setIsLoading(false)
-  }, [playlist])
-
-  // React.useEffect(() => {
-  //   fetchPlaylistData()
-  // }, [fetchPlaylistData])
-
-  // useEffect(() => {
-  //   if (!showingAudioPlayer) {
-  //     return
-  //   }
-  //   if (document.getElementById('rm-audio-player')) return
-  //   setIsLoading(true)
-  //   const checkForDiv = () => {
-  //     const targetDiv = document.getElementById('rm-audio-player')
-  //     if (targetDiv) {
-  //       setIsLoading(false)
-  //       clearInterval(intervalId)
-  //     }
-  //   }
-
-  //   const intervalId = setInterval(checkForDiv, 100) // Adjust the interval duration as needed
-
-  //   // Clean up the interval when the component is unmounted
-  //   return () => {
-  //     clearInterval(intervalId)
-  //   }
-  // }, [showingAudioPlayer])
 
   if (isLoading)
     return (
@@ -212,6 +159,7 @@ export const AudioPlayer: React.FC<VideoPlayerProps> = ({
         />
       </Box>
     )
+
   if (audioPlayList.length === 0 || !showingAudioPlayer) return null
   return (
     <VideoContainer>

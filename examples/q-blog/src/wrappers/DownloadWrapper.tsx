@@ -170,23 +170,6 @@ const DownloadWrapper: React.FC<Props> = ({ children }) => {
                 service,
                 identifier
               })
-              //   fetch(url)
-              //     .then((response) => response.blob())
-              //     .then((blob) => {
-              //       const url = URL.createObjectURL(blob)
-              //       dispatch(
-              //         updateDownloads({
-              //           name,
-              //           service,
-              //           identifier,
-              //           url
-              //         })
-              //       )
-              //     })
-              //     .catch((error) => {
-              //       console.error('Error fetching the video:', error)
-              //       // clearInterval(intervalId)
-              //     })
             }, 120000)
             return
           }
@@ -221,23 +204,7 @@ const DownloadWrapper: React.FC<Props> = ({ children }) => {
       service,
       identifier
     })
-    // fetch(url)
-    //   .then((response) => response.blob())
-    //   .then((blob) => {
-    //     const url = URL.createObjectURL(blob)
-    //     dispatch(
-    //       updateDownloads({
-    //         name,
-    //         service,
-    //         identifier,
-    //         url
-    //       })
-    //     )
-    //   })
-    //   .catch((error) => {
-    //     console.error('Error fetching the video:', error)
-    //     // clearInterval(intervalId)
-    //   })
+ 
   }
 
   const downloadVideo = async ({
@@ -247,9 +214,7 @@ const DownloadWrapper: React.FC<Props> = ({ children }) => {
     blogPost
   }: IDownloadVideoParams) => {
     try {
-      // if (downloads.length > 3) return 'continue'
-      // const willAdd = await addToPile({ name, service, identifier })
-      // if (willAdd === false) return 'continue'
+
 
       performDownload({
         name,
