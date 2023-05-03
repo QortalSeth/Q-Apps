@@ -21,6 +21,7 @@ import ReadOnlySlate from '../../components/editor/ReadOnlySlate'
 import MailThread from './MailThread'
 import { AvatarWrapper } from './MailTable'
 import { formatTimestamp } from '../../utils/time'
+import FileElement from '../../components/FileElement'
 const initialValue: Descendant[] = [
   {
     type: 'paragraph',
@@ -332,19 +333,25 @@ export const ShowMessage = ({
                         width: 'auto'
                       }}
                     >
-                      <AttachFileIcon
-                        sx={{
-                          height: '16px',
-                          width: 'auto'
-                        }}
-                      ></AttachFileIcon>
-                      <Typography
-                        sx={{
-                          fontSize: '16px'
-                        }}
+                      <FileElement
+                        fileInfo={file}
+                        title={file?.filename}
+                        mode="mail"
                       >
-                        {file?.filename}
-                      </Typography>
+                        <AttachFileIcon
+                          sx={{
+                            height: '16px',
+                            width: 'auto'
+                          }}
+                        ></AttachFileIcon>
+                        <Typography
+                          sx={{
+                            fontSize: '16px'
+                          }}
+                        >
+                          {file?.filename}
+                        </Typography>
+                      </FileElement>
                     </Box>
                   </Box>
                 )

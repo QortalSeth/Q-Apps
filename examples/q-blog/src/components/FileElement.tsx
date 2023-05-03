@@ -12,6 +12,10 @@ import {
   setCurrAudio,
   setShowingAudioPlayer
 } from '../state/features/globalSlice'
+import {
+  base64ToUint8Array,
+  objectToUint8ArrayFromResponse
+} from '../utils/toBase64'
 
 const Widget = styled('div')(({ theme }) => ({
   padding: 8,
@@ -51,14 +55,15 @@ const TinyText = styled(Typography)({
 
 interface IAudioElement {
   title: string
-  description: string
-  author: string
+  description?: string
+  author?: string
   fileInfo?: any
   postId?: string
   user?: string
   children?: React.ReactNode
   mimeType?: string
   disable?: boolean
+  mode?: string
 }
 
 interface CustomWindow extends Window {
@@ -72,11 +77,12 @@ export default function FileElement({
   description,
   author,
   fileInfo,
-  postId,
+  postId = '',
   user,
   children,
   mimeType,
-  disable
+  disable,
+  mode
 }: IAudioElement) {
   const { downloadVideo } = React.useContext(MyContext)
   const [isLoading, setIsLoading] = React.useState<boolean>(false)
@@ -124,6 +130,51 @@ export default function FileElement({
     ) {
       try {
         const { name, service, identifier } = fileInfo
+        if (mode === 'mail') {
+          let res = await qortalRequest({
+            action: 'FETCH_QDN_RESOURCE',
+            name: name,
+            service: service,
+            identifier: identifier,
+            encoding: 'base64'
+          })
+          const toUnit8Array = base64ToUint8Array(res)
+          const resName = await qortalRequest({
+            action: 'GET_NAME_DATA',
+            // change this
+            name: name
+          })
+          if (!resName?.owner) return
+
+          const recipientAddress = resName.owner
+          const resAddress = await qortalRequest({
+            action: 'GET_ACCOUNT_DATA',
+            address: recipientAddress
+          })
+          if (!resAddress?.publicKey) return
+          const recipientPublicKey = resAddress.publicKey
+          let requestEncryptBody: any = {
+            action: 'DECRYPT_DATA',
+            encryptedData: toUnit8Array,
+            senderPublicKey: recipientPublicKey
+          }
+          const resDecrypt = await qortalRequest(requestEncryptBody)
+
+          if (!resDecrypt?.decryptedData) return
+          const decryptToUnit8Array = objectToUint8ArrayFromResponse(
+            resDecrypt.decryptedData
+          )
+          const blob = new Blob([decryptToUnit8Array], {
+            type: 'application/pdf'
+          })
+          await qortalRequest({
+            action: 'DOWNLOAD',
+            blob,
+            filename: download?.blogPost?.filename,
+            mimeType: download?.blogPost?.mimeType || ''
+          })
+          return
+        }
         const url = `/arbitrary/${service}/${name}/${identifier}`
         fetch(url)
           .then((response) => response.blob())
@@ -144,7 +195,7 @@ export default function FileElement({
       } catch (error) {}
       return
     }
-    if (!postId) return
+    if (!postId && mode !== 'mail') return
     const { name, service, identifier } = fileInfo
     let filename = fileProperties?.filename
     let mimeType = fileProperties?.mimeType
@@ -162,11 +213,7 @@ export default function FileElement({
       } catch (error) {}
     }
     if (!filename) return
-    if (download && resourceStatus?.status === 'READY') {
-      dispatch(setShowingAudioPlayer(true))
-      dispatch(setCurrAudio(identifier))
-      return
-    }
+
     setIsLoading(true)
     downloadVideo({
       name,
@@ -208,7 +255,30 @@ export default function FileElement({
         cursor: 'pointer'
       }}
     >
-      {children && children}
+      {children && (
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            position: 'relative',
+            gap: '7px'
+          }}
+        >
+          {children}{' '}
+          {(resourceStatus.status && resourceStatus?.status !== 'READY') ||
+          isLoading ? (
+            <CircularProgress color="secondary" size={14} />
+          ) : (
+            <Typography
+              sx={{
+                fontSize: '14px'
+              }}
+            >
+              Ready to download: click here
+            </Typography>
+          )}
+        </Box>
+      )}
       {!children && (
         <Widget>
           <Box sx={{ display: 'flex', alignItems: 'center' }}>
@@ -303,7 +373,7 @@ export default function FileElement({
                       <> Refetching in 2 minutes</>
                     </>
                   ) : resourceStatus?.status === 'DOWNLOADED' ? (
-                    <>Download Completed: building audio...</>
+                    <>Download Completed: building file...</>
                   ) : resourceStatus?.status !== 'READY' ? (
                     <>
                       {(
@@ -314,7 +384,7 @@ export default function FileElement({
                       %
                     </>
                   ) : (
-                    <>Download Completed: fetching audio...</>
+                    <>Download Completed: fetching file...</>
                   )}
                 </Typography>
               )}
