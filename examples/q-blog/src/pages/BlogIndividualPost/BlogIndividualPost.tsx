@@ -38,6 +38,7 @@ import AudioElement from '../../components/AudioElement'
 import ErrorBoundary from '../../components/common/ErrorBoundary'
 import { CommentSection } from '../../components/common/Comments/CommentSection'
 import { Tipping } from '../../components/common/Tipping/Tipping'
+import FileElement from '../../components/FileElement'
 const ResponsiveGridLayout = WidthProvider(Responsive)
 const initialMinHeight = 2 // Define an initial minimum height for grid items
 
@@ -512,6 +513,39 @@ export const BlogIndividualPost = () => {
                   </div>
                 )
               }
+              if (section?.type === 'file') {
+                return (
+                  <div key={section?.id} className="grid-item">
+                    <ErrorBoundary
+                      fallback={
+                        <Typography>
+                          Error loading content: Invalid Data
+                        </Typography>
+                      }
+                    >
+                      <DynamicHeightItemMinimal
+                        layouts={layouts}
+                        setLayouts={setLayouts}
+                        i={section.id}
+                        breakpoint={currentBreakpoint}
+                        count={count}
+                        padding={0}
+                      >
+                        <FileElement
+                          key={section.id}
+                          fileInfo={section.content}
+                          postId={fullPostId}
+                          user={user ? user : ''}
+                          title={section.content?.title}
+                          description={section.content?.description}
+                          mimeType={section.content?.mimeType}
+                          author=""
+                        />
+                      </DynamicHeightItemMinimal>
+                    </ErrorBoundary>
+                  </div>
+                )
+              }
             })}
           </Content>
         )}
@@ -705,6 +739,39 @@ export const BlogIndividualPost = () => {
                                 }}
                                 title={section.content?.title}
                                 description={section.content?.description}
+                                author=""
+                              />
+                            </DynamicHeightItemMinimal>
+                          </ErrorBoundary>
+                        </div>
+                      )
+                    }
+                    if (section?.type === 'file') {
+                      return (
+                        <div key={section?.id} className="grid-item">
+                          <ErrorBoundary
+                            fallback={
+                              <Typography>
+                                Error loading content: Invalid Data
+                              </Typography>
+                            }
+                          >
+                            <DynamicHeightItemMinimal
+                              layouts={layouts}
+                              setLayouts={setLayouts}
+                              i={section.id}
+                              breakpoint={currentBreakpoint}
+                              count={count}
+                              padding={0}
+                            >
+                              <FileElement
+                                key={section.id}
+                                fileInfo={section.content}
+                                postId={fullPostId}
+                                user={user ? user : ''}
+                                title={section.content?.title}
+                                description={section.content?.description}
+                                mimeType={section.content?.mimeType}
                                 author=""
                               />
                             </DynamicHeightItemMinimal>
