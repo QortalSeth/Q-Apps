@@ -29,6 +29,8 @@ interface QortalRequestOptions {
   coin?: string
   destinationAddress?: string
   amount?: number
+  blob?: Blob
+  mimeType?: string
 }
 
 declare function qortalRequest(options: QortalRequestOptions): Promise<any>

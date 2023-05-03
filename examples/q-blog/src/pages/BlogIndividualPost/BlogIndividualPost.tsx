@@ -513,6 +513,39 @@ export const BlogIndividualPost = () => {
                   </div>
                 )
               }
+              if (section?.type === 'file') {
+                return (
+                  <div key={section?.id} className="grid-item">
+                    <ErrorBoundary
+                      fallback={
+                        <Typography>
+                          Error loading content: Invalid Data
+                        </Typography>
+                      }
+                    >
+                      <DynamicHeightItemMinimal
+                        layouts={layouts}
+                        setLayouts={setLayouts}
+                        i={section.id}
+                        breakpoint={currentBreakpoint}
+                        count={count}
+                        padding={0}
+                      >
+                        <FileElement
+                          key={section.id}
+                          fileInfo={section.content}
+                          postId={fullPostId}
+                          user={user ? user : ''}
+                          title={section.content?.title}
+                          description={section.content?.description}
+                          mimeType={section.content?.mimeType}
+                          author=""
+                        />
+                      </DynamicHeightItemMinimal>
+                    </ErrorBoundary>
+                  </div>
+                )
+              }
             })}
           </Content>
         )}
@@ -733,38 +766,12 @@ export const BlogIndividualPost = () => {
                             >
                               <FileElement
                                 key={section.id}
-                                audioInfo={section.content}
+                                fileInfo={section.content}
                                 postId={fullPostId}
                                 user={user ? user : ''}
-                                onClick={() => {
-                                  if (!blog || !postId) return
-                                  const formBlogId = addPrefix(blog)
-                                  const formPostId =
-                                    buildIdentifierFromCreateTitleIdAndId(
-                                      formBlogId,
-                                      postId
-                                    )
-                                  if (formPostId !== audioPostId) {
-                                    tempSaveAudio.current = {
-                                      ...(tempSaveAudio.current || {}),
-                                      currentSelection: section,
-                                      message:
-                                        'You are current on a playlist. Would you like to switch?'
-                                    }
-                                    setisOpenSwitchPlaylistModal(true)
-                                  } else {
-                                    const findIndex = (audios || []).findIndex(
-                                      (item) =>
-                                        item.identifier ===
-                                        section.content.identifier
-                                    )
-                                    if (findIndex >= 0) {
-                                      dispatch(setCurrAudio(findIndex))
-                                    }
-                                  }
-                                }}
                                 title={section.content?.title}
                                 description={section.content?.description}
+                                mimeType={section.content?.mimeType}
                                 author=""
                               />
                             </DynamicHeightItemMinimal>

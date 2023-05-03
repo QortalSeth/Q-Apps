@@ -2,22 +2,21 @@ import * as React from 'react'
 import { styled, useTheme } from '@mui/material/styles'
 import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
-import StreamSaver from 'streamsaver'
 import AudiotrackIcon from '@mui/icons-material/Audiotrack'
 import { MyContext } from '../wrappers/DownloadWrapper'
 import { useDispatch, useSelector } from 'react-redux'
 import { RootState } from '../state/store'
 import { CircularProgress } from '@mui/material'
+import AttachFileIcon from '@mui/icons-material/AttachFile'
 import {
   setCurrAudio,
   setShowingAudioPlayer
 } from '../state/features/globalSlice'
-import { saveAs } from 'file-saver'
 
 const Widget = styled('div')(({ theme }) => ({
-  padding: 16,
-  borderRadius: 16,
-  maxWidth: '100%',
+  padding: 8,
+  borderRadius: 10,
+  maxWidth: 350,
   position: 'relative',
   zIndex: 1,
   //   backgroundColor:
@@ -31,8 +30,8 @@ const Widget = styled('div')(({ theme }) => ({
 }))
 
 const CoverImage = styled('div')({
-  width: 100,
-  height: 100,
+  width: 40,
+  height: 40,
   objectFit: 'cover',
   overflow: 'hidden',
   flexShrink: 0,
@@ -51,13 +50,15 @@ const TinyText = styled(Typography)({
 })
 
 interface IAudioElement {
-  onClick: () => void
   title: string
   description: string
   author: string
-  audioInfo?: any
+  fileInfo?: any
   postId?: string
   user?: string
+  children?: React.ReactNode
+  mimeType?: string
+  disable?: boolean
 }
 
 interface CustomWindow extends Window {
@@ -67,13 +68,15 @@ interface CustomWindow extends Window {
 const customWindow = window as unknown as CustomWindow
 
 export default function FileElement({
-  onClick,
   title,
   description,
   author,
-  audioInfo,
+  fileInfo,
   postId,
-  user
+  user,
+  children,
+  mimeType,
+  disable
 }: IAudioElement) {
   const { downloadVideo } = React.useContext(MyContext)
   const [isLoading, setIsLoading] = React.useState<boolean>(false)
@@ -82,12 +85,12 @@ export default function FileElement({
   const { downloads } = useSelector((state: RootState) => state.global)
   const dispatch = useDispatch()
   const download = React.useMemo(() => {
-    if (!downloads || !audioInfo?.identifier) return {}
-    const findDownload = downloads[audioInfo?.identifier]
+    if (!downloads || !fileInfo?.identifier) return {}
+    const findDownload = downloads[fileInfo?.identifier]
 
     if (!findDownload) return {}
     return findDownload
-  }, [downloads, audioInfo])
+  }, [downloads, fileInfo])
 
   const resourceStatus = React.useMemo(() => {
     return download?.status || {}
@@ -113,18 +116,26 @@ export default function FileElement({
     }
   }
   const handlePlay = async () => {
+    if (disable) return
     if (
       resourceStatus?.status === 'READY' &&
       download?.url &&
       download?.blogPost?.filename
     ) {
       try {
-        const { name, service, identifier } = audioInfo
+        const { name, service, identifier } = fileInfo
         const url = `/arbitrary/${service}/${name}/${identifier}`
         fetch(url)
           .then((response) => response.blob())
-          .then((blob) => {
-            saveAs(blob, download?.blogPost?.filename)
+          .then(async (blob) => {
+            console.log({ blob })
+            await qortalRequest({
+              action: 'DOWNLOAD',
+              blob,
+              filename: download?.blogPost?.filename,
+              mimeType: download?.blogPost?.mimeType || ''
+            })
+            // saveAs(blob, download?.blogPost?.filename)
           })
           .catch((error) => {
             console.error('Error fetching the video:', error)
@@ -134,8 +145,9 @@ export default function FileElement({
       return
     }
     if (!postId) return
-    const { name, service, identifier } = audioInfo
+    const { name, service, identifier } = fileInfo
     let filename = fileProperties?.filename
+    let mimeType = fileProperties?.mimeType
     if (!fileProperties) {
       try {
         let res = await qortalRequest({
@@ -166,7 +178,8 @@ export default function FileElement({
         audioTitle: title,
         audioDescription: description,
         audioAuthor: author,
-        filename
+        filename,
+        mimeType
       }
     })
     dispatch(setCurrAudio(identifier))
@@ -195,97 +208,58 @@ export default function FileElement({
         cursor: 'pointer'
       }}
     >
-      <Widget>
-        <Box sx={{ display: 'flex', alignItems: 'center' }}>
-          <CoverImage>
-            <AudiotrackIcon
-              sx={{
-                width: '90%',
-                height: 'auto'
-              }}
-            />
-          </CoverImage>
-          <Box sx={{ ml: 1.5, minWidth: 0 }}>
-            <Typography
-              variant="caption"
-              color="text.secondary"
-              fontWeight={500}
-            >
-              {author}
-            </Typography>
-            <Typography noWrap>
-              <b>{title}</b>
-            </Typography>
-            <Typography noWrap letterSpacing={-0.25}>
-              {description}
-            </Typography>
-          </Box>
-        </Box>
-        {((resourceStatus.status && resourceStatus?.status !== 'READY') ||
-          isLoading) && (
-          <Box
-            position="absolute"
-            top={0}
-            left={0}
-            right={0}
-            bottom={0}
-            display="flex"
-            justifyContent="center"
-            alignItems="center"
-            zIndex={4999}
-            bgcolor="rgba(0, 0, 0, 0.6)"
-            sx={{
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '10px',
-              padding: '16px',
-              borderRadius: '16px'
-            }}
-          >
-            <CircularProgress color="secondary" />
-            {resourceStatus && (
-              <Typography
-                variant="subtitle2"
-                component="div"
+      {children && children}
+      {!children && (
+        <Widget>
+          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+            <CoverImage>
+              <AttachFileIcon
                 sx={{
-                  color: 'white',
+                  width: '90%',
+                  height: 'auto'
+                }}
+              />
+            </CoverImage>
+            <Box sx={{ ml: 1.5, minWidth: 0 }}>
+              <Typography
+                variant="caption"
+                color="text.secondary"
+                fontWeight={500}
+              >
+                {author}
+              </Typography>
+              <Typography
+                noWrap
+                sx={{
+                  fontSize: '16px'
+                }}
+              >
+                <b>{title}</b>
+              </Typography>
+              <Typography
+                noWrap
+                letterSpacing={-0.25}
+                sx={{
                   fontSize: '14px'
                 }}
               >
-                {resourceStatus?.status === 'REFETCHING' ? (
-                  <>
-                    <>
-                      {(
-                        (resourceStatus?.localChunkCount /
-                          resourceStatus?.totalChunkCount) *
-                        100
-                      )?.toFixed(0)}
-                      %
-                    </>
-
-                    <> Refetching in 2 minutes</>
-                  </>
-                ) : resourceStatus?.status === 'DOWNLOADED' ? (
-                  <>Download Completed: building audio...</>
-                ) : resourceStatus?.status !== 'READY' ? (
-                  <>
-                    {(
-                      (resourceStatus?.localChunkCount /
-                        resourceStatus?.totalChunkCount) *
-                      100
-                    )?.toFixed(0)}
-                    %
-                  </>
-                ) : (
-                  <>Download Completed: fetching audio...</>
-                )}
+                {description}
               </Typography>
-            )}
+              {mimeType && (
+                <Typography
+                  noWrap
+                  letterSpacing={-0.25}
+                  sx={{
+                    fontSize: '12px'
+                  }}
+                >
+                  {mimeType}
+                </Typography>
+              )}
+            </Box>
           </Box>
-        )}
-        {resourceStatus?.status === 'READY' &&
-          download?.url &&
-          download?.blogPost?.filename && (
+          {((resourceStatus.status && resourceStatus?.status !== 'READY') ||
+            isLoading) && (
             <Box
               position="absolute"
               top={0}
@@ -301,23 +275,87 @@ export default function FileElement({
                 display: 'flex',
                 flexDirection: 'column',
                 gap: '10px',
-                padding: '16px',
-                borderRadius: '16px'
+                padding: '8px',
+                borderRadius: '10px'
               }}
             >
-              <Typography
-                variant="subtitle2"
-                component="div"
-                sx={{
-                  color: 'white',
-                  fontSize: '14px'
-                }}
-              >
-                Ready to download: click here
-              </Typography>
+              <CircularProgress color="secondary" />
+              {resourceStatus && (
+                <Typography
+                  variant="subtitle2"
+                  component="div"
+                  sx={{
+                    color: 'white',
+                    fontSize: '14px'
+                  }}
+                >
+                  {resourceStatus?.status === 'REFETCHING' ? (
+                    <>
+                      <>
+                        {(
+                          (resourceStatus?.localChunkCount /
+                            resourceStatus?.totalChunkCount) *
+                          100
+                        )?.toFixed(0)}
+                        %
+                      </>
+
+                      <> Refetching in 2 minutes</>
+                    </>
+                  ) : resourceStatus?.status === 'DOWNLOADED' ? (
+                    <>Download Completed: building audio...</>
+                  ) : resourceStatus?.status !== 'READY' ? (
+                    <>
+                      {(
+                        (resourceStatus?.localChunkCount /
+                          resourceStatus?.totalChunkCount) *
+                        100
+                      )?.toFixed(0)}
+                      %
+                    </>
+                  ) : (
+                    <>Download Completed: fetching audio...</>
+                  )}
+                </Typography>
+              )}
             </Box>
           )}
-      </Widget>
+          {resourceStatus?.status === 'READY' &&
+            download?.url &&
+            download?.blogPost?.filename && (
+              <Box
+                position="absolute"
+                top={0}
+                left={0}
+                right={0}
+                bottom={0}
+                display="flex"
+                justifyContent="center"
+                alignItems="center"
+                zIndex={4999}
+                bgcolor="rgba(0, 0, 0, 0.6)"
+                sx={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '10px',
+                  padding: '8px',
+                  borderRadius: '10px'
+                }}
+              >
+                <Typography
+                  variant="subtitle2"
+                  component="div"
+                  sx={{
+                    color: 'white',
+                    fontSize: '14px'
+                  }}
+                >
+                  Ready to download: click here
+                </Typography>
+              </Box>
+            )}
+        </Widget>
+      )}
     </Box>
   )
 }

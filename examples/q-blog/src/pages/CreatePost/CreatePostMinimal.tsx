@@ -39,6 +39,7 @@ import {
 import { useNavigate } from 'react-router-dom'
 import { removePrefix } from '../../utils/blogIdformats'
 import { BuilderButton } from './CreatePost-styles'
+import FileElement from '../../components/FileElement'
 const ResponsiveGridLayout = WidthProvider(Responsive)
 const initialMinHeight = 2 // Define an initial minimum height for grid items
 const uid = new ShortUniqueId()
@@ -167,7 +168,6 @@ export const CreatePostMinimal = ({
       onChangePadding(blogContentForEdit?.layoutGeneralSettings?.padding || 5)
     }
   }, [blogContentForEdit, postIdForEdit, blogMetadataForEdit])
-  
 
   function objectToBase64(obj: any) {
     // Step 1: Convert the object to a JSON string
@@ -1258,13 +1258,16 @@ export const CreatePostMinimal = ({
                               height: '100%'
                             }}
                           >
-                            <AudioElement
+                            <FileElement
                               key={section.id}
-                              onClick={() => {}}
+                              fileInfo={section.content}
                               title={section.content?.title}
                               description={section.content?.description}
+                              mimeType={section.content?.mimeType}
                               author=""
+                              disable={true}
                             />
+
                             <EditButtons>
                               <DeleteIcon
                                 onClick={() => removeSection(section, rowIndex)}
@@ -1273,22 +1276,6 @@ export const CreatePostMinimal = ({
                                   height: '18px',
                                   width: 'auto'
                                 }}
-                              />
-                              <AudioPanel
-                                width="auto"
-                                height="18px"
-                                onSelect={(audio) =>
-                                  editAudio(
-                                    {
-                                      name: audio.name,
-                                      identifier: audio.identifier,
-                                      service: audio.service,
-                                      title: audio?.metadata?.title,
-                                      description: audio?.metadata?.description
-                                    },
-                                    section
-                                  )
-                                }
                               />
                             </EditButtons>
                           </Box>
