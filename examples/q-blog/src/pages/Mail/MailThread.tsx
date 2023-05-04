@@ -15,6 +15,8 @@ import ReadOnlySlate from '../../components/editor/ReadOnlySlate'
 import { fetchAndEvaluateMail } from '../../utils/fetchMail'
 import { addToHashMapMail } from '../../state/features/mailSlice'
 import { AvatarWrapper } from './MailTable'
+import FileElement from '../../components/FileElement'
+import AttachFileIcon from '@mui/icons-material/AttachFile'
 
 const Accordion = styled((props: AccordionProps) => (
   <MuiAccordion disableGutters elevation={0} square {...props} />
@@ -52,12 +54,18 @@ const AccordionDetails = styled(MuiAccordionDetails)(({ theme }) => ({
   borderTop: '1px solid rgba(0, 0, 0, .125)'
 }))
 
+interface IThread {
+  identifier: string
+  service: string
+  name: string
+}
+
 export default function MailThread({
   thread,
   users,
   otherUser
 }: {
-  thread: string[]
+  thread: IThread[]
   users: string[]
   otherUser: string
 }) {
@@ -75,12 +83,12 @@ export default function MailThread({
     setIsLoading(true)
     try {
       for (const msgId of thread) {
-        const existingMessage = hashMapMailMessages[msgId]
+        const existingMessage = hashMapMailMessages[msgId?.identifier]
         if (existingMessage) {
         } else {
           try {
-            const query = msgId
-            const url = `/arbitrary/resources/search?service=DOCUMENT&query=${query}&limit=20&includemetadata=true&offset=0&reverse=true&excludeblocked=true&name=${users[0]}&name=${users[1]}&exactmatchnames=true&`
+            const query = msgId?.identifier
+            const url = `/arbitrary/resources/search?service=DOCUMENT&query=${query}&limit=20&includemetadata=true&offset=0&reverse=true&excludeblocked=true&name=${msgId?.name}&exactmatchnames=true&`
             const response = await fetch(url, {
               method: 'GET',
               headers: {
@@ -130,13 +138,13 @@ export default function MailThread({
       }}
     >
       {thread?.map((message: any) => {
-        const findMessage: any = hashMapMailMessages[message]
+        const findMessage: any = hashMapMailMessages[message?.identifier]
         if (!findMessage) return null
 
         return (
           <Accordion
-            expanded={expanded === message}
-            onChange={handleChange(message)}
+            expanded={expanded === message?.identifier}
+            onChange={handleChange(message?.identifier)}
           >
             <AccordionSummary
               aria-controls="panel1d-content"
@@ -188,9 +196,67 @@ export default function MailThread({
               </Box>
             </AccordionSummary>
             <AccordionDetails>
-              {findMessage?.textContent && (
-                <ReadOnlySlate content={findMessage.textContent} mode="mail" />
-              )}
+              <>
+                {findMessage?.attachments?.length > 0 && (
+                  <Box
+                    sx={{
+                      width: '100%',
+                      marginTop: '10px',
+                      marginBottom: '20px'
+                    }}
+                  >
+                    {findMessage?.attachments.map((file: any) => {
+                      return (
+                        <Box
+                          sx={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'flex-start',
+                            width: '100%'
+                          }}
+                        >
+                          <Box
+                            sx={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '5px',
+                              cursor: 'pointer',
+                              width: 'auto'
+                            }}
+                          >
+                            <FileElement
+                              fileInfo={file}
+                              title={file?.filename}
+                              mode="mail"
+                              otherUser={otherUser}
+                            >
+                              <AttachFileIcon
+                                sx={{
+                                  height: '16px',
+                                  width: 'auto'
+                                }}
+                              ></AttachFileIcon>
+                              <Typography
+                                sx={{
+                                  fontSize: '16px'
+                                }}
+                              >
+                                {file?.filename}
+                              </Typography>
+                            </FileElement>
+                          </Box>
+                        </Box>
+                      )
+                    })}
+                  </Box>
+                )}
+                {findMessage?.textContent && (
+                  <ReadOnlySlate
+                    content={findMessage.textContent}
+                    mode="mail"
+                  />
+                )}
+              </>
             </AccordionDetails>
           </Accordion>
         )

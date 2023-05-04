@@ -18,7 +18,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { RootState } from '../../state/store'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import { removePrefix } from '../../utils/blogIdformats'
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import AudiotrackIcon from '@mui/icons-material/Audiotrack'
 import {
   setCurrAudio,
@@ -34,6 +34,8 @@ type DownloadItem = {
 export const DownloadTaskManager: React.FC = () => {
   const { downloads } = useSelector((state: RootState) => state.global)
   const dispatch = useDispatch()
+  const location = useLocation()
+  const isMailRoute = location.pathname === '/mail'
   const theme = useTheme()
   const [visible, setVisible] = useState(false)
   const [hidden, setHidden] = useState(true)
@@ -72,7 +74,14 @@ export const DownloadTaskManager: React.FC = () => {
     setHidden(false)
   }, [downloads])
 
-  if (!downloads || Object.keys(downloads).length === 0) return null
+  if (isMailRoute) return null
+  if (
+    !downloads ||
+    Object.keys(downloads).filter(
+      (item) => downloads[item].service !== 'ATTACHMENT'
+    ).length === 0
+  )
+    return null
 
   return (
     <Box sx={{ position: 'fixed', top: '50px', right: '5px', zIndex: 1000 }}>
@@ -121,93 +130,100 @@ export const DownloadTaskManager: React.FC = () => {
               overflow: 'auto'
             }}
           >
-            {Object.keys(downloads).map((download: any) => {
-              const downloadObj = downloads[download]
-              const progress = downloads[download]?.status?.percentLoaded || 0
-              const status = downloads[download]?.status?.status
-              const service = downloads[download]?.service
-              return (
-                <ListItem
-                  key={downloadObj?.identifier}
-                  sx={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    width: '100%',
-                    justifyContent: 'center',
-                    background: theme.palette.primary.main,
-                    color: theme.palette.text.primary,
-                    cursor: 'pointer',
-                    padding: '2px'
-                  }}
-                  onClick={() => {
-                    if (service === 'AUDIO' && downloadObj?.identifier) {
-                      dispatch(setCurrAudio(downloadObj?.identifier))
-                      dispatch(setShowingAudioPlayer(true))
-                      return
-                    }
-                    const str = downloadObj?.blogPost?.postId
-                    if (!str) return
-                    const arr = str.split('-post-')
-                    const str1 = arr[0]
-                    const str2 = arr[1]
-                    const blogId = removePrefix(str1)
-                    navigate(`/${downloadObj?.blogPost.user}/${blogId}/${str2}`)
-                  }}
-                >
-                  <Box
+            {Object.keys(downloads)
+              .filter((item) => downloads[item].service !== 'ATTACHMENT')
+              .map((download: any) => {
+                const downloadObj = downloads[download]
+                const progress = downloads[download]?.status?.percentLoaded || 0
+                const status = downloads[download]?.status?.status
+                const service = downloads[download]?.service
+                return (
+                  <ListItem
+                    key={downloadObj?.identifier}
                     sx={{
-                      width: '100%',
                       display: 'flex',
-                      alignItems: 'center'
+                      flexDirection: 'column',
+                      width: '100%',
+                      justifyContent: 'center',
+                      background: theme.palette.primary.main,
+                      color: theme.palette.text.primary,
+                      cursor: 'pointer',
+                      padding: '2px'
+                    }}
+                    onClick={() => {
+                      if (service === 'AUDIO' && downloadObj?.identifier) {
+                        dispatch(setCurrAudio(downloadObj?.identifier))
+                        dispatch(setShowingAudioPlayer(true))
+                        return
+                      }
+
+                      const str = downloadObj?.blogPost?.postId
+                      if (!str) return
+                      const arr = str.split('-post-')
+                      const str1 = arr[0]
+                      const str2 = arr[1]
+                      const blogId = removePrefix(str1)
+                      navigate(
+                        `/${downloadObj?.blogPost.user}/${blogId}/${str2}`
+                      )
                     }}
                   >
-                    <ListItemIcon>
-                      {service === 'AUDIO' && (
-                        <AudiotrackIcon
-                          sx={{ color: theme.palette.text.primary }}
-                        />
-                      )}
-                      {service === 'VIDEO' && (
-                        <Movie sx={{ color: theme.palette.text.primary }} />
-                      )}
-                    </ListItemIcon>
+                    <Box
+                      sx={{
+                        width: '100%',
+                        display: 'flex',
+                        alignItems: 'center'
+                      }}
+                    >
+                      <ListItemIcon>
+                        {service === 'AUDIO' && (
+                          <AudiotrackIcon
+                            sx={{ color: theme.palette.text.primary }}
+                          />
+                        )}
+                        {service === 'VIDEO' && (
+                          <Movie sx={{ color: theme.palette.text.primary }} />
+                        )}
+                      </ListItemIcon>
 
-                    <Box sx={{ width: '100px', marginLeft: 1, marginRight: 1 }}>
-                      <LinearProgress
-                        variant="determinate"
-                        value={progress}
+                      <Box
+                        sx={{ width: '100px', marginLeft: 1, marginRight: 1 }}
+                      >
+                        <LinearProgress
+                          variant="determinate"
+                          value={progress}
+                          sx={{
+                            borderRadius: '5px',
+                            color: theme.palette.secondary.main
+                          }}
+                        />
+                      </Box>
+                      <Typography
                         sx={{
-                          borderRadius: '5px',
-                          color: theme.palette.secondary.main
+                          fontFamily: 'Arial',
+                          color: theme.palette.text.primary
                         }}
-                      />
+                        variant="caption"
+                      >
+                        {`${progress?.toFixed(0)}%`}{' '}
+                        {status && status === 'REFETCHING' && '- refetching'}
+                        {status && status === 'DOWNLOADED' && '- building'}
+                      </Typography>
                     </Box>
                     <Typography
                       sx={{
+                        fontSize: '10px',
+                        width: '100%',
+                        textAlign: 'end',
                         fontFamily: 'Arial',
                         color: theme.palette.text.primary
                       }}
-                      variant="caption"
                     >
-                      {`${progress?.toFixed(0)}%`}{' '}
-                      {status && status === 'REFETCHING' && '- refetching'}
-                      {status && status === 'DOWNLOADED' && '- building'}
+                      {downloadObj?.identifier}
                     </Typography>
-                  </Box>
-                  <Typography
-                    sx={{
-                      fontSize: '10px',
-                      width: '100%',
-                      textAlign: 'end',
-                      fontFamily: 'Arial',
-                      color: theme.palette.text.primary
-                    }}
-                  >
-                    {downloadObj?.identifier}
-                  </Typography>
-                </ListItem>
-              )
-            })}
+                  </ListItem>
+                )
+              })}
           </List>
         </AccordionDetails>
       </Accordion>

@@ -20,6 +20,8 @@ import { toBase64 } from '../../utils/toBase64'
 import AddIcon from '@mui/icons-material/Add'
 import CloseIcon from '@mui/icons-material/Close'
 import { usePublishGeneric } from './PublishGeneric'
+import { useDispatch } from 'react-redux'
+import { setNotification } from '../../state/features/notificationsSlice'
 
 const StyledModal = styled(Modal)(({ theme }) => ({
   display: 'flex',
@@ -59,6 +61,7 @@ interface SelectOption {
   id: string
   name: string
 }
+const maxSize = 500 * 1024 * 1024
 
 export const GenericModal: React.FC<GenericModalProps> = ({
   open,
@@ -81,6 +84,7 @@ export const GenericModal: React.FC<GenericModalProps> = ({
   const [options, setOptions] = useState<SelectOption[]>([])
   const [tags, setTags] = useState<string[]>([])
   const { publishGeneric } = usePublishGeneric()
+  const dispatch = useDispatch()
 
   let acceptedFile = {}
   if (acceptedFileType) {
@@ -91,8 +95,17 @@ export const GenericModal: React.FC<GenericModalProps> = ({
   const { getRootProps, getInputProps } = useDropzone({
     ...acceptedFile,
     maxFiles: 1,
+    maxSize,
     onDrop: (acceptedFiles) => {
       setFile(acceptedFiles[0])
+    },
+    onDropRejected: (rejectedFiles) => {
+      dispatch(
+        setNotification({
+          msg: 'Your file is over the 500mb limit.',
+          alertType: 'error'
+        })
+      )
     }
   })
 

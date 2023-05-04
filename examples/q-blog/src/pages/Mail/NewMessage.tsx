@@ -18,6 +18,7 @@ import {
   objectToUint8Array,
   objectToUint8ArrayFromResponse,
   processFileInChunks,
+  toBase64,
   uint8ArrayToBase64
 } from '../../utils/toBase64'
 const initialValue: Descendant[] = [
@@ -32,7 +33,7 @@ interface NewMessageProps {
   replyTo?: any
   setReplyTo: React.Dispatch<any>
 }
-
+const maxSize = 25 * 1024 * 1024 // 25 MB in bytes
 export const NewMessage = ({ setReplyTo, replyTo }: NewMessageProps) => {
   const [isOpen, setIsOpen] = useState<boolean>(false)
   const [value, setValue] = useState(initialValue)
@@ -44,8 +45,17 @@ export const NewMessage = ({ setReplyTo, replyTo }: NewMessageProps) => {
   const { user } = useSelector((state: RootState) => state.auth)
   const dispatch = useDispatch()
   const { getRootProps, getInputProps } = useDropzone({
+    maxSize,
     onDrop: (acceptedFiles) => {
       setAttachments((prev) => [...prev, ...acceptedFiles])
+    },
+    onDropRejected: (rejectedFiles) => {
+      dispatch(
+        setNotification({
+          msg: 'One of your files is over the 25mb limit',
+          alertType: 'error'
+        })
+      )
     }
   })
 
@@ -56,6 +66,11 @@ export const NewMessage = ({ setReplyTo, replyTo }: NewMessageProps) => {
     setReplyTo(null)
   }
   const closeModal = () => {
+    setAttachments([])
+    setSubject('')
+    setDestinationName('')
+    setValue(initialValue)
+    setReplyTo(null)
     setIsOpen(false)
   }
   useEffect(() => {
@@ -64,6 +79,7 @@ export const NewMessage = ({ setReplyTo, replyTo }: NewMessageProps) => {
       setDestinationName(replyTo?.user || '')
     }
   }, [replyTo])
+  console.log({ replyTo })
   async function publishQDNResource() {
     let address: string = ''
     let name: string = ''
@@ -99,17 +115,6 @@ export const NewMessage = ({ setReplyTo, replyTo }: NewMessageProps) => {
       throw new Error(errorMsg)
     }
 
-    // const attachmentArray = attachments.map((attach) => {
-    //   const id = uid()
-
-    //   const identifier = `attachments_qmail_${id}`
-    //   return {
-    //     fileName: attach.name,
-    //     identifier,
-    //     file: attach
-    //   }
-    // })
-
     const mailObject: any = {
       title,
       // description,
@@ -120,21 +125,23 @@ export const NewMessage = ({ setReplyTo, replyTo }: NewMessageProps) => {
       textContent: value,
       generalData: {
         thread: []
-      }
+      },
+      recipient: destinationName
     }
     if (replyTo?.id) {
       const previousTread = Array.isArray(replyTo?.generalData?.thread)
         ? replyTo?.generalData?.thread
         : []
-      mailObject.generalData.thread = [...previousTread, replyTo.id]
+      mailObject.generalData.thread = [
+        ...previousTread,
+        {
+          identifier: replyTo.id,
+          name: replyTo.user,
+          service: 'DOCUMENT'
+        }
+      ]
     }
 
-    // if (replyTo?.id && mailObject?.generalData?.thread) {
-    //   mailObject.generalData.thread.push(replyTo.id)
-    // }
-    // if (replyTo?.id && !mailObject?.generalData?.thread) {
-    //   mailObject.generalData.thread = [replyTo.id]
-    // }
     try {
       if (!destinationName) return
       const id = uid()
@@ -157,22 +164,11 @@ export const NewMessage = ({ setReplyTo, replyTo }: NewMessageProps) => {
 
       const attachmentArray = []
       for (const attachment of attachments) {
-        const dataUint8Array = await processFileInChunks(attachment)
-        let requestEncryptBodyAttachment: any = {
-          action: 'ENCRYPT_DATA',
-          Uint8ArrayData: dataUint8Array,
-          destinationPublicKey: recipientPublicKey
-        }
-        const responseEncryptAttachment = await qortalRequest(
-          requestEncryptBodyAttachment
-        )
-        console.log({ responseEncryptAttachment })
-        const convertToArrayAttachment = objectToUint8ArrayFromResponse(
-          responseEncryptAttachment.encryptedData
-        )
-        console.log({ convertToArrayAttachment })
-        const encryptedDataBase64 = uint8ArrayToBase64(convertToArrayAttachment)
-        console.log({ encryptedDataBase64 })
+        const fileBase64 = await toBase64(attachment)
+        if (typeof fileBase64 !== 'string' || !fileBase64)
+          throw new Error('Could not convert file to base64')
+        const base64String = fileBase64.split(',')[1]
+
         const id = uid()
         const id2 = uid()
         const identifier = `attachments_qmail_${id}_${id2}`
@@ -185,13 +181,11 @@ export const NewMessage = ({ setReplyTo, replyTo }: NewMessageProps) => {
           service: 'ATTACHMENT',
           filename: `${id}.${fileExtension}`,
           identifier,
-          data64: encryptedDataBase64
+          data64: base64String
         }
 
         attachmentArray.push(obj)
       }
-
-      //END OF ATTACHMENT LOGIC
 
       if (attachmentArray?.length > 0) {
         mailObject.attachments = attachmentArray.map((item) => {
@@ -202,42 +196,50 @@ export const NewMessage = ({ setReplyTo, replyTo }: NewMessageProps) => {
             filename: item.filename
           }
         })
+
+        const multiplePublish = {
+          action: 'PUBLISH_MULTIPLE_QDN_RESOURCES',
+          resources: [...attachmentArray],
+          encrypt: true,
+          recipientPublicKey
+        }
+        await qortalRequest(multiplePublish)
       }
 
-      const blogPostToUnit8Array = objectToUint8Array(mailObject)
+      //END OF ATTACHMENT LOGIC
 
-      let requestEncryptBody: any = {
-        action: 'ENCRYPT_DATA',
-        Uint8ArrayData: blogPostToUnit8Array,
-        destinationPublicKey: recipientPublicKey
-      }
-      const responseEncrypt = await qortalRequest(requestEncryptBody)
+      const blogPostToBase64 = await objectToBase64(mailObject)
 
-      if (!responseEncrypt?.encryptedData) return
+      // let requestEncryptBody: any = {
+      //   action: 'ENCRYPT_DATA',
+      //   Uint8ArrayData: blogPostToUnit8Array,
+      //   destinationPublicKey: recipientPublicKey
+      // }
+      // const responseEncrypt = await qortalRequest(requestEncryptBody)
+
+      // if (!responseEncrypt?.encryptedData) return
       const identifier = `qblog_qmail_${recipientName.slice(
         0,
         20
       )}_${recipientAddress.slice(-6)}_mail_${id}`
-      console.log({ responseEncrypt })
-      const convertToArray = objectToUint8ArrayFromResponse(
-        responseEncrypt.encryptedData
-      )
-      const encryptedDataBase64 = uint8ArrayToBase64(convertToArray)
+      // console.log({ responseEncrypt })
+      // const convertToArray = objectToUint8ArrayFromResponse(
+      //   responseEncrypt.encryptedData
+      // )
+      // const encryptedDataBase64 = uint8ArrayToBase64(convertToArray)
+
       let requestBody: any = {
         action: 'PUBLISH_QDN_RESOURCE',
         name: name,
         service: 'DOCUMENT',
-        data64: encryptedDataBase64,
+        data64: blogPostToBase64,
         title: title,
         // description: description,
-        identifier
-      }
-      const multiplePublish = {
-        action: 'PUBLISH_MULTIPLE_QDN_RESOURCES',
-        resources: [...attachmentArray]
+        identifier,
+        encrypt: true,
+        recipientPublicKey
       }
 
-      await qortalRequest(multiplePublish)
       await qortalRequest(requestBody)
       dispatch(
         setNotification({
@@ -245,6 +247,8 @@ export const NewMessage = ({ setReplyTo, replyTo }: NewMessageProps) => {
           alertType: 'success'
         })
       )
+
+      closeModal()
     } catch (error: any) {
       let notificationObj = null
       if (typeof error === 'string') {

@@ -9,7 +9,6 @@ import {
 export const fetchAndEvaluateMail = async (data: any) => {
   const getBlogPost = async () => {
     const { user, messageIdentifier, content, otherUser } = data
-    console.log('2', user, messageIdentifier, content)
     let obj: any = {
       ...content,
       isValid: false
@@ -26,7 +25,7 @@ export const fetchAndEvaluateMail = async (data: any) => {
         identifier: messageIdentifier,
         encoding: 'base64'
       })
-      const toUnit8Array = base64ToUint8Array(res)
+      const base64 = res
       const resName = await qortalRequest({
         action: 'GET_NAME_DATA',
         name: otherUser
@@ -42,17 +41,14 @@ export const fetchAndEvaluateMail = async (data: any) => {
       const recipientPublicKey = resAddress.publicKey
       let requestEncryptBody: any = {
         action: 'DECRYPT_DATA',
-        encryptedData: toUnit8Array,
-        senderPublicKey: recipientPublicKey
+        encryptedData: base64,
+        publicKey: recipientPublicKey
       }
       const resDecrypt = await qortalRequest(requestEncryptBody)
 
-      if (!resDecrypt?.decryptedData) return obj
-      const decryptToUnit8Array = objectToUint8ArrayFromResponse(
-        resDecrypt.decryptedData
-      )
+      if (!resDecrypt) return obj
+      const decryptToUnit8Array = base64ToUint8Array(resDecrypt)
       const responseData = uint8ArrayToObject(decryptToUnit8Array)
-      console.log({ responseData })
 
       if (checkStructureMailMessages(responseData)) {
         obj = {
@@ -68,28 +64,6 @@ export const fetchAndEvaluateMail = async (data: any) => {
       return obj
     } catch (error) {
       console.log({ error })
-      //for testing purposes
-      const mockObj = {
-        ...obj,
-        isValid: true,
-        title: '',
-        description: 'from tester',
-        createdAt: 1682857404297,
-        version: 1,
-        attachments: [],
-        textContent: [
-          {
-            type: 'paragraph',
-            children: [
-              {
-                text: 'hello'
-              }
-            ]
-          }
-        ],
-        generalData: {}
-      }
-      return mockObj
     }
   }
 

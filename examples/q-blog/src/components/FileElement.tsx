@@ -64,6 +64,7 @@ interface IAudioElement {
   mimeType?: string
   disable?: boolean
   mode?: string
+  otherUser?: string
 }
 
 interface CustomWindow extends Window {
@@ -82,13 +83,16 @@ export default function FileElement({
   children,
   mimeType,
   disable,
-  mode
+  mode,
+  otherUser
 }: IAudioElement) {
   const { downloadVideo } = React.useContext(MyContext)
   const [isLoading, setIsLoading] = React.useState<boolean>(false)
   const [fileProperties, setFileProperties] = React.useState<any>(null)
   const [pdfSrc, setPdfSrc] = React.useState('')
   const { downloads } = useSelector((state: RootState) => state.global)
+  const { user: username } = useSelector((state: RootState) => state.auth)
+
   const dispatch = useDispatch()
   const download = React.useMemo(() => {
     if (!downloads || !fileInfo?.identifier) return {}
@@ -138,11 +142,11 @@ export default function FileElement({
             identifier: identifier,
             encoding: 'base64'
           })
-          const toUnit8Array = base64ToUint8Array(res)
+          // const toUnit8Array = base64ToUint8Array(res)
           const resName = await qortalRequest({
             action: 'GET_NAME_DATA',
             // change this
-            name: name
+            name: otherUser
           })
           if (!resName?.owner) return
 
@@ -155,20 +159,25 @@ export default function FileElement({
           const recipientPublicKey = resAddress.publicKey
           let requestEncryptBody: any = {
             action: 'DECRYPT_DATA',
-            encryptedData: toUnit8Array,
-            senderPublicKey: recipientPublicKey
+            encryptedData: res,
+            publicKey: recipientPublicKey
           }
           const resDecrypt = await qortalRequest(requestEncryptBody)
 
-          if (!resDecrypt?.decryptedData) return
-          const decryptToUnit8Array = objectToUint8ArrayFromResponse(
-            resDecrypt.decryptedData
-          )
-          const blob = new Blob([decryptToUnit8Array], {
-            type: 'application/pdf'
-          })
+          if (!resDecrypt) return
+          const decryptToUnit8Array = base64ToUint8Array(resDecrypt)
+          let blob = null
+          if (download?.blogPost?.mimeType) {
+            blob = new Blob([decryptToUnit8Array], {
+              type: download?.blogPost?.mimeType
+            })
+          } else {
+            blob = new Blob([decryptToUnit8Array])
+          }
+
+          if (!blob) return
           await qortalRequest({
-            action: 'DOWNLOAD',
+            action: 'SAVE_FILE',
             blob,
             filename: download?.blogPost?.filename,
             mimeType: download?.blogPost?.mimeType || ''
@@ -179,9 +188,8 @@ export default function FileElement({
         fetch(url)
           .then((response) => response.blob())
           .then(async (blob) => {
-            console.log({ blob })
             await qortalRequest({
-              action: 'DOWNLOAD',
+              action: 'SAVE_FILE',
               blob,
               filename: download?.blogPost?.filename,
               mimeType: download?.blogPost?.mimeType || ''
@@ -207,9 +215,9 @@ export default function FileElement({
           service: service,
           identifier: identifier
         })
-        console.log({ res })
         setFileProperties(res)
         filename = res?.filename
+        mimeType = res?.mimeType
       } catch (error) {}
     }
     if (!filename) return
@@ -232,8 +240,6 @@ export default function FileElement({
     dispatch(setCurrAudio(identifier))
     dispatch(setShowingAudioPlayer(true))
   }
-
-  console.log({ download })
 
   React.useEffect(() => {
     if (
@@ -268,7 +274,7 @@ export default function FileElement({
           {(resourceStatus.status && resourceStatus?.status !== 'READY') ||
           isLoading ? (
             <CircularProgress color="secondary" size={14} />
-          ) : (
+          ) : resourceStatus?.status === 'READY' ? (
             <Typography
               sx={{
                 fontSize: '14px'
@@ -276,7 +282,7 @@ export default function FileElement({
             >
               Ready to download: click here
             </Typography>
-          )}
+          ) : null}
         </Box>
       )}
       {!children && (
