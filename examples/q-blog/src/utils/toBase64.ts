@@ -53,19 +53,7 @@ export const toBase64 = (file: File): Promise<string | ArrayBuffer | null> =>
     return uint8Array
   }
 
-  // export function uint8ArrayToBase64(uint8Array: Uint8Array): string {
-  //   console.log({ uint8Array })
-  //   // Convert the Uint8Array to a regular array of numbers
-  //   const numberArray: number[] = Array.from(uint8Array)
-
-  //   // Convert the array of numbers to a binary string
-  //   const binaryString: string = String.fromCharCode.apply(null, numberArray)
-
-  //   // Convert the binary string to a base64-encoded string
-  //   const base64String: string = btoa(binaryString)
-  //   console.log({ base64String })
-  //   return base64String
-  // }
+ 
 
   export function uint8ArrayToBase64(uint8Array: Uint8Array): string {
     const length = uint8Array.length;

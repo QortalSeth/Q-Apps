@@ -59,7 +59,6 @@ export const NewMessage = ({ setReplyTo, replyTo }: NewMessageProps) => {
     }
   })
 
-  console.log({ attachments })
   const openModal = () => {
     setIsOpen(true)
 
@@ -79,7 +78,6 @@ export const NewMessage = ({ setReplyTo, replyTo }: NewMessageProps) => {
       setDestinationName(replyTo?.user || '')
     }
   }, [replyTo])
-  console.log({ replyTo })
   async function publishQDNResource() {
     let address: string = ''
     let name: string = ''
@@ -209,24 +207,10 @@ export const NewMessage = ({ setReplyTo, replyTo }: NewMessageProps) => {
       //END OF ATTACHMENT LOGIC
 
       const blogPostToBase64 = await objectToBase64(mailObject)
-
-      // let requestEncryptBody: any = {
-      //   action: 'ENCRYPT_DATA',
-      //   Uint8ArrayData: blogPostToUnit8Array,
-      //   destinationPublicKey: recipientPublicKey
-      // }
-      // const responseEncrypt = await qortalRequest(requestEncryptBody)
-
-      // if (!responseEncrypt?.encryptedData) return
       const identifier = `qblog_qmail_${recipientName.slice(
         0,
         20
       )}_${recipientAddress.slice(-6)}_mail_${id}`
-      // console.log({ responseEncrypt })
-      // const convertToArray = objectToUint8ArrayFromResponse(
-      //   responseEncrypt.encryptedData
-      // )
-      // const encryptedDataBase64 = uint8ArrayToBase64(convertToArray)
 
       let requestBody: any = {
         action: 'PUBLISH_QDN_RESOURCE',

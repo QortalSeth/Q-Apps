@@ -257,7 +257,6 @@ export const useFetchMail = () => {
   }
   const getMailMessages = React.useCallback(
     async (recipientName: string, recipientAddress: string) => {
-      console.log('hello getmail')
       try {
         const offset = mailMessages.length
 
@@ -287,7 +286,6 @@ export const useFetchMail = () => {
             id: post.identifier
           }
         })
-        console.log({ structureData })
         dispatch(upsertMessages(structureData))
 
         for (const content of structureData) {

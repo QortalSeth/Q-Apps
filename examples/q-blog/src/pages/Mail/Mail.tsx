@@ -86,7 +86,6 @@ export const Mail = () => {
     content: any
   ) => {
     try {
-      console.log({ user, messageIdentifier, content })
       const existingMessage = hashMapMailMessages[messageIdentifier]
       if (existingMessage) {
         setMessage(existingMessage)
@@ -98,7 +97,6 @@ export const Mail = () => {
         content,
         otherUser: user
       })
-      console.log({ res })
       setMessage(res)
       dispatch(addToHashMapMail(res))
       setIsOpen(true)
@@ -115,7 +113,6 @@ export const Mail = () => {
       firstMount.current = true
     }
   }, [user])
-  console.log({ mailMessages })
   return (
     <Box
       sx={{

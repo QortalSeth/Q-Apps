@@ -74,7 +74,6 @@ export const Tipping = ({
         action: 'GET_NAME_DATA',
         name: name
       })
-      console.log({ res })
       const address = res.owner
       if (!address || !amount || !selectedCoin?.value) return
 
@@ -145,7 +144,6 @@ export const Tipping = ({
       // code block
     }
   }
-  console.log({ name })
 
   return (
     <Box
@@ -215,7 +213,6 @@ export const Tipping = ({
                     value={selectedCoin?.value || ''}
                     onChange={handleOptionChange}
                     renderValue={(value) => {
-                      console.log(value)
                       return (
                         <Box
                           sx={{
