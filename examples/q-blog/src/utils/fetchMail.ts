@@ -1,3 +1,4 @@
+import { MAIL_SERVICE_TYPE } from '../constants/mail'
 import { checkStructure, checkStructureMailMessages } from './checkStructure'
 import { extractTextFromSlate } from './extractTextFromSlate'
 import {
@@ -17,11 +18,11 @@ export const fetchAndEvaluateMail = async (data: any) => {
     try {
       // throw new Error('hello')
       if (!user || !messageIdentifier) return obj
-      const url = `/arbitrary/DOCUMENT/${user}/${messageIdentifier}`
+      const url = `/arbitrary/${MAIL_SERVICE_TYPE}/${user}/${messageIdentifier}`
       let res = await qortalRequest({
         action: 'FETCH_QDN_RESOURCE',
         name: user,
-        service: 'DOCUMENT',
+        service: MAIL_SERVICE_TYPE,
         identifier: messageIdentifier,
         encoding: 'base64'
       })

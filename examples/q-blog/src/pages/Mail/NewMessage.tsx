@@ -21,6 +21,10 @@ import {
   toBase64,
   uint8ArrayToBase64
 } from '../../utils/toBase64'
+import {
+  MAIL_ATTACHMENT_SERVICE_TYPE,
+  MAIL_SERVICE_TYPE
+} from '../../constants/mail'
 const initialValue: Descendant[] = [
   {
     type: 'paragraph',
@@ -135,7 +139,7 @@ export const NewMessage = ({ setReplyTo, replyTo }: NewMessageProps) => {
         {
           identifier: replyTo.id,
           name: replyTo.user,
-          service: 'DOCUMENT'
+          service: MAIL_SERVICE_TYPE
         }
       ]
     }
@@ -176,7 +180,7 @@ export const NewMessage = ({ setReplyTo, replyTo }: NewMessageProps) => {
         }
         const obj = {
           name: name,
-          service: 'ATTACHMENT',
+          service: MAIL_ATTACHMENT_SERVICE_TYPE,
           filename: `${id}.${fileExtension}`,
           identifier,
           data64: base64String
@@ -190,7 +194,7 @@ export const NewMessage = ({ setReplyTo, replyTo }: NewMessageProps) => {
           return {
             identifier: item.identifier,
             name,
-            service: 'ATTACHMENT',
+            service: MAIL_ATTACHMENT_SERVICE_TYPE,
             filename: item.filename
           }
         })
@@ -215,7 +219,7 @@ export const NewMessage = ({ setReplyTo, replyTo }: NewMessageProps) => {
       let requestBody: any = {
         action: 'PUBLISH_QDN_RESOURCE',
         name: name,
-        service: 'DOCUMENT',
+        service: MAIL_SERVICE_TYPE,
         data64: blogPostToBase64,
         title: title,
         // description: description,

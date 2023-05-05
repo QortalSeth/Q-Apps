@@ -24,6 +24,7 @@ import {
   setCurrAudio,
   setShowingAudioPlayer
 } from '../../state/features/globalSlice'
+import { MAIL_ATTACHMENT_SERVICE_TYPE } from '../../constants/mail'
 
 type DownloadItem = {
   id: string
@@ -78,7 +79,7 @@ export const DownloadTaskManager: React.FC = () => {
   if (
     !downloads ||
     Object.keys(downloads).filter(
-      (item) => downloads[item].service !== 'ATTACHMENT'
+      (item) => downloads[item].service !== MAIL_ATTACHMENT_SERVICE_TYPE
     ).length === 0
   )
     return null
@@ -131,7 +132,10 @@ export const DownloadTaskManager: React.FC = () => {
             }}
           >
             {Object.keys(downloads)
-              .filter((item) => downloads[item].service !== 'ATTACHMENT')
+              .filter(
+                (item) =>
+                  downloads[item].service !== MAIL_ATTACHMENT_SERVICE_TYPE
+              )
               .map((download: any) => {
                 const downloadObj = downloads[download]
                 const progress = downloads[download]?.status?.percentLoaded || 0

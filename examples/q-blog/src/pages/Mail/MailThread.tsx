@@ -17,6 +17,7 @@ import { addToHashMapMail } from '../../state/features/mailSlice'
 import { AvatarWrapper } from './MailTable'
 import FileElement from '../../components/FileElement'
 import AttachFileIcon from '@mui/icons-material/AttachFile'
+import { MAIL_SERVICE_TYPE } from '../../constants/mail'
 
 const Accordion = styled((props: AccordionProps) => (
   <MuiAccordion disableGutters elevation={0} square {...props} />
@@ -88,7 +89,7 @@ export default function MailThread({
         } else {
           try {
             const query = msgId?.identifier
-            const url = `/arbitrary/resources/search?service=DOCUMENT&query=${query}&limit=20&includemetadata=true&offset=0&reverse=true&excludeblocked=true&name=${msgId?.name}&exactmatchnames=true&`
+            const url = `/arbitrary/resources/search?service=${MAIL_SERVICE_TYPE}&query=${query}&limit=20&includemetadata=true&offset=0&reverse=true&excludeblocked=true&name=${msgId?.name}&exactmatchnames=true&`
             const response = await fetch(url, {
               method: 'GET',
               headers: {

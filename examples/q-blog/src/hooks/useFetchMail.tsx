@@ -24,6 +24,7 @@ import {
   upsertMessages,
   upsertMessagesBeginning
 } from '../state/features/mailSlice'
+import { MAIL_SERVICE_TYPE } from '../constants/mail'
 
 export const useFetchMail = () => {
   const dispatch = useDispatch()
@@ -100,7 +101,7 @@ export const useFetchMail = () => {
           0,
           20
         )}_${recipientAddress.slice(-6)}_mail_`
-        const url = `/arbitrary/resources/search?service=DOCUMENT&query=${query}&limit=20&includemetadata=true&reverse=true&excludeblocked=true`
+        const url = `/arbitrary/resources/search?service=${MAIL_SERVICE_TYPE}&query=${query}&limit=20&includemetadata=true&reverse=true&excludeblocked=true`
         const response = await fetch(url, {
           method: 'GET',
           headers: {
@@ -265,7 +266,7 @@ export const useFetchMail = () => {
           0,
           20
         )}_${recipientAddress.slice(-6)}_mail_`
-        const url = `/arbitrary/resources/search?service=DOCUMENT&query=${query}&limit=20&includemetadata=true&offset=${offset}&reverse=true&excludeblocked=true`
+        const url = `/arbitrary/resources/search?service=${MAIL_SERVICE_TYPE}&query=${query}&limit=20&includemetadata=true&offset=${offset}&reverse=true&excludeblocked=true`
         const response = await fetch(url, {
           method: 'GET',
           headers: {
