@@ -20,6 +20,7 @@ import ReactVirtualizedTable from './MailTable'
 import { ShowMessage } from './ShowMessage'
 import { fetchAndEvaluateMail } from '../../utils/fetchMail'
 import { addToHashMapMail } from '../../state/features/mailSlice'
+import { setIsLoadingGlobal } from '../../state/features/globalSlice'
 
 export const Mail = () => {
   const theme = useTheme()
@@ -90,6 +91,7 @@ export const Mail = () => {
       if (existingMessage) {
         setMessage(existingMessage)
       }
+      dispatch(setIsLoadingGlobal(true))
       const res = await fetchAndEvaluateMail({
         user,
         messageIdentifier,
@@ -100,7 +102,10 @@ export const Mail = () => {
       setMessage(res)
       dispatch(addToHashMapMail(res))
       setIsOpen(true)
-    } catch (error) {}
+    } catch (error) {
+    } finally {
+      dispatch(setIsLoadingGlobal(false))
+    }
   }
 
   const firstMount = useRef(false)
