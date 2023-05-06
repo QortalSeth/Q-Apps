@@ -13,32 +13,17 @@ import {
 } from '../state/features/blogSlice'
 import {
   setCurrentBlog,
-  setIsLoadingGlobal,
-  setUserAvatarHash
+  setIsLoadingGlobal
 } from '../state/features/globalSlice'
 import { RootState } from '../state/store'
 import { fetchAndEvaluatePosts } from '../utils/fetchPosts'
-import { fetchAndEvaluateMail } from '../utils/fetchMail'
-import {
-  addToHashMapMail,
-  upsertMessages,
-  upsertMessagesBeginning
-} from '../state/features/mailSlice'
-import { MAIL_SERVICE_TYPE } from '../constants/mail'
 
-export const useFetchMail = () => {
+export const useFetchPosts = () => {
   const dispatch = useDispatch()
   const hashMapPosts = useSelector(
     (state: RootState) => state.blog.hashMapPosts
   )
-  const hashMapMailMessages = useSelector(
-    (state: RootState) => state.mail.hashMapMailMessages
-  )
   const posts = useSelector((state: RootState) => state.blog.posts)
-  const mailMessages = useSelector(
-    (state: RootState) => state.mail.mailMessages
-  )
-
   const filteredPosts = useSelector(
     (state: RootState) => state.blog.filteredPosts
   )
@@ -84,59 +69,30 @@ export const useFetchMail = () => {
     dispatch(addToHashMap(res))
   }
 
-  const getMailMessage = async (user: string, postId: string, content: any) => {
-    const res = await fetchAndEvaluateMail({
-      user,
-      postId,
-      content
-    })
-
-    dispatch(addToHashMapMail(res))
-  }
-
-  const checkNewMessages = React.useCallback(
-    async (recipientName: string, recipientAddress: string) => {
-      try {
-        const query = `qortal_qmail_${recipientName.slice(
-          0,
-          20
-        )}_${recipientAddress.slice(-6)}_mail_`
-        const url = `/arbitrary/resources/search?service=${MAIL_SERVICE_TYPE}&query=${query}&limit=20&includemetadata=true&reverse=true&excludeblocked=true`
-        const response = await fetch(url, {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json'
-          }
-        })
-        const responseData = await response.json()
-        const latestPost = mailMessages[0]
-        if (!latestPost) return
-        const findPost = responseData?.findIndex(
-          (item: any) => item?.identifier === latestPost?.id
-        )
-        if (findPost === -1) {
-          return
+  const checkNewMessages = React.useCallback(async () => {
+    try {
+      const url = `/arbitrary/resources/search?service=BLOG_POST&query=q-blog-&limit=20&includemetadata=true&reverse=true&excludeblocked=true`
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json'
         }
-        const newArray = responseData.slice(0, findPost)
-        const structureData = newArray.map((post: any): BlogPost => {
-          return {
-            title: post?.metadata?.title,
-            category: post?.metadata?.category,
-            categoryName: post?.metadata?.categoryName,
-            tags: post?.metadata?.tags || [],
-            description: post?.metadata?.description,
-            createdAt: post?.created,
-            updated: post?.updated,
-            user: post.name,
-            id: post.identifier
-          }
-        })
-        dispatch(upsertMessagesBeginning(structureData))
+      })
+      const responseData = await response.json()
+      const latestPost = posts[0]
+      if (!latestPost) return
+      const findPost = responseData?.findIndex(
+        (item: any) => item?.identifier === latestPost?.id
+      )
+      if (findPost === -1) {
+        dispatch(setCountNewPosts(responseData.length))
         return
-      } catch (error) {}
-    },
-    [mailMessages]
-  )
+      }
+      const newArray = responseData.slice(0, findPost)
+      dispatch(setCountNewPosts(newArray.length))
+      return
+    } catch (error) {}
+  }, [posts])
 
   const getNewPosts = React.useCallback(async () => {
     try {
@@ -239,68 +195,6 @@ export const useFetchMail = () => {
       dispatch(setIsLoadingGlobal(false))
     }
   }, [posts, hashMapPosts])
-
-  const getAvatar = async (user: string) => {
-    try {
-      let url = await qortalRequest({
-        action: 'GET_QDN_RESOURCE_URL',
-        name: user,
-        service: 'THUMBNAIL',
-        identifier: 'qortal_avatar'
-      })
-      dispatch(
-        setUserAvatarHash({
-          name: user,
-          url
-        })
-      )
-    } catch (error) {}
-  }
-  const getMailMessages = React.useCallback(
-    async (recipientName: string, recipientAddress: string) => {
-      try {
-        const offset = mailMessages.length
-
-        dispatch(setIsLoadingGlobal(true))
-        const query = `qortal_qmail_${recipientName.slice(
-          0,
-          20
-        )}_${recipientAddress.slice(-6)}_mail_`
-        const url = `/arbitrary/resources/search?service=${MAIL_SERVICE_TYPE}&query=${query}&limit=20&includemetadata=true&offset=${offset}&reverse=true&excludeblocked=true`
-        const response = await fetch(url, {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json'
-          }
-        })
-        const responseData = await response.json()
-        const structureData = responseData.map((post: any): BlogPost => {
-          return {
-            title: post?.metadata?.title,
-            category: post?.metadata?.category,
-            categoryName: post?.metadata?.categoryName,
-            tags: post?.metadata?.tags || [],
-            description: post?.metadata?.description,
-            createdAt: post?.created,
-            updated: post?.updated,
-            user: post.name,
-            id: post.identifier
-          }
-        })
-        dispatch(upsertMessages(structureData))
-
-        for (const content of structureData) {
-          if (content.user && content.id) {
-            getAvatar(content.user)
-          }
-        }
-      } catch (error) {
-      } finally {
-        dispatch(setIsLoadingGlobal(false))
-      }
-    },
-    [mailMessages, hashMapMailMessages]
-  )
   const getBlogFilteredPosts = React.useCallback(
     async (filterValue: string) => {
       try {
@@ -463,7 +357,6 @@ export const useFetchMail = () => {
     hashMapPosts,
     checkNewMessages,
     getNewPosts,
-    getBlogFilteredPosts,
-    getMailMessages
+    getBlogFilteredPosts
   }
 }

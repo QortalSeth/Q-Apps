@@ -83,14 +83,18 @@ export const AliasMail = ({ value }: AliasMailProps) => {
     async (recipientName: string, recipientAddress: string) => {
       try {
         const query = `qortal_qmail_${value}_mail`
-        const url = `/arbitrary/resources/search?service=${MAIL_SERVICE_TYPE}&query=${query}&limit=20&includemetadata=true&reverse=true&excludeblocked=true`
+        const url = `/arbitrary/resources/search?service=${MAIL_SERVICE_TYPE}&query=${query}&limit=50&includemetadata=true&reverse=true&excludeblocked=true`
         const response = await fetch(url, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json'
           }
         })
-        const responseData = await response.json()
+        const responseRaw = await response.json()
+        const responseData = responseRaw.filter(
+          (item: any) => item?.name !== user?.name
+        )
+
         const latestPost = mailMessages[0]
         if (!latestPost) return
         const findPost = responseData?.findIndex(
@@ -145,7 +149,7 @@ export const AliasMail = ({ value }: AliasMailProps) => {
 
         dispatch(setIsLoadingGlobal(true))
         const query = `qortal_qmail_${value}_mail`
-        const url = `/arbitrary/resources/search?service=${MAIL_SERVICE_TYPE}&query=${query}&limit=20&includemetadata=true&offset=${offset}&reverse=true&excludeblocked=true`
+        const url = `/arbitrary/resources/search?service=${MAIL_SERVICE_TYPE}&query=${query}&limit=50&includemetadata=true&offset=${offset}&reverse=true&excludeblocked=true`
         const response = await fetch(url, {
           method: 'GET',
           headers: {
@@ -153,19 +157,21 @@ export const AliasMail = ({ value }: AliasMailProps) => {
           }
         })
         const responseData = await response.json()
-        const structureData = responseData.map((post: any): BlogPost => {
-          return {
-            title: post?.metadata?.title,
-            category: post?.metadata?.category,
-            categoryName: post?.metadata?.categoryName,
-            tags: post?.metadata?.tags || [],
-            description: post?.metadata?.description,
-            createdAt: post?.created,
-            updated: post?.updated,
-            user: post.name,
-            id: post.identifier
-          }
-        })
+        const structureData = responseData
+          .filter((item: any) => item?.name !== user?.name)
+          .map((post: any): BlogPost => {
+            return {
+              title: post?.metadata?.title,
+              category: post?.metadata?.category,
+              categoryName: post?.metadata?.categoryName,
+              tags: post?.metadata?.tags || [],
+              description: post?.metadata?.description,
+              createdAt: post?.created,
+              updated: post?.updated,
+              user: post.name,
+              id: post.identifier
+            }
+          })
         setMailMessages((prev) => {
           const updatedMessages = [...prev]
 
