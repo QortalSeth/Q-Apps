@@ -44,6 +44,7 @@ interface MyComponentProps {
   setValue: (value: any) => void
   editorKey?: number
   mode?: string
+  disableMaxHeight?: boolean
 }
 
 const ModalBox = styled(Box)(({ theme }) => ({
@@ -69,7 +70,8 @@ const BlogEditor: React.FC<MyComponentProps> = ({
   value,
   setValue,
   editorKey,
-  mode
+  mode,
+  disableMaxHeight
 }) => {
   const editor = useMemo(() => withReact(createEditor()), [])
 
@@ -463,6 +465,9 @@ const BlogEditor: React.FC<MyComponentProps> = ({
           onKeyDown={handleKeyDown}
           onPaste={handlePaste}
           mode={mode}
+          style={{
+            maxHeight: disableMaxHeight && 'unset'
+          }}
         />
       </Slate>
       <Modal open={open} onClose={onClose}>

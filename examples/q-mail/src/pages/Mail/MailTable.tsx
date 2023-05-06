@@ -48,26 +48,7 @@ const columns: ColumnData[] = [
   }
 ]
 
-// Replace this with your own data
-const rows: Data[] = [
-  {
-    name: 'Sample 1',
-    description: 'Sample description 1',
-    createdAt: 1682857406070,
-    user: 'tester1',
-    id: 'qortal_qmail_Phil_ViVrF2_mail_NnHcWj',
-    tags: ['attach: 0']
-  },
-  {
-    name: 'Sample 2',
-    description: 'Sample description 2',
-    createdAt: 1682857406071,
-    user: 'tester2',
-    id: 'qortal_qmail_Phil_ViVrF2_mail_NnHcWk',
-    tags: ['attach: 1']
-  }
-  // Add more rows as needed
-]
+
 
 function fixedHeaderContent() {
   return (

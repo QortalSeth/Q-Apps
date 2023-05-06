@@ -161,6 +161,8 @@ export const Mail = () => {
     )
   }
 
+  console.log('hello', valueTab, alias, alias[valueTab - 1])
+
   return (
     <Box
       sx={{
@@ -185,7 +187,16 @@ export const Mail = () => {
           onChange={handleChange}
           aria-label="basic tabs example"
         >
-          <Tab label={user?.name} {...a11yProps(0)} />
+          <Tab
+            sx={{
+              '&.Mui-selected': {
+                color: theme.palette.text.primary,
+                fontWeight: theme.typography.fontWeightMedium
+              }
+            }}
+            label={user?.name}
+            {...a11yProps(0)}
+          />
           {alias.map((alia, index) => {
             return (
               <Tab
@@ -239,7 +250,11 @@ export const Mail = () => {
           + alias
         </Button>
       </Box>
-      <NewMessage replyTo={replyTo} setReplyTo={setReplyTo} />
+      <NewMessage
+        replyTo={replyTo}
+        setReplyTo={setReplyTo}
+        alias={valueTab === 0 ? '' : alias[valueTab - 1]}
+      />
       <ShowMessage
         isOpen={isOpen}
         setIsOpen={setIsOpen}

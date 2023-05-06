@@ -85,10 +85,7 @@ export const AudioPanel: React.FC<VideoPanelProps> = ({
         reverse: true
       })
     } catch (error) {
-      const res2 = await fetch(
-        '/arbitrary/resources?&service=AUDIO&name=Phil&includemetadata=true&limit=100&offset=0&reverse=true'
-      )
-      res = await res2.json()
+
     }
 
     // Replace this URL with the actual API endpoint

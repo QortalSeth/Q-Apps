@@ -50,15 +50,17 @@ export const AliasMail = ({ value }: AliasMailProps) => {
   )
 
   const fullMailMessages = useMemo(() => {
-    return mailMessages.map((msg) => {
-      let message = msg
-      const existingMessage = hashMapMailMessages[msg.id]
-      if (existingMessage) {
-        message = existingMessage
-      }
-      return message
-    })
-  }, [mailMessages, hashMapMailMessages])
+    return mailMessages
+      .map((msg) => {
+        let message = msg
+        const existingMessage = hashMapMailMessages[msg.id]
+        if (existingMessage) {
+          message = existingMessage
+        }
+        return message
+      })
+      .filter((item: any) => item?.user !== user?.name)
+  }, [mailMessages, hashMapMailMessages, user])
   const dispatch = useDispatch()
   const navigate = useNavigate()
 
@@ -90,10 +92,7 @@ export const AliasMail = ({ value }: AliasMailProps) => {
             'Content-Type': 'application/json'
           }
         })
-        const responseRaw = await response.json()
-        const responseData = responseRaw.filter(
-          (item: any) => item?.name !== user?.name
-        )
+        const responseData = await response.json()
 
         const latestPost = mailMessages[0]
         if (!latestPost) return
@@ -157,21 +156,19 @@ export const AliasMail = ({ value }: AliasMailProps) => {
           }
         })
         const responseData = await response.json()
-        const structureData = responseData
-          .filter((item: any) => item?.name !== user?.name)
-          .map((post: any): BlogPost => {
-            return {
-              title: post?.metadata?.title,
-              category: post?.metadata?.category,
-              categoryName: post?.metadata?.categoryName,
-              tags: post?.metadata?.tags || [],
-              description: post?.metadata?.description,
-              createdAt: post?.created,
-              updated: post?.updated,
-              user: post.name,
-              id: post.identifier
-            }
-          })
+        const structureData = responseData.map((post: any): BlogPost => {
+          return {
+            title: post?.metadata?.title,
+            category: post?.metadata?.category,
+            categoryName: post?.metadata?.categoryName,
+            tags: post?.metadata?.tags || [],
+            description: post?.metadata?.description,
+            createdAt: post?.created,
+            updated: post?.updated,
+            user: post.name,
+            id: post.identifier
+          }
+        })
         setMailMessages((prev) => {
           const updatedMessages = [...prev]
 
@@ -267,7 +264,12 @@ export const AliasMail = ({ value }: AliasMailProps) => {
 
   return (
     <>
-      <NewMessage replyTo={replyTo} setReplyTo={setReplyTo} alias={value} />
+      <NewMessage
+        replyTo={replyTo}
+        setReplyTo={setReplyTo}
+        alias={value}
+        hideButton
+      />
       <ShowMessage
         isOpen={isOpen}
         setIsOpen={setIsOpen}
@@ -279,7 +281,17 @@ export const AliasMail = ({ value }: AliasMailProps) => {
         openMessage={openMessage}
         data={fullMailMessages}
       ></SimpleTable>
-      <LazyLoad onLoadMore={getMessages}></LazyLoad>
+      <Box
+        sx={{
+          width: '100%',
+          justifyContent: 'center'
+        }}
+      >
+        {mailMessages.length > 20 && (
+          <Button onClick={getMessages}>Load Older Messages</Button>
+        )}
+      </Box>
+      {/* <LazyLoad onLoadMore={getMessages}></LazyLoad> */}
     </>
   )
 }

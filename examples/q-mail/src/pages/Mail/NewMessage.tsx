@@ -1,6 +1,6 @@
 import React, { Dispatch, useEffect, useState } from 'react'
 import { ReusableModal } from '../../components/modals/ReusableModal'
-import { Box, Input, Typography } from '@mui/material'
+import { Box, Input, Typography, useTheme } from '@mui/material'
 import { BuilderButton } from '../CreatePost/CreatePost-styles'
 import BlogEditor from '../../components/editor/BlogEditor'
 import EmailIcon from '@mui/icons-material/Email'
@@ -11,7 +11,7 @@ import { RootState } from '../../state/store'
 import { useDropzone } from 'react-dropzone'
 import AttachFileIcon from '@mui/icons-material/AttachFile'
 import CloseIcon from '@mui/icons-material/Close'
-
+import CreateIcon from '@mui/icons-material/Create'
 import { setNotification } from '../../state/features/notificationsSlice'
 import {
   objectToBase64,
@@ -37,9 +37,15 @@ interface NewMessageProps {
   replyTo?: any
   setReplyTo: React.Dispatch<any>
   alias?: string
+  hideButton?: boolean
 }
 const maxSize = 25 * 1024 * 1024 // 25 MB in bytes
-export const NewMessage = ({ setReplyTo, replyTo, alias }: NewMessageProps) => {
+export const NewMessage = ({
+  setReplyTo,
+  replyTo,
+  alias,
+  hideButton
+}: NewMessageProps) => {
   const [isOpen, setIsOpen] = useState<boolean>(false)
   const [value, setValue] = useState(initialValue)
   const [title, setTitle] = useState<string>('')
@@ -49,6 +55,7 @@ export const NewMessage = ({ setReplyTo, replyTo, alias }: NewMessageProps) => {
   const [destinationName, setDestinationName] = useState('')
   const [aliasValue, setAliasValue] = useState<string>('')
   const { user } = useSelector((state: RootState) => state.auth)
+  const theme = useTheme()
   const dispatch = useDispatch()
   const { getRootProps, getInputProps } = useDropzone({
     maxSize,
@@ -65,12 +72,6 @@ export const NewMessage = ({ setReplyTo, replyTo, alias }: NewMessageProps) => {
     }
   })
 
-  useEffect(() => {
-    if (alias) {
-      setAliasValue(alias)
-    }
-  }, [alias])
-
   const openModal = () => {
     setIsOpen(true)
 
@@ -84,9 +85,7 @@ export const NewMessage = ({ setReplyTo, replyTo, alias }: NewMessageProps) => {
     setValue(initialValue)
     setReplyTo(null)
     setIsOpen(false)
-    if (!alias) {
-      setAliasValue('')
-    }
+    setAliasValue('')
   }
   useEffect(() => {
     if (replyTo) {
@@ -119,6 +118,12 @@ export const NewMessage = ({ setReplyTo, replyTo, alias }: NewMessageProps) => {
       errorMsg = errMsg
     }
 
+    if (alias && !aliasValue) {
+      errorMsg = 'An alias is required'
+    }
+    if (alias && alias === aliasValue) {
+      errorMsg = "The recipient's alias cannot be the same as yours"
+    }
     if (errorMsg) {
       dispatch(
         setNotification({
@@ -289,17 +294,43 @@ export const NewMessage = ({ setReplyTo, replyTo, alias }: NewMessageProps) => {
         width: '100%'
       }}
     >
-      {!alias && (
-        <EmailIcon
+      {!hideButton && (
+        <Box
           sx={{
+            display: 'flex',
+            alignItems: 'center',
+            background: theme.palette.background.default,
+            borderRadius: '25px',
+            height: 'auto',
+            padding: '10px',
             cursor: 'pointer',
-            margin: '15px'
+            margin: '7px 10px 7px 0px;'
           }}
           onClick={openModal}
-        />
+        >
+          <CreateIcon
+            sx={{
+              cursor: 'pointer',
+              marginRight: '5px'
+            }}
+          />
+          <Typography
+            sx={{
+              fontSize: '14px'
+            }}
+          >
+            Compose
+          </Typography>
+        </Box>
       )}
 
-      <ReusableModal open={isOpen}>
+      <ReusableModal
+        open={isOpen}
+        customStyles={{
+          maxHeight: '95vh',
+          overflowY: 'auto'
+        }}
+      >
         <Box
           sx={{
             display: 'flex',
@@ -320,11 +351,10 @@ export const NewMessage = ({ setReplyTo, replyTo, alias }: NewMessageProps) => {
             <Input
               id="standard-adornment-name"
               value={destinationName}
-              disabled={!!replyTo}
               onChange={(e) => {
                 setDestinationName(e.target.value)
               }}
-              placeholder="To (name) -public"
+              placeholder="To (name)"
               sx={{
                 width: '100%',
                 fontSize: '16px'
@@ -333,7 +363,6 @@ export const NewMessage = ({ setReplyTo, replyTo, alias }: NewMessageProps) => {
             <Input
               id="standard-adornment-alias"
               value={aliasValue}
-              disabled={!!alias}
               onChange={(e) => {
                 setAliasValue(e.target.value)
               }}
@@ -413,6 +442,7 @@ export const NewMessage = ({ setReplyTo, replyTo, alias }: NewMessageProps) => {
             value={value}
             setValue={setValue}
             editorKey={1}
+            disableMaxHeight
           />
         </Box>
         <BuilderButton onClick={sendMail}>

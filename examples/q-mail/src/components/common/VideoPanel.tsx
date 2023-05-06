@@ -84,10 +84,6 @@ export const VideoPanel: React.FC<VideoPanelProps> = ({
         reverse: true
       })
     } catch (error) {
-      const res2 = await fetch(
-        '/arbitrary/resources?&service=VIDEO&name=Phil&includemetadata=true&limit=100&offset=0&reverse=true'
-      )
-      res = await res2.json()
     }
 
     return res

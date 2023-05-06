@@ -20,7 +20,7 @@ import {
   NavbarName
 } from './Navbar-styles'
 import { AccountCircleSVG } from '../../../assets/svgs/AccountCircleSVG'
-import QblogLogo from '../../../assets/img/qBlogLogo.png'
+import QMailLogo from '../../../assets/img/qmaillogo.png'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import PersonOffIcon from '@mui/icons-material/PersonOff'
 import {
@@ -80,7 +80,10 @@ const NavBar: React.FC<Props> = ({
     <CustomAppBar position="sticky" elevation={2}>
       <CustomToolbar variant="dense">
         <QblogLogoContainer
-          src={QblogLogo}
+          style={{
+            height: '32px'
+          }}
+          src={QMailLogo}
           alt="Q-Mail Logo"
           onClick={() => {
             navigate(`/`)
