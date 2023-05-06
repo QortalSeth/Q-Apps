@@ -11,6 +11,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { RootState } from '../../state/store'
 import EditIcon from '@mui/icons-material/Edit'
 import CloseIcon from '@mui/icons-material/Close'
+import Joyride, { ACTIONS, EVENTS, STATUS, Step } from 'react-joyride'
 import {
   Box,
   Button,
@@ -33,6 +34,101 @@ import { setIsLoadingGlobal } from '../../state/features/globalSlice'
 import SimpleTable from './MailTable'
 import { AliasMail } from './AliasMail'
 
+const steps: Step[] = [
+  {
+    content: (
+      <div>
+        <h2>Welcome To Q-Mail</h2>
+        <p
+          style={{
+            fontSize: '18px'
+          }}
+        >
+          Let's take a tour
+        </p>
+        <p
+          style={{
+            fontSize: '12px'
+          }}
+        >
+          The Qortal community, along with its development team and the creators
+          of this application, cannot be held accountable for any content
+          published or displayed. Furthermore, they bear no responsibility for
+          any data loss that may occur as a result of using this application.
+        </p>
+      </div>
+    ),
+    placement: 'center',
+    target: '.step-1'
+  },
+
+  {
+    target: '.step-2',
+    content: (
+      <div>
+        <h2>Composing a mail message</h2>
+        <p
+          style={{
+            fontSize: '18px',
+            fontWeight: 'bold',
+            fontFamily: 'Arial'
+          }}
+        >
+          Compose a secure message featuring encrypted attachments (up to 25MB
+          per attachment).
+        </p>
+        <p
+          style={{
+            fontSize: '18px',
+            fontFamily: 'Arial'
+          }}
+        >
+          To protect the identity of the recipient, assign them an alias for
+          added anonymity.
+        </p>
+      </div>
+    ),
+    placement: 'bottom'
+  },
+  {
+    target: '.step-3',
+    content: (
+      <div>
+        <h2>What is an alias?</h2>
+        <p
+          style={{
+            fontSize: '18px',
+            fontWeight: 'bold',
+            fontFamily: 'Arial'
+          }}
+        >
+          To conceal the identity of the message recipient, utilize the alias
+          option when sending.
+        </p>
+        <p
+          style={{
+            fontSize: '14px',
+            fontFamily: 'Arial'
+          }}
+        >
+          For instance, instruct your friend to address the message to you using
+          the alias 'FrederickGreat'.
+        </p>
+        <p
+          style={{
+            fontSize: '14px',
+            fontFamily: 'Arial'
+          }}
+        >
+          To access messages sent to that alias, simply enter 'FrederickGreat'
+          in the provided input field and click the '+ Alias' button.
+        </p>
+      </div>
+    ),
+    placement: 'bottom'
+  }
+]
+
 export const Mail = () => {
   const theme = useTheme()
   const { user } = useSelector((state: RootState) => state.auth)
@@ -42,6 +138,7 @@ export const Mail = () => {
   const [valueTab, setValueTab] = React.useState(0)
   const [aliasValue, setAliasValue] = useState('')
   const [alias, setAlias] = useState<string[]>([])
+  const [run, setRun] = useState(false)
   const hashMapPosts = useSelector(
     (state: RootState) => state.blog.hashMapPosts
   )
@@ -138,15 +235,40 @@ export const Mail = () => {
     setValueTab(newValue)
   }
 
+  function CustomTabLabelDefault({ label }: any) {
+    return (
+      <div style={{ display: 'flex', alignItems: 'center' }}>
+        <span
+          style={{
+            textTransform: 'none'
+          }}
+        >
+          {label}
+        </span>
+        <IconButton id="close-button" edge="end" color="inherit" size="small">
+          <CloseIcon fontSize="inherit" />
+        </IconButton>
+      </div>
+    )
+  }
+
   function CustomTabLabel({ index, label }: any) {
     return (
       <div style={{ display: 'flex', alignItems: 'center' }}>
-        <span>{label}</span>
+        <span
+          style={{
+            textTransform: 'none'
+          }}
+        >
+          {label}
+        </span>
         <IconButton
+          id="close-button"
           edge="end"
           color="inherit"
           size="small"
           onClick={(event) => {
+            event.stopPropagation() // Add this l
             setValueTab(0)
             const newList = [...alias]
 
@@ -161,10 +283,25 @@ export const Mail = () => {
     )
   }
 
-  console.log('hello', valueTab, alias, alias[valueTab - 1])
+  useEffect(() => {
+    const savedTourStatus = localStorage.getItem('tourStatus-qmail')
+    if (!savedTourStatus || savedTourStatus === STATUS.SKIPPED) {
+      setRun(true)
+    }
+  }, [])
+
+  const handleJoyrideCallback = (data: any) => {
+    const { action, status } = data
+
+    if (status === STATUS.FINISHED || status === STATUS.SKIPPED) {
+      setRun(false)
+      localStorage.setItem('tourStatus-qmail', status)
+    }
+  }
 
   return (
     <Box
+      className="step-1"
       sx={{
         display: 'flex',
         width: '100%',
@@ -194,7 +331,7 @@ export const Mail = () => {
                 fontWeight: theme.typography.fontWeightMedium
               }
             }}
-            label={user?.name}
+            label={<CustomTabLabelDefault label={user?.name} />}
             {...a11yProps(0)}
           />
           {alias.map((alia, index) => {
@@ -213,42 +350,49 @@ export const Mail = () => {
             )
           })}
         </Tabs>
-        <Input
-          id="standard-adornment-alias"
-          onChange={(e) => {
-            setAliasValue(e.target.value)
-          }}
-          value={aliasValue}
-          placeholder="Type in alias"
+        <Box
+          className="step-3"
           sx={{
-            marginLeft: '20px',
-            '&&:before': {
-              borderBottom: 'none'
-            },
-            '&&:after': {
-              borderBottom: 'none'
-            },
-            '&&:hover:before': {
-              borderBottom: 'none'
-            },
-            '&&.Mui-focused:before': {
-              borderBottom: 'none'
-            },
-            '&&.Mui-focused': {
-              outline: 'none'
-            },
-            fontSize: '18px'
+            display: 'flex'
           }}
-        />
-        <Button
-          onClick={() => {
-            setAlias((prev) => [...prev, aliasValue])
-            setAliasValue('')
-          }}
-          variant="contained"
         >
-          + alias
-        </Button>
+          <Input
+            id="standard-adornment-alias"
+            onChange={(e) => {
+              setAliasValue(e.target.value)
+            }}
+            value={aliasValue}
+            placeholder="Type in alias"
+            sx={{
+              marginLeft: '20px',
+              '&&:before': {
+                borderBottom: 'none'
+              },
+              '&&:after': {
+                borderBottom: 'none'
+              },
+              '&&:hover:before': {
+                borderBottom: 'none'
+              },
+              '&&.Mui-focused:before': {
+                borderBottom: 'none'
+              },
+              '&&.Mui-focused': {
+                outline: 'none'
+              },
+              fontSize: '18px'
+            }}
+          />
+          <Button
+            onClick={() => {
+              setAlias((prev) => [...prev, aliasValue])
+              setAliasValue('')
+            }}
+            variant="contained"
+          >
+            + alias
+          </Button>
+        </Box>
       </Box>
       <NewMessage
         replyTo={replyTo}
@@ -261,31 +405,7 @@ export const Mail = () => {
         message={message}
         setReplyTo={setReplyTo}
       />
-      {/* {countNewPosts > 0 && (
-        <Box
-          sx={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center'
-          }}
-        >
-          <Typography>
-            {countNewPosts === 1
-              ? `There is ${countNewPosts} new message`
-              : `There are ${countNewPosts} new messages`}
-          </Typography>
-          <Button
-            sx={{
-              backgroundColor: theme.palette.primary.light,
-              color: theme.palette.text.primary,
-              fontFamily: 'Arial'
-            }}
-            onClick={getNewPosts}
-          >
-            Load new Posts
-          </Button>
-        </Box>
-      )} */}
+
       <TabPanel value={valueTab} index={0}>
         <SimpleTable
           openMessage={openMessage}
@@ -301,32 +421,15 @@ export const Mail = () => {
         )
       })}
 
-      {/* <Box>
-        {mailMessages.map((message, index) => {
-          const existingMessage = hashMapMailMessages[message.id]
-          let mailMessage = message
-          if (existingMessage) {
-            mailMessage = existingMessage
-          }
-          return (
-            <Box
-              sx={{
-                display: 'flex',
-                gap: 1,
-                alignItems: 'center',
-                width: 'auto',
-                position: 'relative',
-                ' @media (max-width: 450px)': {
-                  width: '100%'
-                }
-              }}
-              key={mailMessage.id}
-            >
-              hello
-            </Box>
-          )
-        })}
-      </Box> */}
+      <Joyride
+        steps={steps}
+        run={run}
+        callback={handleJoyrideCallback}
+        continuous={true}
+        scrollToFirstStep={true}
+        showProgress={true}
+        showSkipButton={true}
+      />
     </Box>
   )
 }

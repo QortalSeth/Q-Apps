@@ -301,7 +301,7 @@ export default function FileElement({
                 fontSize: '14px'
               }}
             >
-              Ready to download: click here
+              Ready to save: click here
             </Typography>
           ) : null}
         </Box>
@@ -447,7 +447,7 @@ export default function FileElement({
                     fontSize: '14px'
                   }}
                 >
-                  Ready to download: click here
+                  Ready to save: click here
                 </Typography>
               </Box>
             )}

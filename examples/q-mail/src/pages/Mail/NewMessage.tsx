@@ -25,6 +25,8 @@ import {
   MAIL_ATTACHMENT_SERVICE_TYPE,
   MAIL_SERVICE_TYPE
 } from '../../constants/mail'
+import ConfirmationModal from '../../components/common/ConfirmationModal'
+import useConfirmationModal from '../../hooks/useConfirmModal'
 const initialValue: Descendant[] = [
   {
     type: 'paragraph',
@@ -55,7 +57,13 @@ export const NewMessage = ({
   const [destinationName, setDestinationName] = useState('')
   const [aliasValue, setAliasValue] = useState<string>('')
   const { user } = useSelector((state: RootState) => state.auth)
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false)
   const theme = useTheme()
+  const { Modal, showModal } = useConfirmationModal({
+    title: 'Important',
+    message:
+      'To keep yourself anonymous remember to not use the same alias as the person you are messaging'
+  })
   const dispatch = useDispatch()
   const { getRootProps, getInputProps } = useDropzone({
     maxSize,
@@ -93,6 +101,32 @@ export const NewMessage = ({
       setDestinationName(replyTo?.user || '')
     }
   }, [replyTo])
+
+  const waitForUserAction = async () => {
+    return new Promise<void>((resolve, reject) => {
+      setIsModalOpen(true)
+
+      const handleConfirm = () => {
+        setIsModalOpen(false)
+        resolve()
+      }
+
+      const handleCancel = () => {
+        setIsModalOpen(false)
+        reject(new Error('User canceled'))
+      }
+
+      const modalProps = {
+        open: isModalOpen,
+        title: 'Confirmation',
+        message: 'Are you sure?',
+        handleConfirm,
+        handleCancel
+      }
+
+      return <ConfirmationModal {...modalProps} />
+    })
+  }
   async function publishQDNResource() {
     let address: string = ''
     let name: string = ''
@@ -124,6 +158,7 @@ export const NewMessage = ({
     if (alias && alias === aliasValue) {
       errorMsg = "The recipient's alias cannot be the same as yours"
     }
+
     if (errorMsg) {
       dispatch(
         setNotification({
@@ -134,6 +169,10 @@ export const NewMessage = ({
       throw new Error(errorMsg)
     }
 
+    if (aliasValue && !alias) {
+      const userConfirmed = await showModal()
+      if (userConfirmed === false) return
+    }
     const mailObject: any = {
       title,
       // description,
@@ -296,6 +335,7 @@ export const NewMessage = ({
     >
       {!hideButton && (
         <Box
+          className="step-2"
           sx={{
             display: 'flex',
             alignItems: 'center',
@@ -450,6 +490,7 @@ export const NewMessage = ({
         </BuilderButton>
         <BuilderButton onClick={closeModal}>Close</BuilderButton>
       </ReusableModal>
+      <Modal />
     </Box>
   )
 }
