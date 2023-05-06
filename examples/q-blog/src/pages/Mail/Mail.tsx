@@ -10,17 +10,28 @@ import { useNavigate } from 'react-router-dom'
 import { useDispatch, useSelector } from 'react-redux'
 import { RootState } from '../../state/store'
 import EditIcon from '@mui/icons-material/Edit'
-import { Box, Button, Typography, useTheme } from '@mui/material'
+import CloseIcon from '@mui/icons-material/Close'
+import {
+  Box,
+  Button,
+  Input,
+  Typography,
+  useTheme,
+  IconButton
+} from '@mui/material'
 import { useFetchPosts } from '../../hooks/useFetchPosts'
 import LazyLoad from '../../components/common/LazyLoad'
 import { removePrefix } from '../../utils/blogIdformats'
 import { NewMessage } from './NewMessage'
+import Tabs from '@mui/material/Tabs'
+import Tab from '@mui/material/Tab'
 import { useFetchMail } from '../../hooks/useFetchMail'
-import ReactVirtualizedTable from './MailTable'
 import { ShowMessage } from './ShowMessage'
 import { fetchAndEvaluateMail } from '../../utils/fetchMail'
 import { addToHashMapMail } from '../../state/features/mailSlice'
 import { setIsLoadingGlobal } from '../../state/features/globalSlice'
+import SimpleTable from './MailTable'
+import { AliasMail } from './AliasMail'
 
 export const Mail = () => {
   const theme = useTheme()
@@ -28,7 +39,9 @@ export const Mail = () => {
   const [isOpen, setIsOpen] = useState<boolean>(false)
   const [message, setMessage] = useState<any>(null)
   const [replyTo, setReplyTo] = useState<any>(null)
-
+  const [valueTab, setValueTab] = React.useState(0)
+  const [aliasValue, setAliasValue] = useState('')
+  const [alias, setAlias] = useState<string[]>([])
   const hashMapPosts = useSelector(
     (state: RootState) => state.blog.hashMapPosts
   )
@@ -113,6 +126,41 @@ export const Mail = () => {
       firstMount.current = true
     }
   }, [user])
+
+  function a11yProps(index: number) {
+    return {
+      id: `mail-tabs-${index}`,
+      'aria-controls': `mail-tabs-${index}`
+    }
+  }
+
+  const handleChange = (event: React.SyntheticEvent, newValue: number) => {
+    setValueTab(newValue)
+  }
+
+  function CustomTabLabel({ index, label }: any) {
+    return (
+      <div style={{ display: 'flex', alignItems: 'center' }}>
+        <span>{label}</span>
+        <IconButton
+          edge="end"
+          color="inherit"
+          size="small"
+          onClick={(event) => {
+            setValueTab(0)
+            const newList = [...alias]
+
+            newList.splice(index, 1)
+
+            setAlias(newList)
+          }}
+        >
+          <CloseIcon fontSize="inherit" />
+        </IconButton>
+      </div>
+    )
+  }
+
   return (
     <Box
       sx={{
@@ -122,6 +170,75 @@ export const Mail = () => {
         backgroundColor: 'background.paper'
       }}
     >
+      <Box
+        sx={{
+          borderBottom: 1,
+          borderColor: 'divider',
+          display: 'flex',
+          width: '100%',
+          alignItems: 'center',
+          justifyContent: 'flex-start'
+        }}
+      >
+        <Tabs
+          value={valueTab}
+          onChange={handleChange}
+          aria-label="basic tabs example"
+        >
+          <Tab label={user?.name} {...a11yProps(0)} />
+          {alias.map((alia, index) => {
+            return (
+              <Tab
+                sx={{
+                  '&.Mui-selected': {
+                    color: theme.palette.text.primary,
+                    fontWeight: theme.typography.fontWeightMedium
+                  }
+                }}
+                key={alia}
+                label={<CustomTabLabel index={index} label={alia} />}
+                {...a11yProps(1 + index)}
+              />
+            )
+          })}
+        </Tabs>
+        <Input
+          id="standard-adornment-alias"
+          onChange={(e) => {
+            setAliasValue(e.target.value)
+          }}
+          value={aliasValue}
+          placeholder="Type in alias"
+          sx={{
+            marginLeft: '20px',
+            '&&:before': {
+              borderBottom: 'none'
+            },
+            '&&:after': {
+              borderBottom: 'none'
+            },
+            '&&:hover:before': {
+              borderBottom: 'none'
+            },
+            '&&.Mui-focused:before': {
+              borderBottom: 'none'
+            },
+            '&&.Mui-focused': {
+              outline: 'none'
+            },
+            fontSize: '18px'
+          }}
+        />
+        <Button
+          onClick={() => {
+            setAlias((prev) => [...prev, aliasValue])
+            setAliasValue('')
+          }}
+          variant="contained"
+        >
+          + alias
+        </Button>
+      </Box>
       <NewMessage replyTo={replyTo} setReplyTo={setReplyTo} />
       <ShowMessage
         isOpen={isOpen}
@@ -154,13 +271,21 @@ export const Mail = () => {
           </Button>
         </Box>
       )} */}
-      <ReactVirtualizedTable
-        openMessage={openMessage}
-        data={fullMailMessages}
-        loadMoreData={getMessages}
-      >
-        {/* <LazyLoad onLoadMore={getMessages}></LazyLoad> */}
-      </ReactVirtualizedTable>
+      <TabPanel value={valueTab} index={0}>
+        <SimpleTable
+          openMessage={openMessage}
+          data={fullMailMessages}
+        ></SimpleTable>
+        <LazyLoad onLoadMore={getMessages}></LazyLoad>
+      </TabPanel>
+      {alias.map((alia, index) => {
+        return (
+          <TabPanel key={alia} value={valueTab} index={1 + index}>
+            <AliasMail value={alia} />
+          </TabPanel>
+        )
+      })}
+
       {/* <Box>
         {mailMessages.map((message, index) => {
           const existingMessage = hashMapMailMessages[message.id]
@@ -188,5 +313,30 @@ export const Mail = () => {
         })}
       </Box> */}
     </Box>
+  )
+}
+
+interface TabPanelProps {
+  children?: React.ReactNode
+  index: number
+  value: number
+}
+
+export function TabPanel(props: TabPanelProps) {
+  const { children, value, index, ...other } = props
+
+  return (
+    <div
+      role="tabpanel"
+      hidden={value !== index}
+      id={`mail-tabs-${index}`}
+      aria-labelledby={`mail-tabs-${index}`}
+      {...other}
+      style={{
+        width: '100%'
+      }}
+    >
+      {value === index && children}
+    </div>
   )
 }

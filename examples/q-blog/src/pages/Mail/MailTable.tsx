@@ -6,13 +6,13 @@ import TableContainer from '@mui/material/TableContainer'
 import TableHead from '@mui/material/TableHead'
 import TableRow from '@mui/material/TableRow'
 import Paper from '@mui/material/Paper'
-import { TableVirtuoso, TableComponents } from 'react-virtuoso'
-import { formatTimestamp } from '../../utils/time'
 import { Avatar, Box } from '@mui/material'
 import { useSelector } from 'react-redux'
 import { RootState } from '../../state/store'
+import { formatTimestamp } from '../../utils/time'
 
 const tableCellFontSize = '16px'
+
 interface Data {
   name: string
   description: string
@@ -22,6 +22,7 @@ interface Data {
   tags: string[]
   subject?: string
 }
+
 interface ColumnData {
   dataKey: keyof Data
   label: string
@@ -67,40 +68,6 @@ const rows: Data[] = [
   }
   // Add more rows as needed
 ]
-
-const VirtuosoTableComponents: TableComponents<Data> = {
-  Scroller: React.forwardRef<HTMLDivElement>((props, ref) => (
-    <TableContainer
-      component={Paper}
-      {...props}
-      ref={ref}
-      sx={{
-        '&::-webkit-scrollbar': {
-          width: '8px',
-          height: '8px'
-        },
-        '&::-webkit-scrollbar-thumb': {
-          backgroundColor: '#888',
-          borderRadius: '4px'
-        },
-        '&::-webkit-scrollbar-thumb:hover': {
-          backgroundColor: '#555'
-        }
-      }}
-    />
-  )),
-  Table: (props) => (
-    <Table
-      {...props}
-      sx={{ borderCollapse: 'separate', tableLayout: 'fixed' }}
-    />
-  ),
-  TableHead,
-  TableRow: ({ item: _item, ...props }) => <TableRow {...props} />,
-  TableBody: React.forwardRef<HTMLTableSectionElement>((props, ref) => (
-    <TableBody {...props} ref={ref} />
-  ))
-}
 
 function fixedHeaderContent() {
   return (
@@ -178,30 +145,31 @@ function rowContent(_index: number, row: Data, openMessage: any) {
   )
 }
 
-interface ReactVirtualizedTableProps {
+interface SimpleTableProps {
   openMessage: (user: string, messageIdentifier: string, content: any) => void
-  data: any[]
+  data: Data[]
   children?: React.ReactNode
-  loadMoreData: () => void
 }
 
-export default function ReactVirtualizedTable({
+export default function SimpleTable({
   openMessage,
   data,
-  children,
-  loadMoreData
-}: ReactVirtualizedTableProps) {
+  children
+}: SimpleTableProps) {
   return (
-    <Paper style={{ height: 'calc(100vh - 105px)', width: '100%' }}>
-      <TableVirtuoso
-        data={data}
-        components={VirtuosoTableComponents}
-        fixedHeaderContent={fixedHeaderContent}
-        itemContent={(index, row) => rowContent(index, row, openMessage)}
-        endReached={() => {
-          loadMoreData()
-        }}
-      />
+    <Paper style={{ width: '100%' }}>
+      <TableContainer component={Paper}>
+        <Table>
+          <TableHead>{fixedHeaderContent()}</TableHead>
+          <TableBody>
+            {data.map((row, index) => (
+              <TableRow key={index}>
+                {rowContent(index, row, openMessage)}
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
       {children}
     </Paper>
   )
@@ -213,9 +181,9 @@ export const AvatarWrapper = ({ user }: any) => {
   )
   const avatarLink = React.useMemo(() => {
     if (!user || !userAvatarHash) return ''
-    const findUserAvatr = userAvatarHash[user]
-    if (!findUserAvatr) return ''
-    return findUserAvatr
+    const findUserAvatar = userAvatarHash[user]
+    if (!findUserAvatar) return ''
+    return findUserAvatar
   }, [userAvatarHash, user])
 
   return <Avatar src={avatarLink} alt={`${user}'s avatar`} />

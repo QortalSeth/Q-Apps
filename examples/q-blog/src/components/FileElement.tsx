@@ -16,6 +16,7 @@ import {
   base64ToUint8Array,
   objectToUint8ArrayFromResponse
 } from '../utils/toBase64'
+import { setNotification } from '../state/features/notificationsSlice'
 
 const Widget = styled('div')(({ theme }) => ({
   padding: 8,
@@ -200,7 +201,27 @@ export default function FileElement({
             console.error('Error fetching the video:', error)
             // clearInterval(intervalId)
           })
-      } catch (error) {}
+      } catch (error: any) {
+        let notificationObj = null
+        if (typeof error === 'string') {
+          notificationObj = {
+            msg: error || 'Failed to send message',
+            alertType: 'error'
+          }
+        } else if (typeof error?.error === 'string') {
+          notificationObj = {
+            msg: error?.error || 'Failed to send message',
+            alertType: 'error'
+          }
+        } else {
+          notificationObj = {
+            msg: error?.message || 'Failed to send message',
+            alertType: 'error'
+          }
+        }
+        if (!notificationObj) return
+        dispatch(setNotification(notificationObj))
+      }
       return
     }
     if (!postId && mode !== 'mail') return

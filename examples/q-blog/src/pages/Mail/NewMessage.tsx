@@ -36,9 +36,10 @@ const uid = new ShortUniqueId()
 interface NewMessageProps {
   replyTo?: any
   setReplyTo: React.Dispatch<any>
+  alias?: string
 }
 const maxSize = 25 * 1024 * 1024 // 25 MB in bytes
-export const NewMessage = ({ setReplyTo, replyTo }: NewMessageProps) => {
+export const NewMessage = ({ setReplyTo, replyTo, alias }: NewMessageProps) => {
   const [isOpen, setIsOpen] = useState<boolean>(false)
   const [value, setValue] = useState(initialValue)
   const [title, setTitle] = useState<string>('')
@@ -46,6 +47,7 @@ export const NewMessage = ({ setReplyTo, replyTo }: NewMessageProps) => {
   const [description, setDescription] = useState<string>('')
   const [subject, setSubject] = useState<string>('')
   const [destinationName, setDestinationName] = useState('')
+  const [aliasValue, setAliasValue] = useState<string>('')
   const { user } = useSelector((state: RootState) => state.auth)
   const dispatch = useDispatch()
   const { getRootProps, getInputProps } = useDropzone({
@@ -63,6 +65,12 @@ export const NewMessage = ({ setReplyTo, replyTo }: NewMessageProps) => {
     }
   })
 
+  useEffect(() => {
+    if (alias) {
+      setAliasValue(alias)
+    }
+  }, [alias])
+
   const openModal = () => {
     setIsOpen(true)
 
@@ -72,9 +80,13 @@ export const NewMessage = ({ setReplyTo, replyTo }: NewMessageProps) => {
     setAttachments([])
     setSubject('')
     setDestinationName('')
+
     setValue(initialValue)
     setReplyTo(null)
     setIsOpen(false)
+    if (!alias) {
+      setAliasValue('')
+    }
   }
   useEffect(() => {
     if (replyTo) {
@@ -211,10 +223,14 @@ export const NewMessage = ({ setReplyTo, replyTo }: NewMessageProps) => {
       //END OF ATTACHMENT LOGIC
 
       const blogPostToBase64 = await objectToBase64(mailObject)
-      const identifier = `qblog_qmail_${recipientName.slice(
+      let identifier = `qblog_qmail_${recipientName.slice(
         0,
         20
       )}_${recipientAddress.slice(-6)}_mail_${id}`
+
+      if (aliasValue) {
+        identifier = `qblog_qmail_${aliasValue}_mail_${id}`
+      }
 
       let requestBody: any = {
         action: 'PUBLISH_QDN_RESOURCE',
@@ -273,13 +289,16 @@ export const NewMessage = ({ setReplyTo, replyTo }: NewMessageProps) => {
         width: '100%'
       }}
     >
-      <EmailIcon
-        sx={{
-          cursor: 'pointer',
-          margin: '15px'
-        }}
-        onClick={openModal}
-      />
+      {!alias && (
+        <EmailIcon
+          sx={{
+            cursor: 'pointer',
+            margin: '15px'
+          }}
+          onClick={openModal}
+        />
+      )}
+
       <ReusableModal open={isOpen}>
         <Box
           sx={{
@@ -311,6 +330,20 @@ export const NewMessage = ({ setReplyTo, replyTo }: NewMessageProps) => {
                 fontSize: '16px'
               }}
             />
+            <Input
+              id="standard-adornment-alias"
+              value={aliasValue}
+              disabled={!!alias}
+              onChange={(e) => {
+                setAliasValue(e.target.value)
+              }}
+              placeholder="Alias -optional"
+              sx={{
+                width: '100%',
+                fontSize: '16px'
+              }}
+            />
+
             <Input
               id="standard-adornment-name"
               value={subject}

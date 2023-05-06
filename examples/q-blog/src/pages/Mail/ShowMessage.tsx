@@ -34,7 +34,8 @@ export const ShowMessage = ({
   isOpen,
   setIsOpen,
   message,
-  setReplyTo
+  setReplyTo,
+  alias
 }: any) => {
   const [value, setValue] = useState(initialValue)
   const [title, setTitle] = useState<string>('')
@@ -52,9 +53,6 @@ export const ShowMessage = ({
     setIsOpen(false)
     setIsOpenMailThread(false)
   }
-
- 
-
 
   const handleReply = () => {
     setReplyTo(message)
@@ -85,6 +83,7 @@ export const ShowMessage = ({
           }}
         >
           {isOpenMailThread &&
+            !alias &&
             message?.generalData?.thread &&
             message?.user &&
             user?.name && (
@@ -99,6 +98,7 @@ export const ShowMessage = ({
             )}
 
           {!isOpenMailThread &&
+            !alias &&
             message?.generalData?.thread?.length > 0 &&
             message?.user &&
             user?.name && (
@@ -125,6 +125,7 @@ export const ShowMessage = ({
           }}
         >
           {isOpenMailThread &&
+            !alias &&
             message?.generalData?.thread?.length > 0 &&
             message?.user &&
             user?.name && (
