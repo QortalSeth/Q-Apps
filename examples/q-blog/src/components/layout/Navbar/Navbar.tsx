@@ -320,13 +320,25 @@ const NavBar: React.FC<Props> = ({
               />
               <DropdownText>Blocked Names</DropdownText>
             </DropdownContainer>
-            <DropdownContainer onClick={() => navigate('/mail')}>
-              <EmailIcon
-                sx={{
-                  color: '#50e3c2'
+            <DropdownContainer>
+              <a
+                href="qortal://APP/Q-Mail"
+                className="qortal-link"
+                style={{
+                  width: '100%',
+                  display: 'flex',
+                  gap: '5px',
+                  alignItems: 'center'
                 }}
-              />
-              <DropdownText>My Mail</DropdownText>
+              >
+                <EmailIcon
+                  sx={{
+                    color: '#50e3c2'
+                  }}
+                />
+
+                <DropdownText>My Mail</DropdownText>
+              </a>
             </DropdownContainer>
           </Popover>
           {isOpenModal && (
