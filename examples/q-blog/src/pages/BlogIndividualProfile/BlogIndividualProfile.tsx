@@ -266,6 +266,7 @@ export const BlogIndividualProfile = () => {
                 author={blogPost.user}
                 postImage={blogPost?.postImage}
                 blogPost={blogPost}
+                tags={blogPost?.tags}
               />
 
               {blogPost.user === user?.name && (
