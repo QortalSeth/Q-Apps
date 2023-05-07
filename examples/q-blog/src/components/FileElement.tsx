@@ -90,6 +90,8 @@ export default function FileElement({
   const { downloadVideo } = React.useContext(MyContext)
   const [isLoading, setIsLoading] = React.useState<boolean>(false)
   const [fileProperties, setFileProperties] = React.useState<any>(null)
+  const [downloadLoader, setDownloadLoader] = React.useState<any>(false)
+
   const [pdfSrc, setPdfSrc] = React.useState('')
   const { downloads } = useSelector((state: RootState) => state.global)
   const { user: username } = useSelector((state: RootState) => state.auth)
@@ -133,9 +135,12 @@ export default function FileElement({
       download?.url &&
       download?.blogPost?.filename
     ) {
+      if (downloadLoader) return
+
       try {
         const { name, service, identifier } = fileInfo
         if (mode === 'mail') {
+          setDownloadLoader(true)
           let res = await qortalRequest({
             action: 'FETCH_QDN_RESOURCE',
             name: name,
@@ -185,6 +190,7 @@ export default function FileElement({
           })
           return
         }
+        setDownloadLoader(true)
         const url = `/arbitrary/${service}/${name}/${identifier}`
         fetch(url)
           .then((response) => response.blob())
@@ -200,6 +206,9 @@ export default function FileElement({
           .catch((error) => {
             console.error('Error fetching the video:', error)
             // clearInterval(intervalId)
+          })
+          .finally(() => {
+            setDownloadLoader(false)
           })
       } catch (error: any) {
         let notificationObj = null
@@ -221,6 +230,10 @@ export default function FileElement({
         }
         if (!notificationObj) return
         dispatch(setNotification(notificationObj))
+      } finally {
+        if (mode === 'mail') {
+          setDownloadLoader(false)
+        }
       }
       return
     }
@@ -296,13 +309,18 @@ export default function FileElement({
           isLoading ? (
             <CircularProgress color="secondary" size={14} />
           ) : resourceStatus?.status === 'READY' ? (
-            <Typography
-              sx={{
-                fontSize: '14px'
-              }}
-            >
-              Ready to save: click here
-            </Typography>
+            <>
+              <Typography
+                sx={{
+                  fontSize: '14px'
+                }}
+              >
+                Ready to save: click here
+              </Typography>
+              {downloadLoader && (
+                <CircularProgress color="secondary" size={14} />
+              )}
+            </>
           ) : null}
         </Box>
       )}
@@ -433,7 +451,7 @@ export default function FileElement({
                 bgcolor="rgba(0, 0, 0, 0.6)"
                 sx={{
                   display: 'flex',
-                  flexDirection: 'column',
+                  flexDirection: 'row',
                   gap: '10px',
                   padding: '8px',
                   borderRadius: '10px'
@@ -449,6 +467,9 @@ export default function FileElement({
                 >
                   Ready to save: click here
                 </Typography>
+                {downloadLoader && (
+                  <CircularProgress color="secondary" size={14} />
+                )}
               </Box>
             )}
         </Widget>

@@ -56,19 +56,21 @@ export const toBase64 = (file: File): Promise<string | ArrayBuffer | null> =>
  
 
   export function uint8ArrayToBase64(uint8Array: Uint8Array): string {
-    const length = uint8Array.length;
-    let base64String = '';
-    const chunkSize = 1024 * 1024; // Process 1MB at a time
-  
+    const length = uint8Array.length
+    let binaryString = ''
+    const chunkSize = 1024 * 1024 // Process 1MB at a time
+
     for (let i = 0; i < length; i += chunkSize) {
-      const chunkEnd = Math.min(i + chunkSize, length);
-      const chunk = uint8Array.subarray(i, chunkEnd);
-      const binaryString: string = chunk.reduce((acc, byte) => acc + String.fromCharCode(byte), '');
-      base64String += btoa(binaryString);
+      const chunkEnd = Math.min(i + chunkSize, length)
+      const chunk = uint8Array.subarray(i, chunkEnd)
+      binaryString += Array.from(chunk, (byte) =>
+        String.fromCharCode(byte)
+      ).join('')
     }
-  
-    return base64String;
+
+    return btoa(binaryString)
   }
+  
   
 
   export function objectToUint8ArrayFromResponse(obj: any) {

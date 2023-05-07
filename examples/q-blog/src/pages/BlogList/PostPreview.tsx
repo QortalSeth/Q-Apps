@@ -44,6 +44,7 @@ import BookmarkIcon from '@mui/icons-material/Bookmark'
 import { AppDispatch, RootState } from '../../state/store'
 import BlockIcon from '@mui/icons-material/Block'
 import { CustomIcon } from '../../components/common/CustomIcon'
+import ResponsiveImage from '../../components/common/ResponsiveImage'
 interface BlogPostPreviewProps {
   title: string
   createdAt: number | string
@@ -53,6 +54,7 @@ interface BlogPostPreviewProps {
   blogPost: BlogPost
   onClick?: () => void
   isValid?: boolean
+  tags?: string[]
 }
 
 const BlogPostPreview: React.FC<BlogPostPreviewProps> = ({
@@ -63,7 +65,8 @@ const BlogPostPreview: React.FC<BlogPostPreviewProps> = ({
   description,
   onClick,
   blogPost,
-  isValid
+  isValid,
+  tags
 }) => {
   const [avatarUrl, setAvatarUrl] = React.useState<string>('')
   const [showIcons, setShowIcons] = React.useState<boolean>(false)
@@ -164,6 +167,16 @@ const BlogPostPreview: React.FC<BlogPostPreviewProps> = ({
     setIsOpenAlert(false)
   }
 
+  const dimensions = useMemo(() => {
+    if (Array.isArray(tags)) {
+      const imgDimensions = tags[tags.length - 2]
+      if (!imgDimensions?.includes('v1.')) return ''
+      return imgDimensions
+    }
+
+    return ''
+  }, [tags])
+
   return (
     <>
       <StyledCard
@@ -171,7 +184,8 @@ const BlogPostPreview: React.FC<BlogPostPreviewProps> = ({
         onMouseEnter={() => setShowIcons(true)}
         onMouseLeave={() => setShowIcons(false)}
       >
-        {postImage && (
+        <ResponsiveImage src={postImage || ''} dimensions={dimensions} />
+        {/* {postImage && (
           <Box sx={{ padding: '2px' }}>
             <img
               src={postImage}
@@ -182,7 +196,7 @@ const BlogPostPreview: React.FC<BlogPostPreviewProps> = ({
               }}
             />
           </Box>
-        )}
+        )} */}
         <CardContentContainer>
           <StyledCardHeader
             sx={{

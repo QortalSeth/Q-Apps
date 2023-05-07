@@ -90,6 +90,8 @@ export default function FileElement({
   const { downloadVideo } = React.useContext(MyContext)
   const [isLoading, setIsLoading] = React.useState<boolean>(false)
   const [fileProperties, setFileProperties] = React.useState<any>(null)
+  const [downloadLoader, setDownloadLoader] = React.useState<any>(false)
+
   const [pdfSrc, setPdfSrc] = React.useState('')
   const { downloads } = useSelector((state: RootState) => state.global)
   const { user: username } = useSelector((state: RootState) => state.auth)
@@ -133,6 +135,8 @@ export default function FileElement({
       download?.url &&
       download?.blogPost?.filename
     ) {
+      if (downloadLoader) return
+      setDownloadLoader(true)
       try {
         const { name, service, identifier } = fileInfo
         if (mode === 'mail') {
@@ -221,6 +225,8 @@ export default function FileElement({
         }
         if (!notificationObj) return
         dispatch(setNotification(notificationObj))
+      } finally {
+        setDownloadLoader(false)
       }
       return
     }
@@ -296,13 +302,18 @@ export default function FileElement({
           isLoading ? (
             <CircularProgress color="secondary" size={14} />
           ) : resourceStatus?.status === 'READY' ? (
-            <Typography
-              sx={{
-                fontSize: '14px'
-              }}
-            >
-              Ready to save: click here
-            </Typography>
+            <>
+              <Typography
+                sx={{
+                  fontSize: '14px'
+                }}
+              >
+                Ready to save: click here
+              </Typography>
+              {downloadLoader && (
+                <CircularProgress color="secondary" size={14} />
+              )}
+            </>
           ) : null}
         </Box>
       )}
@@ -433,7 +444,7 @@ export default function FileElement({
                 bgcolor="rgba(0, 0, 0, 0.6)"
                 sx={{
                   display: 'flex',
-                  flexDirection: 'column',
+                  flexDirection: 'row',
                   gap: '10px',
                   padding: '8px',
                   borderRadius: '10px'
@@ -449,6 +460,9 @@ export default function FileElement({
                 >
                   Ready to save: click here
                 </Typography>
+                {downloadLoader && (
+                  <CircularProgress color="secondary" size={14} />
+                )}
               </Box>
             )}
         </Widget>

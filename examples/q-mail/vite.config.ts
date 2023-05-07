@@ -20,7 +20,8 @@ export default defineConfig(({ mode }) => {
         renderLegacyChunks: false,
         modernPolyfills: ['es/global-this']
       })
-    ]
+    ],
+    base: ''
   }
   return config
 })
