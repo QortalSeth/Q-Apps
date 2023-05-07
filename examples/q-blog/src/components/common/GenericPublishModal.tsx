@@ -55,6 +55,7 @@ interface GenericModalProps {
   acceptedFileTypes?: string[]
   service: string
   identifierPrefix: string
+  editVideoIdentifier?: string | null | undefined
 }
 
 interface SelectOption {
@@ -70,7 +71,8 @@ export const GenericModal: React.FC<GenericModalProps> = ({
   acceptedFileType,
   acceptedFileTypes,
   service,
-  identifierPrefix
+  identifierPrefix,
+  editVideoIdentifier
 }) => {
   const [file, setFile] = useState<File | null>(null)
   const [title, setTitle] = useState('')
@@ -157,6 +159,7 @@ export const GenericModal: React.FC<GenericModalProps> = ({
       const fileTitle = title?.replace(/ /g, '_')?.slice(0, 20)
       const filename = `${fileTitle}.${fileExtension}`
       const res = await publishGeneric({
+        editVideoIdentifier,
         service,
         identifierPrefix,
         title,
@@ -217,6 +220,11 @@ export const GenericModal: React.FC<GenericModalProps> = ({
   return (
     <StyledModal open={open} onClose={onClose}>
       <ModalContent>
+        {editVideoIdentifier && (
+          <Typography variant="h6">
+            You are editing: {editVideoIdentifier}
+          </Typography>
+        )}
         <Typography variant="h6" component="h2" gutterBottom>
           Upload {service}
         </Typography>

@@ -14,12 +14,15 @@ interface IPublishGeneric {
   service: string
   identifierPrefix: string
   filename: string
+  editVideoIdentifier?: string | null | undefined
+  
 }
 
 export const usePublishGeneric = () => {
   const { user } = useSelector((state: RootState) => state.auth)
   const dispatch = useDispatch()
   const publishGeneric = async ({
+    editVideoIdentifier,
     service,
     identifierPrefix,
     filename,
@@ -63,7 +66,10 @@ export const usePublishGeneric = () => {
     try {
       const id = uid()
 
-      const identifier = `${identifierPrefix}_${id}`
+      let identifier = `${identifierPrefix}_${id}`
+      if(editVideoIdentifier){
+        identifier = editVideoIdentifier
+      }
 
       const resourceResponse = await qortalRequest({
         action: 'PUBLISH_QDN_RESOURCE',

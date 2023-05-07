@@ -6,7 +6,8 @@ import {
   Typography,
   CardHeader,
   Avatar,
-  useTheme
+  useTheme,
+  Tooltip
 } from '@mui/material'
 import { useNavigate } from 'react-router-dom'
 import { styled } from '@mui/system'
@@ -16,6 +17,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { RootState } from '../../state/store'
 import { checkStructure } from '../../utils/checkStructure'
 import { BlogContent } from '../../interfaces/interfaces'
+import ShareIcon from '@mui/icons-material/Share'
 import {
   setAudio,
   setCurrAudio,
@@ -39,6 +41,9 @@ import ErrorBoundary from '../../components/common/ErrorBoundary'
 import { CommentSection } from '../../components/common/Comments/CommentSection'
 import { Tipping } from '../../components/common/Tipping/Tipping'
 import FileElement from '../../components/FileElement'
+import { CopyToClipboard } from 'react-copy-to-clipboard'
+import { setNotification } from '../../state/features/notificationsSlice'
+
 const ResponsiveGridLayout = WidthProvider(Responsive)
 const initialMinHeight = 2 // Define an initial minimum height for grid items
 
@@ -346,6 +351,27 @@ export const BlogIndividualPost = () => {
           >
             {blogContent?.title}
           </Typography>
+          <Tooltip title={`Copy post link`} arrow>
+            <Box
+              sx={{
+                cursor: 'pointer'
+              }}
+            >
+              <CopyToClipboard
+                text={`qortal://APP/Q-Blog/${user}/${blog}/${postId}`}
+                onCopy={() => {
+                  dispatch(
+                    setNotification({
+                      msg: 'Copied to clipboard!',
+                      alertType: 'success'
+                    })
+                  )
+                }}
+              >
+                <ShareIcon />
+              </CopyToClipboard>
+            </Box>
+          </Tooltip>
           <CommentSection postId={fullPostId} />
         </Box>
 

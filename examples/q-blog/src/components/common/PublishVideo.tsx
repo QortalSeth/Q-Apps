@@ -11,12 +11,14 @@ interface IPublishVideo {
   description: string
   base64: string
   category: string
+  editVideoIdentifier?: string | null | undefined
 }
 
 export const usePublishVideo = () => {
   const { user } = useSelector((state: RootState) => state.auth)
   const dispatch = useDispatch()
   const publishVideo = async ({
+    editVideoIdentifier,
     title,
     description,
     base64,
@@ -57,8 +59,10 @@ export const usePublishVideo = () => {
     try {
       const id = uid()
 
-      const identifier = `qvideo_qblog_${id}`
-
+      let identifier = `qvideo_qblog_${id}`
+      if(editVideoIdentifier){
+        identifier = editVideoIdentifier
+      }
       const resourceResponse = await qortalRequest({
         action: 'PUBLISH_QDN_RESOURCE',
         name: name,

@@ -49,6 +49,7 @@ interface VideoModalProps {
   open: boolean
   onClose: () => void
   onPublish: (value: any) => void
+  editVideoIdentifier?: string | null | undefined
 }
 
 interface SelectOption {
@@ -140,7 +141,8 @@ async function addAudioCoverImage(
 export const AudioModal: React.FC<VideoModalProps> = ({
   open,
   onClose,
-  onPublish
+  onPublish,
+  editVideoIdentifier
 }) => {
   const [file, setFile] = useState<File | null>(null)
   const [title, setTitle] = useState('')
@@ -210,6 +212,7 @@ export const AudioModal: React.FC<VideoModalProps> = ({
       const base64String = base64.split(',')[1]
 
       const res = await publishAudio({
+        editVideoIdentifier,
         title,
         description,
         base64: base64String,
@@ -267,6 +270,11 @@ export const AudioModal: React.FC<VideoModalProps> = ({
   return (
     <StyledModal open={open} onClose={onClose}>
       <ModalContent>
+        {editVideoIdentifier && (
+          <Typography variant="h6">
+            You are editing: {editVideoIdentifier}
+          </Typography>
+        )}
         <Typography variant="h6" component="h2" gutterBottom>
           Upload Audio
         </Typography>

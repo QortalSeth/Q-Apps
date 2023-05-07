@@ -12,9 +12,12 @@ import {
 } from '@mui/material'
 import VideoCallIcon from '@mui/icons-material/VideoCall'
 import VideoModal from './VideoPublishModal'
-import { useSelector } from 'react-redux'
-import { RootState } from '../../state/store'
+import { useDispatch, useSelector } from 'react-redux'
+import { CopyToClipboard } from 'react-copy-to-clipboard'
 
+import { RootState } from '../../state/store'
+import LinkIcon from '@mui/icons-material/Link'
+import { setNotification } from '../../state/features/notificationsSlice'
 interface VideoPanelProps {
   onSelect: (video: Video) => void
   height?: string
@@ -68,7 +71,10 @@ export const VideoPanel: React.FC<VideoPanelProps> = ({
   const [videos, setVideos] = useState<Video[]>([])
   const [isOpenVideoModal, setIsOpenVideoModal] = useState<boolean>(false)
   const { user } = useSelector((state: RootState) => state.auth)
-
+  const [editVideoIdentifier, setEditVideoIdentifier] = useState<
+    string | null | undefined
+  >()
+  const dispatch = useDispatch()
   const fetchVideos = React.useCallback(async (): Promise<Video[]> => {
     if (!user?.name) return []
     // Replace this URL with the actual API endpoint
@@ -178,6 +184,39 @@ export const VideoPanel: React.FC<VideoPanelProps> = ({
                     secondary={video?.metadata?.description || ''}
                   />
                 </ButtonBase>
+                <Box
+                  sx={{
+                    display: 'flex',
+                    gap: '5px'
+                  }}
+                >
+                  <Button
+                    size="small"
+                    variant="contained"
+                    onClick={() => {
+                      setEditVideoIdentifier(video.identifier)
+                      setIsOpenVideoModal(true)
+                    }}
+                  >
+                    Edit
+                  </Button>
+                  <CopyToClipboard
+                    text={`qortal://${video.service}/${video.name}/${video.identifier}`}
+                    onCopy={() => {
+                      dispatch(
+                        setNotification({
+                          msg: 'Copied to clipboard!',
+                          alertType: 'success'
+                        })
+                      )
+                    }}
+                  >
+                    <LinkIcon sx={{
+                      fontSize: '14px',
+                      cursor: 'pointer'
+                    }} />
+                  </CopyToClipboard>
+                </Box>
               </ListItem>
             ))}
           </List>
@@ -191,7 +230,10 @@ export const VideoPanel: React.FC<VideoPanelProps> = ({
           >
             <PublishButton
               variant="contained"
-              onClick={() => setIsOpenVideoModal(true)}
+              onClick={() => {
+                setEditVideoIdentifier(null)
+                setIsOpenVideoModal(true)
+              }}
             >
               Publish new video
             </PublishButton>
@@ -201,12 +243,14 @@ export const VideoPanel: React.FC<VideoPanelProps> = ({
       <VideoModal
         onClose={() => {
           setIsOpenVideoModal(false)
+          setEditVideoIdentifier(null)
         }}
         open={isOpenVideoModal}
         onPublish={(value) => {
           fetchVideos().then((fetchedVideos) => setVideos(fetchedVideos))
           setIsOpenVideoModal(false)
         }}
+        editVideoIdentifier={editVideoIdentifier}
       />
     </Box>
   )

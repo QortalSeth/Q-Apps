@@ -12,8 +12,11 @@ import {
 } from '@mui/icons-material'
 import { styled } from '@mui/system'
 import { MyContext } from '../../wrappers/DownloadWrapper'
-import { useSelector } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import { RootState } from '../../state/store'
+import { CopyToClipboard } from 'react-copy-to-clipboard'
+import { setNotification } from '../../state/features/notificationsSlice'
+import LinkIcon from '@mui/icons-material/Link'
 
 const VideoContainer = styled(Box)`
   position: relative;
@@ -79,7 +82,7 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
   const [startPlay, setStartPlay] = useState(false)
 
   const { downloads } = useSelector((state: RootState) => state.global)
-
+  const dispatch = useDispatch()
   const download = useMemo(() => {
     if (!downloads || !identifier) return {}
     const findDownload = downloads[identifier]
@@ -322,6 +325,32 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
         padding: from === 'create' ? '8px' : 0
       }}
     >
+      {/* <Box
+        sx={{
+          position: 'absolute',
+          top: '-30px',
+          right: '-15px'
+        }}
+      >
+        <CopyToClipboard
+          text={`qortal://${service}/${name}/${identifier}`}
+          onCopy={() => {
+            dispatch(
+              setNotification({
+                msg: 'Copied to clipboard!',
+                alertType: 'success'
+              })
+            )
+          }}
+        >
+          <LinkIcon
+            sx={{
+              fontSize: '14px',
+              cursor: 'pointer'
+            }}
+          />
+        </CopyToClipboard>
+      </Box> */}
       {isLoading && (
         <Box
           position="absolute"
