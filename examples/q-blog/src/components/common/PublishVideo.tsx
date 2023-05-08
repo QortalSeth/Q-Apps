@@ -9,15 +9,17 @@ const uid = new ShortUniqueId()
 interface IPublishVideo {
   title: string
   description: string
-  base64: string
+  base64?: string
   category: string
   editVideoIdentifier?: string | null | undefined
+  file?: File
 }
 
 export const usePublishVideo = () => {
   const { user } = useSelector((state: RootState) => state.auth)
   const dispatch = useDispatch()
   const publishVideo = async ({
+    file,
     editVideoIdentifier,
     title,
     description,
@@ -60,14 +62,15 @@ export const usePublishVideo = () => {
       const id = uid()
 
       let identifier = `qvideo_qblog_${id}`
-      if(editVideoIdentifier){
+      if (editVideoIdentifier) {
         identifier = editVideoIdentifier
       }
       const resourceResponse = await qortalRequest({
         action: 'PUBLISH_QDN_RESOURCE',
         name: name,
         service: 'VIDEO',
-        data64: base64,
+        // data64: base64,
+        file: file,
         title: title,
         description: description,
         category: category,
@@ -101,7 +104,6 @@ export const usePublishVideo = () => {
       }
       if (!notificationObj) return
       dispatch(setNotification(notificationObj))
-     
     }
   }
   return {

@@ -17,7 +17,7 @@ import { RootState } from '../../state/store'
 import { CopyToClipboard } from 'react-copy-to-clipboard'
 import { setNotification } from '../../state/features/notificationsSlice'
 import LinkIcon from '@mui/icons-material/Link'
-
+import { Refresh } from '@mui/icons-material'
 const VideoContainer = styled(Box)`
   position: relative;
   display: flex;
@@ -319,6 +319,17 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
     return minutes + ':' + remainingSeconds
   }
 
+  const reloadVideo = () => {
+    if (!videoRef.current) return
+    const currentTime = videoRef.current.currentTime
+    videoRef.current.src = src
+    videoRef.current.load()
+    videoRef.current.currentTime = currentTime
+    if (playing) {
+      videoRef.current.play()
+    }
+  }
+
   return (
     <VideoContainer
       style={{
@@ -357,7 +368,7 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
           top={0}
           left={0}
           right={0}
-          bottom={0}
+          bottom={resourceStatus?.status === 'READY' ? '55px ' : 0}
           display="flex"
           justifyContent="center"
           alignItems="center"
@@ -443,7 +454,7 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
 
       <VideoElement
         ref={videoRef}
-        src={!startPlay ? '' : src}
+        src={!startPlay ? '' : resourceStatus?.status === 'READY' ? src : ''}
         poster={poster}
         onTimeUpdate={updateProgress}
         autoPlay={autoplay}
@@ -467,6 +478,15 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
           onClick={togglePlay}
         >
           {playing ? <Pause /> : <PlayArrow />}
+        </IconButton>
+        <IconButton
+          sx={{
+            color: 'rgba(255, 255, 255, 0.7)',
+            marginLeft: '15px'
+          }}
+          onClick={reloadVideo}
+        >
+          <Refresh />
         </IconButton>
         <Slider
           value={progress}

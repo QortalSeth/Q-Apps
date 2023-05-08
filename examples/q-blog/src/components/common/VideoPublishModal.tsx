@@ -125,15 +125,16 @@ const VideoModal: React.FC<VideoModalProps> = ({
     })
 
     try {
-      const base64 = await toBase64(file)
-      if (typeof base64 !== 'string') return
-      const base64String = base64.split(',')[1]
+      // const base64 = await toBase64(file)
+      // if (typeof base64 !== 'string') return
+      // const base64String = base64.split(',')[1]
+      // if (!file) return
 
       const res = await publishVideo({
+        file: file,
         editVideoIdentifier,
         title,
         description,
-        base64: base64String,
         category: selectedOption?.id || '',
         ...formattedTags
       })
