@@ -128,7 +128,7 @@ const DownloadWrapper: React.FC<Props> = ({ children }) => {
     const url = `/arbitrary/${service}/${name}/${identifier}`
     let isCalling = false
     let percentLoaded = 0
-    let timer = 25
+    let timer = 24
     const intervalId = setInterval(async () => {
       if (isCalling) return
       isCalling = true
@@ -145,12 +145,12 @@ const DownloadWrapper: React.FC<Props> = ({ children }) => {
             res.percentLoaded === percentLoaded &&
             res.percentLoaded !== 100
           ) {
-            timer = timer - 3
+            timer = timer - 5
           } else {
-            timer = 25
+            timer = 24
           }
           if (timer < 0) {
-            timer = 25
+            timer = 24
             isCalling = true
             dispatch(
               updateDownloads({
@@ -170,7 +170,7 @@ const DownloadWrapper: React.FC<Props> = ({ children }) => {
                 service,
                 identifier
               })
-            }, 120000)
+            }, 25000)
             return
           }
           percentLoaded = res.percentLoaded
@@ -197,14 +197,13 @@ const DownloadWrapper: React.FC<Props> = ({ children }) => {
           })
         )
       }
-    }, 3000) // 1 second interval
+    }, 5000) // 1 second interval
 
     fetchVideoUrl({
       name,
       service,
       identifier
     })
- 
   }
 
   const downloadVideo = async ({

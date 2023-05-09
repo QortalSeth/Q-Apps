@@ -192,7 +192,7 @@ export default function AudioElement({
                       %
                     </>
 
-                    <> Refetching in 2 minutes</>
+                    <> Refetching in 25 seconds</>
                   </>
                 ) : resourceStatus?.status === 'DOWNLOADED' ? (
                   <>Download Completed: building audio...</>

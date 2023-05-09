@@ -1,4 +1,4 @@
-import React, { useContext, useMemo, useRef, useState } from 'react'
+import React, { useContext, useEffect, useMemo, useRef, useState } from 'react'
 import ReactDOM from 'react-dom'
 import { Box, IconButton, Slider } from '@mui/material'
 import { CircularProgress, Typography } from '@mui/material'
@@ -12,9 +12,9 @@ import {
 } from '@mui/icons-material'
 import { styled } from '@mui/system'
 import { MyContext } from '../../wrappers/DownloadWrapper'
-import { useSelector } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import { RootState } from '../../state/store'
-
+import { Refresh } from '@mui/icons-material'
 const VideoContainer = styled(Box)`
   position: relative;
   display: flex;
@@ -77,9 +77,8 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
   const [progress, setProgress] = useState(0)
   const [isLoading, setIsLoading] = useState(false)
   const [startPlay, setStartPlay] = useState(false)
-
+  const reDownload = useRef<boolean>(false)
   const { downloads } = useSelector((state: RootState) => state.global)
-
   const download = useMemo(() => {
     if (!downloads || !identifier) return {}
     const findDownload = downloads[identifier]
@@ -316,6 +315,27 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
     return minutes + ':' + remainingSeconds
   }
 
+  const reloadVideo = () => {
+    if (!videoRef.current) return
+    const currentTime = videoRef.current.currentTime
+    videoRef.current.src = src
+    videoRef.current.load()
+    videoRef.current.currentTime = currentTime
+    if (playing) {
+      videoRef.current.play()
+    }
+  }
+
+  useEffect(() => {
+    if (
+      resourceStatus?.status === 'DOWNLOADED' &&
+      reDownload?.current === false
+    ) {
+      getSrc()
+      reDownload.current = true
+    }
+  }, [getSrc, resourceStatus])
+
   return (
     <VideoContainer
       style={{
@@ -328,7 +348,7 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
           top={0}
           left={0}
           right={0}
-          bottom={0}
+          bottom={resourceStatus?.status === 'READY' ? '55px ' : 0}
           display="flex"
           justifyContent="center"
           alignItems="center"
@@ -361,7 +381,7 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
                     %
                   </>
 
-                  <> Refetching in 2 minutes</>
+                  <> Refetching in 25 seconds</>
                 </>
               ) : resourceStatus?.status === 'DOWNLOADED' ? (
                 <>Download Completed: building video...</>
@@ -414,7 +434,7 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
 
       <VideoElement
         ref={videoRef}
-        src={!startPlay ? '' : src}
+        src={!startPlay ? '' : resourceStatus?.status === 'READY' ? src : ''}
         poster={poster}
         onTimeUpdate={updateProgress}
         autoPlay={autoplay}
@@ -438,6 +458,15 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
           onClick={togglePlay}
         >
           {playing ? <Pause /> : <PlayArrow />}
+        </IconButton>
+        <IconButton
+          sx={{
+            color: 'rgba(255, 255, 255, 0.7)',
+            marginLeft: '15px'
+          }}
+          onClick={reloadVideo}
+        >
+          <Refresh />
         </IconButton>
         <Slider
           value={progress}

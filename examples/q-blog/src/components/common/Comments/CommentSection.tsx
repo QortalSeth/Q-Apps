@@ -114,7 +114,7 @@ export const CommentSection = ({ postId }: CommentSectionProps) => {
 
   useEffect(() => {
     getComments()
-  }, [getComments])
+  }, [getComments, postId])
 
   const structuredCommentList = useMemo(() => {
     return listComments.reduce((acc, curr, index, array) => {
