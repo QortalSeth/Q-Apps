@@ -29,6 +29,9 @@ interface QortalRequestOptions {
   coin?: string
   destinationAddress?: string
   amount?: number
+  blob?: Blob
+  mimeType?: string
+  file?: File
 }
 
 declare function qortalRequest(options: QortalRequestOptions): Promise<any>
@@ -41,5 +44,13 @@ declare global {
   interface Window {
     _qdnBase: any // Replace 'any' with the appropriate type if you know it
     _qdnTheme: string
+  }
+}
+
+declare global {
+  interface Window {
+    showSaveFilePicker: (
+      options?: SaveFilePickerOptions
+    ) => Promise<FileSystemFileHandle>
   }
 }

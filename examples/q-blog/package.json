@@ -21,6 +21,7 @@
     "moment": "^2.29.4",
     "philliplm-react-modern-audio-player": "^1.4.6",
     "react": "^18.2.0",
+    "react-copy-to-clipboard": "^5.1.0",
     "react-dnd": "^16.0.1",
     "react-dnd-html5-backend": "^16.0.1",
     "react-dom": "^18.2.0",
@@ -32,6 +33,7 @@
     "react-resize-detector": "^8.0.4",
     "react-router-dom": "^6.9.0",
     "react-toastify": "^9.1.2",
+    "react-virtuoso": "^4.3.3",
     "short-unique-id": "^4.4.4",
     "slate": "^0.91.4",
     "slate-history": "^0.86.0",
@@ -40,6 +42,7 @@
   "devDependencies": {
     "@mui/types": "^7.2.3",
     "@types/react": "^18.0.28",
+    "@types/react-copy-to-clipboard": "^5.0.4",
     "@types/react-dom": "^18.0.11",
     "@vitejs/plugin-react-swc": "^3.2.0",
     "prettier": "^2.8.6",

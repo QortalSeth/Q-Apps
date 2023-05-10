@@ -43,6 +43,7 @@ interface MyComponentProps {
   value: any
   setValue: (value: any) => void
   editorKey?: number
+  mode?: string
 }
 
 const ModalBox = styled(Box)(({ theme }) => ({
@@ -67,7 +68,8 @@ const BlogEditor: React.FC<MyComponentProps> = ({
   section,
   value,
   setValue,
-  editorKey
+  editorKey,
+  mode
 }) => {
   const editor = useMemo(() => withReact(createEditor()), [])
 
@@ -456,10 +458,11 @@ const BlogEditor: React.FC<MyComponentProps> = ({
         </div>
         <Editable
           className="blog-editor"
-          renderElement={renderElement}
+          renderElement={(props) => renderElement({ ...props, mode })}
           renderLeaf={renderLeaf}
           onKeyDown={handleKeyDown}
           onPaste={handlePaste}
+          mode={mode}
         />
       </Slate>
       <Modal open={open} onClose={onClose}>
@@ -485,11 +488,14 @@ const BlogEditor: React.FC<MyComponentProps> = ({
 
 export default BlogEditor
 
+type ExtendedRenderElementProps = RenderElementProps & { mode?: string }
+
 export const renderElement = ({
   attributes,
   children,
-  element
-}: RenderElementProps) => {
+  element,
+  mode
+}: ExtendedRenderElementProps) => {
   switch (element.type) {
     case 'block-quote':
       return <blockquote {...attributes}>{children}</blockquote>
@@ -530,7 +536,7 @@ export const renderElement = ({
     default:
       return (
         <p
-          className="paragraph"
+          className={`paragraph${mode ? `-${mode}` : ''}`}
           {...attributes}
           style={{ textAlign: element.textAlign }}
         >

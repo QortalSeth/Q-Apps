@@ -6,7 +6,8 @@ import {
   Typography,
   CardHeader,
   Avatar,
-  useTheme
+  useTheme,
+  Tooltip
 } from '@mui/material'
 import { useNavigate } from 'react-router-dom'
 import { styled } from '@mui/system'
@@ -16,6 +17,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { RootState } from '../../state/store'
 import { checkStructure } from '../../utils/checkStructure'
 import { BlogContent } from '../../interfaces/interfaces'
+import ShareIcon from '@mui/icons-material/Share'
 import {
   setAudio,
   setCurrAudio,
@@ -38,6 +40,10 @@ import AudioElement from '../../components/AudioElement'
 import ErrorBoundary from '../../components/common/ErrorBoundary'
 import { CommentSection } from '../../components/common/Comments/CommentSection'
 import { Tipping } from '../../components/common/Tipping/Tipping'
+import FileElement from '../../components/FileElement'
+import { CopyToClipboard } from 'react-copy-to-clipboard'
+import { setNotification } from '../../state/features/notificationsSlice'
+
 const ResponsiveGridLayout = WidthProvider(Responsive)
 const initialMinHeight = 2 // Define an initial minimum height for grid items
 
@@ -313,7 +319,7 @@ export const BlogIndividualPost = () => {
               <Typography
                 sx={{ fontFamily: 'Cairo', fontSize: '25px' }}
                 color={theme.palette.text.primary}
-              >{`Author: ${user}`}</Typography>
+              >{` ${user}`}</Typography>
             }
           />
           {user && (
@@ -345,6 +351,27 @@ export const BlogIndividualPost = () => {
           >
             {blogContent?.title}
           </Typography>
+          <Tooltip title={`Copy post link`} arrow>
+            <Box
+              sx={{
+                cursor: 'pointer'
+              }}
+            >
+              <CopyToClipboard
+                text={`qortal://APP/Q-Blog/${user}/${blog}/${postId}`}
+                onCopy={() => {
+                  dispatch(
+                    setNotification({
+                      msg: 'Copied to clipboard!',
+                      alertType: 'success'
+                    })
+                  )
+                }}
+              >
+                <ShareIcon />
+              </CopyToClipboard>
+            </Box>
+          </Tooltip>
           <CommentSection postId={fullPostId} />
         </Box>
 
@@ -508,6 +535,39 @@ export const BlogIndividualPost = () => {
                           author=""
                         />
                       </DynamicHeightItem>
+                    </ErrorBoundary>
+                  </div>
+                )
+              }
+              if (section?.type === 'file') {
+                return (
+                  <div key={section?.id} className="grid-item">
+                    <ErrorBoundary
+                      fallback={
+                        <Typography>
+                          Error loading content: Invalid Data
+                        </Typography>
+                      }
+                    >
+                      <DynamicHeightItemMinimal
+                        layouts={layouts}
+                        setLayouts={setLayouts}
+                        i={section.id}
+                        breakpoint={currentBreakpoint}
+                        count={count}
+                        padding={0}
+                      >
+                        <FileElement
+                          key={section.id}
+                          fileInfo={section.content}
+                          postId={fullPostId}
+                          user={user ? user : ''}
+                          title={section.content?.title}
+                          description={section.content?.description}
+                          mimeType={section.content?.mimeType}
+                          author=""
+                        />
+                      </DynamicHeightItemMinimal>
                     </ErrorBoundary>
                   </div>
                 )
@@ -705,6 +765,39 @@ export const BlogIndividualPost = () => {
                                 }}
                                 title={section.content?.title}
                                 description={section.content?.description}
+                                author=""
+                              />
+                            </DynamicHeightItemMinimal>
+                          </ErrorBoundary>
+                        </div>
+                      )
+                    }
+                    if (section?.type === 'file') {
+                      return (
+                        <div key={section?.id} className="grid-item">
+                          <ErrorBoundary
+                            fallback={
+                              <Typography>
+                                Error loading content: Invalid Data
+                              </Typography>
+                            }
+                          >
+                            <DynamicHeightItemMinimal
+                              layouts={layouts}
+                              setLayouts={setLayouts}
+                              i={section.id}
+                              breakpoint={currentBreakpoint}
+                              count={count}
+                              padding={0}
+                            >
+                              <FileElement
+                                key={section.id}
+                                fileInfo={section.content}
+                                postId={fullPostId}
+                                user={user ? user : ''}
+                                title={section.content?.title}
+                                description={section.content?.description}
+                                mimeType={section.content?.mimeType}
                                 author=""
                               />
                             </DynamicHeightItemMinimal>

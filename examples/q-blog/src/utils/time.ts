@@ -1,0 +1,17 @@
+import moment from 'moment'
+
+export function formatTimestamp(timestamp: number): string {
+  const now = moment()
+  const timestampMoment = moment(timestamp)
+  const elapsedTime = now.diff(timestampMoment, 'minutes')
+
+  if (elapsedTime < 1) {
+    return 'Just now'
+  } else if (elapsedTime < 60) {
+    return `${elapsedTime}m`
+  } else if (elapsedTime < 1440) {
+    return `${Math.floor(elapsedTime / 60)}h`
+  } else {
+    return timestampMoment.format('MMM D')
+  }
+}

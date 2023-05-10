@@ -342,6 +342,32 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
         padding: from === 'create' ? '8px' : 0
       }}
     >
+      {/* <Box
+        sx={{
+          position: 'absolute',
+          top: '-30px',
+          right: '-15px'
+        }}
+      >
+        <CopyToClipboard
+          text={`qortal://${service}/${name}/${identifier}`}
+          onCopy={() => {
+            dispatch(
+              setNotification({
+                msg: 'Copied to clipboard!',
+                alertType: 'success'
+              })
+            )
+          }}
+        >
+          <LinkIcon
+            sx={{
+              fontSize: '14px',
+              cursor: 'pointer'
+            }}
+          />
+        </CopyToClipboard>
+      </Box> */}
       {isLoading && (
         <Box
           position="absolute"

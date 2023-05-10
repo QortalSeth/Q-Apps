@@ -15,6 +15,7 @@ import GlobalWrapper from './wrappers/GlobalWrapper'
 import DownloadWrapper from './wrappers/DownloadWrapper'
 import Notification from './components/common/Notification/Notification'
 import { useState } from 'react'
+import { Mail } from './pages/Mail/Mail'
 
 function App() {
   const themeColor = window._qdnTheme
@@ -53,6 +54,7 @@ function App() {
                 path="/subscriptions"
                 element={<BlogList mode="subscriptions" />}
               />
+              <Route path="/mail" element={<Mail />} />
               <Route path="/" element={<BlogList />} />
             </Routes>
           </GlobalWrapper>

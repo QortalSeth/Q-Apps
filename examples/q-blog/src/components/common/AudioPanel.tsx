@@ -69,6 +69,7 @@ export const AudioPanel: React.FC<VideoPanelProps> = ({
   const [videos, setVideos] = useState<Video[]>([])
   const [isOpenVideoModal, setIsOpenVideoModal] = useState<boolean>(false)
   const { user } = useSelector((state: RootState) => state.auth)
+  const [editVideoIdentifier, setEditVideoIdentifier] = useState<string | null | undefined>()
 
   const fetchVideos = React.useCallback(async (): Promise<Video[]> => {
     if (!user?.name) return []
@@ -181,6 +182,10 @@ export const AudioPanel: React.FC<VideoPanelProps> = ({
                     secondary={video?.metadata?.description || ''}
                   />
                 </ButtonBase>
+                <Button size='small' variant='contained' onClick={()=> {
+                  setEditVideoIdentifier(video.identifier)
+                  setIsOpenVideoModal(true)
+                }}>Edit</Button>
               </ListItem>
             ))}
           </List>
@@ -194,7 +199,11 @@ export const AudioPanel: React.FC<VideoPanelProps> = ({
           >
             <PublishButton
               variant="contained"
-              onClick={() => setIsOpenVideoModal(true)}
+              onClick={() => {
+
+                setEditVideoIdentifier(null)
+                setIsOpenVideoModal(true)
+              } }
             >
               Publish new audio file
             </PublishButton>
@@ -204,12 +213,15 @@ export const AudioPanel: React.FC<VideoPanelProps> = ({
       <AudioModal
         onClose={() => {
           setIsOpenVideoModal(false)
+          setEditVideoIdentifier(null)
+
         }}
         open={isOpenVideoModal}
         onPublish={(value) => {
           fetchVideos().then((fetchedVideos) => setVideos(fetchedVideos))
           setIsOpenVideoModal(false)
         }}
+        editVideoIdentifier={editVideoIdentifier}
       />
     </Box>
   )

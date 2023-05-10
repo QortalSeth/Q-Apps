@@ -48,6 +48,7 @@ interface VideoModalProps {
   open: boolean
   onClose: () => void
   onPublish: (value: any) => void
+  editVideoIdentifier?: string | null | undefined
 }
 
 interface SelectOption {
@@ -58,7 +59,8 @@ interface SelectOption {
 const VideoModal: React.FC<VideoModalProps> = ({
   open,
   onClose,
-  onPublish
+  onPublish,
+  editVideoIdentifier
 }) => {
   const [file, setFile] = useState<File | null>(null)
   const [title, setTitle] = useState('')
@@ -122,16 +124,17 @@ const VideoModal: React.FC<VideoModalProps> = ({
       formattedTags[`tag${i + 1}`] = tag
     })
 
-    
     try {
-      const base64 = await toBase64(file)
-      if (typeof base64 !== 'string') return
-      const base64String = base64.split(',')[1]
+      // const base64 = await toBase64(file)
+      // if (typeof base64 !== 'string') return
+      // const base64String = base64.split(',')[1]
+      // if (!file) return
 
       const res = await publishVideo({
+        file: file,
+        editVideoIdentifier,
         title,
         description,
-        base64: base64String,
         category: selectedOption?.id || '',
         ...formattedTags
       })
@@ -186,6 +189,11 @@ const VideoModal: React.FC<VideoModalProps> = ({
   return (
     <StyledModal open={open} onClose={onClose}>
       <ModalContent>
+        {editVideoIdentifier && (
+          <Typography variant="h6">
+            You are editing: {editVideoIdentifier}
+          </Typography>
+        )}
         <Typography variant="h6" component="h2" gutterBottom>
           Upload Video
         </Typography>

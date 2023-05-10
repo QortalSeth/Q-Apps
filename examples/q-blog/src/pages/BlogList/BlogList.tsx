@@ -119,6 +119,8 @@ export const BlogList = ({ mode }: BlogListProps) => {
     }
   }, [filterValue, isFiltering, filteredPosts])
   // if (!favoritesLocal) return null
+
+  console.log({ posts })
   return (
     <>
       {/* <List
@@ -197,6 +199,7 @@ export const BlogList = ({ mode }: BlogListProps) => {
                 postImage={blogPost?.postImage}
                 blogPost={blogPost}
                 isValid={blogPost?.isValid}
+                tags={blogPost?.tags}
               />
 
               {blogPost.user === user?.name && (
