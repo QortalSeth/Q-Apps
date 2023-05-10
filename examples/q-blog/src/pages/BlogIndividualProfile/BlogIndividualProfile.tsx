@@ -20,6 +20,7 @@ import { useFetchPosts } from '../../hooks/useFetchPosts'
 import LazyLoad from '../../components/common/LazyLoad'
 import { addPrefix, removePrefix } from '../../utils/blogIdformats'
 import Masonry from 'react-masonry-css'
+import ContextMenuResource from '../../components/common/ContextMenu/ContextMenuResource'
 
 const breakpointColumnsObj = {
   default: 5,
@@ -237,6 +238,12 @@ export const BlogIndividualProfile = () => {
           if (existingPost) {
             blogPost = existingPost
           }
+          const str = blogPost.id
+          const arr = str.split('-post-')
+          const str1 = arr[0]
+
+          const blogId = removePrefix(str1)
+          const str2 = arr[1]
           return (
             <Box
               sx={{
@@ -250,25 +257,25 @@ export const BlogIndividualProfile = () => {
                 }
               }}
             >
-              <BlogPostPreview
-                onClick={() => {
-                  const str = blogPost.id
-                  const arr = str.split('-post-')
-                  const str1 = arr[0]
-
-                  const blogId = removePrefix(str1)
-                  const str2 = arr[1]
-                  navigate(`/${blogPost.user}/${blogId}/${str2}`)
-                }}
-                description={blogPost?.description}
-                title={blogPost?.title}
-                createdAt={blogPost?.createdAt}
-                author={blogPost.user}
-                postImage={blogPost?.postImage}
-                blogPost={blogPost}
-                tags={blogPost?.tags}
-              />
-
+              <ContextMenuResource
+                name={blogPost.user}
+                service="BLOG_POST"
+                identifier={blogPost.id}
+                link={`qortal://APP/Q-Blog/${blogPost.user}/${blogId}/${str2}`}
+              >
+                <BlogPostPreview
+                  onClick={() => {
+                    navigate(`/${blogPost.user}/${blogId}/${str2}`)
+                  }}
+                  description={blogPost?.description}
+                  title={blogPost?.title}
+                  createdAt={blogPost?.createdAt}
+                  author={blogPost.user}
+                  postImage={blogPost?.postImage}
+                  blogPost={blogPost}
+                  tags={blogPost?.tags}
+                />
+              </ContextMenuResource>
               {blogPost.user === user?.name && (
                 <EditIcon
                   className="edit-btn"
@@ -280,11 +287,6 @@ export const BlogIndividualProfile = () => {
                     cursor: 'pointer'
                   }}
                   onClick={() => {
-                    const str = blogPost.id
-                    const arr = str.split('-post-')
-                    const str1 = arr[0]
-                    const str2 = arr[1]
-                    const blogId = removePrefix(str1)
                     navigate(`/${blogPost.user}/${blogId}/${str2}/edit`)
                   }}
                 />

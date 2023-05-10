@@ -20,6 +20,7 @@ import { useSelector } from 'react-redux'
 import { RootState } from '../../../state/store'
 import Portal from '../Portal'
 import { Tipping } from '../Tipping/Tipping'
+import { formatDate } from '../../../utils/time'
 interface CommentProps {
   comment: any
   postId: string
@@ -30,6 +31,8 @@ export const Comment = ({ comment, postId, onSubmit }: CommentProps) => {
   const [isEditing, setIsEditing] = useState<boolean>(false)
   const { user } = useSelector((state: RootState) => state.auth)
   const [currentEdit, setCurrentEdit] = useState<any>(null)
+  const theme = useTheme()
+
   const handleSubmit = useCallback((comment: any, isEdit?: boolean) => {
     onSubmit(comment, isEdit)
     setCurrentEdit(null)
@@ -97,37 +100,57 @@ export const Comment = ({ comment, postId, onSubmit }: CommentProps) => {
               alignItems: 'center',
               gap: '5px',
               marginTop: '20px',
-              justifyContent: 'flex-end'
+              justifyContent: 'space-between'
             }}
           >
-            <Button
-              size="small"
-              variant="contained"
-              onClick={() => setIsReplying(true)}
-            >
-              reply
-            </Button>
-            {user?.name === comment?.name && (
-              <Button
-                size="small"
-                variant="contained"
-                onClick={() => setCurrentEdit(comment)}
-              >
-                edit
-              </Button>
-            )}
-            {isReplying && (
-              <Button
-                size="small"
-                variant="contained"
-                onClick={() => {
-                  setIsReplying(false)
-                  setIsEditing(false)
+            {comment?.created && (
+              <Typography
+                variant="h6"
+                sx={{
+                  fontSize: '12px',
+                  marginLeft: '5px'
                 }}
+                color={theme.palette.text.primary}
               >
-                close
-              </Button>
+                {formatDate(+comment?.created)}
+              </Typography>
             )}
+            <Box
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '5px'
+              }}
+            >
+              <Button
+                size="small"
+                variant="contained"
+                onClick={() => setIsReplying(true)}
+              >
+                reply
+              </Button>
+              {user?.name === comment?.name && (
+                <Button
+                  size="small"
+                  variant="contained"
+                  onClick={() => setCurrentEdit(comment)}
+                >
+                  edit
+                </Button>
+              )}
+              {isReplying && (
+                <Button
+                  size="small"
+                  variant="contained"
+                  onClick={() => {
+                    setIsReplying(false)
+                    setIsEditing(false)
+                  }}
+                >
+                  close
+                </Button>
+              )}
+            </Box>
           </Box>
         </CommentCard>
         {/* <Typography variant="body1"> {comment?.message}</Typography> */}
@@ -253,20 +276,43 @@ const CommentCard = ({
                 message={reply?.message}
                 setCurrentEdit={setCurrentEdit}
               >
-                {user?.name === reply?.name && (
-                  <Button
-                    size="small"
-                    variant="contained"
-                    onClick={() => setCurrentEdit(reply)}
-                    sx={{
-                      width: '30px',
-                      alignSelf: 'flex-end',
-                      background: theme.palette.primary.light
-                    }}
-                  >
-                    edit
-                  </Button>
-                )}
+                <Box
+                  sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '5px',
+                    justifyContent: 'space-between'
+                  }}
+                >
+                  {reply?.created && (
+                    <Typography
+                      variant="h6"
+                      sx={{
+                        fontSize: '12px',
+                        marginLeft: '5px'
+                      }}
+                      color={theme.palette.text.primary}
+                    >
+                      {formatDate(+reply?.created)}
+                    </Typography>
+                  )}
+                  {user?.name === reply?.name ? (
+                    <Button
+                      size="small"
+                      variant="contained"
+                      onClick={() => setCurrentEdit(reply)}
+                      sx={{
+                        width: '30px',
+                        alignSelf: 'flex-end',
+                        background: theme.palette.primary.light
+                      }}
+                    >
+                      edit
+                    </Button>
+                  ) : (
+                    <Box />
+                  )}
+                </Box>
               </CommentCard>
               {/* <Typography variant="body2"> {reply?.message}</Typography> */}
             </Box>

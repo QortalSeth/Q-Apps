@@ -43,6 +43,7 @@ import { Tipping } from '../../components/common/Tipping/Tipping'
 import FileElement from '../../components/FileElement'
 import { CopyToClipboard } from 'react-copy-to-clipboard'
 import { setNotification } from '../../state/features/notificationsSlice'
+import ContextMenuResource from '../../components/common/ContextMenu/ContextMenuResource'
 
 const ResponsiveGridLayout = WidthProvider(Responsive)
 const initialMinHeight = 2 // Define an initial minimum height for grid items
@@ -454,14 +455,21 @@ export const BlogIndividualPost = () => {
                         count={count}
                         padding={layoutGeneralSettings?.padding}
                       >
-                        <VideoPlayer
+                        <ContextMenuResource
                           name={section.content.name}
                           service={section.content.service}
                           identifier={section.content.identifier}
-                          setCount={handleCount}
-                          user={user}
-                          postId={fullPostId}
-                        />
+                          link={`qortal://${section?.content?.service}/${section?.content?.name}/${section?.content?.identifier}`}
+                        >
+                          <VideoPlayer
+                            name={section.content.name}
+                            service={section.content.service}
+                            identifier={section.content.identifier}
+                            setCount={handleCount}
+                            user={user}
+                            postId={fullPostId}
+                          />
+                        </ContextMenuResource>
                       </DynamicHeightItem>
                     </ErrorBoundary>
                   </div>
@@ -485,55 +493,63 @@ export const BlogIndividualPost = () => {
                         count={count}
                         padding={layoutGeneralSettings?.padding}
                       >
-                        <AudioElement
-                          key={section.id}
-                          audioInfo={section.content}
-                          postId={fullPostId}
-                          user={user ? user : ''}
-                          onClick={() => {
-                            if (!blog || !postId) return
+                        <ContextMenuResource
+                          name={section.content.name}
+                          service={section.content.service}
+                          identifier={section.content.identifier}
+                          link={`qortal://${section?.content?.service}/${section?.content?.name}/${section?.content?.identifier}`}
+                        >
+                          <AudioElement
+                            key={section.id}
+                            audioInfo={section.content}
+                            postId={fullPostId}
+                            user={user ? user : ''}
+                            onClick={() => {
+                              if (!blog || !postId) return
 
-                            const formBlogId = addPrefix(blog)
-                            const formPostId =
-                              buildIdentifierFromCreateTitleIdAndId(
-                                formBlogId,
-                                postId
-                              )
-                            if (audioPostId && formPostId !== audioPostId) {
-                              tempSaveAudio.current = {
-                                ...(tempSaveAudio.current || {}),
-                                currentSelection: section,
-                                message:
-                                  'You are current on a playlist. Would you like to switch?'
-                              }
-                              setisOpenSwitchPlaylistModal(true)
-                            } else {
-                              if (!audios && saveAudio?.current) {
-                                const findIndex = (
-                                  saveAudio?.current?.audios || []
-                                ).findIndex(
-                                  (item: any) =>
+                              const formBlogId = addPrefix(blog)
+                              const formPostId =
+                                buildIdentifierFromCreateTitleIdAndId(
+                                  formBlogId,
+                                  postId
+                                )
+                              if (audioPostId && formPostId !== audioPostId) {
+                                tempSaveAudio.current = {
+                                  ...(tempSaveAudio.current || {}),
+                                  currentSelection: section,
+                                  message:
+                                    'You are current on a playlist. Would you like to switch?'
+                                }
+                                setisOpenSwitchPlaylistModal(true)
+                              } else {
+                                if (!audios && saveAudio?.current) {
+                                  const findIndex = (
+                                    saveAudio?.current?.audios || []
+                                  ).findIndex(
+                                    (item: any) =>
+                                      item.identifier ===
+                                      section.content.identifier
+                                  )
+                                  dispatch(setAudio(saveAudio?.current))
+                                  dispatch(setCurrAudio(findIndex))
+                                  return
+                                }
+
+                                const findIndex = (audios || []).findIndex(
+                                  (item) =>
                                     item.identifier ===
                                     section.content.identifier
                                 )
-                                dispatch(setAudio(saveAudio?.current))
-                                dispatch(setCurrAudio(findIndex))
-                                return
+                                if (findIndex >= 0) {
+                                  dispatch(setCurrAudio(findIndex))
+                                }
                               }
-
-                              const findIndex = (audios || []).findIndex(
-                                (item) =>
-                                  item.identifier === section.content.identifier
-                              )
-                              if (findIndex >= 0) {
-                                dispatch(setCurrAudio(findIndex))
-                              }
-                            }
-                          }}
-                          title={section.content?.title}
-                          description={section.content?.description}
-                          author=""
-                        />
+                            }}
+                            title={section.content?.title}
+                            description={section.content?.description}
+                            author=""
+                          />
+                        </ContextMenuResource>
                       </DynamicHeightItem>
                     </ErrorBoundary>
                   </div>
@@ -557,16 +573,23 @@ export const BlogIndividualPost = () => {
                         count={count}
                         padding={0}
                       >
-                        <FileElement
-                          key={section.id}
-                          fileInfo={section.content}
-                          postId={fullPostId}
-                          user={user ? user : ''}
-                          title={section.content?.title}
-                          description={section.content?.description}
-                          mimeType={section.content?.mimeType}
-                          author=""
-                        />
+                        <ContextMenuResource
+                          name={section.content.name}
+                          service={section.content.service}
+                          identifier={section.content.identifier}
+                          link={`qortal://${section?.content?.service}/${section?.content?.name}/${section?.content?.identifier}`}
+                        >
+                          <FileElement
+                            key={section.id}
+                            fileInfo={section.content}
+                            postId={fullPostId}
+                            user={user ? user : ''}
+                            title={section.content?.title}
+                            description={section.content?.description}
+                            mimeType={section.content?.mimeType}
+                            author=""
+                          />
+                        </ContextMenuResource>
                       </DynamicHeightItemMinimal>
                     </ErrorBoundary>
                   </div>
@@ -690,24 +713,31 @@ export const BlogIndividualPost = () => {
                               count={count}
                               padding={0}
                             >
-                              <Box
-                                sx={{
-                                  position: 'relative',
-                                  width: '100%',
-                                  height: '100%'
-                                }}
+                              <ContextMenuResource
+                                name={section.content.name}
+                                service={section.content.service}
+                                identifier={section.content.identifier}
+                                link={`qortal://${section?.content?.service}/${section?.content?.name}/${section?.content?.identifier}`}
                               >
-                                <VideoPlayer
-                                  name={section.content.name}
-                                  service={section.content.service}
-                                  identifier={section.content.identifier}
-                                  customStyle={{
-                                    height: '50vh'
+                                <Box
+                                  sx={{
+                                    position: 'relative',
+                                    width: '100%',
+                                    height: '100%'
                                   }}
-                                  user={user}
-                                  postId={fullPostId}
-                                />
-                              </Box>
+                                >
+                                  <VideoPlayer
+                                    name={section.content.name}
+                                    service={section.content.service}
+                                    identifier={section.content.identifier}
+                                    customStyle={{
+                                      height: '50vh'
+                                    }}
+                                    user={user}
+                                    postId={fullPostId}
+                                  />
+                                </Box>
+                              </ContextMenuResource>
                             </DynamicHeightItemMinimal>
                           </ErrorBoundary>
                         </div>
@@ -731,42 +761,51 @@ export const BlogIndividualPost = () => {
                               count={count}
                               padding={0}
                             >
-                              <AudioElement
-                                key={section.id}
-                                audioInfo={section.content}
-                                postId={fullPostId}
-                                user={user ? user : ''}
-                                onClick={() => {
-                                  if (!blog || !postId) return
-                                  const formBlogId = addPrefix(blog)
-                                  const formPostId =
-                                    buildIdentifierFromCreateTitleIdAndId(
-                                      formBlogId,
-                                      postId
-                                    )
-                                  if (formPostId !== audioPostId) {
-                                    tempSaveAudio.current = {
-                                      ...(tempSaveAudio.current || {}),
-                                      currentSelection: section,
-                                      message:
-                                        'You are current on a playlist. Would you like to switch?'
+                              <ContextMenuResource
+                                name={section.content.name}
+                                service={section.content.service}
+                                identifier={section.content.identifier}
+                                link={`qortal://${section?.content?.service}/${section?.content?.name}/${section?.content?.identifier}`}
+                              >
+                                <AudioElement
+                                  key={section.id}
+                                  audioInfo={section.content}
+                                  postId={fullPostId}
+                                  user={user ? user : ''}
+                                  onClick={() => {
+                                    if (!blog || !postId) return
+                                    const formBlogId = addPrefix(blog)
+                                    const formPostId =
+                                      buildIdentifierFromCreateTitleIdAndId(
+                                        formBlogId,
+                                        postId
+                                      )
+                                    if (formPostId !== audioPostId) {
+                                      tempSaveAudio.current = {
+                                        ...(tempSaveAudio.current || {}),
+                                        currentSelection: section,
+                                        message:
+                                          'You are current on a playlist. Would you like to switch?'
+                                      }
+                                      setisOpenSwitchPlaylistModal(true)
+                                    } else {
+                                      const findIndex = (
+                                        audios || []
+                                      ).findIndex(
+                                        (item) =>
+                                          item.identifier ===
+                                          section.content.identifier
+                                      )
+                                      if (findIndex >= 0) {
+                                        dispatch(setCurrAudio(findIndex))
+                                      }
                                     }
-                                    setisOpenSwitchPlaylistModal(true)
-                                  } else {
-                                    const findIndex = (audios || []).findIndex(
-                                      (item) =>
-                                        item.identifier ===
-                                        section.content.identifier
-                                    )
-                                    if (findIndex >= 0) {
-                                      dispatch(setCurrAudio(findIndex))
-                                    }
-                                  }
-                                }}
-                                title={section.content?.title}
-                                description={section.content?.description}
-                                author=""
-                              />
+                                  }}
+                                  title={section.content?.title}
+                                  description={section.content?.description}
+                                  author=""
+                                />
+                              </ContextMenuResource>
                             </DynamicHeightItemMinimal>
                           </ErrorBoundary>
                         </div>
@@ -790,16 +829,23 @@ export const BlogIndividualPost = () => {
                               count={count}
                               padding={0}
                             >
-                              <FileElement
-                                key={section.id}
-                                fileInfo={section.content}
-                                postId={fullPostId}
-                                user={user ? user : ''}
-                                title={section.content?.title}
-                                description={section.content?.description}
-                                mimeType={section.content?.mimeType}
-                                author=""
-                              />
+                              <ContextMenuResource
+                                name={section.content.name}
+                                service={section.content.service}
+                                identifier={section.content.identifier}
+                                link={`qortal://${section?.content?.service}/${section?.content?.name}/${section?.content?.identifier}`}
+                              >
+                                <FileElement
+                                  key={section.id}
+                                  fileInfo={section.content}
+                                  postId={fullPostId}
+                                  user={user ? user : ''}
+                                  title={section.content?.title}
+                                  description={section.content?.description}
+                                  mimeType={section.content?.mimeType}
+                                  author=""
+                                />
+                              </ContextMenuResource>
                             </DynamicHeightItemMinimal>
                           </ErrorBoundary>
                         </div>

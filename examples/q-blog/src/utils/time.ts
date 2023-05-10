@@ -15,3 +15,10 @@ export function formatTimestamp(timestamp: number): string {
     return timestampMoment.format('MMM D')
   }
 }
+
+
+export const formatDate = (unixTimestamp: number): string => {
+  const date = moment(unixTimestamp, 'x').fromNow()
+
+  return date
+}

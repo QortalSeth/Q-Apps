@@ -45,6 +45,7 @@ import { AppDispatch, RootState } from '../../state/store'
 import BlockIcon from '@mui/icons-material/Block'
 import { CustomIcon } from '../../components/common/CustomIcon'
 import ResponsiveImage from '../../components/common/ResponsiveImage'
+import { formatDate } from '../../utils/time'
 interface BlogPostPreviewProps {
   title: string
   createdAt: number | string
@@ -81,11 +82,6 @@ const BlogPostPreview: React.FC<BlogPostPreviewProps> = ({
     (state: RootState) => state.blog.subscriptions
   )
   const username = useSelector((state: RootState) => state.auth?.user?.name)
-  const formatDate = (unixTimestamp: number): string => {
-    const date = moment(unixTimestamp, 'x').fromNow()
-
-    return date
-  }
 
   function extractTextFromSlate(nodes: any) {
     if (!Array.isArray(nodes)) return ''
