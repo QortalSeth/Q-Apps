@@ -329,9 +329,7 @@ export const NewMessage = ({
   return (
     <Box
       sx={{
-        display: 'flex',
-        justifyContent: 'flex-end',
-        width: '100%'
+        display: 'flex'
       }}
     >
       {!hideButton && (

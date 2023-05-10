@@ -28,11 +28,10 @@ import {
 import SimpleTable from './MailTable'
 import { MAIL_SERVICE_TYPE } from '../../constants/mail'
 import { BlogPost } from '../../state/features/blogSlice'
+import { setNotification } from '../../state/features/notificationsSlice'
 
-interface AliasMailProps {
-  value: string
-}
-export const AliasMail = ({ value }: AliasMailProps) => {
+interface SentMailProps {}
+export const SentMail = ({}: SentMailProps) => {
   const theme = useTheme()
   const { user } = useSelector((state: RootState) => state.auth)
   const [isOpen, setIsOpen] = useState<boolean>(false)
@@ -50,16 +49,14 @@ export const AliasMail = ({ value }: AliasMailProps) => {
   )
 
   const fullMailMessages = useMemo(() => {
-    return mailMessages
-      .map((msg) => {
-        let message = msg
-        const existingMessage = hashMapMailMessages[msg.id]
-        if (existingMessage) {
-          message = existingMessage
-        }
-        return message
-      })
-      .filter((item: any) => item?.user !== user?.name)
+    return mailMessages.map((msg) => {
+      let message = msg
+      const existingMessage = hashMapMailMessages[msg.id]
+      if (existingMessage) {
+        message = existingMessage
+      }
+      return message
+    })
   }, [mailMessages, hashMapMailMessages, user])
   const dispatch = useDispatch()
   const navigate = useNavigate()
@@ -84,8 +81,9 @@ export const AliasMail = ({ value }: AliasMailProps) => {
   const checkNewMessages = React.useCallback(
     async (recipientName: string, recipientAddress: string) => {
       try {
-        const query = `qortal_qmail_${value}_mail`
-        const url = `/arbitrary/resources/search?service=${MAIL_SERVICE_TYPE}&query=${query}&limit=50&includemetadata=true&reverse=true&excludeblocked=true`
+        if (!user?.name) return
+        const query = `qortal_qmail_`
+        const url = `/arbitrary/resources/search?service=${MAIL_SERVICE_TYPE}&query=${query}&name=${user?.name}&limit=20&includemetadata=true&reverse=true&excludeblocked=true`
         const response = await fetch(url, {
           method: 'GET',
           headers: {
@@ -144,11 +142,12 @@ export const AliasMail = ({ value }: AliasMailProps) => {
   const getMailMessages = React.useCallback(
     async (recipientName: string, recipientAddress: string) => {
       try {
+        if (!user?.name) return
         const offset = mailMessages.length
 
         dispatch(setIsLoadingGlobal(true))
-        const query = `qortal_qmail_${value}_mail`
-        const url = `/arbitrary/resources/search?service=${MAIL_SERVICE_TYPE}&query=${query}&limit=50&includemetadata=true&offset=${offset}&reverse=true&excludeblocked=true`
+        const query = `qortal_qmail_`
+        const url = `/arbitrary/resources/search?service=${MAIL_SERVICE_TYPE}&query=${query}&name=${user.name}&limit=20&includemetadata=true&offset=${offset}&reverse=true&excludeblocked=true`
         const response = await fetch(url, {
           method: 'GET',
           headers: {
@@ -228,6 +227,47 @@ export const AliasMail = ({ value }: AliasMailProps) => {
     }
   }, [checkNewMessagesFunc])
 
+  function extractData(identifier: string) {
+    let parts = identifier.split('_')
+
+    let recipientName = parts[2]
+    let recipientAddress = parts[3]
+
+    return { recipientName, recipientAddress }
+  }
+
+  const findUserFunc = async (msgIdentifier: string) => {
+    const { recipientName, recipientAddress } = extractData(msgIdentifier)
+    if (!recipientName || !recipientAddress) return null
+    // full name lookup
+    try {
+      const url = `/names/${recipientName}`
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      const responseData = await response.json()
+      if (responseData?.name) return responseData.name
+    } catch (error) {}
+
+    // check partial name lookp
+    const url = `/names/search?query=${recipientName}&limit=5`
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    })
+    const responseData = await response.json()
+    const findName = responseData.find((item: any) =>
+      item.owner.includes(recipientAddress)
+    )
+    if (findName) return findName?.name
+    return null
+  }
+
   const openMessage = async (
     user: string,
     messageIdentifier: string,
@@ -241,59 +281,43 @@ export const AliasMail = ({ value }: AliasMailProps) => {
         return
       }
       dispatch(setIsLoadingGlobal(true))
+      const findUser = await findUserFunc(messageIdentifier)
+      if (!findUser) throw new Error('cannot find user')
       const res = await fetchAndEvaluateMail({
         user,
         messageIdentifier,
         content,
-        otherUser: user
+        otherUser: findUser
       })
       setMessage(res)
       dispatch(addToHashMapMail(res))
       setIsOpen(true)
     } catch (error) {
+      dispatch(
+        setNotification({
+          alertType: 'error',
+          msg: 'Unknown recipient- cannot decrypt message'
+        })
+      )
     } finally {
       dispatch(setIsLoadingGlobal(false))
     }
   }
 
-  const firstMount = useRef(false)
-  useEffect(() => {
-    if (user?.name && !firstMount.current) {
-      getMessages()
-      firstMount.current = true
-    }
-  }, [user])
-
   return (
     <>
-      <NewMessage
-        replyTo={replyTo}
-        setReplyTo={setReplyTo}
-        alias={value}
-        hideButton
-      />
+      <NewMessage replyTo={replyTo} setReplyTo={setReplyTo} hideButton />
       <ShowMessage
         isOpen={isOpen}
         setIsOpen={setIsOpen}
         message={message}
         setReplyTo={setReplyTo}
-        alias={value}
       />
       <SimpleTable
         openMessage={openMessage}
         data={fullMailMessages}
       ></SimpleTable>
-      <Box
-        sx={{
-          width: '100%',
-          justifyContent: 'center'
-        }}
-      >
-        {mailMessages.length > 20 && (
-          <Button onClick={getMessages}>Load Older Messages</Button>
-        )}
-      </Box>
-      {/* <LazyLoad onLoadMore={getMessages}></LazyLoad> */}
+      <LazyLoad onLoadMore={getMessages}></LazyLoad>
     </>
   )
 }

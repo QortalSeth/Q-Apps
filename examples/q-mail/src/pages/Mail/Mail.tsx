@@ -12,6 +12,8 @@ import { RootState } from '../../state/store'
 import EditIcon from '@mui/icons-material/Edit'
 import CloseIcon from '@mui/icons-material/Close'
 import Joyride, { ACTIONS, EVENTS, STATUS, Step } from 'react-joyride'
+import SendIcon from '@mui/icons-material/Send'
+import MailIcon from '@mui/icons-material/Mail'
 import {
   Box,
   Button,
@@ -33,6 +35,7 @@ import { addToHashMapMail } from '../../state/features/mailSlice'
 import { setIsLoadingGlobal } from '../../state/features/globalSlice'
 import SimpleTable from './MailTable'
 import { AliasMail } from './AliasMail'
+import { SentMail } from './SentMail'
 
 const steps: Step[] = [
   {
@@ -199,6 +202,8 @@ export const Mail = () => {
       const existingMessage = hashMapMailMessages[messageIdentifier]
       if (existingMessage) {
         setMessage(existingMessage)
+        setIsOpen(true)
+        return
       }
       dispatch(setIsLoadingGlobal(true))
       const res = await fetchAndEvaluateMail({
@@ -394,11 +399,78 @@ export const Mail = () => {
           </Button>
         </Box>
       </Box>
-      <NewMessage
-        replyTo={replyTo}
-        setReplyTo={setReplyTo}
-        alias={valueTab === 0 ? '' : alias[valueTab - 1]}
-      />
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          width: '100%'
+        }}
+      >
+        {valueTab === 0 || valueTab === 500 ? (
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              background: theme.palette.background.default,
+              height: 'auto',
+              padding: '5px',
+              cursor: 'pointer',
+              margin: '7px 10px 7px 7px;'
+            }}
+            onClick={() => {
+              if (valueTab === 0) {
+                setValueTab(500)
+                return
+              }
+              setValueTab(0)
+            }}
+          >
+            {valueTab === 0 && (
+              <>
+                <SendIcon
+                  sx={{
+                    cursor: 'pointer',
+                    marginRight: '5px'
+                  }}
+                />
+                <Typography
+                  sx={{
+                    fontSize: '14px'
+                  }}
+                >
+                  Sent
+                </Typography>
+              </>
+            )}
+            {valueTab === 500 && (
+              <>
+                <MailIcon
+                  sx={{
+                    cursor: 'pointer',
+                    marginRight: '5px'
+                  }}
+                />
+                <Typography
+                  sx={{
+                    fontSize: '14px'
+                  }}
+                >
+                  Inbox
+                </Typography>
+              </>
+            )}
+          </Box>
+        ) : (
+          <div />
+        )}
+
+        <NewMessage
+          replyTo={replyTo}
+          setReplyTo={setReplyTo}
+          alias={valueTab === 0 ? '' : alias[valueTab - 1]}
+        />
+      </Box>
       <ShowMessage
         isOpen={isOpen}
         setIsOpen={setIsOpen}
@@ -413,6 +485,11 @@ export const Mail = () => {
         ></SimpleTable>
         <LazyLoad onLoadMore={getMessages}></LazyLoad>
       </TabPanel>
+
+      <TabPanel value={valueTab} index={500}>
+        <SentMail />
+      </TabPanel>
+
       {alias.map((alia, index) => {
         return (
           <TabPanel key={alia} value={valueTab} index={1 + index}>
