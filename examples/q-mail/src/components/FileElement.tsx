@@ -136,6 +136,12 @@ export default function FileElement({
       download?.blogPost?.filename
     ) {
       if (downloadLoader) return
+      dispatch(
+        setNotification({
+          msg: 'Saving file... please wait',
+          alertType: 'info'
+        })
+      )
       setDownloadLoader(true)
       try {
         const { name, service, identifier } = fileInfo
@@ -153,14 +159,16 @@ export default function FileElement({
             // change this
             name: otherUser
           })
-          if (!resName?.owner) return
+          if (!resName?.owner)
+            throw new Error('Unable to locate details to decrypt file')
 
           const recipientAddress = resName.owner
           const resAddress = await qortalRequest({
             action: 'GET_ACCOUNT_DATA',
             address: recipientAddress
           })
-          if (!resAddress?.publicKey) return
+          if (!resAddress?.publicKey)
+            throw new Error('Unable to locate details to decrypt file')
           const recipientPublicKey = resAddress.publicKey
           let requestEncryptBody: any = {
             action: 'DECRYPT_DATA',
@@ -169,7 +177,7 @@ export default function FileElement({
           }
           const resDecrypt = await qortalRequest(requestEncryptBody)
 
-          if (!resDecrypt) return
+          if (!resDecrypt) throw new Error('Unable to decrypt file')
           const decryptToUnit8Array = base64ToUint8Array(resDecrypt)
           let blob = null
           if (download?.blogPost?.mimeType) {
@@ -180,13 +188,14 @@ export default function FileElement({
             blob = new Blob([decryptToUnit8Array])
           }
 
-          if (!blob) return
+          if (!blob) throw new Error('Unable build file into blob')
           await qortalRequest({
             action: 'SAVE_FILE',
             blob,
             filename: download?.blogPost?.filename,
             mimeType: download?.blogPost?.mimeType || ''
           })
+
           return
         }
         const url = `/arbitrary/${service}/${name}/${identifier}`
@@ -236,6 +245,12 @@ export default function FileElement({
     let mimeType = fileProperties?.mimeType
     if (!fileProperties) {
       try {
+        dispatch(
+          setNotification({
+            msg: 'Downloading file... please wait',
+            alertType: 'info'
+          })
+        )
         let res = await qortalRequest({
           action: 'GET_QDN_RESOURCE_PROPERTIES',
           name: name,
@@ -245,11 +260,18 @@ export default function FileElement({
         setFileProperties(res)
         filename = res?.filename
         mimeType = res?.mimeType
-      } catch (error) {}
+      } catch (error: any) {
+        console.log({ error })
+        dispatch(
+          setNotification({
+            msg: error?.message || 'Error with download. Please try again',
+            alertType: 'error'
+          })
+        )
+      }
     }
     if (!filename) return
 
-    setIsLoading(true)
     downloadVideo({
       name,
       service,
@@ -264,8 +286,6 @@ export default function FileElement({
         mimeType
       }
     })
-    dispatch(setCurrAudio(identifier))
-    dispatch(setShowingAudioPlayer(true))
   }
 
   React.useEffect(() => {
@@ -275,6 +295,12 @@ export default function FileElement({
       download?.blogPost?.filename
     ) {
       setIsLoading(false)
+      dispatch(
+        setNotification({
+          msg: 'Download completed. Click to save file',
+          alertType: 'info'
+        })
+      )
     }
   }, [resourceStatus, download])
 

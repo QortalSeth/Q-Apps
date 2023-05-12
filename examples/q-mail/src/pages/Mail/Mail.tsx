@@ -152,6 +152,11 @@ export const Mail = () => {
     (state: RootState) => state.mail.mailMessages
   )
 
+  const userName = useMemo(() => {
+    if (!user?.name) return ''
+    return user.name
+  }, [user])
+
   const fullMailMessages = useMemo(() => {
     return mailMessages.map((msg) => {
       let message = msg
@@ -280,6 +285,14 @@ export const Mail = () => {
             newList.splice(index, 1)
 
             setAlias(newList)
+            if (userName) {
+              try {
+                localStorage.setItem(
+                  `alias-qmail-${userName}`,
+                  JSON.stringify(newList)
+                )
+              } catch (error) {}
+            }
           }}
         >
           <CloseIcon fontSize="inherit" />
@@ -294,6 +307,18 @@ export const Mail = () => {
       setRun(true)
     }
   }, [])
+
+  useEffect(() => {
+    if (!userName) return
+    const savedAlias = localStorage.getItem(`alias-qmail-${userName}`)
+    if (savedAlias) {
+      try {
+        setAlias(JSON.parse(savedAlias))
+      } catch (error) {
+        console.error('Error parsing JSON from localStorage:', error)
+      }
+    }
+  }, [userName])
 
   const handleJoyrideCallback = (data: any) => {
     const { action, status } = data
@@ -390,6 +415,16 @@ export const Mail = () => {
           />
           <Button
             onClick={() => {
+              const newList = [...alias, aliasValue]
+              if (userName) {
+                try {
+                  localStorage.setItem(
+                    `alias-qmail-${userName}`,
+                    JSON.stringify(newList)
+                  )
+                } catch (error) {}
+              }
+
               setAlias((prev) => [...prev, aliasValue])
               setAliasValue('')
             }}
