@@ -1,0 +1,150 @@
+import React, { FC, useCallback, useEffect, useRef, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { useDispatch, useSelector } from 'react-redux'
+import { RootState } from '../../state/store'
+import EditIcon from '@mui/icons-material/Edit'
+import {
+  Box,
+  Button,
+  List,
+  ListItem,
+  Typography,
+  useTheme
+} from '@mui/material'
+import BlogPostPreview from './PostPreview'
+import {  useFetchProducts } from '../../hooks/useFetchProducts'
+import LazyLoad from '../../components/common/LazyLoad'
+import { removePrefix } from '../../utils/blogIdformats'
+import Masonry from 'react-masonry-css'
+import ContextMenuResource from '../../components/common/ContextMenu/ContextMenuResource'
+import { setIsLoadingGlobal } from '../../state/features/globalSlice'
+import { Store } from '../../state/features/storeSlice'
+
+const breakpointColumnsObj = {
+  default: 5,
+  1600: 4,
+  1300: 3,
+  940: 2,
+  700: 1,
+  500: 1
+}
+interface BlogListProps {
+  mode?: string
+}
+export const StoreList = ({ mode }: BlogListProps) => {
+  const theme = useTheme()
+  const dispatch = useDispatch()
+  const { user } = useSelector((state: RootState) => state.auth)
+  const [stores, setStores] = useState<Store[]>([])
+  const hashMapStores = useSelector(
+    (state: RootState) => state.store.hashMapStores
+  )
+  // const stores = useSelector(
+  //   (state: RootState) => state.store.stores
+  // )
+  const navigate = useNavigate()
+  const {} = useFetchProducts()
+
+  const getUserStores = React.useCallback(async () => {
+    try {
+      dispatch(setIsLoadingGlobal(true))
+      const offset = stores.length
+      //TODO - NAME SHOULD BE EXACT
+      const query = `q-store-general`
+      const url = `/arbitrary/resources/search?service=STORE&query=${query}&limit=20&exactmatchnames=true&includemetadata=true&offset=${offset}&reverse=true`
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      const responseData = await response.json()
+
+      const structureData = responseData.map((storeItem: any): Store => {
+        return {
+          title: storeItem?.metadata?.title,
+          category: storeItem?.metadata?.category,
+          categoryName: storeItem?.metadata?.categoryName,
+          tags: storeItem?.metadata?.tags || [],
+          description: storeItem?.metadata?.description,
+          created: '',
+          owner: storeItem.name,
+          id: storeItem.identifier
+        }
+      })
+      const copiedStores: Store[] = [...stores]
+      structureData.forEach((storeItem: Store) => {
+        const index = stores.findIndex((p: Store) => p.id === storeItem.id)
+        if (index !== -1) {
+          copiedStores[index] = storeItem
+        } else {
+          copiedStores.push(storeItem)
+        }
+      })
+      setStores(copiedStores)
+    } catch (error) {
+    } finally {
+      dispatch(setIsLoadingGlobal(false))
+    }
+  }, [stores])
+  const getStores = React.useCallback(async () => {
+    await getUserStores()
+  }, [getUserStores, user?.name])
+
+  return (
+    <>
+      <Masonry
+        breakpointCols={breakpointColumnsObj}
+        className="my-masonry-grid"
+        columnClassName="my-masonry-grid_column"
+      >
+        {stores.map((store: Store, index) => {
+          const existingStore = hashMapStores[store.id]
+          let storeItem = store
+          if (existingStore) {
+            storeItem = existingStore
+          }
+          const storeId = store?.id || ""
+          const storeOwner = store?.owner || ""
+          return (
+            <Box
+              sx={{
+                display: 'flex',
+                gap: 1,
+                alignItems: 'center',
+                width: 'auto',
+                position: 'relative',
+                ' @media (max-width: 450px)': {
+                  width: '100%'
+                }
+              }}
+              key={storeId}
+            >
+              <ContextMenuResource
+                name={storeOwner}
+                service="STORE"
+                identifier={storeId}
+                link={`qortal://APP/Q-Store/${storeOwner}/${storeId}`}
+              >
+                <BlogPostPreview
+                  onClick={() => {
+                    navigate(`/${storeOwner}/${storeId}`)
+                  }}
+                  description={storeItem?.description}
+                  title={storeItem?.title}
+                  createdAt={storeItem?.created}
+                  author={storeOwner}
+                  blogPost={storeItem}
+                  isValid={storeItem?.isValid}
+                  tags={storeItem?.tags}
+                />
+              </ContextMenuResource>
+      
+            </Box>
+          )
+        })}
+      </Masonry>
+      <LazyLoad onLoadMore={getStores}></LazyLoad>
+    </>
+  )
+}
