@@ -71,6 +71,8 @@ export default function AudioElement({
   const { downloadVideo } = React.useContext(MyContext)
   const [isLoading, setIsLoading] = React.useState<boolean>(false)
   const { downloads } = useSelector((state: RootState) => state.global)
+  const reDownload = React.useRef<boolean>(false)
+
   const dispatch = useDispatch()
   const download = React.useMemo(() => {
     if (!downloads || !audioInfo?.identifier) return {}
@@ -114,6 +116,16 @@ export default function AudioElement({
       setIsLoading(false)
     }
   }, [resourceStatus])
+
+  React.useEffect(() => {
+    if (
+      resourceStatus?.status === 'DOWNLOADED' &&
+      reDownload?.current === false
+    ) {
+      handlePlay()
+      reDownload.current = true
+    }
+  }, [handlePlay, resourceStatus])
   return (
     <Box
       onClick={handlePlay}

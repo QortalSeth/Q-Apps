@@ -136,60 +136,15 @@ export default function FileElement({
       download?.blogPost?.filename
     ) {
       if (downloadLoader) return
-
+      dispatch(
+        setNotification({
+          msg: 'Saving file... please wait',
+          alertType: 'info'
+        })
+      )
       try {
         const { name, service, identifier } = fileInfo
-        if (mode === 'mail') {
-          setDownloadLoader(true)
-          let res = await qortalRequest({
-            action: 'FETCH_QDN_RESOURCE',
-            name: name,
-            service: service,
-            identifier: identifier,
-            encoding: 'base64'
-          })
-          // const toUnit8Array = base64ToUint8Array(res)
-          const resName = await qortalRequest({
-            action: 'GET_NAME_DATA',
-            // change this
-            name: otherUser
-          })
-          if (!resName?.owner) return
 
-          const recipientAddress = resName.owner
-          const resAddress = await qortalRequest({
-            action: 'GET_ACCOUNT_DATA',
-            address: recipientAddress
-          })
-          if (!resAddress?.publicKey) return
-          const recipientPublicKey = resAddress.publicKey
-          let requestEncryptBody: any = {
-            action: 'DECRYPT_DATA',
-            encryptedData: res,
-            publicKey: recipientPublicKey
-          }
-          const resDecrypt = await qortalRequest(requestEncryptBody)
-
-          if (!resDecrypt) return
-          const decryptToUnit8Array = base64ToUint8Array(resDecrypt)
-          let blob = null
-          if (download?.blogPost?.mimeType) {
-            blob = new Blob([decryptToUnit8Array], {
-              type: download?.blogPost?.mimeType
-            })
-          } else {
-            blob = new Blob([decryptToUnit8Array])
-          }
-
-          if (!blob) return
-          await qortalRequest({
-            action: 'SAVE_FILE',
-            blob,
-            filename: download?.blogPost?.filename,
-            mimeType: download?.blogPost?.mimeType || ''
-          })
-          return
-        }
         setDownloadLoader(true)
         const url = `/arbitrary/${service}/${name}/${identifier}`
         fetch(url)
@@ -237,12 +192,18 @@ export default function FileElement({
       }
       return
     }
-    if (!postId && mode !== 'mail') return
+    if (!postId) return
     const { name, service, identifier } = fileInfo
     let filename = fileProperties?.filename
     let mimeType = fileProperties?.mimeType
     if (!fileProperties) {
       try {
+        dispatch(
+          setNotification({
+            msg: 'Downloading file... please wait',
+            alertType: 'info'
+          })
+        )
         let res = await qortalRequest({
           action: 'GET_QDN_RESOURCE_PROPERTIES',
           name: name,
@@ -252,7 +213,14 @@ export default function FileElement({
         setFileProperties(res)
         filename = res?.filename
         mimeType = res?.mimeType
-      } catch (error) {}
+      } catch (error: any) {
+        dispatch(
+          setNotification({
+            msg: error?.message || 'Error with download. Please try again',
+            alertType: 'error'
+          })
+        )
+      }
     }
     if (!filename) return
 
@@ -271,8 +239,6 @@ export default function FileElement({
         mimeType
       }
     })
-    dispatch(setCurrAudio(identifier))
-    dispatch(setShowingAudioPlayer(true))
   }
 
   React.useEffect(() => {

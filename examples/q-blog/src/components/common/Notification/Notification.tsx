@@ -1,5 +1,5 @@
 import { useDispatch, useSelector } from 'react-redux'
-import { toast, ToastContainer, Zoom } from 'react-toastify'
+import { toast, ToastContainer, Zoom, Slide } from 'react-toastify'
 import { removeNotification } from '../../../state/features/notificationsSlice'
 import 'react-toastify/dist/ReactToastify.css'
 import { RootState } from '../../../state/store'
@@ -34,6 +34,38 @@ const Notification = () => {
       icon: false
     })
     dispatch(removeNotification())
+  }
+  if (alertTypes.alertInfo) {
+    toast.info(`${alertTypes?.alertInfo}`, {
+      position: 'top-right',
+      autoClose: 1300,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+      theme: 'light'
+    })
+    dispatch(removeNotification())
+  }
+
+  if (alertTypes.alertInfo) {
+    return (
+      <ToastContainer
+        position="top-right"
+        autoClose={2000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="light"
+        toastStyle={{ fontSize: '16px' }}
+        transition={Slide}
+      />
+    )
   }
 
   return (
