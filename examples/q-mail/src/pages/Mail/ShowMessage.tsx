@@ -226,7 +226,7 @@ export const ShowMessage = ({
                             fontSize: '16px'
                           }}
                         >
-                          {file?.filename}
+                          {file?.originalFilename || file?.filename}
                         </Typography>
                       </FileElement>
                     </Box>

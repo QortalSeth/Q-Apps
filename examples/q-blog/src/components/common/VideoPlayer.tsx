@@ -15,6 +15,9 @@ import { MyContext } from '../../wrappers/DownloadWrapper'
 import { useDispatch, useSelector } from 'react-redux'
 import { RootState } from '../../state/store'
 import { Refresh } from '@mui/icons-material'
+
+import { Menu, MenuItem } from '@mui/material'
+import { MoreVert as MoreIcon } from '@mui/icons-material'
 const VideoContainer = styled(Box)`
   position: relative;
   display: flex;
@@ -76,7 +79,11 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
   const [volume, setVolume] = useState(1)
   const [progress, setProgress] = useState(0)
   const [isLoading, setIsLoading] = useState(false)
+  const [canPlay, setCanPlay] = useState(false)
   const [startPlay, setStartPlay] = useState(false)
+  const [isMobileView, setIsMobileView] = useState(false)
+  const [playbackRate, setPlaybackRate] = useState(1)
+  const [anchorEl, setAnchorEl] = useState(null)
   const reDownload = useRef<boolean>(false)
   const { downloads } = useSelector((state: RootState) => state.global)
   const download = useMemo(() => {
@@ -93,6 +100,17 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
   const resourceStatus = useMemo(() => {
     return download?.status || {}
   }, [download])
+
+  const increaseSpeed = () => {
+    if (videoRef.current && playbackRate < 3.5) {
+      let newPlaybackRate = playbackRate + 0.25
+      videoRef.current.playbackRate = newPlaybackRate
+      setPlaybackRate(newPlaybackRate)
+    } else if (videoRef.current && playbackRate === 3.5) {
+      videoRef.current.playbackRate = 0.25
+      setPlaybackRate(0.25)
+    }
+  }
 
   const toggleRef = useRef<any>(null)
   const { downloadVideo } = useContext(MyContext)
@@ -193,6 +211,7 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
       setCount()
     }
     setIsLoading(false)
+    setCanPlay(true)
   }
 
   const getSrc = React.useCallback(async () => {
@@ -336,6 +355,21 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
     }
   }, [getSrc, resourceStatus])
 
+  const handleMenuOpen = (event: any) => {
+    setAnchorEl(event.currentTarget)
+  }
+
+  const handleMenuClose = () => {
+    setAnchorEl(null)
+  }
+
+  useEffect(() => {
+    const videoWidth = videoRef?.current?.offsetWidth
+    if (videoWidth && videoWidth <= 600) {
+      setIsMobileView(true)
+    }
+  }, [canPlay])
+
   return (
     <VideoContainer
       style={{
@@ -393,7 +427,8 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
               component="div"
               sx={{
                 color: 'white',
-                fontSize: '18px'
+                fontSize: '15px',
+                textAlign: 'center'
               }}
             >
               {resourceStatus?.status === 'REFETCHING' ? (
@@ -472,75 +507,167 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
           ...customStyle
         }}
       />
+
       <ControlsContainer
         style={{
           bottom: from === 'create' ? '15px' : 0
         }}
       >
-        <IconButton
-          sx={{
-            color: 'rgba(255, 255, 255, 0.7)'
-          }}
-          onClick={togglePlay}
-        >
-          {playing ? <Pause /> : <PlayArrow />}
-        </IconButton>
-        <IconButton
-          sx={{
-            color: 'rgba(255, 255, 255, 0.7)',
-            marginLeft: '15px'
-          }}
-          onClick={reloadVideo}
-        >
-          <Refresh />
-        </IconButton>
-        <Slider
-          value={progress}
-          onChange={onProgressChange}
-          min={0}
-          max={videoRef.current?.duration || 100}
-          sx={{ flexGrow: 1, mx: 2 }}
-        />
-        <Typography
-          sx={{
-            fontSize: '14px',
-            marginRight: '5px',
-            color: 'rgba(255, 255, 255, 0.7)',
-            visibility:
-              !videoRef.current?.duration || !progress ? 'hidden' : 'visible'
-          }}
-        >
-          {progress && videoRef.current?.duration && formatTime(progress)}/
-          {progress &&
-            videoRef.current?.duration &&
-            formatTime(videoRef.current?.duration)}
-        </Typography>
-        <VolumeUp />
-        <Slider
-          value={volume}
-          onChange={onVolumeChange}
-          min={0}
-          max={1}
-          step={0.01}
-        />
-        <IconButton
-          sx={{
-            color: 'rgba(255, 255, 255, 0.7)',
-            marginLeft: '15px'
-          }}
-          ref={toggleRef}
-          onClick={togglePictureInPicture}
-        >
-          <PictureInPicture />
-        </IconButton>
-        <IconButton
-          sx={{
-            color: 'rgba(255, 255, 255, 0.7)'
-          }}
-          onClick={toggleFullscreen}
-        >
-          <Fullscreen />
-        </IconButton>
+        {isMobileView && canPlay ? (
+          <>
+            <IconButton
+              sx={{
+                color: 'rgba(255, 255, 255, 0.7)'
+              }}
+              onClick={togglePlay}
+            >
+              {playing ? <Pause /> : <PlayArrow />}
+            </IconButton>
+            <IconButton
+              sx={{
+                color: 'rgba(255, 255, 255, 0.7)',
+                marginLeft: '15px'
+              }}
+              onClick={reloadVideo}
+            >
+              <Refresh />
+            </IconButton>
+            <Slider
+              value={progress}
+              onChange={onProgressChange}
+              min={0}
+              max={videoRef.current?.duration || 100}
+              sx={{ flexGrow: 1, mx: 2 }}
+            />
+            <IconButton
+              edge="end"
+              color="inherit"
+              aria-label="menu"
+              onClick={handleMenuOpen}
+            >
+              <MoreIcon />
+            </IconButton>
+            <Menu
+              id="simple-menu"
+              anchorEl={anchorEl}
+              keepMounted
+              open={Boolean(anchorEl)}
+              onClose={handleMenuClose}
+              PaperProps={{
+                style: {
+                  width: '250px'
+                }
+              }}
+            >
+              <MenuItem>
+                <VolumeUp />
+                <Slider
+                  value={volume}
+                  onChange={onVolumeChange}
+                  min={0}
+                  max={1}
+                  step={0.01}
+                />
+              </MenuItem>
+              <MenuItem onClick={increaseSpeed}>
+                <Typography
+                  sx={{
+                    color: 'rgba(255, 255, 255, 0.7)',
+                    fontSize: '14px'
+                  }}
+                >
+                  Speed: {playbackRate}x
+                </Typography>
+              </MenuItem>
+              <MenuItem onClick={togglePictureInPicture}>
+                <PictureInPicture />
+              </MenuItem>
+              <MenuItem onClick={toggleFullscreen}>
+                <Fullscreen />
+              </MenuItem>
+            </Menu>
+          </>
+        ) : canPlay ? (
+          <>
+            <IconButton
+              sx={{
+                color: 'rgba(255, 255, 255, 0.7)'
+              }}
+              onClick={togglePlay}
+            >
+              {playing ? <Pause /> : <PlayArrow />}
+            </IconButton>
+            <IconButton
+              sx={{
+                color: 'rgba(255, 255, 255, 0.7)',
+                marginLeft: '15px'
+              }}
+              onClick={reloadVideo}
+            >
+              <Refresh />
+            </IconButton>
+            <Slider
+              value={progress}
+              onChange={onProgressChange}
+              min={0}
+              max={videoRef.current?.duration || 100}
+              sx={{ flexGrow: 1, mx: 2 }}
+            />
+            <Typography
+              sx={{
+                fontSize: '14px',
+                marginRight: '5px',
+                color: 'rgba(255, 255, 255, 0.7)',
+                visibility:
+                  !videoRef.current?.duration || !progress
+                    ? 'hidden'
+                    : 'visible'
+              }}
+            >
+              {progress && videoRef.current?.duration && formatTime(progress)}/
+              {progress &&
+                videoRef.current?.duration &&
+                formatTime(videoRef.current?.duration)}
+            </Typography>
+            <VolumeUp />
+            <Slider
+              value={volume}
+              onChange={onVolumeChange}
+              min={0}
+              max={1}
+              step={0.01}
+            />
+            <IconButton
+              sx={{
+                color: 'rgba(255, 255, 255, 0.7)',
+                fontSize: '14px',
+                marginLeft: '5px'
+              }}
+              onClick={increaseSpeed}
+            >
+              Speed: {playbackRate}x
+            </IconButton>
+
+            <IconButton
+              sx={{
+                color: 'rgba(255, 255, 255, 0.7)',
+                marginLeft: '15px'
+              }}
+              ref={toggleRef}
+              onClick={togglePictureInPicture}
+            >
+              <PictureInPicture />
+            </IconButton>
+            <IconButton
+              sx={{
+                color: 'rgba(255, 255, 255, 0.7)'
+              }}
+              onClick={toggleFullscreen}
+            >
+              <Fullscreen />
+            </IconButton>
+          </>
+        ) : null}
       </ControlsContainer>
     </VideoContainer>
   )

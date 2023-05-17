@@ -192,7 +192,9 @@ export default function FileElement({
           await qortalRequest({
             action: 'SAVE_FILE',
             blob,
-            filename: download?.blogPost?.filename,
+            filename:
+              download?.blogPost?.originalFilename ||
+              download?.blogPost?.filename,
             mimeType: download?.blogPost?.mimeType || ''
           })
 
@@ -283,7 +285,8 @@ export default function FileElement({
         audioDescription: description,
         audioAuthor: author,
         filename,
-        mimeType
+        mimeType,
+        originalFilename: fileInfo?.originalFilename
       }
     })
   }

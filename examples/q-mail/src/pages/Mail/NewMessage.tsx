@@ -239,6 +239,7 @@ export const NewMessage = ({
           name: name,
           service: MAIL_ATTACHMENT_SERVICE_TYPE,
           filename: `${id}.${fileExtension}`,
+          originalFilename: attachment?.name || '',
           identifier,
           data64: base64String
         }
@@ -252,7 +253,8 @@ export const NewMessage = ({
             identifier: item.identifier,
             name,
             service: MAIL_ATTACHMENT_SERVICE_TYPE,
-            filename: item.filename
+            filename: item.filename,
+            originalFilename: item.originalFilename
           }
         })
 

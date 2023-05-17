@@ -247,7 +247,8 @@ const CommentCard = ({
           variant="body2"
           color={theme.palette.text.primary}
           sx={{
-            fontSize: '16px'
+            fontSize: '16px',
+            wordBreak: 'break-word'
           }}
         >
           {message}

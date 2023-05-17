@@ -109,7 +109,7 @@ export const CommentSection = ({ postId }: CommentSectionProps) => {
       try {
       } catch (error) {}
     },
-    []
+    [postId]
   )
 
   useEffect(() => {
