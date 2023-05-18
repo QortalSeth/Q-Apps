@@ -47,6 +47,7 @@ import {
   setFilterValue,
   setIsFiltering
 } from '../../../state/features/storeSlice'
+import { setIsOpen } from '../../../state/features/cartSlice'
 interface Props {
   isAuthenticated: boolean
   hasBlog: boolean
@@ -74,24 +75,13 @@ const NavBar: React.FC<Props> = ({
   const dispatch = useDispatch()
   const theme = useTheme()
   const query = useQuery()
-  const { visitingBlog } = useSelector((state: RootState) => state.global)
   const location = useLocation()
   const [anchorEl, setAnchorEl] = React.useState<HTMLButtonElement | null>(null)
   const [isOpenModal, setIsOpenModal] = React.useState<boolean>(false)
   const [searchVal, setSearchVal] = useState<string>('')
   const searchValRef = useRef('')
   const inputRef = useRef<HTMLInputElement>(null)
-  const stripBlogId = removePrefix(visitingBlog?.blogId || '')
-  if (visitingBlog?.navbarConfig && location?.pathname?.includes(stripBlogId)) {
-    return (
-      <UserNavbar
-        title={visitingBlog?.title || ''}
-        menuItems={visitingBlog?.navbarConfig?.navItems || []}
-        name={visitingBlog?.name || ''}
-        blogId={visitingBlog?.blogId || ''}
-      />
-    )
-  }
+
 
   const handleClick = (event: React.MouseEvent<HTMLDivElement>) => {
     const target = event.currentTarget as unknown as HTMLButtonElement | null
@@ -240,25 +230,26 @@ const NavBar: React.FC<Props> = ({
                 color="primary"
                 startIcon={<AddBoxIcon />}
                 onClick={() => {
-                  navigate(`/post/new`)
+                  navigate(`/product-manager`)
                 }}
               >
-                Create Post
+                Store Manager
               </StyledButton>
 
-              <StyledButton
-                color="primary"
-                startIcon={<AutoStoriesIcon />}
-                onClick={() => {
-                  navigate(`/${userName}/${blog.blogId}`)
-                }}
-              >
-                My Blog
-              </StyledButton>
             </>
           )}
 
           {isAuthenticated && userName && (
+            <>
+             <StyledButton
+                color="primary"
+                startIcon={<AutoStoriesIcon />}
+                onClick={() => {
+                  dispatch(setIsOpen(true))
+                }}
+              >
+                Cart
+              </StyledButton>
             <AvatarContainer onClick={handleClick}>
               <NavbarName>{userName}</NavbarName>
               {!userAvatar ? (
@@ -280,6 +271,7 @@ const NavBar: React.FC<Props> = ({
               )}
               <ExpandMoreIcon id="expand-icon" sx={{ color: '#ACB6BF' }} />
             </AvatarContainer>
+            </>
           )}
           <Popover
             id={id}

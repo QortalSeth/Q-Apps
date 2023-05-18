@@ -32,7 +32,7 @@ const initialValue: Descendant[] = [
     children: [{ text: '' }]
   }
 ]
-const uid = new ShortUniqueId({ length: 16 })
+const uid = new ShortUniqueId({ length: 10 })
 
 interface NewMessageProps {
   replyTo?: any
@@ -59,8 +59,8 @@ export const NewMessage = ({
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false)
   const [showAlias, setShowAlias] = useState<boolean>(false)
   const [imagePreviewFile, setImagePreviewFile] = useState<any>(null)
-  const currentBlog = useSelector(
-    (state: RootState) => state.global.currentBlog
+  const currentStore = useSelector(
+    (state: RootState) => state.global.currentStore
   )
 
   const theme = useTheme()
@@ -94,7 +94,10 @@ export const NewMessage = ({
     },
     maxFiles: 1,
     onDrop: (acceptedFiles) => {
-      setImagePreviewFile([acceptedFiles])
+      if(acceptedFiles?.length > 0){
+        setImagePreviewFile(acceptedFiles[0])
+      }
+     
     }
     // onDropRejected: (rejectedFiles) => {
     //   dispatch(
@@ -129,7 +132,7 @@ export const NewMessage = ({
     if (!imagePreviewFile) {
       errorMsg = 'Missing a preview image'
     }
-    if (!currentBlog) {
+    if (!currentStore) {
       errorMsg = 'Cannot create a product without having a store'
     }
 
@@ -159,26 +162,28 @@ export const NewMessage = ({
         images: ['', ''],
         type: 'physical',
         recipient: destinationName,
-        price: [{ qort: 15 }]
+        price: [{ currency: 'qort', value: 15 }]
       }
-      const blogPostToBase64 = objectToBase64(productObject)
-
+      const blogPostToBase64 = await objectToBase64(productObject)
+      console.log({imagePreviewFile})
       const productId = uid()
-      if (!currentBlog) return
-      const storeId: string = currentBlog?.blogId
+      if (!currentStore) return
+      const storeId: string = currentStore?.id
       const productResource = {
         identifier: `q-store-product-${storeId}-${productId}`,
         title: 'Shoes',
+        name,
         service: 'PRODUCT',
         filename: 'product.json',
         data64: blogPostToBase64
       }
 
       const productImagePreviewResource = {
-        identifier: 'IMAGE',
+        identifier: `q-store-product-${storeId}-${productId}-image`,
+        name,
         title: 'Shoes',
         service: 'IMAGE',
-        filename: imagePreviewFile?.filename,
+        filename: imagePreviewFile?.name,
         file: imagePreviewFile
       }
 

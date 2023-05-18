@@ -5,7 +5,6 @@ import { RootState } from '../../state/store'
 import { useParams } from 'react-router-dom'
 import { Typography, Box, Button, useTheme } from '@mui/material'
 import EditIcon from '@mui/icons-material/Edit'
-import BlogPostPreview from '../StoreList/PostPreview'
 import {
   setIsLoadingGlobal,
 } from '../../state/features/globalSlice'
@@ -17,6 +16,7 @@ import LazyLoad from '../../components/common/LazyLoad'
 import { addPrefix, removePrefix } from '../../utils/blogIdformats'
 import Masonry from 'react-masonry-css'
 import ContextMenuResource from '../../components/common/ContextMenu/ContextMenuResource'
+import { setProductToCart, setStoreId, setStoreOwner } from '../../state/features/cartSlice'
 
 const breakpointColumnsObj = {
   default: 5,
@@ -104,6 +104,8 @@ export const Store = () => {
       })
       const responseData = await response.json()
       setUserStore(responseData)
+      dispatch(setStoreId(responseData.identifier))
+      dispatch(setStoreOwner(responseData.name))
     } catch (error) {}
   }, [username, store])
 
@@ -150,21 +152,15 @@ export const Store = () => {
             >
               <ContextMenuResource
                 name={storeProduct.user}
-                service="BLOG_POST"
+                service="PRODUCT"
                 identifier={storeProduct.id}
-                link={`qortal://APP/Q-Blog/${storeProduct.user}/${storeId}/${productId}`}
+                link={`qortal://APP/Q-Shop/${storeProduct.user}/${storeId}/${productId}`}
               >
-                <BlogPostPreview
-                  onClick={() => {
-                    navigate(`/${storeProduct.user}/${storeId}/${productId}`)
-                  }}
-                  description={storeProduct?.description}
-                  title={storeProduct?.title}
-                  createdAt={storeProduct?.created}
-                  author={storeProduct.user}
-                  blogPost={storeProduct}
-                  tags={storeProduct?.tags}
-                />
+               <p onClick={()=> {
+                dispatch(setProductToCart({
+                  id: productId
+                }))
+               }}>{product.title}</p>
               </ContextMenuResource>
             </Box>
           )

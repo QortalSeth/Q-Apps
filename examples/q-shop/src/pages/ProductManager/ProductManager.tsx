@@ -30,100 +30,6 @@ import Tab from '@mui/material/Tab'
 import { ShowMessage } from './ShowProduct'
 import SimpleTable from './ProductTable'
 
-const steps: Step[] = [
-  {
-    content: (
-      <div>
-        <h2>Welcome To Q-Mail</h2>
-        <p
-          style={{
-            fontSize: '18px'
-          }}
-        >
-          Let's take a tour
-        </p>
-        <p
-          style={{
-            fontSize: '12px'
-          }}
-        >
-          The Qortal community, along with its development team and the creators
-          of this application, cannot be held accountable for any content
-          published or displayed. Furthermore, they bear no responsibility for
-          any data loss that may occur as a result of using this application.
-        </p>
-      </div>
-    ),
-    placement: 'center',
-    target: '.step-1'
-  },
-
-  {
-    target: '.step-2',
-    content: (
-      <div>
-        <h2>Composing a mail message</h2>
-        <p
-          style={{
-            fontSize: '18px',
-            fontWeight: 'bold',
-            fontFamily: 'Arial'
-          }}
-        >
-          Compose a secure message featuring encrypted attachments (up to 25MB
-          per attachment).
-        </p>
-        <p
-          style={{
-            fontSize: '18px',
-            fontFamily: 'Arial'
-          }}
-        >
-          To protect the identity of the recipient, assign them an alias for
-          added anonymity.
-        </p>
-      </div>
-    ),
-    placement: 'bottom'
-  },
-  {
-    target: '.step-3',
-    content: (
-      <div>
-        <h2>What is an alias?</h2>
-        <p
-          style={{
-            fontSize: '18px',
-            fontWeight: 'bold',
-            fontFamily: 'Arial'
-          }}
-        >
-          To conceal the identity of the message recipient, utilize the alias
-          option when sending.
-        </p>
-        <p
-          style={{
-            fontSize: '14px',
-            fontFamily: 'Arial'
-          }}
-        >
-          For instance, instruct your friend to address the message to you using
-          the alias 'FrederickGreat'.
-        </p>
-        <p
-          style={{
-            fontSize: '14px',
-            fontFamily: 'Arial'
-          }}
-        >
-          To access messages sent to that alias, simply enter 'FrederickGreat'
-          in the provided input field and click the '+ Alias' button.
-        </p>
-      </div>
-    ),
-    placement: 'bottom'
-  }
-]
 
 export const ProductManager = () => {
   const theme = useTheme()
@@ -221,33 +127,9 @@ export const ProductManager = () => {
     )
   }
 
-  useEffect(() => {
-    const savedTourStatus = localStorage.getItem('tourStatus-qmail')
-    if (!savedTourStatus || savedTourStatus === STATUS.SKIPPED) {
-      setRun(true)
-    }
-  }, [])
 
-  useEffect(() => {
-    if (!userName) return
-    const savedAlias = localStorage.getItem(`alias-qmail-${userName}`)
-    if (savedAlias) {
-      try {
-        setAlias(JSON.parse(savedAlias))
-      } catch (error) {
-        console.error('Error parsing JSON from localStorage:', error)
-      }
-    }
-  }, [userName])
 
-  const handleJoyrideCallback = (data: any) => {
-    const { action, status } = data
 
-    if (status === STATUS.FINISHED || status === STATUS.SKIPPED) {
-      setRun(false)
-      localStorage.setItem('tourStatus-qmail', status)
-    }
-  }
 
   return (
     <Box
@@ -442,17 +324,6 @@ export const ProductManager = () => {
       </TabPanel>
 
  
-
-
-      <Joyride
-        steps={steps}
-        run={run}
-        callback={handleJoyrideCallback}
-        continuous={true}
-        scrollToFirstStep={true}
-        showProgress={true}
-        showSkipButton={true}
-      />
     </Box>
   )
 }

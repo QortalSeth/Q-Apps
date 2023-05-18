@@ -9,25 +9,19 @@ import PublishBlogModal from '../components/modals/PublishBlogModal'
 import EditBlogModal from '../components/modals/EditBlogModal'
 
 import {
-  setCurrentBlog,
+  setCurrentStore,
   setIsLoadingGlobal,
   toggleEditBlogModal,
   togglePublishBlogModal
 } from '../state/features/globalSlice'
 import NavBar from '../components/layout/Navbar/Navbar'
 import PageLoader from '../components/common/PageLoader'
-import {
-  addFavorites,
-  addPosts,
-  addSubscriptions,
-  addToHashMap,
-  BlogPost
-} from '../state/features/storeSlice'
-import { useFetchPosts } from '../hooks/useFetchProducts'
+
 import { setNotification } from '../state/features/notificationsSlice'
-import { AudioPlayer } from '../components/common/AudioPlayer'
 import localForage from 'localforage'
 import ConsentModal from '../components/modals/ConsentModal'
+import { objectToBase64 } from '../utils/toBase64'
+import { Cart } from '../pages/ProductManager/Cart'
 
 interface Props {
   children: React.ReactNode
@@ -40,21 +34,15 @@ const GlobalWrapper: React.FC<Props> = ({ children }) => {
   const dispatch = useDispatch()
 
   const [userAvatar, setUserAvatar] = useState<string>('')
-
+  const [isOpenCart, setIsOpenCart] = useState<boolean>(false)
   const { user } = useSelector((state: RootState) => state.auth)
-  const { audios, currAudio } = useSelector((state: RootState) => state.global)
   const [hasAttemptedToFetchBlogInitial, setHasAttemptedToFetchBlogInitial] =
     useState(false)
-  const favoritesLocalRef = useRef<any>(null)
 
   useEffect(() => {
     if (!user?.name) return
-    const dynamicInstanceName = `q-blog-favorites-${user.name}` // Replace this with your dynamic value
-    favoritesLocalRef.current = localForage.createInstance({
-      name: dynamicInstanceName
-    })
-    getFavorites()
-    getSubscriptions()
+
+
     getAvatar()
   }, [user?.name])
 
@@ -75,22 +63,10 @@ const GlobalWrapper: React.FC<Props> = ({ children }) => {
     }
   }
 
-  const getSubscriptions = async () => {
-    try {
-      if (!user?.name) return
-      const listName = `q-blog-subscriptions-${user.name}`
-      const response = await qortalRequest({
-        action: 'GET_LIST_ITEMS',
-        list_name: listName
-      })
-
-      dispatch(addSubscriptions(response))
-    } catch (error) {}
-  }
-
+ 
   const {
     isOpenPublishBlogModal,
-    currentBlog,
+    currentStore,
     isLoadingGlobal,
     isOpenEditBlogModal
   } = useSelector((state: RootState) => state.global)
@@ -133,7 +109,7 @@ const GlobalWrapper: React.FC<Props> = ({ children }) => {
 
     return doesExist
   }
-  async function getBlog(name: string) {
+  async function getStore(name: string) {
     //TODO NAME SHOULD BE EXACT
     const url = `/arbitrary/resources/search?service=STORE&identifier=q-store-general-&exactmatchnames=true&name=${name}&prefix=true&limit=20&includemetadata=true`
     const responseBlogs = await fetch(url, {
@@ -161,9 +137,9 @@ const GlobalWrapper: React.FC<Props> = ({ children }) => {
     const responseData = await response.json()
 
     dispatch(
-      setCurrentBlog({
+      setCurrentStore({
         created: responseData?.created || '',
-        identifier: blog.identifier,
+        id: blog.identifier,
         title: responseData?.title || '',
         location: responseData?.location,
         shipsTo: responseData?.shipsTo,
@@ -191,30 +167,13 @@ const GlobalWrapper: React.FC<Props> = ({ children }) => {
       const name = await getNameInfo(account.address)
       dispatch(addUser({ ...account, name }))
 
-      const blog = await getBlog(name)
+      const blog = await getStore(name)
       setHasAttemptedToFetchBlogInitial(true)
     } catch (error) {
       console.error(error)
     }
   }, [])
-  function objectToBase64(obj: any) {
-    // Step 1: Convert the object to a JSON string
-    const jsonString = JSON.stringify(obj)
 
-    // Step 2: Convert the JSON string to a Uint8Array of bytes
-    const utf8Encoder = new TextEncoder()
-    const uint8Array = utf8Encoder.encode(jsonString)
-
-    // Step 3: Convert the Uint8Array to a base64-encoded string
-    let base64 = ''
-
-    // For browsers
-    const numberArray = Array.from(uint8Array) // Convert Uint8Array to a regular array
-    const binaryString = String.fromCharCode.apply(null, numberArray)
-    base64 = btoa(binaryString)
-
-    return base64
-  }
 
   const createStore = React.useCallback(
     async (
@@ -258,7 +217,7 @@ const GlobalWrapper: React.FC<Props> = ({ children }) => {
         shipsTo: 'Worldwide',
         created: Date.now()
       }
-      const blogPostToBase64 = objectToBase64(blogobj)
+      const blogPostToBase64 = await objectToBase64(blogobj)
       try {
         const resourceResponse = await qortalRequest({
           action: 'PUBLISH_QDN_RESOURCE',
@@ -285,8 +244,8 @@ const GlobalWrapper: React.FC<Props> = ({ children }) => {
           tags
         }
 
-        dispatch(setCurrentBlog(blogfullObj))
-        // getBlog(name)
+        dispatch(setCurrentStore(blogfullObj))
+        // getStore(name)
         dispatch(
           setNotification({
             msg: 'Store successfully created',
@@ -323,94 +282,7 @@ const GlobalWrapper: React.FC<Props> = ({ children }) => {
     [user]
   )
 
-  const editBlog = React.useCallback(
-    async (
-      title: string,
-      description: string,
-      category: string,
-      tags: string[]
-    ) => {
-      if (!user || !user.name)
-        throw new Error('Cannot update: your Qortal name is not accessible')
 
-      if (!currentBlog)
-        throw new Error('Your blog is not available. Refresh and try again.')
-      if (!title) throw new Error('A title is required')
-      if (!description) throw new Error('A description is required')
-      const name = user.name
-      const formattedTags: { [key: string]: string } = {}
-      tags.forEach((tag: string, i: number) => {
-        formattedTags[`tag${i + 1}`] = tag
-      })
-
-      const blogobj = {
-        ...currentBlog,
-        title,
-        description
-      }
-      const blogPostToBase64 = objectToBase64(blogobj)
-      try {
-        const resourceResponse = await qortalRequest({
-          action: 'PUBLISH_QDN_RESOURCE',
-          name: name,
-          service: 'BLOG',
-          data64: blogPostToBase64,
-          title,
-          description,
-          category,
-          ...formattedTags,
-          identifier: currentBlog.blogId
-        })
-
-        await new Promise<void>((res, rej) => {
-          setTimeout(() => {
-            res()
-          }, 1000)
-        })
-        const blogfullObj = {
-          ...blogobj,
-          tags,
-          category
-        }
-        // blogobj.tags = tags
-        // blogobj.category = category
-        // getBlog(name)
-        dispatch(setCurrentBlog(blogfullObj))
-        dispatch(
-          setNotification({
-            msg: 'Blog successfully updated',
-            alertType: 'success'
-          })
-        )
-      } catch (error: any) {
-        let notificationObj: any = null
-        if (typeof error === 'string') {
-          notificationObj = {
-            msg: error || 'Failed to update blog',
-            alertType: 'error'
-          }
-        } else if (typeof error?.error === 'string') {
-          notificationObj = {
-            msg: error?.error || 'Failed to update blog',
-            alertType: 'error'
-          }
-        } else {
-          notificationObj = {
-            msg: error?.message || 'Failed to update blog',
-            alertType: 'error'
-          }
-        }
-        if (!notificationObj) return
-        dispatch(setNotification(notificationObj))
-        if (error instanceof Error) {
-          throw new Error(error.message)
-        } else {
-          throw new Error('An unknown error occurred')
-        }
-      }
-    },
-    [user, currentBlog]
-  )
 
   React.useEffect(() => {
     askForAccountInformation()
@@ -423,28 +295,7 @@ const GlobalWrapper: React.FC<Props> = ({ children }) => {
     dispatch(toggleEditBlogModal(false))
   }, [])
 
-  const getFavorites = useCallback(async () => {
-    try {
-      const allItems: any[] = []
 
-      if (!favoritesLocalRef?.current) {
-        return
-      }
-
-      favoritesLocalRef?.current
-        .iterate(function (value: any, key: string) {
-          // Handle each key-value pair here
-
-          allItems.push({ id: key, ...(value || {}) })
-        })
-        .then(function () {
-          dispatch(addFavorites(allItems))
-        })
-        .catch(function (error: any) {
-          // Handle any errors here
-        })
-    } catch (error) {}
-  }, [user?.name])
 
   return (
     <>
@@ -459,27 +310,24 @@ const GlobalWrapper: React.FC<Props> = ({ children }) => {
         />
       )}
 
-      <EditBlogModal
+      {/* <EditBlogModal
         open={isOpenEditBlogModal}
         onClose={onCloseEditBlogModal}
-        onPublish={editBlog}
-        currentBlog={currentBlog}
-      />
+        onPublish={()=> {}}
+        currentBlog={currentStore}
+      /> */}
       <NavBar
-        isAuthenticated={!!user}
-        hasBlog={!!currentBlog}
+        isAuthenticated={!!user?.name}
+        hasBlog={!!currentStore}
         userName={user?.name || ''}
         userAvatar={userAvatar}
-        blog={currentBlog}
+        blog={currentStore}
         authenticate={askForAccountInformation}
         hasAttemptedToFetchBlogInitial={hasAttemptedToFetchBlogInitial}
       />
       <ConsentModal />
+      <Cart  />
       {children}
-
-      {audios && audios.length > 0 && (
-        <AudioPlayer currAudio={currAudio} playlist={audios} />
-      )}
     </>
   )
 }

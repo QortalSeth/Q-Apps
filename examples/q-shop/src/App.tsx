@@ -9,7 +9,6 @@ import { lightTheme, darkTheme } from './styles/theme'
 import { store } from './state/store'
 import { Provider } from 'react-redux'
 import GlobalWrapper from './wrappers/GlobalWrapper'
-import DownloadWrapper from './wrappers/DownloadWrapper'
 import Notification from './components/common/Notification/Notification'
 import { useState } from 'react'
 import { ProductManager } from './pages/ProductManager/ProductManager'
@@ -23,7 +22,6 @@ function App() {
     <Provider store={store}>
       <ThemeProvider theme={themeColor === 'light' ? lightTheme : darkTheme}>
         <Notification />
-        <DownloadWrapper>
           <GlobalWrapper>
             <CssBaseline />
 
@@ -44,7 +42,6 @@ function App() {
               <Route path="/" element={<StoreList />} />
             </Routes>
           </GlobalWrapper>
-        </DownloadWrapper>
       </ThemeProvider>
     </Provider>
   )

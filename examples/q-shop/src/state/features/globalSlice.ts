@@ -40,7 +40,7 @@ export const globalSlice = createSlice({
     toggleEditBlogModal: (state, action) => {
       state.isOpenEditBlogModal = action.payload
     },
-    setCurrentBlog: (state, action) => {
+    setCurrentStore: (state, action) => {
       state.currentStore = action.payload
       state.isLoadingCurrentBlog = false
     },
@@ -71,7 +71,7 @@ export const globalSlice = createSlice({
 
 export const {
   togglePublishBlogModal,
-  setCurrentBlog,
+  setCurrentStore,
   setIsLoadingGlobal,
   toggleEditBlogModal,
 

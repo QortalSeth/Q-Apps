@@ -3,13 +3,15 @@ import notificationsReducer from "./features/notificationsSlice";
 import authReducer from "./features/authSlice";
 import globalReducer from "./features/globalSlice";
 import storeReducer from "./features/storeSlice";
+import cartReducer from "./features/cartSlice";
 
 export const store = configureStore({
   reducer: {
     notifications: notificationsReducer,
     auth: authReducer,
     global: globalReducer,
-    store: storeReducer
+    store: storeReducer,
+    cart: cartReducer
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

@@ -11,7 +11,6 @@ import {
   Typography,
   useTheme
 } from '@mui/material'
-import BlogPostPreview from './PostPreview'
 import {  useFetchProducts } from '../../hooks/useFetchProducts'
 import LazyLoad from '../../components/common/LazyLoad'
 import { removePrefix } from '../../utils/blogIdformats'
@@ -106,6 +105,7 @@ export const StoreList = ({ mode }: BlogListProps) => {
           }
           const storeId = store?.id || ""
           const storeOwner = store?.owner || ""
+          const storeTitle = store.title
           return (
             <Box
               sx={{
@@ -126,18 +126,7 @@ export const StoreList = ({ mode }: BlogListProps) => {
                 identifier={storeId}
                 link={`qortal://APP/Q-Store/${storeOwner}/${storeId}`}
               >
-                <BlogPostPreview
-                  onClick={() => {
-                    navigate(`/${storeOwner}/${storeId}`)
-                  }}
-                  description={storeItem?.description}
-                  title={storeItem?.title}
-                  createdAt={storeItem?.created}
-                  author={storeOwner}
-                  blogPost={storeItem}
-                  isValid={storeItem?.isValid}
-                  tags={storeItem?.tags}
-                />
+              <p onClick={()=> navigate(`/${storeOwner}/${storeId}`)}>{storeTitle}</p>
               </ContextMenuResource>
       
             </Box>
