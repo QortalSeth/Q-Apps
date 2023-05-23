@@ -61,12 +61,18 @@ export const Cart = () => {
       name: storeOwner
     })
     const address = res.owner
+    const resAddress = await qortalRequest({
+      action: 'GET_ACCOUNT_DATA',
+      address: address
+    })
+    if (!resAddress?.publicKey) throw new Error("Cannot find store owner")
     const responseSendCoin = await qortalRequest({
       action: 'SEND_COIN',
       coin: 'QORT',
       destinationAddress: address,
       amount: priceToPay
     })
+    console.log({responseSendCoin})
     const signature = responseSendCoin.signature
     try {
       const orderObject: any = {
@@ -74,13 +80,13 @@ export const Cart = () => {
         version: 1,
         order,
         delivery: {
-          customerName: "",
+          customerName: "Phil",
           shippingAddress: {
-            streetAddress: "",
-            city: "",
-            region: "",
-            country: "",
-            zipCode: ""
+            streetAddress: "2323 Street name",
+            city: "Milan",
+            region: "Lombardy",
+            country: "Italy",
+            zipCode: "23233"
           }
         },
         payment: {
@@ -91,7 +97,7 @@ export const Cart = () => {
         communicationMethod: ['Q-Mail']
       }
       const blogPostToBase64 = await objectToBase64(orderObject)
-
+      console.log({blogPostToBase64})
       const orderId = uid()
       const storeId = currentCart.storeId
       if(!storeId) throw new Error('Cannot find store identifier')
@@ -103,14 +109,15 @@ export const Cart = () => {
         filename: `order_${orderId}.json`,
         data64: blogPostToBase64,
         encrypt: true,
-        publicKeys: [res.publicKey, usernamePublicKey]
+        publicKeys: [resAddress.publicKey, usernamePublicKey]
       }
       await qortalRequest(productRequestBody)
     } catch (error) {
-      
+      console.log({error})
     }
   }
 
+  console.log({currentCart})
   return (
     <Box
       sx={{
@@ -178,7 +185,7 @@ export const Cart = () => {
           }}
         >
       
-          <Button onClick={closeModal}>Close</Button>
+          <Button variant='contained' onClick={closeModal}>Close</Button>
         </Box>
       </ReusableModal>
     </Box>

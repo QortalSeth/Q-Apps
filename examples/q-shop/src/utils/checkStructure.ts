@@ -8,7 +8,7 @@ export const checkStructure = (content: any)=> {
     if(!Array.isArray(content?.images)) isValid = false
     if(!Array.isArray(content?.price)) isValid = false
 
-  
+    console.log({isValid})
     return isValid
   }
 

@@ -37,7 +37,7 @@ export const Store = () => {
 
   const dispatch = useDispatch()
   const [userStore, setUserStore] = React.useState<any>(null)
-  const { getProduct, hashMapProducts } = useFetchProducts()
+  const { getProduct, hashMapProducts, checkAndUpdateResource } = useFetchProducts()
 
   const [products, setProducts] = React.useState<Product[]>([])
 
@@ -73,7 +73,7 @@ export const Store = () => {
           id: product.identifier
         }
       })
-      setProducts(structureData)
+    
       const copiedProducts: Product[] = [...products]
       structureData.forEach((product: Product) => {
         const index = products.findIndex((p) => p.id === product.id)
@@ -84,6 +84,14 @@ export const Store = () => {
         }
       })
       setProducts(copiedProducts)
+      for (const content of structureData) {
+        if (content.user && content.id) {
+          const res = checkAndUpdateResource(content)
+          if (res) {
+            getProduct(content.user, content.id, content)
+          }
+        }
+      }
     } catch (error) {
     } finally {
       dispatch(setIsLoadingGlobal(false))
@@ -104,8 +112,8 @@ export const Store = () => {
       })
       const responseData = await response.json()
       setUserStore(responseData)
-      dispatch(setStoreId(responseData.identifier))
-      dispatch(setStoreOwner(responseData.name))
+      dispatch(setStoreId(store))
+      dispatch(setStoreOwner(name))
     } catch (error) {}
   }, [username, store])
 
