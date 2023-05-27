@@ -9,53 +9,59 @@ import { RootState } from '../../state/store'
 import { setIsOpen } from '../../state/features/cartSlice'
 import { objectToBase64 } from '../../utils/toBase64'
 
-
 const uid = new ShortUniqueId({
   length: 10
 })
 
 export const Cart = () => {
-
-  const username =  useSelector((state: RootState) => state.auth.user?.name)
-  const usernamePublicKey =  useSelector((state: RootState) => state.auth.user?.publicKey)
+  const username = useSelector((state: RootState) => state.auth.user?.name)
+  const usernamePublicKey = useSelector(
+    (state: RootState) => state.auth.user?.publicKey
+  )
   const isOpen = useSelector((state: RootState) => state.cart.isOpen)
   const currentCart = useSelector((state: RootState) => state.cart.currentCart)
-  const hashMapProducts = useSelector((state: RootState) => state.store.hashMapProducts)
+  const hashMapProducts = useSelector(
+    (state: RootState) => state.store.hashMapProducts
+  )
   const dispatch = useDispatch()
 
   const closeModal = () => {
     dispatch(setIsOpen(false))
   }
 
-
-  const handlePurchase = async()=> {
-    const order = Object.keys(currentCart?.orders || {}).reduce((acc: any, key)=> {
-      const order = currentCart?.orders[key]
-      const quantity = order?.quantity
-      const productId = order?.productId
-      let product = null
-      if(productId){
-        product = hashMapProducts[productId]
+  const handlePurchase = async () => {
+    const order = Object.keys(currentCart?.orders || {}).reduce(
+      (acc: any, key) => {
+        const order = currentCart?.orders[key]
+        const quantity = order?.quantity
+        const productId = order?.productId
+        let product = null
+        if (productId) {
+          product = hashMapProducts[productId]
+        }
+        if (!product) return acc
+        const priceInQort =
+          product.price?.find(
+            (priceItem: any) => priceItem?.currency === 'qort'
+          )?.value || null
+        const totalProductPrice = priceInQort * quantity
+        acc[productId] = {
+          product,
+          quantity,
+          pricePerUnit: priceInQort,
+          totalProductPrice: priceInQort * quantity
+        }
+        acc['totalPrice'] = acc['totalPrice'] + totalProductPrice
+        return acc
+      },
+      {
+        totalPrice: 0
       }
-      if(!product) return acc
-      const priceInQort = product.price?.find((priceItem: any)=> priceItem?.currency === 'qort')?.value || null
-      const totalProductPrice = priceInQort * quantity
-       acc[productId]= {
-        product,
-        quantity,
-        pricePerUnit :priceInQort,
-        totalProductPrice: priceInQort * quantity
-      }
-      acc['totalPrice'] = acc['totalPrice'] + totalProductPrice
-      return acc
-
-    }, {
-      totalPrice: 0
-    })
+    )
     order['totalPrice'] = order['totalPrice'].toFixed(8)
     const priceToPay = order['totalPrice']
     const storeOwner = currentCart.storeOwner
-    if(!storeOwner) throw new Error('Cannot find store owner')
+    if (!storeOwner) throw new Error('Cannot find store owner')
     let res = await qortalRequest({
       action: 'GET_NAME_DATA',
       name: storeOwner
@@ -65,14 +71,14 @@ export const Cart = () => {
       action: 'GET_ACCOUNT_DATA',
       address: address
     })
-    if (!resAddress?.publicKey) throw new Error("Cannot find store owner")
+    if (!resAddress?.publicKey) throw new Error('Cannot find store owner')
     const responseSendCoin = await qortalRequest({
       action: 'SEND_COIN',
       coin: 'QORT',
       destinationAddress: address,
       amount: priceToPay
     })
-    console.log({responseSendCoin})
+    console.log({ responseSendCoin })
     const signature = responseSendCoin.signature
     try {
       const orderObject: any = {
@@ -80,13 +86,13 @@ export const Cart = () => {
         version: 1,
         order,
         delivery: {
-          customerName: "Phil",
+          customerName: 'Phil',
           shippingAddress: {
-            streetAddress: "2323 Street name",
-            city: "Milan",
-            region: "Lombardy",
-            country: "Italy",
-            zipCode: "23233"
+            streetAddress: '2323 Street name',
+            city: 'Milan',
+            region: 'Lombardy',
+            country: 'Italy',
+            zipCode: '23233'
           }
         },
         payment: {
@@ -97,10 +103,10 @@ export const Cart = () => {
         communicationMethod: ['Q-Mail']
       }
       const blogPostToBase64 = await objectToBase64(orderObject)
-      console.log({blogPostToBase64})
+      console.log({ blogPostToBase64 })
       const orderId = uid()
       const storeId = currentCart.storeId
-      if(!storeId) throw new Error('Cannot find store identifier')
+      if (!storeId) throw new Error('Cannot find store identifier')
       const productRequestBody = {
         action: 'PUBLISH_QDN_RESOURCE',
         identifier: `q-store-order-${storeId}-${orderId}`,
@@ -113,11 +119,11 @@ export const Cart = () => {
       }
       await qortalRequest(productRequestBody)
     } catch (error) {
-      console.log({error})
+      console.log({ error })
     }
   }
 
-  console.log({currentCart})
+  console.log({ currentCart })
   return (
     <Box
       sx={{
@@ -141,9 +147,7 @@ export const Cart = () => {
             width: '100%',
             alignItems: 'center'
           }}
-        >
-          
-        </Box>
+        ></Box>
 
         <Box
           sx={{
@@ -156,26 +160,31 @@ export const Cart = () => {
             width: '100%'
           }}
         >
-   
-         
-          {Object.keys(currentCart?.orders || {}).map((key)=> {
+          {Object.keys(currentCart?.orders || {}).map((key) => {
             const order = currentCart?.orders[key]
             const quantity = order?.quantity
             const productId = order?.productId
             let product = null
-            if(productId){
+            if (productId) {
               product = hashMapProducts[productId]
             }
-            if(!product) return null
-            const priceInQort = product.price?.find((priceItem: any)=> priceItem?.currency === 'qort')?.value || null
-            return <Box key={key}>
-              <Typography>{product.title}</Typography>
-              <Typography>Quantity: {quantity}</Typography>
-              <Typography>Price per unit: {priceInQort}</Typography>
-              <Typography>Total Price: {priceInQort * quantity}</Typography>
-            </Box>
+            if (!product) return null
+            const priceInQort =
+              product.price?.find(
+                (priceItem: any) => priceItem?.currency === 'qort'
+              )?.value || null
+            return (
+              <Box key={key}>
+                <Typography>{product.title}</Typography>
+                <Typography>Quantity: {quantity}</Typography>
+                <Typography>Price per unit: {priceInQort}</Typography>
+                <Typography>Total Price: {priceInQort * quantity}</Typography>
+              </Box>
+            )
           })}
-        <Button onClick={handlePurchase}>Purchase</Button>
+          <Button variant="contained" onClick={handlePurchase}>
+            Purchase
+          </Button>
         </Box>
         <Box
           sx={{
@@ -184,8 +193,9 @@ export const Cart = () => {
             justifyContent: 'flex-end'
           }}
         >
-      
-          <Button variant='contained' onClick={closeModal}>Close</Button>
+          <Button variant="contained" onClick={closeModal}>
+            Close
+          </Button>
         </Box>
       </ReusableModal>
     </Box>

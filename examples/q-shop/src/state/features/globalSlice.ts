@@ -1,5 +1,29 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
+import { Product } from './storeSlice'
 
+interface ProductDataContainer {
+  created: number
+  priceQort: number
+  category: string
+  catalogueId: string
+}
+
+export interface DataContainer {
+  storeId: string
+  shortStoreId: string
+  owner: string
+  products: Record<string, ProductDataContainer>
+  catalogues: CatalogueDataContainer[]
+}
+
+export interface CatalogueDataContainer {
+  id: string
+  products: Record<string, true>
+}
+export interface Catalogue {
+  id: string
+  products: Record<string, Product>
+}
 interface GlobalState {
   isOpenPublishBlogModal: boolean
   isLoadingCurrentBlog: boolean
@@ -19,6 +43,8 @@ interface GlobalState {
   downloads: any
 
   userAvatarHash: Record<string, string>
+  dataContainer: DataContainer | null
+  productsToSave: Record<string, Product>
 }
 const initialState: GlobalState = {
   isOpenPublishBlogModal: false,
@@ -27,7 +53,9 @@ const initialState: GlobalState = {
   currentStore: null,
   isOpenEditBlogModal: false,
   downloads: {},
-  userAvatarHash: {}
+  userAvatarHash: {},
+  dataContainer: null,
+  productsToSave: {}
 }
 
 export const globalSlice = createSlice({
@@ -44,13 +72,19 @@ export const globalSlice = createSlice({
       state.currentStore = action.payload
       state.isLoadingCurrentBlog = false
     },
-
+    setDataContainer: (state, action) => {
+      state.dataContainer = action.payload
+    },
     setIsLoadingGlobal: (state, action) => {
       state.isLoadingGlobal = action.payload
     },
     setAddToDownloads: (state, action) => {
       const download = action.payload
       state.downloads[download.identifier] = download
+    },
+    setProductsToSave: (state, action) => {
+      const product = action.payload
+      state.productsToSave[product.id] = product
     },
     updateDownloads: (state, action) => {
       const { identifier } = action.payload
@@ -72,13 +106,15 @@ export const globalSlice = createSlice({
 export const {
   togglePublishBlogModal,
   setCurrentStore,
+  setDataContainer,
   setIsLoadingGlobal,
   toggleEditBlogModal,
 
   setAddToDownloads,
   updateDownloads,
 
-  setUserAvatarHash
+  setUserAvatarHash,
+  setProductsToSave
 } = globalSlice.actions
 
 export default globalSlice.reducer

@@ -161,7 +161,6 @@ const PostPublishModal: React.FC<PostModalProps> = ({
   const handleInputChange = (event: any) => {
     setInputValue(event.target.value)
   }
-  
 
   const handleInputKeyDown = (event: any) => {
     if (event.key === 'Enter' && inputValue !== '') {
@@ -183,7 +182,7 @@ const PostPublishModal: React.FC<PostModalProps> = ({
 
   const getListCategories = React.useCallback(async () => {
     try {
-      const url = `/arbitrary/categories`
+      const url = `http://62.141.38.192:62391/arbitrary/categories`
       const response = await fetch(url, {
         method: 'GET',
         headers: {

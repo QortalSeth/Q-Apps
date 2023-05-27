@@ -5,18 +5,19 @@ import { RootState } from '../../state/store'
 import { useParams } from 'react-router-dom'
 import { Typography, Box, Button, useTheme } from '@mui/material'
 import EditIcon from '@mui/icons-material/Edit'
-import {
-  setIsLoadingGlobal,
-} from '../../state/features/globalSlice'
-import {
-  Product,
-} from '../../state/features/storeSlice'
+import { setIsLoadingGlobal } from '../../state/features/globalSlice'
+import { Product } from '../../state/features/storeSlice'
 import { useFetchProducts } from '../../hooks/useFetchProducts'
 import LazyLoad from '../../components/common/LazyLoad'
 import { addPrefix, removePrefix } from '../../utils/blogIdformats'
 import Masonry from 'react-masonry-css'
 import ContextMenuResource from '../../components/common/ContextMenu/ContextMenuResource'
-import { setProductToCart, setStoreId, setStoreOwner } from '../../state/features/cartSlice'
+import {
+  setProductToCart,
+  setStoreId,
+  setStoreOwner
+} from '../../state/features/cartSlice'
+import { ProductCard } from './ProductCard'
 
 const breakpointColumnsObj = {
   default: 5,
@@ -30,14 +31,16 @@ export const Store = () => {
   const navigate = useNavigate()
   const theme = useTheme()
   const { user } = useSelector((state: RootState) => state.auth)
-  const currentStore = useSelector((state: RootState) => state.global.currentStore)
-
+  const currentStore = useSelector(
+    (state: RootState) => state.global.currentStore
+  )
 
   const { store, user: username } = useParams()
 
   const dispatch = useDispatch()
   const [userStore, setUserStore] = React.useState<any>(null)
-  const { getProduct, hashMapProducts, checkAndUpdateResource } = useFetchProducts()
+  const { getProduct, hashMapProducts, checkAndUpdateResource } =
+    useFetchProducts()
 
   const [products, setProducts] = React.useState<Product[]>([])
 
@@ -51,8 +54,10 @@ export const Store = () => {
       dispatch(setIsLoadingGlobal(true))
       const offset = products.length
       //TODO - NAME SHOULD BE EXACT
-      const query = `q-store-product-${store}`
-      const url = `/arbitrary/resources/search?service=PRODUCT&query=${query}&limit=20&exactmatchnames=true&name=${name}&includemetadata=true&offset=${offset}&reverse=true`
+      const parts = store.split('q-store-general-')
+      const shortStoreId = parts[1]
+      const query = `q-store-product-${shortStoreId}`
+      const url = `http://62.141.38.192:62391/arbitrary/resources/search?service=PRODUCT&query=${query}&limit=20&exactmatchnames=true&name=${name}&includemetadata=true&offset=${offset}&reverse=true`
       const response = await fetch(url, {
         method: 'GET',
         headers: {
@@ -73,7 +78,7 @@ export const Store = () => {
           id: product.identifier
         }
       })
-    
+
       const copiedProducts: Product[] = [...products]
       structureData.forEach((product: Product) => {
         const index = products.findIndex((p) => p.id === product.id)
@@ -103,7 +108,7 @@ export const Store = () => {
     if (!name) return
     if (!store) return
     try {
-      const urlStore = `/arbitrary/STORE/${name}/${store}`
+      const urlStore = `http://62.141.38.192:62391/arbitrary/STORE/${name}/${store}`
       const response = await fetch(urlStore, {
         method: 'GET',
         headers: {
@@ -124,29 +129,28 @@ export const Store = () => {
     await getUserProducts()
   }, [getUserProducts])
 
-
-
+  console.log({ products, hashMapProducts })
   if (!userStore) return null
   return (
     <>
-    
-
       <Masonry
         breakpointCols={breakpointColumnsObj}
         className="my-masonry-grid"
         columnClassName="my-masonry-grid_column"
         style={{ backgroundColor: theme.palette.background.default }}
       >
-        {products.map((product, index) => {
+        {products.map((product: Product, index) => {
           const existingProduct = hashMapProducts[product.id]
           let storeProduct = product
           if (existingProduct) {
             storeProduct = existingProduct
           }
-          const storeId = currentStore?.id || ""
-          const productId = storeProduct?.id || ""
+          const storeId = currentStore?.id || ''
+          const productId = storeProduct?.id || ''
+
           return (
             <Box
+              key={productId}
               sx={{
                 display: 'flex',
                 gap: 1,
@@ -164,11 +168,18 @@ export const Store = () => {
                 identifier={storeProduct.id}
                 link={`qortal://APP/Q-Shop/${storeProduct.user}/${storeId}/${productId}`}
               >
-               <p onClick={()=> {
-                dispatch(setProductToCart({
-                  id: productId
-                }))
-               }}>{product.title}</p>
+                <ProductCard product={storeProduct} />
+                {/* <p
+                  onClick={() => {
+                    dispatch(
+                      setProductToCart({
+                        id: productId
+                      })
+                    )
+                  }}
+                >
+                  {product.title}
+                </p> */}
               </ContextMenuResource>
             </Box>
           )

@@ -11,7 +11,7 @@ import {
   Typography,
   useTheme
 } from '@mui/material'
-import {  useFetchProducts } from '../../hooks/useFetchProducts'
+import { useFetchProducts } from '../../hooks/useFetchProducts'
 import LazyLoad from '../../components/common/LazyLoad'
 import { removePrefix } from '../../utils/blogIdformats'
 import Masonry from 'react-masonry-css'
@@ -50,7 +50,7 @@ export const StoreList = ({ mode }: BlogListProps) => {
       const offset = stores.length
       //TODO - NAME SHOULD BE EXACT
       const query = `q-store-general`
-      const url = `/arbitrary/resources/search?service=STORE&query=${query}&limit=20&exactmatchnames=true&includemetadata=true&offset=${offset}&reverse=true`
+      const url = `http://62.141.38.192:62391/arbitrary/resources/search?service=STORE&query=${query}&limit=20&exactmatchnames=true&includemetadata=true&offset=${offset}&reverse=true`
       const response = await fetch(url, {
         method: 'GET',
         headers: {
@@ -58,7 +58,7 @@ export const StoreList = ({ mode }: BlogListProps) => {
         }
       })
       const responseData = await response.json()
-
+      console.log({ responseData })
       const structureData = responseData.map((storeItem: any): Store => {
         return {
           title: storeItem?.metadata?.title,
@@ -71,6 +71,7 @@ export const StoreList = ({ mode }: BlogListProps) => {
           id: storeItem.identifier
         }
       })
+      console.log({ structureData })
       const copiedStores: Store[] = [...stores]
       structureData.forEach((storeItem: Store) => {
         const index = stores.findIndex((p: Store) => p.id === storeItem.id)
@@ -103,9 +104,9 @@ export const StoreList = ({ mode }: BlogListProps) => {
           if (existingStore) {
             storeItem = existingStore
           }
-          const storeId = store?.id || ""
-          const storeOwner = store?.owner || ""
-          const storeTitle = store.title
+          const storeId = store?.id || ''
+          const storeOwner = store?.owner || ''
+          const storeTitle = store?.title || 'missing metadata'
           return (
             <Box
               sx={{
@@ -126,9 +127,10 @@ export const StoreList = ({ mode }: BlogListProps) => {
                 identifier={storeId}
                 link={`qortal://APP/Q-Store/${storeOwner}/${storeId}`}
               >
-              <p onClick={()=> navigate(`/${storeOwner}/${storeId}`)}>{storeTitle}</p>
+                <p onClick={() => navigate(`/${storeOwner}/${storeId}`)}>
+                  {storeTitle}
+                </p>
               </ContextMenuResource>
-      
             </Box>
           )
         })}

@@ -1,6 +1,5 @@
-import { createSlice } from '@reduxjs/toolkit';
+import { createSlice } from '@reduxjs/toolkit'
 import { RootState } from '../store'
-
 
 interface GlobalState {
   products: Product[]
@@ -19,18 +18,22 @@ const initialState: GlobalState = {
   hashMapStores: {}
 }
 
+export interface Price {
+  currency: string
+  value: number
+}
 export interface Product {
   title: string
   description: string
-  created: number | string
+  created: number
   user: string
   id: string
-  category?: string
+  category: string
   categoryName?: string
   tags?: string[]
-  updated?: number | string
+  updated?: number
   isValid?: boolean
-  price?: any[]
+  price: Price[]
   images?: any[]
   type?: string
 }
@@ -47,8 +50,8 @@ export interface Store {
   updated?: number | string
   isValid?: boolean
 
-        location?: string,
-        shipsTo?: string,
+  location?: string
+  shipsTo?: string
 }
 
 export const storeSlice = createSlice({
@@ -144,10 +147,6 @@ export const storeSlice = createSlice({
       state.filteredProducts = state.filteredProducts.filter(
         (item) => item.user !== username
       )
-    
-
-
-
     }
   }
 })
@@ -170,4 +169,3 @@ export const {
 } = storeSlice.actions
 
 export default storeSlice.reducer
-

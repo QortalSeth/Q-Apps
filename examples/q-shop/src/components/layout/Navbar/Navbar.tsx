@@ -82,7 +82,6 @@ const NavBar: React.FC<Props> = ({
   const searchValRef = useRef('')
   const inputRef = useRef<HTMLInputElement>(null)
 
-
   const handleClick = (event: React.MouseEvent<HTMLDivElement>) => {
     const target = event.currentTarget as unknown as HTMLButtonElement | null
     setAnchorEl(target)
@@ -224,24 +223,23 @@ const NavBar: React.FC<Props> = ({
                 Create Store
               </CreateBlogButton>
             )}
-          {isAuthenticated && userName && hasBlog && (
-            <>
-              <StyledButton
-                color="primary"
-                startIcon={<AddBoxIcon />}
-                onClick={() => {
-                  navigate(`/product-manager`)
-                }}
-              >
-                Store Manager
-              </StyledButton>
-
-            </>
-          )}
+          {/* {isAuthenticated && userName && hasBlog && ( */}
+          <>
+            <StyledButton
+              color="primary"
+              startIcon={<AddBoxIcon />}
+              onClick={() => {
+                navigate(`/product-manager`)
+              }}
+            >
+              Store Manager
+            </StyledButton>
+          </>
+          {/* )} */}
 
           {isAuthenticated && userName && (
             <>
-             <StyledButton
+              <StyledButton
                 color="primary"
                 startIcon={<AutoStoriesIcon />}
                 onClick={() => {
@@ -250,27 +248,27 @@ const NavBar: React.FC<Props> = ({
               >
                 Cart
               </StyledButton>
-            <AvatarContainer onClick={handleClick}>
-              <NavbarName>{userName}</NavbarName>
-              {!userAvatar ? (
-                <AccountCircleSVG
-                  color={theme.palette.text.primary}
-                  width="32"
-                  height="32"
-                />
-              ) : (
-                <img
-                  src={userAvatar}
-                  alt="User Avatar"
-                  width="32"
-                  height="32"
-                  style={{
-                    borderRadius: '50%'
-                  }}
-                />
-              )}
-              <ExpandMoreIcon id="expand-icon" sx={{ color: '#ACB6BF' }} />
-            </AvatarContainer>
+              <AvatarContainer onClick={handleClick}>
+                <NavbarName>{userName}</NavbarName>
+                {!userAvatar ? (
+                  <AccountCircleSVG
+                    color={theme.palette.text.primary}
+                    width="32"
+                    height="32"
+                  />
+                ) : (
+                  <img
+                    src={userAvatar}
+                    alt="User Avatar"
+                    width="32"
+                    height="32"
+                    style={{
+                      borderRadius: '50%'
+                    }}
+                  />
+                )}
+                <ExpandMoreIcon id="expand-icon" sx={{ color: '#ACB6BF' }} />
+              </AvatarContainer>
             </>
           )}
           <Popover

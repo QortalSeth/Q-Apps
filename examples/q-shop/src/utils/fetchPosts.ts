@@ -12,7 +12,7 @@ export const fetchAndEvaluateProducts = async (data: any) => {
     if (!user || !productId) return obj
 
     try {
-      const url = `/arbitrary/PRODUCT/${user}/${productId}`
+      const url = `http://62.141.38.192:62391/arbitrary/PRODUCT/${user}/${productId}`
       const response = await fetch(url, {
         method: 'GET',
         headers: {
@@ -21,10 +21,10 @@ export const fetchAndEvaluateProducts = async (data: any) => {
       })
 
       const responseData = await response.json()
-      console.log({responseData})
+      console.log({ responseData })
       if (checkStructure(responseData)) {
         obj = {
-         ...responseData,
+          ...responseData,
           ...content,
           user,
           title: responseData.title,
@@ -33,7 +33,7 @@ export const fetchAndEvaluateProducts = async (data: any) => {
           isValid: true
         }
       }
-      console.log({obj})
+      console.log({ obj })
       return obj
     } catch (error) {}
   }

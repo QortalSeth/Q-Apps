@@ -10,6 +10,7 @@ import EditBlogModal from '../components/modals/EditBlogModal'
 
 import {
   setCurrentStore,
+  setDataContainer,
   setIsLoadingGlobal,
   toggleEditBlogModal,
   togglePublishBlogModal
@@ -42,7 +43,6 @@ const GlobalWrapper: React.FC<Props> = ({ children }) => {
   useEffect(() => {
     if (!user?.name) return
 
-
     getAvatar()
   }, [user?.name])
 
@@ -63,7 +63,6 @@ const GlobalWrapper: React.FC<Props> = ({ children }) => {
     }
   }
 
- 
   const {
     isOpenPublishBlogModal,
     currentStore,
@@ -85,8 +84,8 @@ const GlobalWrapper: React.FC<Props> = ({ children }) => {
   async function verifyIfBlogIdExtists(username: string, identifier: string) {
     let doesExist = true
     //TODO - SHOULD REMOVE NAME FILTER AND IDENTIFIER SHOULD BE EXACT
-    // const url2 = `/arbitrary/resources/search?service=BLOG&identifier=${identifier}&name=${username}&limit=1&includemetadata=true`
-    const url2 = `/arbitrary/resources?service=BLOG&identifier=${identifier}&name=${username}&limit=1&includemetadata=true`
+    // const url2 = `http://62.141.38.192:62391/arbitrary/resources/search?service=BLOG&identifier=${identifier}&name=${username}&limit=1&includemetadata=true`
+    const url2 = `http://62.141.38.192:62391/arbitrary/resources?service=BLOG&identifier=${identifier}&name=${username}&limit=1&includemetadata=true`
     const responseBlogs = await fetch(url2, {
       method: 'GET',
       headers: {
@@ -95,7 +94,7 @@ const GlobalWrapper: React.FC<Props> = ({ children }) => {
     })
 
     const dataMetadata = await responseBlogs.json()
-    // const url = `/arbitrary/metadata/BLOG/${username}/${identifier}}`
+    // const url = `http://62.141.38.192:62391/arbitrary/metadata/BLOG/${username}/${identifier}}`
     // const responseBlogs = await fetch(url, {
     //   method: 'GET',
     //   headers: {
@@ -111,7 +110,7 @@ const GlobalWrapper: React.FC<Props> = ({ children }) => {
   }
   async function getStore(name: string) {
     //TODO NAME SHOULD BE EXACT
-    const url = `/arbitrary/resources/search?service=STORE&identifier=q-store-general-&exactmatchnames=true&name=${name}&prefix=true&limit=20&includemetadata=true`
+    const url = `http://62.141.38.192:62391/arbitrary/resources/search?service=STORE&identifier=q-store-general-&exactmatchnames=true&name=${name}&prefix=true&limit=20&includemetadata=true`
     const responseBlogs = await fetch(url, {
       method: 'GET',
       headers: {
@@ -127,7 +126,7 @@ const GlobalWrapper: React.FC<Props> = ({ children }) => {
     if (filterOut.length !== 0) {
       blog = filterOut[0]
     }
-    const urlBlog = `/arbitrary/STORE/${blog.name}/${blog.identifier}`
+    const urlBlog = `http://62.141.38.192:62391/arbitrary/STORE/${blog.name}/${blog.identifier}`
     const response = await fetch(urlBlog, {
       method: 'GET',
       headers: {
@@ -135,6 +134,15 @@ const GlobalWrapper: React.FC<Props> = ({ children }) => {
       }
     })
     const responseData = await response.json()
+
+    const urlDataContainer = `http://62.141.38.192:62391/arbitrary/DOCUMENT/${blog.name}/${blog.identifier}-datacontainer`
+    const response2 = await fetch(urlDataContainer, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    })
+    const responseData2 = await response2.json()
 
     dispatch(
       setCurrentStore({
@@ -145,9 +153,31 @@ const GlobalWrapper: React.FC<Props> = ({ children }) => {
         shipsTo: responseData?.shipsTo,
         description: responseData?.description || '',
         category: blog.metadata?.category,
-        tags: blog.metadata?.tags || [],
+        tags: blog.metadata?.tags || []
       })
     )
+    console.log({ responseData2 })
+    if (responseData2 && !responseData2.error) {
+      dispatch(setDataContainer(responseData2))
+    } else {
+      const parts = blog.identifier.split('q-store-general-')
+      const shortStoreId = parts[1]
+      const dataContainer = {
+        storeId: blog.identifier,
+        shortStoreId: shortStoreId,
+        owner: blog.name,
+        products: {}
+      }
+      const dataContainerToBase64 = await objectToBase64(dataContainer)
+
+      const resourceResponse2 = await qortalRequest({
+        action: 'PUBLISH_QDN_RESOURCE',
+        name: blog.name,
+        service: 'DOCUMENT',
+        data64: dataContainerToBase64,
+        identifier: `${blog.identifier}-datacontainer`
+      })
+    }
     // const response = await fetch("/names/address/" + address);
     // const nameData = await response.json();
 
@@ -173,7 +203,6 @@ const GlobalWrapper: React.FC<Props> = ({ children }) => {
       console.error(error)
     }
   }, [])
-
 
   const createStore = React.useCallback(
     async (
@@ -215,9 +244,17 @@ const GlobalWrapper: React.FC<Props> = ({ children }) => {
         description: 'This is a description of my store',
         location: 'Canada',
         shipsTo: 'Worldwide',
-        created: Date.now()
+        created: Date.now(),
+        shortStoreId: formatBlogIdentifier
+      }
+      const dataContainer = {
+        storeId: identifier,
+        shortStoreId: formatBlogIdentifier,
+        owner: name,
+        products: {}
       }
       const blogPostToBase64 = await objectToBase64(blogobj)
+      const dataContainerToBase64 = await objectToBase64(dataContainer)
       try {
         const resourceResponse = await qortalRequest({
           action: 'PUBLISH_QDN_RESOURCE',
@@ -229,6 +266,13 @@ const GlobalWrapper: React.FC<Props> = ({ children }) => {
           category,
           identifier: identifier,
           ...formattedTags
+        })
+        const resourceResponse2 = await qortalRequest({
+          action: 'PUBLISH_QDN_RESOURCE',
+          name: name,
+          service: 'DOCUMENT',
+          data64: dataContainerToBase64,
+          identifier: `${identifier}-datacontainer`
         })
         // navigate(`/${user.name}/${identifier}`)
         await new Promise<void>((res, rej) => {
@@ -245,6 +289,7 @@ const GlobalWrapper: React.FC<Props> = ({ children }) => {
         }
 
         dispatch(setCurrentStore(blogfullObj))
+        dispatch(setDataContainer(dataContainer))
         // getStore(name)
         dispatch(
           setNotification({
@@ -282,8 +327,6 @@ const GlobalWrapper: React.FC<Props> = ({ children }) => {
     [user]
   )
 
-
-
   React.useEffect(() => {
     askForAccountInformation()
   }, [])
@@ -294,8 +337,6 @@ const GlobalWrapper: React.FC<Props> = ({ children }) => {
   const onCloseEditBlogModal = React.useCallback(() => {
     dispatch(toggleEditBlogModal(false))
   }, [])
-
-
 
   return (
     <>
@@ -326,7 +367,7 @@ const GlobalWrapper: React.FC<Props> = ({ children }) => {
         hasAttemptedToFetchBlogInitial={hasAttemptedToFetchBlogInitial}
       />
       <ConsentModal />
-      <Cart  />
+      <Cart />
       {children}
     </>
   )
