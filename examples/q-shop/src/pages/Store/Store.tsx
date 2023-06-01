@@ -73,9 +73,11 @@ export const Store = () => {
           categoryName: product?.metadata?.categoryName,
           tags: product?.metadata?.tags || [],
           description: product?.metadata?.description,
-          created: '',
+          created: product?.created,
           user: product.name,
-          id: product.identifier
+          id: product.identifier,
+          price: [],
+          catalogueId: 'test'
         }
       })
 

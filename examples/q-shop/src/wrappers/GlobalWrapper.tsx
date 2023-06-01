@@ -158,7 +158,12 @@ const GlobalWrapper: React.FC<Props> = ({ children }) => {
     )
     console.log({ responseData2 })
     if (responseData2 && !responseData2.error) {
-      dispatch(setDataContainer(responseData2))
+      dispatch(
+        setDataContainer({
+          ...responseData2,
+          id: `${blog.identifier}-datacontainer`
+        })
+      )
     } else {
       const parts = blog.identifier.split('q-store-general-')
       const shortStoreId = parts[1]
@@ -261,6 +266,7 @@ const GlobalWrapper: React.FC<Props> = ({ children }) => {
           name: name,
           service: 'STORE',
           data64: blogPostToBase64,
+          filename: 'store.json',
           title,
           description,
           category,
@@ -272,7 +278,8 @@ const GlobalWrapper: React.FC<Props> = ({ children }) => {
           name: name,
           service: 'DOCUMENT',
           data64: dataContainerToBase64,
-          identifier: `${identifier}-datacontainer`
+          identifier: `${identifier}-datacontainer`,
+          filename: 'datacontainer.json'
         })
         // navigate(`/${user.name}/${identifier}`)
         await new Promise<void>((res, rej) => {
@@ -289,7 +296,12 @@ const GlobalWrapper: React.FC<Props> = ({ children }) => {
         }
 
         dispatch(setCurrentStore(blogfullObj))
-        dispatch(setDataContainer(dataContainer))
+        dispatch(
+          setDataContainer({
+            ...dataContainer,
+            id: `${identifier}-datacontainer`
+          })
+        )
         // getStore(name)
         dispatch(
           setNotification({

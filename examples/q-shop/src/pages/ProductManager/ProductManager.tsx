@@ -9,11 +9,7 @@ import React, {
 import { useNavigate } from 'react-router-dom'
 import { useDispatch, useSelector } from 'react-redux'
 import { RootState } from '../../state/store'
-import EditIcon from '@mui/icons-material/Edit'
-import CloseIcon from '@mui/icons-material/Close'
-import Joyride, { ACTIONS, EVENTS, STATUS, Step } from 'react-joyride'
-import SendIcon from '@mui/icons-material/Send'
-import MailIcon from '@mui/icons-material/Mail'
+
 import {
   Box,
   Button,
@@ -23,7 +19,6 @@ import {
   IconButton
 } from '@mui/material'
 import LazyLoad from '../../components/common/LazyLoad'
-import { removePrefix } from '../../utils/blogIdformats'
 import { NewProduct } from './NewProduct'
 import Tabs from '@mui/material/Tabs'
 import Tab from '@mui/material/Tab'
@@ -37,7 +32,9 @@ import {
   CatalogueDataContainer,
   DataContainer
 } from '../../state/features/globalSlice'
-import { Price } from '../../state/features/storeSlice'
+import { Price, Product } from '../../state/features/storeSlice'
+import { useFetchOrders } from '../../hooks/useFetchOrders'
+import { AVAILABLE } from '../../constants/product-status'
 
 const uid = new ShortUniqueId({ length: 10 })
 
@@ -56,14 +53,12 @@ export const ProductManager = () => {
   const dataContainer = useSelector(
     (state: RootState) => state.global.dataContainer
   )
+  const products = useSelector((state: RootState) => state.global.products)
   const [isOpen, setIsOpen] = useState<boolean>(false)
   const [message, setMessage] = useState<any>(null)
   const [replyTo, setReplyTo] = useState<any>(null)
   const [valueTab, setValueTab] = React.useState(0)
-  const [aliasValue, setAliasValue] = useState('')
-  const [alias, setAlias] = useState<string[]>([])
-  const [run, setRun] = useState(false)
-
+  const [productToEdit, setProductToEdit] = useState<Product | null>(null)
   const userName = useMemo(() => {
     if (!user?.name) return ''
     return user.name
@@ -72,32 +67,8 @@ export const ProductManager = () => {
   const dispatch = useDispatch()
   const navigate = useNavigate()
 
-  function a11yProps(index: number) {
-    return {
-      id: `mail-tabs-${index}`,
-      'aria-controls': `mail-tabs-${index}`
-    }
-  }
-
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
     setValueTab(newValue)
-  }
-
-  function CustomTabLabelDefault({ label }: any) {
-    return (
-      <div style={{ display: 'flex', alignItems: 'center' }}>
-        <span
-          style={{
-            textTransform: 'none'
-          }}
-        >
-          {label}
-        </span>
-        <IconButton id="close-button" edge="end" color="inherit" size="small">
-          <CloseIcon fontSize="inherit" />
-        </IconButton>
-      </div>
-    )
   }
 
   async function publishQDNResource() {
@@ -134,27 +105,27 @@ export const ProductManager = () => {
     if (!currentStore?.id) throw new Error('Cannot find store id')
     if (!dataContainer?.products)
       throw new Error('Cannot find data-container products')
-    try {
-      const newDataContainer = { ...dataContainer }
-      const dataContainerProducts = { ...dataContainer.products }
-    } catch (error: any) {
-      throw new Error(error?.message || 'Failed to create product')
-    }
+
     try {
       const storeId: string = currentStore?.id
-
+      if (!storeId) throw new Error('Could not find your store')
       const parts = storeId.split('q-store-general-')
       const shortStoreId = parts[1]
 
-      if (!currentStore) return
-
+      if (!currentStore) throw new Error('Could not find your store')
+      console.log({ shortStoreId, currentStore })
       // let lengthOfProducts = Object.keys(productsDataContainer || {})?.length
 
       const lastCatalogue: CatalogueDataContainer | undefined =
         dataContainer?.catalogues?.at(-1)
       let catalogue = null
       const listOfCataloguesToPublish: Catalogue[] = []
-      const dataContainerToPublish: DataContainer = { ...dataContainer }
+      const dataContainerToPublish: DataContainer = {
+        ...dataContainer,
+        products: structuredClone(dataContainer.products),
+        catalogues: structuredClone(dataContainer.catalogues)
+      }
+      console.log({ dataContainerToPublish })
       if (lastCatalogue && Object.keys(lastCatalogue?.products)?.length < 10) {
         // create new catalogue
         // add product to new catalogue
@@ -166,106 +137,185 @@ export const ProductManager = () => {
           service: 'DOCUMENT',
           identifier: lastCatalogue.id
         })
-
+        console.log({ catalogueResponse })
         if (catalogueResponse && !catalogueResponse?.error)
           catalogue = catalogueResponse
       }
+      console.log({ catalogue })
       if (catalogue) listOfCataloguesToPublish.push(catalogue)
 
-      Object.keys(productsToSave).forEach((key) => {
-        const product = productsToSave[key]
+      Object.keys(productsToSave)
+        .filter((item) => !productsToSave[item]?.isUpdate)
+        .forEach((key) => {
+          const product = productsToSave[key]
+          console.log({ product })
+          const priceInQort = product?.price?.find(
+            (item: Price) => item?.currency === 'qort'
+          )?.value
+          if (!priceInQort)
+            throw new Error('Cannot find price for one of your products')
+          const lastCatalogueInList = listOfCataloguesToPublish.at(-1)
+          const lastCatalogueInListIndex = listOfCataloguesToPublish.length - 1
+          console.log({ lastCatalogueInList, lastCatalogueInListIndex })
+          if (
+            lastCatalogueInList &&
+            Object.keys(lastCatalogueInList?.products)?.length < 10
+          ) {
+            const copyLastCatalogue = { ...lastCatalogueInList }
+            console.log({ copyLastCatalogue })
+            copyLastCatalogue.products[key] = product
+            console.log('2', { copyLastCatalogue })
+            dataContainerToPublish.products[key] = {
+              created: product.created,
+              priceQort: priceInQort,
+              category: product?.category || '',
+              catalogueId: copyLastCatalogue.id,
+              status: AVAILABLE
+            }
+            console.log({ dataContainerToPublish })
+            if (!dataContainerToPublish.catalogues)
+              dataContainerToPublish.catalogues = []
+
+            const findCatalogueInDataContainer =
+              dataContainerToPublish.catalogues.findIndex(
+                (item) => item.id === copyLastCatalogue.id
+              )
+            console.log({ findCatalogueInDataContainer })
+            if (findCatalogueInDataContainer >= 0) {
+              dataContainerToPublish.catalogues[
+                findCatalogueInDataContainer
+              ].products[key] = true
+            } else {
+              dataContainerToPublish.catalogues = [
+                ...dataContainerToPublish.catalogues,
+                {
+                  id: copyLastCatalogue.id,
+                  products: {
+                    [key]: true
+                  }
+                }
+              ]
+            }
+          } else {
+            const uidGenerator = uid()
+            const catalogueId = `q-store-catalogue-${shortStoreId}-${uidGenerator}`
+            console.log({ catalogueId })
+            listOfCataloguesToPublish.push({
+              id: catalogueId,
+              products: {
+                [key]: product
+              }
+            })
+            console.log({ listOfCataloguesToPublish, dataContainerToPublish })
+            try {
+              dataContainerToPublish.products[key] = {
+                created: product.created,
+                priceQort: priceInQort,
+                category: product?.category || '',
+                catalogueId,
+                status: AVAILABLE
+              }
+            } catch (error) {
+              console.log('my error', error)
+            }
+
+            if (!dataContainerToPublish.catalogues)
+              dataContainerToPublish.catalogues = []
+
+            const findCatalogueInDataContainer =
+              dataContainerToPublish.catalogues.findIndex(
+                (item) => item.id === catalogueId
+              )
+            if (findCatalogueInDataContainer >= 0) {
+              dataContainerToPublish.catalogues[
+                findCatalogueInDataContainer
+              ].products[key] = true
+            } else {
+              dataContainerToPublish.catalogues = [
+                ...dataContainerToPublish.catalogues,
+                {
+                  id: catalogueId,
+                  products: {
+                    [key]: true
+                  }
+                }
+              ]
+            }
+          }
+        })
+      const productsToUpdate = Object.keys(productsToSave)
+        .filter((item) => !!productsToSave[item]?.isUpdate)
+        .map((key) => productsToSave[key])
+      for (const product of productsToUpdate) {
         const priceInQort = product?.price?.find(
           (item: Price) => item?.currency === 'qort'
         )?.value
         if (!priceInQort)
           throw new Error('Cannot find price for one of your products')
-        const lastCatalogueInList = listOfCataloguesToPublish.at(-1)
-        const lastCatalogueInListIndex = listOfCataloguesToPublish.length - 1
-        if (
-          lastCatalogueInList &&
-          Object.keys(lastCatalogueInList?.products)?.length < 10
-        ) {
-          lastCatalogueInList.products[key] = product
-          dataContainerToPublish.products[key] = {
-            created: product.created,
-            priceQort: priceInQort,
-            category: product.category,
-            catalogueId: lastCatalogueInList.id
-          }
-          dataContainerToPublish.catalogues[lastCatalogueInListIndex].products[
-            key
-          ] = true
-        } else {
-          const catalogueId = uid()
-          const id = `q-store-catalogue-${shortStoreId}-${catalogueId}`
-          listOfCataloguesToPublish.push({
-            id: id,
-            products: {
-              [key]: product
-            }
-          })
-          dataContainerToPublish.products[key] = {
-            created: product.created,
-            priceQort: priceInQort,
-            category: product.category,
-            catalogueId
-          }
-          const lastCatalogueInListIndex = listOfCataloguesToPublish.length - 1
-          dataContainerToPublish.catalogues[lastCatalogueInListIndex].products[
-            key
-          ] = true
+
+        dataContainerToPublish.products[product.id] = {
+          created: product.created,
+          priceQort: priceInQort,
+          category: product?.category || '',
+          catalogueId: product.catalogueId,
+          status: product?.status || ''
         }
-      })
 
-      // if (!lastCatalogue || lastCatalogue?.products?.length === 10) {
-      //   // create new catalogue
-      //   // add product to new catalogue
-      //   // add products to dataContainer catalogue products
-      //   const catalogueId = uid()
-      // const id = `q-store-catalogue-${shortStoreId}-${catalogueId}`
-      //   return
-      // }
-
-      // let catalogue = null
-      // const catalogueResponse =  await qortalRequest({
-      //   action: 'FETCH_QDN_RESOURCE',
-      //   name: name,
-      //   service: 'DOCUMENT',
-      //   identifier: lastCatalogue.id
-      // })
-
-      // if(catalogueResponse && !catalogueResponse?.error) catalogue = catalogueResponse
-      // add products to catalogue
-      // add products to dataContainer catalogue products
-      //
-
-      const catalogueObject: any = {
-        // ...catalogue,
-        // products: {
-        //   ...catalogue.products
-        //   [product.id]: product
-        // }
+        const findCatalogueFromExistingList =
+          listOfCataloguesToPublish.findIndex(
+            (cat) => cat.id === product.catalogueId
+          )
+        if (findCatalogueFromExistingList >= 0) {
+          listOfCataloguesToPublish[findCatalogueFromExistingList].products[
+            product.id
+          ] = product
+        } else {
+          const catalogueResponse = await qortalRequest({
+            action: 'FETCH_QDN_RESOURCE',
+            name: name,
+            service: 'DOCUMENT',
+            identifier: product.catalogueId
+          })
+          if (catalogueResponse && !catalogueResponse?.error) {
+            const copiedCatalogue = structuredClone(catalogueResponse)
+            copiedCatalogue.products[product.id] = product
+            listOfCataloguesToPublish.push(copiedCatalogue)
+          }
+        }
       }
-      const blogPostToBase64 = await objectToBase64(catalogueObject)
+
       if (!currentStore) return
-      const productResource = {
-        // identifier: id,
-        title: 'Shoes',
+      let publishMultipleCatalogues = []
+
+      for (const catalogue of listOfCataloguesToPublish) {
+        const catalogueToBase64 = await objectToBase64(catalogue)
+        const publish = {
+          name,
+          service: 'DOCUMENT',
+          identifier: catalogue.id,
+          filename: 'catalogue.json',
+          data64: catalogueToBase64
+        }
+        publishMultipleCatalogues.push(publish)
+      }
+      const dataContainerToBase64 = await objectToBase64(dataContainerToPublish)
+      const publishDataContainer = {
         name,
-        service: 'PRODUCT',
-        filename: 'product.json',
-        data64: blogPostToBase64
+        service: 'DOCUMENT',
+        identifier: dataContainerToPublish.id,
+        filename: 'datacontainer.json',
+        data64: dataContainerToBase64
       }
 
       const multiplePublish = {
         action: 'PUBLISH_MULTIPLE_QDN_RESOURCES',
-        resources: [productResource]
+        resources: [...publishMultipleCatalogues, publishDataContainer]
       }
       await qortalRequest(multiplePublish)
 
       dispatch(
         setNotification({
-          msg: 'Message sent',
+          msg: 'Products saved',
           alertType: 'success'
         })
       )
@@ -294,7 +344,16 @@ export const ProductManager = () => {
     }
   }
 
-  console.log({ productsToSave })
+  const { getOrders, getProducts } = useFetchOrders()
+  const handleGetOrders = React.useCallback(async () => {
+    await getOrders()
+  }, [getOrders])
+
+  const handleGetProducts = React.useCallback(async () => {
+    await getProducts()
+  }, [getProducts])
+
+  console.log({ productToEdit })
 
   return (
     <Box
@@ -327,21 +386,21 @@ export const ProductManager = () => {
                 fontWeight: theme.typography.fontWeightMedium
               }
             }}
-            label={<CustomTabLabelDefault label={user?.name} />}
+            label="Orders"
+          />
+          <Tab
+            sx={{
+              '&.Mui-selected': {
+                color: theme.palette.text.primary,
+                fontWeight: theme.typography.fontWeightMedium
+              }
+            }}
+            label="Products"
           />
         </Tabs>
       </Box>
-      <Box
-        sx={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          width: '100%'
-        }}
-      >
-        <NewProduct />
-      </Box>
-      {Object.keys(productsToSave).length === 0 && (
+
+      {Object.keys(productsToSave).length > 0 && (
         <Box
           sx={{
             position: 'fixed',
@@ -362,8 +421,32 @@ export const ProductManager = () => {
       />
 
       <TabPanel value={valueTab} index={0}>
-        <SimpleTable openMessage={() => {}} data={[]}></SimpleTable>
-        {/* <LazyLoad onLoadMore={getMessages}></LazyLoad> */}
+        <SimpleTable openProduct={() => {}} data={[]}></SimpleTable>
+        <LazyLoad onLoadMore={handleGetOrders}></LazyLoad>
+      </TabPanel>
+      <TabPanel value={valueTab} index={1}>
+        <Box
+          sx={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            width: '100%'
+          }}
+        >
+          <NewProduct
+            editProduct={productToEdit}
+            onClose={() => {
+              setProductToEdit(null)
+            }}
+          />
+        </Box>
+        <SimpleTable
+          openProduct={(product) => {
+            setProductToEdit(product)
+          }}
+          data={products}
+        ></SimpleTable>
+        <LazyLoad onLoadMore={handleGetProducts}></LazyLoad>
       </TabPanel>
     </Box>
   )

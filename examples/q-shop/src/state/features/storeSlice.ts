@@ -23,19 +23,23 @@ export interface Price {
   value: number
 }
 export interface Product {
-  title: string
-  description: string
+  title?: string
+  description?: string
   created: number
   user: string
   id: string
-  category: string
+  category?: string
   categoryName?: string
   tags?: string[]
   updated?: number
   isValid?: boolean
-  price: Price[]
-  images?: any[]
+  price?: Price[]
+  images?: string[]
   type?: string
+  catalogueId: string
+  status?: string
+  mainImageIndex?: number
+  isUpdate?: boolean
 }
 
 export interface Store {

@@ -30,7 +30,7 @@ export const Cart = () => {
   }
 
   const handlePurchase = async () => {
-    const order = Object.keys(currentCart?.orders || {}).reduce(
+    const details = Object.keys(currentCart?.orders || {}).reduce(
       (acc: any, key) => {
         const order = currentCart?.orders[key]
         const quantity = order?.quantity
@@ -44,6 +44,7 @@ export const Cart = () => {
           product.price?.find(
             (priceItem: any) => priceItem?.currency === 'qort'
           )?.value || null
+        if (!priceInQort) throw new Error('Could not retrieve price')
         const totalProductPrice = priceInQort * quantity
         acc[productId] = {
           product,
@@ -58,8 +59,8 @@ export const Cart = () => {
         totalPrice: 0
       }
     )
-    order['totalPrice'] = order['totalPrice'].toFixed(8)
-    const priceToPay = order['totalPrice']
+    details['totalPrice'] = details['totalPrice'].toFixed(8)
+    const priceToPay = details['totalPrice']
     const storeOwner = currentCart.storeOwner
     if (!storeOwner) throw new Error('Cannot find store owner')
     let res = await qortalRequest({
@@ -84,7 +85,7 @@ export const Cart = () => {
       const orderObject: any = {
         created: Date.now(),
         version: 1,
-        order,
+        details,
         delivery: {
           customerName: 'Phil',
           shippingAddress: {
@@ -178,7 +179,9 @@ export const Cart = () => {
                 <Typography>{product.title}</Typography>
                 <Typography>Quantity: {quantity}</Typography>
                 <Typography>Price per unit: {priceInQort}</Typography>
-                <Typography>Total Price: {priceInQort * quantity}</Typography>
+                {priceInQort && (
+                  <Typography>Total Price: {priceInQort * quantity}</Typography>
+                )}
               </Box>
             )
           })}

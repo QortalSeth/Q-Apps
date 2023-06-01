@@ -1,11 +1,14 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
 import { Product } from './storeSlice'
 
-interface ProductDataContainer {
+export interface ProductDataContainer {
   created: number
   priceQort: number
   category: string
   catalogueId: string
+  productId?: string
+  user?: string
+  status: string
 }
 
 export interface DataContainer {
@@ -14,6 +17,7 @@ export interface DataContainer {
   owner: string
   products: Record<string, ProductDataContainer>
   catalogues: CatalogueDataContainer[]
+  id: string
 }
 
 export interface CatalogueDataContainer {
@@ -44,7 +48,14 @@ interface GlobalState {
 
   userAvatarHash: Record<string, string>
   dataContainer: DataContainer | null
+  listProducts: {
+    sort: string
+    products: ProductDataContainer[]
+    categories: string[]
+  }
   productsToSave: Record<string, Product>
+  catalogueHashMap: Record<string, Catalogue>
+  products: Product[]
 }
 const initialState: GlobalState = {
   isOpenPublishBlogModal: false,
@@ -55,7 +66,14 @@ const initialState: GlobalState = {
   downloads: {},
   userAvatarHash: {},
   dataContainer: null,
-  productsToSave: {}
+  listProducts: {
+    sort: 'created',
+    products: [],
+    categories: []
+  },
+  products: [],
+  productsToSave: {},
+  catalogueHashMap: {}
 }
 
 export const globalSlice = createSlice({
@@ -73,7 +91,24 @@ export const globalSlice = createSlice({
       state.isLoadingCurrentBlog = false
     },
     setDataContainer: (state, action) => {
+      let categories: any = {}
       state.dataContainer = action.payload
+      const mappedProducts = Object.keys(action.payload.products)
+        .map((key) => {
+          const category = action.payload?.products[key]?.category
+          if (category) {
+            categories[category] = true
+          }
+          return {
+            ...action.payload.products[key],
+            productId: key,
+            user: action.payload.owner
+          }
+        })
+        .sort((a, b) => b.created - a.created)
+      state.listProducts.sort = 'created'
+      state.listProducts.products = mappedProducts
+      state.listProducts.categories = Object.keys(categories).map((cat) => cat)
     },
     setIsLoadingGlobal: (state, action) => {
       state.isLoadingGlobal = action.payload
@@ -99,6 +134,20 @@ export const globalSlice = createSlice({
       if (avatar?.name && avatar?.url) {
         state.userAvatarHash[avatar?.name] = avatar?.url
       }
+    },
+    setCatalogueHashMap: (state, action) => {
+      const catalogue = action.payload
+      state.catalogueHashMap[catalogue.id] = catalogue
+    },
+    upsertProducts: (state, action) => {
+      action.payload.forEach((product: Product) => {
+        const index = state.products.findIndex((p) => p.id === product.id)
+        if (index !== -1) {
+          state.products[index] = product
+        } else {
+          state.products.push(product)
+        }
+      })
     }
   }
 })
@@ -114,7 +163,9 @@ export const {
   updateDownloads,
 
   setUserAvatarHash,
-  setProductsToSave
+  setProductsToSave,
+  setCatalogueHashMap,
+  upsertProducts
 } = globalSlice.actions
 
 export default globalSlice.reducer

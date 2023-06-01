@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import {
   Box,
   TextField,
@@ -12,33 +12,40 @@ import { useDropzone } from 'react-dropzone'
 import AddPhotoAlternateIcon from '@mui/icons-material/AddPhotoAlternate'
 import ImageUploader from '../../components/common/ImageUploader'
 import { PublishProductParams } from './NewProduct'
+import { Product } from '../../state/features/storeSlice'
+import { useSelector } from 'react-redux'
+import { RootState } from '../../state/store'
 interface ProductFormProps {
-  categories: string[]
   onSubmit: (product: PublishProductParams) => void
+  editProduct?: Product | null
 }
 
-interface Product {
-  title: string
-  description: string
+interface ProductObj {
+  title?: string
+  description?: string
   price: number
   images: string[]
   category?: string
 }
 
 export const ProductForm: React.FC<ProductFormProps> = ({
-  categories,
-  onSubmit
+  onSubmit,
+  editProduct
 }) => {
-  const [product, setProduct] = useState<Product>({
+  const categories = useSelector(
+    (state: RootState) => state.global.listProducts.categories
+  )
+  const [product, setProduct] = useState<ProductObj>({
     title: '',
     description: '',
     price: 0,
     images: []
   })
+  console.log({ product })
   const [categoryList, setCategoryList] = useState<string[]>([])
   const [selectedType, setSelectedType] = useState<string | null>(null)
   const [images, setImages] = useState<string[]>([])
-
+  const [selectedStatus, setSelectedStatus] = useState<string>('AVAILABLE')
   const [newCategory, setNewCategory] = useState<string>('')
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -56,12 +63,14 @@ export const ProductForm: React.FC<ProductFormProps> = ({
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
-    if (!selectedType) return
+    if (!selectedType || !selectedCategory) return
     onSubmit({
       title: product.title,
       description: product.description,
       type: selectedType,
       images,
+      category: selectedCategory,
+      status: selectedStatus,
       price: [
         {
           currency: 'qort',
@@ -78,6 +87,53 @@ export const ProductForm: React.FC<ProductFormProps> = ({
     setCategoryList((prev) => [...prev, newCategory])
     setNewCategory('')
   }
+
+  useEffect(() => {
+    if (categories) {
+      setCategoryList(categories)
+    }
+  }, [categories])
+
+  useEffect(() => {
+    if (editProduct) {
+      console.log({ editProduct })
+      try {
+        const {
+          title,
+          description,
+          images,
+          mainImageIndex,
+          type,
+          price,
+          category,
+          status
+        } = editProduct
+        const findPrice =
+          price?.find((item) => item?.currency === 'qort')?.value || 0
+        console.log({ title, description, images, mainImageIndex, type, price })
+        setProduct({
+          title,
+          description,
+          images: [],
+          price: findPrice
+        })
+        if (images) {
+          setImages(images)
+        }
+        if (type) {
+          setSelectedType(type)
+        }
+        if (category) {
+          setSelectedCategory(category)
+        }
+        if (status) {
+          setSelectedStatus(status)
+        }
+      } catch (error) {
+        console.log({ error })
+      }
+    }
+  }, [editProduct])
 
   return (
     <Box
@@ -124,6 +180,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
         name="title"
         label="Title"
         variant="outlined"
+        value={product.title}
         onChange={handleInputChange}
         inputProps={{ maxLength: 180 }}
         required
@@ -131,6 +188,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
       <TextField
         name="description"
         label="Description"
+        value={product.description}
         variant="outlined"
         onChange={handleInputChange}
         required
@@ -138,6 +196,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
       <TextField
         name="price"
         label="Price"
+        value={product.price}
         variant="outlined"
         type="number"
         onChange={handleInputChange}
@@ -175,6 +234,23 @@ export const ProductForm: React.FC<ProductFormProps> = ({
         value={newCategory}
         onChange={handleNewCategory}
       />
+      {editProduct && (
+        <>
+          <InputLabel id="status">Status</InputLabel>
+          <Select
+            name="status"
+            value={selectedStatus}
+            onChange={(e) => setSelectedStatus(e.target.value)}
+            variant="outlined"
+            required
+          >
+            <MenuItem value="AVAILABLE">Available</MenuItem>
+            <MenuItem value="RETIRED">Retired</MenuItem>
+            <MenuItem value="OUT_OF_STOCK">Out of stock</MenuItem>
+          </Select>
+        </>
+      )}
+
       <Button variant="contained" onClick={addNewCategoryToList}>
         Add Category
       </Button>

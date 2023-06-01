@@ -10,17 +10,19 @@ import { Avatar, Box } from '@mui/material'
 import { useSelector } from 'react-redux'
 import { RootState } from '../../state/store'
 import { formatTimestamp } from '../../utils/time'
+import { Product } from '../../state/features/storeSlice'
+import moment from 'moment'
 
 const tableCellFontSize = '16px'
 
 interface Data {
-  name: string
+  title: string
   description: string
-  createdAt: number
+  created: number
   user: string
   id: string
   tags: string[]
-  subject?: string
+  status: string
 }
 
 interface ColumnData {
@@ -31,24 +33,27 @@ interface ColumnData {
 }
 
 const columns: ColumnData[] = [
+  // {
+  //   label: 'Sender',
+  //   dataKey: 'user',
+  //   width: 200
+  // },
   {
-    label: 'Sender',
-    dataKey: 'user',
-    width: 200
+    label: 'Title',
+    dataKey: 'title'
   },
   {
-    label: 'Subject',
-    dataKey: 'description'
+    label: 'Status',
+    dataKey: 'status',
+    width: 120
   },
   {
-    label: 'Date',
-    dataKey: 'createdAt',
+    label: 'Created',
+    dataKey: 'created',
     numeric: true,
-    width: 200
+    width: 300
   }
 ]
-
-
 
 function fixedHeaderContent() {
   return (
@@ -74,17 +79,28 @@ function fixedHeaderContent() {
   )
 }
 
-function rowContent(_index: number, row: Data, openMessage: any) {
+function rowContent(_index: number, row: Product, openProduct: any) {
+  const catalogueHashMap = useSelector(
+    (state: RootState) => state.global.catalogueHashMap
+  )
+
   return (
     <React.Fragment>
       {columns.map((column) => {
-        let subject = '-'
-        if (column.dataKey === 'description' && row['subject']) {
-          subject = row['subject']
+        let rowData = row
+        if (
+          catalogueHashMap[row?.catalogueId] &&
+          catalogueHashMap[row.catalogueId].products[row?.id]
+        ) {
+          rowData = {
+            ...row,
+            ...catalogueHashMap[row.catalogueId].products[row?.id],
+            catalogueId: row?.catalogueId || ''
+          }
         }
         return (
           <TableCell
-            onClick={() => openMessage(row?.user, row?.id, row)}
+            onClick={() => openProduct(rowData)}
             key={column.dataKey}
             align={column.numeric || false ? 'right' : 'left'}
             style={{ width: column.width, cursor: 'pointer' }}
@@ -93,32 +109,13 @@ function rowContent(_index: number, row: Data, openMessage: any) {
               padding: '7px'
             }}
           >
-            {column.dataKey === 'user' && (
-              <Box
-                sx={{
-                  display: 'flex',
-                  gap: '5px',
-                  width: '100%',
-                  alignItems: 'center',
-                  flexWrap: 'wrap',
-                  textOverflow: 'ellipsis',
-                  overflow: 'hidden',
-                  whiteSpace: 'nowrap'
-                }}
-              >
-                <AvatarWrapper user={row?.user}></AvatarWrapper>
-                {row[column.dataKey]}
-              </Box>
-            )}
-            {column.dataKey !== 'user' && (
-              <>
-                {column.dataKey === 'createdAt'
-                  ? formatTimestamp(row[column.dataKey])
-                  : column.dataKey === 'description'
-                  ? subject
-                  : row[column.dataKey]}
-              </>
-            )}
+            <>
+              {column.dataKey === 'created'
+                ? moment(rowData[column.dataKey]).format('llll')
+                : column.dataKey === 'status'
+                ? rowData[column.dataKey] || 'unknown'
+                : rowData[column.dataKey]}
+            </>
           </TableCell>
         )
       })}
@@ -127,13 +124,13 @@ function rowContent(_index: number, row: Data, openMessage: any) {
 }
 
 interface SimpleTableProps {
-  openMessage: (user: string, messageIdentifier: string, content: any) => void
-  data: Data[]
+  openProduct: (product: Product) => void
+  data: Product[]
   children?: React.ReactNode
 }
 
 export default function SimpleTable({
-  openMessage,
+  openProduct,
   data,
   children
 }: SimpleTableProps) {
@@ -145,7 +142,7 @@ export default function SimpleTable({
           <TableBody>
             {data.map((row, index) => (
               <TableRow key={index}>
-                {rowContent(index, row, openMessage)}
+                {rowContent(index, row, openProduct)}
               </TableRow>
             ))}
           </TableBody>

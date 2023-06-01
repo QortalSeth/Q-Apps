@@ -17,6 +17,7 @@ import {
 
 import { ProductForm } from './ProductForm'
 import { setProductsToSave } from '../../state/features/globalSlice'
+import { Product } from '../../state/features/storeSlice'
 
 const uid = new ShortUniqueId({ length: 10 })
 
@@ -25,16 +26,21 @@ interface ProductPrice {
   value: number
 }
 export interface PublishProductParams {
-  title: string
-  description: string
+  title?: string
+  description?: string
   type: string
   images: string[]
   price: ProductPrice[]
   mainImageIndex: number
+  category: string
+  status?: string
 }
-interface NewMessageProps {}
+interface NewMessageProps {
+  editProduct?: Product | null
+  onClose: () => void
+}
 const maxSize = 25 * 1024 * 1024 // 25 MB in bytes
-export const NewProduct = ({}: NewMessageProps) => {
+export const NewProduct = ({ editProduct, onClose }: NewMessageProps) => {
   const [isOpen, setIsOpen] = useState<boolean>(false)
 
   const [destinationName, setDestinationName] = useState('')
@@ -56,7 +62,14 @@ export const NewProduct = ({}: NewMessageProps) => {
   }
   const closeModal = () => {
     setIsOpen(false)
+    onClose()
   }
+
+  useEffect(() => {
+    if (editProduct) {
+      setIsOpen(true)
+    }
+  }, [editProduct])
 
   async function addProduct({
     title,
@@ -64,7 +77,9 @@ export const NewProduct = ({}: NewMessageProps) => {
     type,
     images,
     price,
-    mainImageIndex
+    mainImageIndex,
+    category,
+    status
   }: PublishProductParams) {
     let address: string = ''
     let name: string = ''
@@ -109,154 +124,40 @@ export const NewProduct = ({}: NewMessageProps) => {
       const shortStoreId = parts[1]
       const productId = uid()
       if (!currentStore) return
-
-      const id = `q-store-product-${shortStoreId}-${productId}`
-      const productObject: any = {
-        title,
-        description,
-        created: Date.now(),
-        version: 1,
-        images,
-        mainImageIndex,
-        type,
-        price,
-        storeId,
-        shortStoreId,
-        id
-      }
-
-      dispatch(setProductsToSave(productObject))
-
-      closeModal()
-    } catch (error: any) {
-      let notificationObj = null
-      if (typeof error === 'string') {
-        notificationObj = {
-          msg: error || 'Failed to send message',
-          alertType: 'error'
+      if (editProduct) {
+        const productObject: any = {
+          ...editProduct,
+          title,
+          description,
+          images,
+          mainImageIndex,
+          type,
+          price,
+          category,
+          isUpdate: true,
+          status
         }
-      } else if (typeof error?.error === 'string') {
-        notificationObj = {
-          msg: error?.error || 'Failed to send message',
-          alertType: 'error'
-        }
+
+        dispatch(setProductsToSave(productObject))
       } else {
-        notificationObj = {
-          msg: error?.message || 'Failed to send message',
-          alertType: 'error'
+        const id = `q-store-product-${shortStoreId}-${productId}`
+        const productObject: any = {
+          title,
+          description,
+          created: Date.now(),
+          version: 1,
+          images,
+          mainImageIndex,
+          type,
+          price,
+          storeId,
+          shortStoreId,
+          category,
+          id
         }
+
+        dispatch(setProductsToSave(productObject))
       }
-      if (!notificationObj) return
-      dispatch(setNotification(notificationObj))
-
-      throw new Error('Failed to send message')
-    }
-  }
-  async function publishQDNResource({
-    title,
-    description,
-    type,
-    images,
-    price,
-    mainImageIndex
-  }: PublishProductParams) {
-    let address: string = ''
-    let name: string = ''
-    let errorMsg = ''
-
-    address = user?.address || ''
-    name = user?.name || ''
-
-    if (!address) {
-      errorMsg = "Cannot send: your address isn't available"
-    }
-    if (!name) {
-      errorMsg = 'Cannot send a message without a access to your name'
-    }
-    if (!imagePreviewFile) {
-      errorMsg = 'Missing a preview image'
-    }
-    if (!currentStore) {
-      errorMsg = 'Cannot create a product without having a store'
-    }
-    if (!dataContainer) {
-      errorMsg = 'Cannot create a product without having a data-container'
-    }
-
-    if (errorMsg) {
-      dispatch(
-        setNotification({
-          msg: errorMsg,
-          alertType: 'error'
-        })
-      )
-      throw new Error(errorMsg)
-    }
-    if (!currentStore?.id) throw new Error('Cannot find store id')
-    if (!dataContainer?.products)
-      throw new Error('Cannot find data-container products')
-    try {
-      const newDataContainer = { ...dataContainer }
-      const dataContainerProducts = { ...dataContainer.products }
-    } catch (error: any) {
-      throw new Error(error?.message || 'Failed to create product')
-    }
-    try {
-      const storeId: string = currentStore?.id
-
-      const parts = storeId.split('q-store-general-')
-      const shortStoreId = parts[1]
-      const productId = uid()
-      if (!currentStore) return
-
-      const id = `q-store-product-${shortStoreId}-${productId}`
-      const productObject: any = {
-        title,
-        description,
-        created: Date.now(),
-        version: 1,
-        images,
-        mainImageIndex,
-        type,
-        price,
-        // price: [{ currency: 'qort', value: 15 }],
-        storeId,
-        shortStoreId,
-        id
-      }
-      const blogPostToBase64 = await objectToBase64(productObject)
-      console.log({ imagePreviewFile })
-      if (!currentStore) return
-      const productResource = {
-        identifier: id,
-        title: 'Shoes',
-        name,
-        service: 'PRODUCT',
-        filename: 'product.json',
-        data64: blogPostToBase64
-      }
-
-      const productImagePreviewResource = {
-        identifier: `q-store-product-${shortStoreId}-${productId}-image`,
-        name,
-        title: 'Shoes',
-        service: 'IMAGE',
-        filename: imagePreviewFile?.name,
-        file: imagePreviewFile
-      }
-
-      const multiplePublish = {
-        action: 'PUBLISH_MULTIPLE_QDN_RESOURCES',
-        resources: [productImagePreviewResource, productResource]
-      }
-      await qortalRequest(multiplePublish)
-
-      dispatch(
-        setNotification({
-          msg: 'Message sent',
-          alertType: 'success'
-        })
-      )
 
       closeModal()
     } catch (error: any) {
@@ -334,7 +235,7 @@ export const NewProduct = ({}: NewMessageProps) => {
             gap: 1
           }}
         >
-          <ProductForm onSubmit={addProduct} categories={[]} />
+          <ProductForm editProduct={editProduct} onSubmit={addProduct} />
         </Box>
         <Button variant="contained" onClick={closeModal}>
           Close
