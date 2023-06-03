@@ -43,6 +43,7 @@ export interface Order {
   communicationMethod?: CommunicationMethod[]
   user: string
   id: string
+  totalPrice?: string
 }
 
 export const orderSlice = createSlice({
@@ -61,11 +62,14 @@ export const orderSlice = createSlice({
     },
     addToHashMap: (state, action) => {
       const order = action.payload
-      state.hashMapOrders[order.id] = order
+      state.hashMapOrders[order.id] = {
+        ...order,
+        totalPrice: order.details.totalPrice
+      }
     }
   }
 })
 
-export const { upsertOrders } = orderSlice.actions
+export const { upsertOrders, addToHashMap } = orderSlice.actions
 
 export default orderSlice.reducer

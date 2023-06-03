@@ -23,6 +23,9 @@ export const Cart = () => {
   const hashMapProducts = useSelector(
     (state: RootState) => state.store.hashMapProducts
   )
+  const catalogueHashMap = useSelector(
+    (state: RootState) => state.global.catalogueHashMap
+  )
   const dispatch = useDispatch()
 
   const closeModal = () => {
@@ -35,9 +38,10 @@ export const Cart = () => {
         const order = currentCart?.orders[key]
         const quantity = order?.quantity
         const productId = order?.productId
+        const catalogueId = order?.catalogueId
         let product = null
-        if (productId) {
-          product = hashMapProducts[productId]
+        if (productId && catalogueId && catalogueHashMap[catalogueId]) {
+          product = catalogueHashMap[catalogueId]?.products[productId]
         }
         if (!product) return acc
         const priceInQort =
@@ -48,6 +52,7 @@ export const Cart = () => {
         const totalProductPrice = priceInQort * quantity
         acc[productId] = {
           product,
+          catalogueId,
           quantity,
           pricePerUnit: priceInQort,
           totalProductPrice: priceInQort * quantity
@@ -61,6 +66,7 @@ export const Cart = () => {
     )
     details['totalPrice'] = details['totalPrice'].toFixed(8)
     const priceToPay = details['totalPrice']
+    console.log({ priceToPay })
     const storeOwner = currentCart.storeOwner
     if (!storeOwner) throw new Error('Cannot find store owner')
     let res = await qortalRequest({
@@ -108,9 +114,11 @@ export const Cart = () => {
       const orderId = uid()
       const storeId = currentCart.storeId
       if (!storeId) throw new Error('Cannot find store identifier')
+      const parts = storeId.split('q-store-general-')
+      const shortStoreId = parts[1]
       const productRequestBody = {
         action: 'PUBLISH_QDN_RESOURCE',
-        identifier: `q-store-order-${storeId}-${orderId}`,
+        identifier: `q-store-order-${shortStoreId}-${orderId}`,
         name: username,
         service: 'DOCUMENT_PRIVATE',
         filename: `order_${orderId}.json`,
@@ -165,9 +173,10 @@ export const Cart = () => {
             const order = currentCart?.orders[key]
             const quantity = order?.quantity
             const productId = order?.productId
+            const catalogueId = order?.catalogueId
             let product = null
-            if (productId) {
-              product = hashMapProducts[productId]
+            if (productId && catalogueId && catalogueHashMap[catalogueId]) {
+              product = catalogueHashMap[catalogueId]?.products[productId]
             }
             if (!product) return null
             const priceInQort =

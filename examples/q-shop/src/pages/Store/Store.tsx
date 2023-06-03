@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useDispatch, useSelector } from 'react-redux'
 import { RootState } from '../../state/store'
@@ -9,8 +9,6 @@ import { setIsLoadingGlobal } from '../../state/features/globalSlice'
 import { Product } from '../../state/features/storeSlice'
 import { useFetchProducts } from '../../hooks/useFetchProducts'
 import LazyLoad from '../../components/common/LazyLoad'
-import { addPrefix, removePrefix } from '../../utils/blogIdformats'
-import Masonry from 'react-masonry-css'
 import ContextMenuResource from '../../components/common/ContextMenu/ContextMenuResource'
 import {
   setProductToCart,
@@ -18,14 +16,13 @@ import {
   setStoreOwner
 } from '../../state/features/cartSlice'
 import { ProductCard } from './ProductCard'
+import { ProductDataContainer } from '../../state/features/globalSlice'
+import { useFetchOrders } from '../../hooks/useFetchOrders'
 
-const breakpointColumnsObj = {
-  default: 5,
-  1600: 4,
-  1300: 3,
-  940: 2,
-  700: 1,
-  500: 1
+interface IListProducts {
+  sort: string
+  products: ProductDataContainer[]
+  categories: string[]
 }
 export const Store = () => {
   const navigate = useNavigate()
@@ -34,56 +31,46 @@ export const Store = () => {
   const currentStore = useSelector(
     (state: RootState) => state.global.currentStore
   )
-
+  const { checkAndUpdateResourceCatalogue, getCatalogue } = useFetchOrders()
   const { store, user: username } = useParams()
-
+  const catalogueHashMap = useSelector(
+    (state: RootState) => state.global.catalogueHashMap
+  )
   const dispatch = useDispatch()
   const [userStore, setUserStore] = React.useState<any>(null)
+  const [dataContainer, setDataContainer] = useState(null)
   const { getProduct, hashMapProducts, checkAndUpdateResource } =
     useFetchProducts()
 
   const [products, setProducts] = React.useState<Product[]>([])
-
-  const getUserProducts = React.useCallback(async () => {
-    let name = username
-
-    if (!name) return
+  const [listProducts, setListProducts] = useState<IListProducts>({
+    sort: 'created',
+    products: [],
+    categories: []
+  })
+  const getProducts = React.useCallback(async () => {
     if (!store) return
 
     try {
       dispatch(setIsLoadingGlobal(true))
       const offset = products.length
-      //TODO - NAME SHOULD BE EXACT
-      const parts = store.split('q-store-general-')
-      const shortStoreId = parts[1]
-      const query = `q-store-product-${shortStoreId}`
-      const url = `http://62.141.38.192:62391/arbitrary/resources/search?service=PRODUCT&query=${query}&limit=20&exactmatchnames=true&name=${name}&includemetadata=true&offset=${offset}&reverse=true`
-      const response = await fetch(url, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      })
-      const responseData = await response.json()
+      const productList = listProducts.products
+      const responseData = productList.slice(offset, offset + 20)
 
-      const structureData = responseData.map((product: any): Product => {
-        return {
-          title: product?.metadata?.title,
-          category: product?.metadata?.category,
-          categoryName: product?.metadata?.categoryName,
-          tags: product?.metadata?.tags || [],
-          description: product?.metadata?.description,
-          created: product?.created,
-          user: product.name,
-          id: product.identifier,
-          price: [],
-          catalogueId: 'test'
+      const structureData = responseData.map(
+        (product: ProductDataContainer): Product => {
+          return {
+            created: product?.created,
+            catalogueId: product.catalogueId,
+            id: product?.productId || '',
+            user: product?.user || '',
+            status: product?.status || ''
+          }
         }
-      })
-
-      const copiedProducts: Product[] = [...products]
+      )
+      const copiedProducts = [...products]
       structureData.forEach((product: Product) => {
-        const index = products.findIndex((p) => p.id === product.id)
+        const index = copiedProducts.findIndex((p) => p.id === product.id)
         if (index !== -1) {
           copiedProducts[index] = product
         } else {
@@ -91,11 +78,14 @@ export const Store = () => {
         }
       })
       setProducts(copiedProducts)
+
       for (const content of structureData) {
         if (content.user && content.id) {
-          const res = checkAndUpdateResource(content)
+          const res = checkAndUpdateResourceCatalogue({
+            id: content.catalogueId
+          })
           if (res) {
-            getProduct(content.user, content.id, content)
+            getCatalogue(content.user, content.catalogueId)
           }
         }
       }
@@ -103,7 +93,7 @@ export const Store = () => {
     } finally {
       dispatch(setIsLoadingGlobal(false))
     }
-  }, [username, store, products])
+  }, [products, listProducts])
   const getStore = React.useCallback(async () => {
     let name = username
 
@@ -118,41 +108,79 @@ export const Store = () => {
         }
       })
       const responseData = await response.json()
+      const urlDatacontainer = `http://62.141.38.192:62391/arbitrary/DOCUMENT/${name}/${store}-datacontainer`
+      const responseContainer = await fetch(urlDatacontainer, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      const responseDataContainer = await responseContainer.json()
+      setDataContainer({
+        ...responseDataContainer,
+        id: `${store}-datacontainer`
+      })
+      let categories: any = {}
+      const mappedProducts = Object.keys(responseDataContainer.products)
+        .map((key) => {
+          const category = responseDataContainer?.products[key]?.category
+          if (category) {
+            categories[category] = true
+          }
+          return {
+            ...responseDataContainer.products[key],
+            productId: key,
+            user: responseDataContainer.owner
+          }
+        })
+        .sort((a, b) => b.created - a.created)
+      setListProducts({
+        sort: 'created',
+        products: mappedProducts,
+        categories: Object.keys(categories).map((cat) => cat)
+      })
+
       setUserStore(responseData)
       dispatch(setStoreId(store))
       dispatch(setStoreOwner(name))
     } catch (error) {}
-  }, [username, store])
+  }, [username, store, dataContainer])
 
   React.useEffect(() => {
     getStore()
   }, [username, store])
-  const getProducts = React.useCallback(async () => {
-    await getUserProducts()
-  }, [getUserProducts])
+  const getProductsHandler = React.useCallback(async () => {
+    await getProducts()
+  }, [getProducts])
 
   console.log({ products, hashMapProducts })
   if (!userStore) return null
   return (
     <>
-      <Masonry
-        breakpointCols={breakpointColumnsObj}
-        className="my-masonry-grid"
-        columnClassName="my-masonry-grid_column"
-        style={{ backgroundColor: theme.palette.background.default }}
+      <Box
+        sx={{
+          display: 'flex',
+          flexWrap: 'wrap',
+          gap: '15px',
+          margin: '15px'
+        }}
       >
         {products.map((product: Product, index) => {
-          const existingProduct = hashMapProducts[product.id]
-          let storeProduct = product
-          if (existingProduct) {
-            storeProduct = existingProduct
+          let existingProduct = product
+          if (
+            catalogueHashMap[product?.catalogueId] &&
+            catalogueHashMap[product.catalogueId].products[product?.id]
+          ) {
+            existingProduct = {
+              ...product,
+              ...catalogueHashMap[product.catalogueId].products[product?.id],
+              catalogueId: product?.catalogueId || ''
+            }
           }
           const storeId = currentStore?.id || ''
-          const productId = storeProduct?.id || ''
-
           return (
             <Box
-              key={productId}
+              key={existingProduct.id}
               sx={{
                 display: 'flex',
                 gap: 1,
@@ -165,29 +193,18 @@ export const Store = () => {
               }}
             >
               <ContextMenuResource
-                name={storeProduct.user}
+                name={existingProduct.user}
                 service="PRODUCT"
-                identifier={storeProduct.id}
-                link={`qortal://APP/Q-Shop/${storeProduct.user}/${storeId}/${productId}`}
+                identifier={existingProduct.id}
+                link={`qortal://APP/Q-Shop/${existingProduct.user}/${storeId}/${existingProduct.id}`}
               >
-                <ProductCard product={storeProduct} />
-                {/* <p
-                  onClick={() => {
-                    dispatch(
-                      setProductToCart({
-                        id: productId
-                      })
-                    )
-                  }}
-                >
-                  {product.title}
-                </p> */}
+                <ProductCard product={existingProduct} />
               </ContextMenuResource>
             </Box>
           )
         })}
-      </Masonry>
-      <LazyLoad onLoadMore={getProducts}></LazyLoad>
+      </Box>
+      <LazyLoad onLoadMore={getProductsHandler}></LazyLoad>
     </>
   )
 }

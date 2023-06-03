@@ -1,6 +1,7 @@
 import React from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { Product, addToHashMap } from '../state/features/storeSlice'
+import { Product } from '../state/features/storeSlice'
+import { addToHashMap } from '../state/features/orderSlice'
 
 import { RootState } from '../state/store'
 import { Order, upsertOrders } from '../state/features/orderSlice'
@@ -179,6 +180,8 @@ export const useFetchOrders = () => {
     hashMapOrders,
     checkAndUpdateResource,
     getOrders,
-    getProducts
+    getProducts,
+    getCatalogue,
+    checkAndUpdateResourceCatalogue
   }
 }

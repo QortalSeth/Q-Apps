@@ -1,6 +1,5 @@
-import { createSlice } from '@reduxjs/toolkit';
+import { createSlice } from '@reduxjs/toolkit'
 import { RootState } from '../store'
-
 
 interface CartState {
   hashMapCarts: Record<string, Cart>
@@ -23,10 +22,11 @@ const initialState: CartState = {
   isOpen: false
 }
 
- export interface Order {
+export interface Order {
   productId: string
   quantity: number
- }
+  catalogueId: string
+}
 
 export interface Cart {
   orders: Record<string, Order>
@@ -37,46 +37,38 @@ export const cartSlice = createSlice({
   name: 'cart',
   initialState,
   reducers: {
-   
     setProductToCart: (state, action) => {
-      const {id} = action.payload;
-      let order = state.currentCart?.orders[id];
-  
+      const { id, catalogueId } = action.payload
+      let order = state.currentCart?.orders[id]
+
       if (order) {
-          // If an order already exists, increment its quantity.
-          order.quantity += 1;
+        // If an order already exists, increment its quantity.
+        order.quantity += 1
       } else {
-          // If no order exists, create a new one with quantity 1.
-          order = {
-              quantity : 1,
-              productId: id
-          };
+        // If no order exists, create a new one with quantity 1.
+        order = {
+          quantity: 1,
+          productId: id,
+          catalogueId
+        }
       }
-  
-      state.currentCart.orders[id] = order;
+
+      state.currentCart.orders[id] = order
       state.currentCart.lastUpdated = Date.now()
     },
     setIsOpen: (state, action) => {
-      
       state.isOpen = action.payload
     },
     setStoreId: (state, action) => {
-      
       state.currentCart.storeId = action.payload
     },
     setStoreOwner: (state, action) => {
-      
       state.currentCart.storeOwner = action.payload
-    },
+    }
   }
 })
 
-export const {
-  setProductToCart,
-  setIsOpen,
-  setStoreId,
-  setStoreOwner
-} = cartSlice.actions
+export const { setProductToCart, setIsOpen, setStoreId, setStoreOwner } =
+  cartSlice.actions
 
 export default cartSlice.reducer
-

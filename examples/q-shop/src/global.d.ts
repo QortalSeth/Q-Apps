@@ -32,6 +32,7 @@ interface QortalRequestOptions {
   blob?: Blob
   mimeType?: string
   file?: File
+  encryptedData?: string
 }
 
 declare function qortalRequest(options: QortalRequestOptions): Promise<any>

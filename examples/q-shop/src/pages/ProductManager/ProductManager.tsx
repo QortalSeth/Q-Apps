@@ -35,6 +35,7 @@ import {
 import { Price, Product } from '../../state/features/storeSlice'
 import { useFetchOrders } from '../../hooks/useFetchOrders'
 import { AVAILABLE } from '../../constants/product-status'
+import OrderTable from './OrderTable'
 
 const uid = new ShortUniqueId({ length: 10 })
 
@@ -53,6 +54,12 @@ export const ProductManager = () => {
   const dataContainer = useSelector(
     (state: RootState) => state.global.dataContainer
   )
+  const orders = useSelector((state: RootState) => state.order.orders)
+  const hashMapOrders = useSelector(
+    (state: RootState) => state.order.hashMapOrders
+  )
+
+  console.log({ orders, hashMapOrders })
   const products = useSelector((state: RootState) => state.global.products)
   const [isOpen, setIsOpen] = useState<boolean>(false)
   const [message, setMessage] = useState<any>(null)
@@ -421,7 +428,7 @@ export const ProductManager = () => {
       />
 
       <TabPanel value={valueTab} index={0}>
-        <SimpleTable openProduct={() => {}} data={[]}></SimpleTable>
+        <OrderTable openOrder={() => {}} data={orders}></OrderTable>
         <LazyLoad onLoadMore={handleGetOrders}></LazyLoad>
       </TabPanel>
       <TabPanel value={valueTab} index={1}>
