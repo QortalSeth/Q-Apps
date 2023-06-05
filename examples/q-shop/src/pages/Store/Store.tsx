@@ -100,7 +100,7 @@ export const Store = () => {
     if (!name) return
     if (!store) return
     try {
-      const urlStore = `http://62.141.38.192:62391/arbitrary/STORE/${name}/${store}`
+      const urlStore = `/arbitrary/STORE/${name}/${store}`
       const response = await fetch(urlStore, {
         method: 'GET',
         headers: {
@@ -108,7 +108,7 @@ export const Store = () => {
         }
       })
       const responseData = await response.json()
-      const urlDatacontainer = `http://62.141.38.192:62391/arbitrary/DOCUMENT/${name}/${store}-datacontainer`
+      const urlDatacontainer = `/arbitrary/DOCUMENT/${name}/${store}-datacontainer`
       const responseContainer = await fetch(urlDatacontainer, {
         method: 'GET',
         headers: {

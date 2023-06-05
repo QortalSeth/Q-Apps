@@ -22,7 +22,7 @@ import LazyLoad from '../../components/common/LazyLoad'
 import { NewProduct } from './NewProduct'
 import Tabs from '@mui/material/Tabs'
 import Tab from '@mui/material/Tab'
-import { ShowMessage } from './ShowProduct'
+import { ShowOrder } from './ShowOrder'
 import SimpleTable from './ProductTable'
 import { setNotification } from '../../state/features/notificationsSlice'
 import { objectToBase64 } from '../../utils/toBase64'
@@ -62,8 +62,9 @@ export const ProductManager = () => {
   console.log({ orders, hashMapOrders })
   const products = useSelector((state: RootState) => state.global.products)
   const [isOpen, setIsOpen] = useState<boolean>(false)
-  const [message, setMessage] = useState<any>(null)
+  const [order, setOrder] = useState<any>(null)
   const [replyTo, setReplyTo] = useState<any>(null)
+
   const [valueTab, setValueTab] = React.useState(0)
   const [productToEdit, setProductToEdit] = useState<Product | null>(null)
   const userName = useMemo(() => {
@@ -420,15 +421,16 @@ export const ProductManager = () => {
           </Button>
         </Box>
       )}
-      <ShowMessage
-        isOpen={isOpen}
-        setIsOpen={setIsOpen}
-        message={message}
-        setReplyTo={setReplyTo}
-      />
 
       <TabPanel value={valueTab} index={0}>
-        <OrderTable openOrder={() => {}} data={orders}></OrderTable>
+        <ShowOrder isOpen={isOpen} setIsOpen={setIsOpen} order={order} />
+        <OrderTable
+          openOrder={(order) => {
+            setOrder(order)
+            setIsOpen(true)
+          }}
+          data={orders}
+        ></OrderTable>
         <LazyLoad onLoadMore={handleGetOrders}></LazyLoad>
       </TabPanel>
       <TabPanel value={valueTab} index={1}>

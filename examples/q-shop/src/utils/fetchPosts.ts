@@ -12,7 +12,7 @@ export const fetchAndEvaluateProducts = async (data: any) => {
     if (!user || !productId) return obj
 
     try {
-      const url = `http://62.141.38.192:62391/arbitrary/PRODUCT/${user}/${productId}`
+      const url = `/arbitrary/PRODUCT/${user}/${productId}`
       const response = await fetch(url, {
         method: 'GET',
         headers: {

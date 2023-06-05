@@ -84,8 +84,8 @@ const GlobalWrapper: React.FC<Props> = ({ children }) => {
   async function verifyIfBlogIdExtists(username: string, identifier: string) {
     let doesExist = true
     //TODO - SHOULD REMOVE NAME FILTER AND IDENTIFIER SHOULD BE EXACT
-    // const url2 = `http://62.141.38.192:62391/arbitrary/resources/search?service=BLOG&identifier=${identifier}&name=${username}&limit=1&includemetadata=true`
-    const url2 = `http://62.141.38.192:62391/arbitrary/resources?service=BLOG&identifier=${identifier}&name=${username}&limit=1&includemetadata=true`
+    // const url2 = `/arbitrary/resources/search?service=BLOG&identifier=${identifier}&name=${username}&limit=1&includemetadata=true`
+    const url2 = `/arbitrary/resources?service=BLOG&identifier=${identifier}&name=${username}&limit=1&includemetadata=true`
     const responseBlogs = await fetch(url2, {
       method: 'GET',
       headers: {
@@ -94,7 +94,7 @@ const GlobalWrapper: React.FC<Props> = ({ children }) => {
     })
 
     const dataMetadata = await responseBlogs.json()
-    // const url = `http://62.141.38.192:62391/arbitrary/metadata/BLOG/${username}/${identifier}}`
+    // const url = `/arbitrary/metadata/BLOG/${username}/${identifier}}`
     // const responseBlogs = await fetch(url, {
     //   method: 'GET',
     //   headers: {
@@ -110,7 +110,7 @@ const GlobalWrapper: React.FC<Props> = ({ children }) => {
   }
   async function getStore(name: string) {
     //TODO NAME SHOULD BE EXACT
-    const url = `http://62.141.38.192:62391/arbitrary/resources/search?service=STORE&identifier=q-store-general-&exactmatchnames=true&name=${name}&prefix=true&limit=20&includemetadata=true`
+    const url = `/arbitrary/resources/search?service=STORE&identifier=q-store-general-&exactmatchnames=true&name=${name}&prefix=true&limit=20&includemetadata=true`
     const responseBlogs = await fetch(url, {
       method: 'GET',
       headers: {
@@ -126,7 +126,7 @@ const GlobalWrapper: React.FC<Props> = ({ children }) => {
     if (filterOut.length !== 0) {
       blog = filterOut[0]
     }
-    const urlBlog = `http://62.141.38.192:62391/arbitrary/STORE/${blog.name}/${blog.identifier}`
+    const urlBlog = `/arbitrary/STORE/${blog.name}/${blog.identifier}`
     const response = await fetch(urlBlog, {
       method: 'GET',
       headers: {
@@ -135,7 +135,7 @@ const GlobalWrapper: React.FC<Props> = ({ children }) => {
     })
     const responseData = await response.json()
 
-    const urlDataContainer = `http://62.141.38.192:62391/arbitrary/DOCUMENT/${blog.name}/${blog.identifier}-datacontainer`
+    const urlDataContainer = `/arbitrary/DOCUMENT/${blog.name}/${blog.identifier}-datacontainer`
     const response2 = await fetch(urlDataContainer, {
       method: 'GET',
       headers: {

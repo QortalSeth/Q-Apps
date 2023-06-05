@@ -18,7 +18,7 @@ export const fetchAndEvaluateMail = async (data: any) => {
     try {
       // throw new Error('hello')
       if (!user || !messageIdentifier) return obj
-      const url = `http://62.141.38.192:62391/arbitrary/${MAIL_SERVICE_TYPE}/${user}/${messageIdentifier}`
+      const url = `/arbitrary/${MAIL_SERVICE_TYPE}/${user}/${messageIdentifier}`
       let res = await qortalRequest({
         action: 'FETCH_QDN_RESOURCE',
         name: user,

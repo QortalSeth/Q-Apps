@@ -50,7 +50,7 @@ export const StoreList = ({ mode }: BlogListProps) => {
       const offset = stores.length
       //TODO - NAME SHOULD BE EXACT
       const query = `q-store-general`
-      const url = `http://62.141.38.192:62391/arbitrary/resources/search?service=STORE&query=${query}&limit=20&exactmatchnames=true&includemetadata=true&offset=${offset}&reverse=true`
+      const url = `/arbitrary/resources/search?service=STORE&query=${query}&limit=20&exactmatchnames=true&includemetadata=true&offset=${offset}&reverse=true`
       const response = await fetch(url, {
         method: 'GET',
         headers: {

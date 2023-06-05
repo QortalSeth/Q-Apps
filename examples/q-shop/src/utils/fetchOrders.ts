@@ -12,7 +12,7 @@ export const fetchAndEvaluateOrders = async (data: any) => {
     if (!user || !orderId) return obj
 
     try {
-      // const url = `http://62.141.38.192:62391/arbitrary/DOCUMENT_PRIVATE/${user}/${orderId}`
+      // const url = `/arbitrary/DOCUMENT_PRIVATE/${user}/${orderId}`
       // const response = await fetch(url, {
       //   method: 'GET',
       //   headers: {

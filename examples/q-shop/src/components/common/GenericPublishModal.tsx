@@ -201,7 +201,7 @@ export const GenericModal: React.FC<GenericModalProps> = ({
 
   const getListCategories = React.useCallback(async () => {
     try {
-      const url = `http://62.141.38.192:62391/arbitrary/categories`
+      const url = `/arbitrary/categories`
       const response = await fetch(url, {
         method: 'GET',
         headers: {

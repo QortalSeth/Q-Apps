@@ -104,7 +104,7 @@ export const useFetchOrders = () => {
       const shortStoreId = parts[1]
 
       const query = `q-store-order-${shortStoreId}`
-      const url = `http://62.141.38.192:62391/arbitrary/resources/search?service=DOCUMENT_PRIVATE&query=${query}&limit=20&includemetadata=true&offset=${offset}&reverse=true`
+      const url = `/arbitrary/resources/search?service=DOCUMENT_PRIVATE&query=${query}&limit=20&includemetadata=true&offset=${offset}&reverse=true`
       const response = await fetch(url, {
         method: 'GET',
         headers: {

@@ -10,7 +10,7 @@ export const fetchAndEvaluateCatalogues = async (data: any) => {
     if (!user || !catalogueId) return obj
 
     try {
-      const url = `http://62.141.38.192:62391/arbitrary/DOCUMENT/${user}/${catalogueId}`
+      const url = `/arbitrary/DOCUMENT/${user}/${catalogueId}`
       const response = await fetch(url, {
         method: 'GET',
         headers: {

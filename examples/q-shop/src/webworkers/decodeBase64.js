@@ -6,11 +6,11 @@ self.addEventListener('message', async (event) => {
   // const service = event.data.service
   // const identifier = event.data.identifier
 
-  // const url2 = `http://62.141.38.192:62391/arbitrary/VIDEO/crowetic/q-blog-video-xGR8HP?&encoding=base64`
+  // const url2 = `/arbitrary/VIDEO/crowetic/q-blog-video-xGR8HP?&encoding=base64`
   // const res = await fetch(url2);
   // const data = await res.text();
   // self.postMessage(data);
-  const url2 = `http://62.141.38.192:62391/arbitrary/VIDEO/crowetic/q-blog-video-xGR8HP`
+  const url2 = `/arbitrary/VIDEO/crowetic/q-blog-video-xGR8HP`
 
   const xhr = new XMLHttpRequest()
   xhr.open('GET', url2, true)
