@@ -7,4 +7,4 @@ The [examples](examples/) folder contains some sample Q-Apps. These can be used 
 Q-Apps support any client-side javascript frameworks or approaches. Initial examples will be in React and vanilla javascript, but these are by no means the only options for structuring a Q-App.
 
 ## Documentation
-See: [Q-Apps documentation](https://github.com/Qortal/qortal/blob/q-apps/Q-Apps.md) for developer docs and info on how to get started.
+See: [Q-Apps documentation](https://github.com/Qortal/qortal/blob/master/Q-Apps.md) for developer docs and info on how to get started.

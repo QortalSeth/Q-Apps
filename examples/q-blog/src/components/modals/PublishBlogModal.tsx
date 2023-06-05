@@ -199,7 +199,7 @@ const MyModal: React.FC<MyModalProps> = ({
           value={blogIdentifier}
           onChange={handleInputChangeId}
           fullWidth
-          inputProps={{ maxLength: 25 }}
+          inputProps={{ maxLength: 20 }}
         />
 
         <TextField
