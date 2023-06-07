@@ -9,13 +9,13 @@ const uid = new ShortUniqueId()
 interface IPublishGeneric {
   title: string
   description: string
-  base64: string
+  base64?: string
+  file?: File
   category: string
   service: string
   identifierPrefix: string
   filename: string
   editVideoIdentifier?: string | null | undefined
-  
 }
 
 export const usePublishGeneric = () => {
@@ -29,6 +29,7 @@ export const usePublishGeneric = () => {
     title,
     description,
     base64,
+    file,
     category,
     ...rest
   }: IPublishGeneric) => {
@@ -67,7 +68,7 @@ export const usePublishGeneric = () => {
       const id = uid()
 
       let identifier = `${identifierPrefix}_${id}`
-      if(editVideoIdentifier){
+      if (editVideoIdentifier) {
         identifier = editVideoIdentifier
       }
 
@@ -75,7 +76,7 @@ export const usePublishGeneric = () => {
         action: 'PUBLISH_QDN_RESOURCE',
         name: name,
         service: service,
-        data64: base64,
+        file,
         title: title,
         description: description,
         category: category,
