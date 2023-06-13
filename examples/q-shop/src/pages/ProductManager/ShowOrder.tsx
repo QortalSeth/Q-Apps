@@ -1,11 +1,22 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { ReusableModal } from '../../components/modals/ReusableModal'
-import { Box, Button, Input, Typography } from '@mui/material'
+import {
+  Box,
+  Button,
+  Input,
+  InputLabel,
+  MenuItem,
+  Select,
+  TextField,
+  Typography
+} from '@mui/material'
+import EmailIcon from '@mui/icons-material/Email'
 
 import { Descendant } from 'slate'
 import ShortUniqueId from 'short-unique-id'
 import { useDispatch, useSelector } from 'react-redux'
 import { RootState } from '../../state/store'
+import { objectToBase64 } from '../../utils/toBase64'
 
 const initialValue: Descendant[] = [
   {
@@ -15,8 +26,14 @@ const initialValue: Descendant[] = [
 ]
 const uid = new ShortUniqueId()
 
-export const ShowOrder = ({ isOpen, setIsOpen, order }: any) => {
+export const ShowOrder = ({ isOpen, setIsOpen, order, from }: any) => {
+  const [note, setNote] = useState('')
+  const [selectedStatus, setSelectedStatus] = useState('')
   const user = useSelector((state: RootState) => state.auth?.user)
+  const username = useSelector((state: RootState) => state.auth.user?.name)
+  const usernamePublicKey = useSelector(
+    (state: RootState) => state.auth.user?.publicKey
+  )
   const [paymentInfo, setPaymentInfo] = useState(null)
   const dispatch = useDispatch()
   const openModal = () => {
@@ -41,6 +58,50 @@ export const ShowOrder = ({ isOpen, setIsOpen, order }: any) => {
         setPaymentInfo(responseData)
       }
     } catch (error) {}
+  }
+
+  useEffect(() => {
+    if (from === 'ProductManager' && order) {
+      setNote(order?.note || '')
+      setSelectedStatus(order?.status || '')
+    }
+  }, [order, from])
+
+  const updateStatus = async () => {
+    try {
+      const orderStateObject: any = {
+        status: selectedStatus,
+        note
+      }
+      const orderStatusToBase64 = await objectToBase64(orderStateObject)
+
+      let res = await qortalRequest({
+        action: 'GET_NAME_DATA',
+        name: order.user
+      })
+      const address = res.owner
+      const resAddress = await qortalRequest({
+        action: 'GET_ACCOUNT_DATA',
+        address: address
+      })
+      if (!resAddress?.publicKey) throw new Error('Cannot find store owner')
+      const string = order.id
+
+      const identifier = string.replace(/(q-store)(-order)/, '$1-status$2')
+      const productRequestBody = {
+        action: 'PUBLISH_QDN_RESOURCE',
+        identifier: identifier,
+        name: username,
+        service: 'DOCUMENT_PRIVATE',
+        filename: `${order.id}_status.json`,
+        data64: orderStatusToBase64,
+        encrypt: true,
+        publicKeys: [resAddress.publicKey, usernamePublicKey]
+      }
+      await qortalRequest(productRequestBody)
+    } catch (error) {
+      console.log({ error })
+    }
   }
 
   return (
@@ -68,7 +129,24 @@ export const ShowOrder = ({ isOpen, setIsOpen, order }: any) => {
             alignItems: 'center'
           }}
         >
-          Message {order?.delivery?.customerName} on Q-Mail
+          {' '}
+          <a
+            href={`qortal://APP/Q-Mail?to=${order?.delivery?.customerName}`}
+            className="qortal-link"
+            style={{
+              width: '100%',
+              display: 'flex',
+              gap: '5px',
+              alignItems: 'center'
+            }}
+          >
+            <EmailIcon
+              sx={{
+                color: '#50e3c2'
+              }}
+            />
+            Message {order?.delivery?.customerName} on Q-Mail
+          </a>
         </Box>
 
         <Box
@@ -82,6 +160,40 @@ export const ShowOrder = ({ isOpen, setIsOpen, order }: any) => {
             width: '100%'
           }}
         >
+          {from === 'ProductManager' ? (
+            <Box>
+              <InputLabel id="status">Order Status</InputLabel>
+              <Select
+                name="status"
+                value={selectedStatus}
+                onChange={(event) => {
+                  setSelectedStatus(event.target.value)
+                }}
+                variant="outlined"
+                required
+              >
+                <MenuItem value="Received">Received</MenuItem>
+                <MenuItem value="Shipped">Shipped</MenuItem>
+                <MenuItem value="Refunded">Refunded</MenuItem>
+              </Select>
+              <TextField
+                name="note"
+                label="Note"
+                value={note}
+                variant="outlined"
+                onChange={(e) => setNote(e.target.value)}
+              />
+              <Button onClick={updateStatus} variant="contained">
+                Update Status
+              </Button>
+            </Box>
+          ) : (
+            <Box>
+              <Typography>Order Status</Typography>
+              <Typography>status: {order?.status}</Typography>
+              <Typography>{order?.note}</Typography>
+            </Box>
+          )}
           <Box>
             <Typography variant="body1" color="text.primary">
               Order Payment

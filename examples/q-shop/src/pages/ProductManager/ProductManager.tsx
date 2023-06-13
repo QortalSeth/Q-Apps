@@ -423,7 +423,12 @@ export const ProductManager = () => {
       )}
 
       <TabPanel value={valueTab} index={0}>
-        <ShowOrder isOpen={isOpen} setIsOpen={setIsOpen} order={order} />
+        <ShowOrder
+          isOpen={isOpen}
+          setIsOpen={setIsOpen}
+          order={order}
+          from="ProductManager"
+        />
         <OrderTable
           openOrder={(order) => {
             setOrder(order)

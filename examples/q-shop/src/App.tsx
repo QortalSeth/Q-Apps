@@ -13,35 +13,27 @@ import Notification from './components/common/Notification/Notification'
 import { useState } from 'react'
 import { ProductManager } from './pages/ProductManager/ProductManager'
 import { Store } from './pages/Store/Store'
+import { MyOrders } from './pages/MyOrders/MyOrders'
 
 function App() {
   const themeColor = window._qdnTheme
-
 
   return (
     <Provider store={store}>
       <ThemeProvider theme={themeColor === 'light' ? lightTheme : darkTheme}>
         <Notification />
-          <GlobalWrapper>
-            <CssBaseline />
+        <GlobalWrapper>
+          <CssBaseline />
 
-            <Routes>
-              <Route
-                path="/:user/:store/:product"
-                element={<Product />}
-              />
-             
-              <Route
-                path="/product-manager"
-                element={<ProductManager  />}
-              />
-              <Route
-                path="/:user/:store"
-                element={<Store  />}
-              />
-              <Route path="/" element={<StoreList />} />
-            </Routes>
-          </GlobalWrapper>
+          <Routes>
+            <Route path="/:user/:store/:product" element={<Product />} />
+
+            <Route path="/product-manager" element={<ProductManager />} />
+            <Route path="/my-orders" element={<MyOrders />} />
+            <Route path="/:user/:store" element={<Store />} />
+            <Route path="/" element={<StoreList />} />
+          </Routes>
+        </GlobalWrapper>
       </ThemeProvider>
     </Provider>
   )

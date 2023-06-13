@@ -281,21 +281,13 @@ const NavBar: React.FC<Props> = ({
               horizontal: 'left'
             }}
           >
-            <DropdownContainer onClick={() => navigate('/favorites')}>
+            <DropdownContainer onClick={() => navigate('/my-orders')}>
               <BookmarkIcon
                 sx={{
                   color: '#50e3c2'
                 }}
               />
-              <DropdownText>Favorites</DropdownText>
-            </DropdownContainer>
-            <DropdownContainer onClick={() => navigate('/subscriptions')}>
-              <SubscriptionsIcon
-                sx={{
-                  color: '#5f50e3'
-                }}
-              />
-              <DropdownText>Subscriptions</DropdownText>
+              <DropdownText>My Orders</DropdownText>
             </DropdownContainer>
             <DropdownContainer
               onClick={() => {

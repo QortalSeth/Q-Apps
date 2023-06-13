@@ -21,6 +21,7 @@ interface ColumnData {
   label: string
   numeric?: boolean
   width?: number
+  status?: string
 }
 
 const columns: ColumnData[] = [
@@ -32,6 +33,11 @@ const columns: ColumnData[] = [
   {
     label: 'Customer',
     dataKey: 'user'
+  },
+  {
+    label: 'Status',
+    dataKey: 'status',
+    width: 120
   },
   {
     label: 'Total',
@@ -121,6 +127,7 @@ export default function OrderTable({
   data,
   children
 }: SimpleTableProps) {
+  console.log({data})
   return (
     <Paper style={{ width: '100%' }}>
       <TableContainer component={Paper}>

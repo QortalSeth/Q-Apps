@@ -8,11 +8,12 @@ import { useDispatch, useSelector } from 'react-redux'
 import { RootState } from '../../state/store'
 import { setIsOpen } from '../../state/features/cartSlice'
 import { objectToBase64 } from '../../utils/toBase64'
+import { MAIL_SERVICE_TYPE } from '../../constants/mail'
 
 const uid = new ShortUniqueId({
   length: 10
 })
-
+const mailUid = new ShortUniqueId()
 export const Cart = () => {
   const username = useSelector((state: RootState) => state.auth.user?.name)
   const usernamePublicKey = useSelector(
@@ -121,12 +122,49 @@ export const Cart = () => {
         identifier: `q-store-order-${shortStoreId}-${orderId}`,
         name: username,
         service: 'DOCUMENT_PRIVATE',
-        filename: `order_${orderId}.json`,
-        data64: blogPostToBase64,
+        data64: blogPostToBase64
+      }
+      const mailId = mailUid()
+      let identifier = `qortal_qmail_${storeOwner.slice(0, 20)}_${address.slice(
+        -6
+      )}_mail_${mailId}`
+
+      const htmlContent = `
+        <div>this is an example of a mail from q-shop</div>
+
+      `
+
+      const mailObject: any = {
+        title: `Order for store ${shortStoreId} from ${username}`,
+        // description,
+        subject: 'New order',
+        createdAt: Date.now(),
+        version: 1,
+        attachments: [],
+        textContent: '',
+        htmlContent: htmlContent,
+        generalData: {
+          thread: []
+        },
+        recipient: storeOwner
+      }
+      const mailObjectToBase64 = await objectToBase64(mailObject)
+      let mailRequestBody: any = {
+        action: 'PUBLISH_QDN_RESOURCE',
+        name: username,
+        service: MAIL_SERVICE_TYPE,
+        data64: mailObjectToBase64,
+        identifier
+      }
+
+      // await qortalRequest(productRequestBody)
+      const multiplePublish = {
+        action: 'PUBLISH_MULTIPLE_QDN_RESOURCES',
+        resources: [productRequestBody, mailRequestBody],
         encrypt: true,
         publicKeys: [resAddress.publicKey, usernamePublicKey]
       }
-      await qortalRequest(productRequestBody)
+      await qortalRequest(multiplePublish)
     } catch (error) {
       console.log({ error })
     }

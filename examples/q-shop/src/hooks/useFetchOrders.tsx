@@ -11,6 +11,7 @@ import {
   ProductDataContainer,
   setCatalogueHashMap,
   setIsLoadingGlobal,
+  upsertMyOrders,
   upsertProducts
 } from '../state/features/globalSlice'
 import { fetchAndEvaluateCatalogues } from '../utils/fetchCatalogues'
@@ -28,6 +29,8 @@ export const useFetchOrders = () => {
   const store = useSelector(
     (state: RootState) => state.global?.currentStore?.id
   )
+  const myOrders = useSelector((state: RootState) => state.global.myOrders)
+
   const products = useSelector((state: RootState) => state.global.products)
   const listProducts = useSelector(
     (state: RootState) => state.global.listProducts
@@ -137,6 +140,53 @@ export const useFetchOrders = () => {
     }
   }, [store, orders])
 
+  const getMyOrders = React.useCallback(
+    async (name: string) => {
+      if (!store) return
+
+      try {
+        dispatch(setIsLoadingGlobal(true))
+        const offset = orders.length
+        //TODO - NAME SHOULD BE EXACT
+        const parts = store.split('q-store-general-')
+        const shortStoreId = parts[1]
+
+        const query = `q-store-order-`
+        const url = `/arbitrary/resources/search?service=DOCUMENT_PRIVATE&query=${query}&limit=20&includemetadata=true&offset=${offset}&name=${name}&reverse=true`
+        const response = await fetch(url, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        })
+        const responseData = await response.json()
+
+        const structureData = responseData.map((order: any): Order => {
+          return {
+            created: order?.created,
+            updated: order?.updated,
+            user: order.name,
+            id: order.identifier
+          }
+        })
+
+        dispatch(upsertMyOrders(structureData))
+        for (const content of structureData) {
+          if (content.user && content.id) {
+            const res = checkAndUpdateResource(content)
+            if (res) {
+              getOrder(content.user, content.id, content)
+            }
+          }
+        }
+      } catch (error) {
+      } finally {
+        dispatch(setIsLoadingGlobal(false))
+      }
+    },
+    [store, myOrders]
+  )
+
   const getProducts = React.useCallback(async () => {
     if (!store) return
 
@@ -182,6 +232,7 @@ export const useFetchOrders = () => {
     getOrders,
     getProducts,
     getCatalogue,
-    checkAndUpdateResourceCatalogue
+    checkAndUpdateResourceCatalogue,
+    getMyOrders
   }
 }

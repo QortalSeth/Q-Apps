@@ -44,6 +44,11 @@ export interface Order {
   user: string
   id: string
   totalPrice?: string
+  status?: string
+}
+
+export interface Status {
+  status: string
 }
 
 export const orderSlice = createSlice({

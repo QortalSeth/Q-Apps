@@ -1,5 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
 import { Product } from './storeSlice'
+import { Order } from './orderSlice'
 
 export interface ProductDataContainer {
   created: number
@@ -56,6 +57,7 @@ interface GlobalState {
   productsToSave: Record<string, Product>
   catalogueHashMap: Record<string, Catalogue>
   products: Product[]
+  myOrders: Order[]
 }
 const initialState: GlobalState = {
   isOpenPublishBlogModal: false,
@@ -73,7 +75,8 @@ const initialState: GlobalState = {
   },
   products: [],
   productsToSave: {},
-  catalogueHashMap: {}
+  catalogueHashMap: {},
+  myOrders: []
 }
 
 export const globalSlice = createSlice({
@@ -148,6 +151,16 @@ export const globalSlice = createSlice({
           state.products.push(product)
         }
       })
+    },
+    upsertMyOrders: (state, action) => {
+      action.payload.forEach((order: Order) => {
+        const index = state.myOrders.findIndex((p) => p.id === order.id)
+        if (index !== -1) {
+          state.myOrders[index] = order
+        } else {
+          state.myOrders.push(order)
+        }
+      })
     }
   }
 })
@@ -165,7 +178,8 @@ export const {
   setUserAvatarHash,
   setProductsToSave,
   setCatalogueHashMap,
-  upsertProducts
+  upsertProducts,
+  upsertMyOrders
 } = globalSlice.actions
 
 export default globalSlice.reducer
