@@ -270,7 +270,6 @@ export const BlogIndividualPost = () => {
   }, [user, blogFull])
 
   if (!blogContent) return null
-
   return (
     <Box
       sx={{
@@ -373,7 +372,7 @@ export const BlogIndividualPost = () => {
               </CopyToClipboard>
             </Box>
           </Tooltip>
-          <CommentSection postId={fullPostId} />
+          <CommentSection postId={fullPostId} postName={user || ''} />
         </Box>
 
         {(layoutGeneralSettings?.blogPostType === 'builder' ||

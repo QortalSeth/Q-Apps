@@ -32,6 +32,10 @@ interface QortalRequestOptions {
   blob?: Blob
   mimeType?: string
   file?: File
+  count?: number
+  query?: string
+  exactMatchNames?: boolean
+  excludeBlocked?: boolean
 }
 
 declare function qortalRequest(options: QortalRequestOptions): Promise<any>

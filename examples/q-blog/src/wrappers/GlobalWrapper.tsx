@@ -11,6 +11,7 @@ import EditBlogModal from '../components/modals/EditBlogModal'
 import {
   setCurrentBlog,
   setIsLoadingGlobal,
+  setNotifications,
   toggleEditBlogModal,
   togglePublishBlogModal
 } from '../state/features/globalSlice'
@@ -29,6 +30,8 @@ import { setNotification } from '../state/features/notificationsSlice'
 import { AudioPlayer } from '../components/common/AudioPlayer'
 import localForage from 'localforage'
 import ConsentModal from '../components/modals/ConsentModal'
+import localforage from 'localforage'
+import { Item } from '../components/common/Comments/CommentEditor'
 
 interface Props {
   children: React.ReactNode
@@ -36,12 +39,16 @@ interface Props {
 
 const uid = new ShortUniqueId()
 
+const notification = localforage.createInstance({
+  name: 'notification'
+})
+
 const GlobalWrapper: React.FC<Props> = ({ children }) => {
   const navigate = useNavigate()
   const dispatch = useDispatch()
 
   const [userAvatar, setUserAvatar] = useState<string>('')
-
+  const interval = useRef<any>(null)
   const { user } = useSelector((state: RootState) => state.auth)
   const { audios, currAudio } = useSelector((state: RootState) => state.global)
   const [hasAttemptedToFetchBlogInitial, setHasAttemptedToFetchBlogInitial] =
@@ -445,6 +452,77 @@ const GlobalWrapper: React.FC<Props> = ({ children }) => {
         })
     } catch (error) {}
   }, [user?.name])
+
+  const checkNotifications = useCallback(async (username: string) => {
+    try {
+      let notificationComments: Item[] =
+        (await notification.getItem('comments')) || []
+      notificationComments = notificationComments
+        .filter((nc) => nc.postId && nc.postName && nc.lastSeen)
+        .sort((a, b) => b.lastSeen - a.lastSeen)
+
+      let listOfNotifications = []
+      for (const comment of notificationComments) {
+        const response: any[] = await qortalRequest({
+          action: 'SEARCH_QDN_RESOURCES',
+          service: 'BLOG_COMMENT',
+          query: `_reply_${comment.id.slice(-6)}`,
+          exactMatchNames: true,
+          excludeBlocked: true,
+          limit: 1,
+          offset: 0,
+          reverse: true
+        })
+        if (response.length === 0) return
+
+        if (
+          response[0].created > comment.lastSeen &&
+          response[0].name !== username
+        ) {
+          const string = response[0].identifier
+          const startIndex = string.indexOf('blog_') + 5
+          const result = string.substr(startIndex, 12)
+          listOfNotifications.push({
+            ...response[0],
+            partialPostId: result,
+            postId: comment.postId,
+            postName: comment.postName
+          })
+        }
+      }
+      dispatch(setNotifications(listOfNotifications))
+      await qortalRequest({
+        action: 'SET_TAB_NOTIFICATIONS',
+        count: listOfNotifications.length
+      })
+    } catch (error) {
+      console.log({ error })
+    }
+  }, [])
+
+  const checkNotificationsFunc = useCallback(
+    (username: string) => {
+      let isCalling = false
+      interval.current = setInterval(async () => {
+        if (isCalling) return
+        isCalling = true
+        const res = await checkNotifications(username)
+        isCalling = false
+      }, 20000)
+    },
+    [checkNotifications]
+  )
+
+  useEffect(() => {
+    if (!user?.name) return
+    checkNotificationsFunc(user.name)
+
+    return () => {
+      if (interval?.current) {
+        clearInterval(interval.current)
+      }
+    }
+  }, [checkNotificationsFunc, user])
 
   return (
     <>

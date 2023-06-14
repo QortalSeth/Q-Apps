@@ -49,8 +49,6 @@ const ResponsiveImage: React.FC<ResponsiveImageProps> = ({
     ...style
   }
 
-  console.log({ width, height })
-
   return (
     <Box
       sx={{

@@ -5,9 +5,67 @@ import { RootState } from '../../../state/store'
 import ShortUniqueId from 'short-unique-id'
 import { setNotification } from '../../../state/features/notificationsSlice'
 import { toBase64 } from '../../../utils/toBase64'
+import localforage from 'localforage'
 const uid = new ShortUniqueId()
+
+const notification = localforage.createInstance({
+  name: 'notification'
+})
+
+const MAX_ITEMS = 10
+
+export interface Item {
+  id: string
+  lastSeen: number
+  postId: string
+  postName: string
+}
+
+export async function addItem(item: Item): Promise<void> {
+  // Get all items
+  let notificationComments: Item[] =
+    (await notification.getItem('comments')) || []
+
+  // Find the item with the same id, if it exists
+  let existingItemIndex = notificationComments.findIndex(
+    (i) => i.id === item.id
+  )
+
+  if (existingItemIndex !== -1) {
+    // If the item exists, update its date
+    notificationComments[existingItemIndex].lastSeen = item.lastSeen
+  } else {
+    // If the item doesn't exist, add it
+    notificationComments.push(item)
+
+    // If adding the item has caused us to exceed the max number of items, remove the oldest one
+    if (notificationComments.length > MAX_ITEMS) {
+      notificationComments.sort((a, b) => b.lastSeen - a.lastSeen) // sort items by date, newest first
+      notificationComments.pop() // remove the oldest item
+    }
+  }
+
+  // Store the items back into localForage
+  await notification.setItem('comments', notificationComments)
+}
+export async function updateItemDate(item: any): Promise<void> {
+  // Get all items
+  let notificationComments: Item[] =
+    (await notification.getItem('comments')) || []
+
+  // Find the item with the same id, if it exists
+  notificationComments.forEach((nc, index) => {
+    if (nc.postId === item.postId) {
+      notificationComments[index].lastSeen = item.lastSeen
+    }
+  })
+
+  // Store the items back into localForage
+  await notification.setItem('comments', notificationComments)
+}
 interface CommentEditorProps {
   postId: string
+  postName: string
   onSubmit: (obj: any) => void
   isReply?: boolean
   commentId?: string
@@ -30,6 +88,7 @@ function utf8ToBase64(inputString: string): string {
 export const CommentEditor = ({
   onSubmit,
   postId,
+  postName,
   isReply,
   commentId,
   isEdit,
@@ -38,13 +97,20 @@ export const CommentEditor = ({
   const [value, setValue] = useState<string>('')
   const dispatch = useDispatch()
   const { user } = useSelector((state: RootState) => state.auth)
+  const notifications = useSelector(
+    (state: RootState) => state.global.notifications
+  )
 
   useEffect(() => {
     if (isEdit && commentMessage) {
       setValue(commentMessage)
     }
   }, [isEdit, commentMessage])
-  const publishComment = async (identifier: string) => {
+
+  const publishComment = async (
+    identifier: string,
+    idForNotification?: string
+  ) => {
     let address
     let name
     let errorMsg = ''
@@ -88,6 +154,15 @@ export const CommentEditor = ({
           alertType: 'success'
         })
       )
+      if (idForNotification) {
+        addItem({
+          id: idForNotification,
+          lastSeen: Date.now(),
+          postId,
+          postName: postName
+        })
+      }
+
       return resourceResponse
     } catch (error: any) {
       let notificationObj = null
@@ -118,15 +193,18 @@ export const CommentEditor = ({
       const id = uid()
 
       let identifier = `qcomment_v1_qblog_${postId.slice(-12)}_${id}`
+      let idForNotification = identifier
       if (isReply && commentId) {
         identifier = `qcomment_v1_qblog_${postId.slice(
           -12
         )}_reply_${commentId.slice(-6)}_${id}`
+        idForNotification = commentId
       }
       if (isEdit && commentId) {
         identifier = commentId
       }
-      await publishComment(identifier)
+
+      await publishComment(identifier, idForNotification)
       onSubmit({
         created: Date.now(),
         identifier,

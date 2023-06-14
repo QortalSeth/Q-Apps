@@ -33,6 +33,7 @@ interface GlobalState {
   downloads: any
   showingAudioPlayer: boolean
   userAvatarHash: Record<string, string>
+  notifications: any[]
 }
 const initialState: GlobalState = {
   isOpenPublishBlogModal: false,
@@ -46,7 +47,8 @@ const initialState: GlobalState = {
   audioPostId: '',
   downloads: {},
   showingAudioPlayer: false,
-  userAvatarHash: {}
+  userAvatarHash: {},
+  notifications: []
 }
 
 export const globalSlice = createSlice({
@@ -103,6 +105,9 @@ export const globalSlice = createSlice({
       if (avatar?.name && avatar?.url) {
         state.userAvatarHash[avatar?.name] = avatar?.url
       }
+    },
+    setNotifications: (state, action) => {
+      state.notifications = action.payload
     }
   }
 })
@@ -119,7 +124,8 @@ export const {
   setAddToDownloads,
   updateDownloads,
   setShowingAudioPlayer,
-  setUserAvatarHash
+  setUserAvatarHash,
+  setNotifications
 } = globalSlice.actions
 
 export default globalSlice.reducer;
