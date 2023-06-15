@@ -48,6 +48,15 @@ export const CommentSection = ({ postId, postName }: CommentSectionProps) => {
   const notifications = useSelector(
     (state: RootState) => state.global.notifications
   )
+  const notificationCreatorComment = useSelector(
+    (state: RootState) => state.global.notificationCreatorComment
+  )
+
+  const fullNotifications = useMemo(() => {
+    return [...notificationCreatorComment, ...notifications].sort(
+      (a, b) => b.created - a.created
+    )
+  }, [notificationCreatorComment, notifications])
   const theme = useTheme()
   const onSubmit = (obj?: any, isEdit?: boolean) => {
     if (isEdit) {
@@ -144,8 +153,10 @@ export const CommentSection = ({ postId, postName }: CommentSectionProps) => {
   )
 
   const checkAndUpdateNotification = async () => {
-    const filteredNotifications = notifications.filter((notification) =>
-      postId.includes(notification?.partialPostId)
+    const filteredNotifications = fullNotifications.filter(
+      (notification) =>
+        postId.includes(notification?.partialPostId) ||
+        notification?.postId === postId
     )
     filteredNotifications.forEach((notification) => {
       if (postId) {
@@ -158,10 +169,10 @@ export const CommentSection = ({ postId, postName }: CommentSectionProps) => {
     })
   }
   useEffect(() => {
-    if (notifications && isOpen) {
+    if (fullNotifications && isOpen) {
       checkAndUpdateNotification()
     }
-  }, [notifications, isOpen])
+  }, [fullNotifications, isOpen])
 
   useEffect(() => {
     getComments()

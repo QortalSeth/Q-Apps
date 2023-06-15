@@ -34,6 +34,7 @@ interface GlobalState {
   showingAudioPlayer: boolean
   userAvatarHash: Record<string, string>
   notifications: any[]
+  notificationCreatorComment: any[]
 }
 const initialState: GlobalState = {
   isOpenPublishBlogModal: false,
@@ -48,7 +49,8 @@ const initialState: GlobalState = {
   downloads: {},
   showingAudioPlayer: false,
   userAvatarHash: {},
-  notifications: []
+  notifications: [],
+  notificationCreatorComment: []
 }
 
 export const globalSlice = createSlice({
@@ -108,6 +110,9 @@ export const globalSlice = createSlice({
     },
     setNotifications: (state, action) => {
       state.notifications = action.payload
+    },
+    setNotificationCreatorComment: (state, action) => {
+      state.notificationCreatorComment = action.payload
     }
   }
 })
@@ -125,7 +130,8 @@ export const {
   updateDownloads,
   setShowingAudioPlayer,
   setUserAvatarHash,
-  setNotifications
+  setNotifications,
+  setNotificationCreatorComment
 } = globalSlice.actions
 
 export default globalSlice.reducer;

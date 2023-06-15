@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react'
+import React, { useMemo, useRef, useState } from 'react'
 import {
   Typography,
   Box,
@@ -89,6 +89,15 @@ const NavBar: React.FC<Props> = ({
   const notifications = useSelector(
     (state: RootState) => state.global.notifications
   )
+  const notificationCreatorComment = useSelector(
+    (state: RootState) => state.global.notificationCreatorComment
+  )
+
+  const fullNotifications = useMemo(() => {
+    return [...notificationCreatorComment, ...notifications].sort(
+      (a, b) => b.created - a.created
+    )
+  }, [notificationCreatorComment, notifications])
   const location = useLocation()
   const [anchorEl, setAnchorEl] = React.useState<HTMLButtonElement | null>(null)
   const [anchorElNotification, setAnchorElNotification] =
@@ -247,7 +256,7 @@ const NavBar: React.FC<Props> = ({
             </AuthenticateButton>
           )}
           <Badge
-            badgeContent={notifications.length}
+            badgeContent={fullNotifications.length}
             color="primary"
             sx={{
               margin: '0px 12px'
@@ -285,7 +294,7 @@ const NavBar: React.FC<Props> = ({
                   overflow: 'auto'
                 }}
               >
-                {notifications.map((notification, index) => (
+                {fullNotifications.map((notification: any, index: number) => (
                   <ListItem
                     key={index}
                     divider

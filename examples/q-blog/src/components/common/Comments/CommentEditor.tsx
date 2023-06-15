@@ -53,6 +53,13 @@ export async function updateItemDate(item: any): Promise<void> {
   let notificationComments: Item[] =
     (await notification.getItem('comments')) || []
 
+  let notificationCreatorComment: any =
+    (await notification.getItem('post-comments')) || {}
+  const findPostId = notificationCreatorComment[item.postId]
+  if (findPostId) {
+    notificationCreatorComment[item.postId].lastSeen = item.lastSeen
+  }
+
   // Find the item with the same id, if it exists
   notificationComments.forEach((nc, index) => {
     if (nc.postId === item.postId) {
@@ -62,6 +69,7 @@ export async function updateItemDate(item: any): Promise<void> {
 
   // Store the items back into localForage
   await notification.setItem('comments', notificationComments)
+  await notification.setItem('post-comments', notificationCreatorComment)
 }
 interface CommentEditorProps {
   postId: string
