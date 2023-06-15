@@ -35,11 +35,8 @@ import {
   setFilterValue,
   setIsFiltering
 } from "../../../state/features/storeSlice";
-import { setIsOpen } from "../../../state/features/cartSlice";
-
 interface Props {
   isAuthenticated: boolean;
-  hasStore: boolean;
   userName: string | null;
   userAvatar: string;
   blog: any;
@@ -50,7 +47,6 @@ interface Props {
 
 const NavBar: React.FC<Props> = ({
   isAuthenticated,
-  hasStore,
   userName,
   userAvatar,
   blog,
@@ -211,32 +207,16 @@ const NavBar: React.FC<Props> = ({
             Authenticate
           </AuthenticateButton>
         )}
-        {/* {isAuthenticated &&
-          userName &&
-          hasAttemptedToFetchBlogInitial &&
-          !hasBlog && (
-            <CreateBlogButton
-              onClick={() => {
-                dispatch(toggleCreateStoreModal(true));
-              }}
-            >
-              <NewWindowSVG color="#fff" width="18" height="18" />
-              Create Store
-            </CreateBlogButton>
-          )} */}
-        {isAuthenticated &&
-          userName &&
-          hasAttemptedToFetchShopInitial &&
-          !hasStore && (
-            <StoreManagerIcon
-              color={theme.palette.text.primary}
-              height={"32"}
-              width={"32"}
-              onClickFunc={() => {
-                navigate(`/product-manager`);
-              }}
-            />
-          )}
+        {isAuthenticated && userName && hasAttemptedToFetchShopInitial && (
+          <StoreManagerIcon
+            color={theme.palette.text.primary}
+            height={"32"}
+            width={"32"}
+            onClickFunc={() => {
+              navigate(`/product-manager`);
+            }}
+          />
+        )}
         {isAuthenticated && userName && (
           <>
             <StyledButton

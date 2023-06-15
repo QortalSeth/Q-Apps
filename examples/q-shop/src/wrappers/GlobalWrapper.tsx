@@ -453,7 +453,6 @@ const GlobalWrapper: React.FC<Props> = ({ children, setTheme }) => {
       <NavBar
         setTheme={(val: string) => setTheme(val)}
         isAuthenticated={!!user?.name}
-        hasStore={!!currentStore}
         userName={user?.name || ""}
         userAvatar={userAvatar}
         blog={currentStore}
