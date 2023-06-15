@@ -83,7 +83,7 @@ export const globalSlice = createSlice({
   name: 'global',
   initialState,
   reducers: {
-    togglePublishBlogModal: (state, action) => {
+    toggleCreateStoreModal: (state, action) => {
       state.isOpenPublishBlogModal = action.payload
     },
     toggleEditBlogModal: (state, action) => {
@@ -166,7 +166,7 @@ export const globalSlice = createSlice({
 })
 
 export const {
-  togglePublishBlogModal,
+  toggleCreateStoreModal,
   setCurrentStore,
   setDataContainer,
   setIsLoadingGlobal,

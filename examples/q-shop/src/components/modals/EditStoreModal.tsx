@@ -1,4 +1,4 @@
-import React, { ChangeEvent, useState } from 'react'
+import React, { ChangeEvent, useState } from "react";
 import {
   Box,
   Button,
@@ -13,42 +13,42 @@ import {
   OutlinedInput,
   Chip,
   IconButton
-} from '@mui/material'
-import { useDispatch } from 'react-redux'
-import { togglePublishBlogModal } from '../../state/features/globalSlice'
-import AddIcon from '@mui/icons-material/Add'
-import CloseIcon from '@mui/icons-material/Close'
-import { styled } from '@mui/system'
-import ImageUploader from '../common/ImageUploader'
-import AddPhotoAlternateIcon from '@mui/icons-material/AddPhotoAlternate'
+} from "@mui/material";
+import { useDispatch } from "react-redux";
+import { toggleCreateStoreModal } from "../../state/features/globalSlice";
+import AddIcon from "@mui/icons-material/Add";
+import CloseIcon from "@mui/icons-material/Close";
+import { styled } from "@mui/system";
+import ImageUploader from "../common/ImageUploader";
+import AddPhotoAlternateIcon from "@mui/icons-material/AddPhotoAlternate";
 
 interface SelectOption {
-  id: string
-  name: string
+  id: string;
+  name: string;
 }
 
 export interface onPublishParamEdit {
-  title: string
-  description: string
-  shipsTo: string
-  location: string
-  logo: string
+  title: string;
+  description: string;
+  shipsTo: string;
+  location: string;
+  logo: string;
 }
 interface MyModalProps {
-  open: boolean
-  onClose: () => void
-  onPublish: (param: onPublishParamEdit) => Promise<void>
-  username: string
-  currentStore: any
+  open: boolean;
+  onClose: () => void;
+  onPublish: (param: onPublishParamEdit) => Promise<void>;
+  username: string;
+  currentStore: any;
 }
 
 const ChipContainer = styled(Box)({
-  display: 'flex',
-  flexWrap: 'wrap',
-  '& > *': {
-    margin: '4px'
+  display: "flex",
+  flexWrap: "wrap",
+  "& > *": {
+    margin: "4px"
   }
-})
+});
 
 const MyModal: React.FC<MyModalProps> = ({
   open,
@@ -57,21 +57,21 @@ const MyModal: React.FC<MyModalProps> = ({
   username,
   currentStore
 }) => {
-  const dispatch = useDispatch()
+  const dispatch = useDispatch();
 
-  const [title, setTitle] = useState<string>('')
-  const [description, setDescription] = useState<string>('')
-  const [location, setLocation] = useState<string>('')
-  const [shipsTo, setShipsTo] = useState<string>('')
-  const [errorMessage, setErrorMessage] = useState<string>('')
-  const [blogIdentifier, setBlogIdentifier] = useState(username || '')
-  const [logo, setLogo] = useState<string | null>(null)
+  const [title, setTitle] = useState<string>("");
+  const [description, setDescription] = useState<string>("");
+  const [location, setLocation] = useState<string>("");
+  const [shipsTo, setShipsTo] = useState<string>("");
+  const [errorMessage, setErrorMessage] = useState<string>("");
+  const [blogIdentifier, setBlogIdentifier] = useState(username || "");
+  const [logo, setLogo] = useState<string | null>(null);
   const handlePublish = async (): Promise<void> => {
     try {
-      setErrorMessage('')
+      setErrorMessage("");
       if (!logo) {
-        setErrorMessage('A logo is required')
-        return
+        setErrorMessage("A logo is required");
+        return;
       }
       await onPublish({
         title,
@@ -79,50 +79,50 @@ const MyModal: React.FC<MyModalProps> = ({
         shipsTo,
         location,
         logo
-      })
-      handleClose()
+      });
+      handleClose();
     } catch (error: any) {
-      setErrorMessage(error.message)
+      setErrorMessage(error.message);
     }
-  }
+  };
 
   React.useEffect(() => {
     if (currentStore) {
-      setTitle(currentStore?.title || '')
-      setDescription(currentStore?.description || '')
-      setLogo(currentStore?.description || null)
-      setLocation(currentStore?.location || '')
-      setShipsTo(currentStore?.shipsTo || '')
+      setTitle(currentStore?.title || "");
+      setDescription(currentStore?.description || "");
+      setLogo(currentStore?.description || null);
+      setLocation(currentStore?.location || "");
+      setShipsTo(currentStore?.shipsTo || "");
     }
-  }, [currentStore])
+  }, [currentStore]);
 
   const handleClose = (): void => {
-    setTitle('')
-    setDescription('')
-    setErrorMessage('')
-    dispatch(togglePublishBlogModal(false))
-    onClose()
-  }
+    setTitle("");
+    setDescription("");
+    setErrorMessage("");
+    dispatch(toggleCreateStoreModal(false));
+    onClose();
+  };
 
   const handleInputChangeId = (event: ChangeEvent<HTMLInputElement>) => {
     // Replace any non-alphanumeric and non-space characters with an empty string
     // Replace multiple spaces with a single dash and remove any dashes that come one after another
     let newValue = event.target.value
-      .replace(/[^a-zA-Z0-9\s-]/g, '')
-      .replace(/\s+/g, '-')
-      .replace(/-+/g, '-')
-      .trim()
+      .replace(/[^a-zA-Z0-9\s-]/g, "")
+      .replace(/\s+/g, "-")
+      .replace(/-+/g, "-")
+      .trim();
 
-    if (newValue.toLowerCase().includes('post')) {
+    if (newValue.toLowerCase().includes("post")) {
       // Replace the 'post' string with an empty string
-      newValue = newValue.replace(/post/gi, '')
+      newValue = newValue.replace(/post/gi, "");
     }
-    if (newValue.toLowerCase().includes('q-blog')) {
+    if (newValue.toLowerCase().includes("q-blog")) {
       // Replace the 'q-blog' string with an empty string
-      newValue = newValue.replace(/q-blog/gi, '')
+      newValue = newValue.replace(/q-blog/gi, "");
     }
-    setBlogIdentifier(newValue)
-  }
+    setBlogIdentifier(newValue);
+  };
 
   return (
     <Modal
@@ -133,19 +133,19 @@ const MyModal: React.FC<MyModalProps> = ({
     >
       <Box
         sx={{
-          position: 'absolute',
-          top: '50%',
-          left: '50%',
-          transform: 'translate(-50%, -50%)',
+          position: "absolute",
+          top: "50%",
+          left: "50%",
+          transform: "translate(-50%, -50%)",
           width: 400,
-          bgcolor: 'background.paper',
+          bgcolor: "background.paper",
           boxShadow: 24,
           p: 4,
-          display: 'flex',
-          flexDirection: 'column',
+          display: "flex",
+          flexDirection: "column",
           gap: 2,
-          overflowY: 'auto',
-          maxHeight: '95vh'
+          overflowY: "auto",
+          maxHeight: "95vh"
         }}
       >
         <Typography id="modal-title" variant="h6" component="h2">
@@ -154,9 +154,9 @@ const MyModal: React.FC<MyModalProps> = ({
         <ImageUploader onPick={(img: string) => setLogo(img)}>
           <AddPhotoAlternateIcon
             sx={{
-              height: '20px',
-              width: 'auto',
-              cursor: 'pointer'
+              height: "20px",
+              width: "auto",
+              cursor: "pointer"
             }}
           ></AddPhotoAlternateIcon>
         </ImageUploader>
@@ -220,7 +220,7 @@ const MyModal: React.FC<MyModalProps> = ({
             {errorMessage}
           </Typography>
         )}
-        <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1 }}>
+        <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 1 }}>
           <Button variant="outlined" color="error" onClick={handleClose}>
             Cancel
           </Button>
@@ -230,7 +230,7 @@ const MyModal: React.FC<MyModalProps> = ({
         </Box>
       </Box>
     </Modal>
-  )
-}
+  );
+};
 
-export default MyModal
+export default MyModal;
