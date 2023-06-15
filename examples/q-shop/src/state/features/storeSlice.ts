@@ -45,13 +45,13 @@ export interface Product {
 export interface Store {
   title: string
   description: string
-  created: number | string
+  created: number
   owner: string
   id: string
   category?: string
   categoryName?: string
   tags?: string[]
-  updated?: number | string
+  updated?: number
   isValid?: boolean
 
   location?: string
@@ -98,6 +98,10 @@ export const storeSlice = createSlice({
     addToHashMap: (state, action) => {
       const post = action.payload
       state.hashMapProducts[post.id] = post
+    },
+    addToHashMapStores: (state, action) => {
+      const store = action.payload
+      state.hashMapStores[store.id] = store
     },
     updateInHashMap: (state, action) => {
       const { id } = action.payload
@@ -169,7 +173,8 @@ export const {
   upsertFilteredPosts,
   addFilteredPosts,
   setIsFiltering,
-  setFilterValue
+  setFilterValue,
+  addToHashMapStores
 } = storeSlice.actions
 
 export default storeSlice.reducer
