@@ -36,3 +36,17 @@ export const checkStructureMailMessages = (content: any) => {
 
   return isValid
 }
+
+export const checkStructureStore = (content: any) => {
+  let isValid = true
+  // if (!content?.title) isValid = false
+  // if (!content?.created) isValid = false
+  // if (!content?.description) isValid = false
+  // if (!content?.type) isValid = false
+  // if (!Array.isArray(content?.images)) isValid = false
+  // if (!Array.isArray(content?.price)) isValid = false
+
+
+  return isValid
+}
+

@@ -5,8 +5,12 @@ import { useNavigate } from "react-router-dom";
 import { addUser } from "../state/features/authSlice";
 import ShortUniqueId from "short-unique-id";
 import { RootState } from "../state/store";
-import PublishBlogModal from "../components/modals/PublishBlogModal";
-import EditBlogModal from "../components/modals/EditBlogModal";
+import PublishStoreModal, {
+  onPublishParam
+} from "../components/modals/PublishStoreModal";
+import EditBlogModal, {
+  onPublishParamEdit
+} from "../components/modals/EditStoreModal";
 
 import {
   setCurrentStore,
@@ -212,19 +216,21 @@ const GlobalWrapper: React.FC<Props> = ({ children, setTheme }) => {
   }, []);
 
   const createStore = React.useCallback(
-    async (
-      title: string,
-      description: string,
-      category: string,
-      tags: string[],
-      blogIdentifier: string
-    ) => {
+    async ({
+      title,
+      description,
+      location,
+      shipsTo,
+      blogIdentifier,
+      logo
+    }: onPublishParam) => {
       if (!user || !user.name)
         throw new Error("Cannot publish: You do not have a Qortal name");
       if (!title) throw new Error("A title is required");
       if (!description) throw new Error("A description is required");
+      if (!location) throw new Error("A location is required");
+      if (!shipsTo) throw new Error("Ships to is required");
       const name = user.name;
-      const id = uid();
       let formatBlogIdentifier = blogIdentifier;
       if (formatBlogIdentifier.endsWith("-")) {
         formatBlogIdentifier = formatBlogIdentifier.slice(0, -1);
@@ -241,18 +247,14 @@ const GlobalWrapper: React.FC<Props> = ({ children, setTheme }) => {
         throw new Error("The store identifier already exists");
       }
 
-      const formattedTags: { [key: string]: string } = {};
-      tags.forEach((tag: string, i: number) => {
-        formattedTags[`tag${i + 1}`] = tag;
-      });
-
       const blogobj = {
-        title: "My Store",
-        description: "This is a description of my store",
-        location: "Canada",
-        shipsTo: "Worldwide",
+        title,
+        description,
+        location,
+        shipsTo,
         created: Date.now(),
-        shortStoreId: formatBlogIdentifier
+        shortStoreId: formatBlogIdentifier,
+        logo
       };
       const dataContainer = {
         storeId: identifier,
@@ -271,9 +273,7 @@ const GlobalWrapper: React.FC<Props> = ({ children, setTheme }) => {
           filename: "store.json",
           title,
           description,
-          category,
-          identifier: identifier,
-          ...formattedTags
+          identifier: identifier
         });
         const resourceResponse2 = await qortalRequest({
           action: "PUBLISH_QDN_RESOURCE",
@@ -292,9 +292,7 @@ const GlobalWrapper: React.FC<Props> = ({ children, setTheme }) => {
 
         const blogfullObj = {
           ...blogobj,
-          blogId: identifier,
-          category,
-          tags
+          blogId: identifier
         };
 
         dispatch(setCurrentStore(blogfullObj));
@@ -341,6 +339,86 @@ const GlobalWrapper: React.FC<Props> = ({ children, setTheme }) => {
     [user]
   );
 
+  const editStore = React.useCallback(
+    async ({
+      title,
+      description,
+      location,
+      shipsTo,
+      logo
+    }: onPublishParamEdit) => {
+      if (!user || !user.name || !currentStore)
+        throw new Error("Cannot publish: You do not have a Qortal name");
+      if (!title) throw new Error("A title is required");
+      if (!description) throw new Error("A description is required");
+      if (!location) throw new Error("A location is required");
+      if (!shipsTo) throw new Error("Ships to is required");
+      const name = user.name;
+
+      const blogobj = {
+        ...currentStore,
+        title,
+        description,
+        location,
+        shipsTo,
+        logo
+      };
+      const blogPostToBase64 = await objectToBase64(blogobj);
+      try {
+        const resourceResponse = await qortalRequest({
+          action: "PUBLISH_QDN_RESOURCE",
+          name: name,
+          service: "STORE",
+          data64: blogPostToBase64,
+          filename: "store.json",
+          title,
+          description,
+          identifier: currentStore.id
+        });
+
+        await new Promise<void>((res, rej) => {
+          setTimeout(() => {
+            res();
+          }, 1000);
+        });
+
+        dispatch(setCurrentStore(blogobj));
+        dispatch(
+          setNotification({
+            msg: "Store successfully updated",
+            alertType: "success"
+          })
+        );
+      } catch (error: any) {
+        let notificationObj: any = null;
+        if (typeof error === "string") {
+          notificationObj = {
+            msg: error || "Failed to update blog",
+            alertType: "error"
+          };
+        } else if (typeof error?.error === "string") {
+          notificationObj = {
+            msg: error?.error || "Failed to update blog",
+            alertType: "error"
+          };
+        } else {
+          notificationObj = {
+            msg: error?.message || "Failed to update blog",
+            alertType: "error"
+          };
+        }
+        if (!notificationObj) return;
+        dispatch(setNotification(notificationObj));
+        if (error instanceof Error) {
+          throw new Error(error.message);
+        } else {
+          throw new Error("An unknown error occurred");
+        }
+      }
+    },
+    [user, currentStore]
+  );
+
   React.useEffect(() => {
     askForAccountInformation();
   }, []);
@@ -357,13 +435,21 @@ const GlobalWrapper: React.FC<Props> = ({ children, setTheme }) => {
       {isLoadingGlobal && <PageLoader />}
 
       {isOpenPublishBlogModal && user?.name && (
-        <PublishBlogModal
+        <PublishStoreModal
           open={isOpenPublishBlogModal}
           onClose={onClosePublishBlogModal}
           onPublish={createStore}
           username={user?.name || ""}
         />
       )}
+
+      <EditBlogModal
+        open={isOpenEditBlogModal}
+        onClose={onCloseEditBlogModal}
+        onPublish={editStore}
+        currentStore={currentStore}
+        username={user?.name || ""}
+      />
       <NavBar
         setTheme={(val: string) => setTheme(val)}
         isAuthenticated={!!user?.name}

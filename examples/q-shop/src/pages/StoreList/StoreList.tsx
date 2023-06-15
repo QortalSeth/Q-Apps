@@ -18,6 +18,7 @@ import Masonry from 'react-masonry-css'
 import ContextMenuResource from '../../components/common/ContextMenu/ContextMenuResource'
 import { setIsLoadingGlobal } from '../../state/features/globalSlice'
 import { Store } from '../../state/features/storeSlice'
+import { useFetchStores } from '../../hooks/useFetchStores'
 
 const breakpointColumnsObj = {
   default: 5,
@@ -38,11 +39,11 @@ export const StoreList = ({ mode }: BlogListProps) => {
   const hashMapStores = useSelector(
     (state: RootState) => state.store.hashMapStores
   )
+  const { getStore, checkAndUpdateResource } = useFetchStores()
   // const stores = useSelector(
   //   (state: RootState) => state.store.stores
   // )
   const navigate = useNavigate()
-  const {} = useFetchProducts()
 
   const getUserStores = React.useCallback(async () => {
     try {
@@ -66,7 +67,8 @@ export const StoreList = ({ mode }: BlogListProps) => {
           categoryName: storeItem?.metadata?.categoryName,
           tags: storeItem?.metadata?.tags || [],
           description: storeItem?.metadata?.description,
-          created: '',
+          created: storeItem.created,
+          updated: storeItem.updated,
           owner: storeItem.name,
           id: storeItem.identifier
         }
@@ -82,6 +84,17 @@ export const StoreList = ({ mode }: BlogListProps) => {
         }
       })
       setStores(copiedStores)
+      for (const content of structureData) {
+        if (content.owner && content.id) {
+          const res = checkAndUpdateResource({
+            id: content.id,
+            updated: content.updated
+          })
+          if (res) {
+            getStore(content.owner, content.id, content)
+          }
+        }
+      }
     } catch (error) {
     } finally {
       dispatch(setIsLoadingGlobal(false))
@@ -91,6 +104,7 @@ export const StoreList = ({ mode }: BlogListProps) => {
     await getUserStores()
   }, [getUserStores, user?.name])
 
+  console.log({ stores, hashMapStores })
   return (
     <>
       <Masonry
@@ -104,9 +118,9 @@ export const StoreList = ({ mode }: BlogListProps) => {
           if (existingStore) {
             storeItem = existingStore
           }
-          const storeId = store?.id || ''
-          const storeOwner = store?.owner || ''
-          const storeTitle = store?.title || 'missing metadata'
+          const storeId = storeItem?.id || ''
+          const storeOwner = storeItem?.owner || ''
+          const storeTitle = storeItem?.title || 'missing metadata'
           return (
             <Box
               sx={{

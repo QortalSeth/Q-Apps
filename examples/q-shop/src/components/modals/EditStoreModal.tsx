@@ -19,21 +19,27 @@ import { toggleCreateStoreModal } from "../../state/features/globalSlice";
 import AddIcon from "@mui/icons-material/Add";
 import CloseIcon from "@mui/icons-material/Close";
 import { styled } from "@mui/system";
+import ImageUploader from "../common/ImageUploader";
+import AddPhotoAlternateIcon from "@mui/icons-material/AddPhotoAlternate";
+
 interface SelectOption {
   id: string;
   name: string;
 }
+
+export interface onPublishParamEdit {
+  title: string;
+  description: string;
+  shipsTo: string;
+  location: string;
+  logo: string;
+}
 interface MyModalProps {
   open: boolean;
   onClose: () => void;
-  onPublish: (
-    title: string,
-    description: string,
-    category: string,
-    tags: string[],
-    blogIdentifier: string
-  ) => Promise<void>;
+  onPublish: (param: onPublishParamEdit) => Promise<void>;
   username: string;
+  currentStore: any;
 }
 
 const ChipContainer = styled(Box)({
@@ -48,34 +54,47 @@ const MyModal: React.FC<MyModalProps> = ({
   open,
   onClose,
   onPublish,
-  username
+  username,
+  currentStore
 }) => {
   const dispatch = useDispatch();
 
   const [title, setTitle] = useState<string>("");
   const [description, setDescription] = useState<string>("");
+  const [location, setLocation] = useState<string>("");
+  const [shipsTo, setShipsTo] = useState<string>("");
   const [errorMessage, setErrorMessage] = useState<string>("");
-  const [selectedOption, setSelectedOption] = useState<SelectOption | null>(
-    null
-  );
-  const [inputValue, setInputValue] = useState<string>("");
-  const [chips, setChips] = useState<string[]>([]);
   const [blogIdentifier, setBlogIdentifier] = useState(username || "");
-  const [options, setOptions] = useState<SelectOption[]>([]);
+  const [logo, setLogo] = useState<string | null>(null);
   const handlePublish = async (): Promise<void> => {
     try {
-      await onPublish(
+      setErrorMessage("");
+      if (!logo) {
+        setErrorMessage("A logo is required");
+        return;
+      }
+      await onPublish({
         title,
         description,
-        selectedOption?.id || "",
-        chips,
-        blogIdentifier
-      );
+        shipsTo,
+        location,
+        logo
+      });
       handleClose();
     } catch (error: any) {
       setErrorMessage(error.message);
     }
   };
+
+  React.useEffect(() => {
+    if (currentStore) {
+      setTitle(currentStore?.title || "");
+      setDescription(currentStore?.description || "");
+      setLogo(currentStore?.description || null);
+      setLocation(currentStore?.location || "");
+      setShipsTo(currentStore?.shipsTo || "");
+    }
+  }, [currentStore]);
 
   const handleClose = (): void => {
     setTitle("");
@@ -84,58 +103,6 @@ const MyModal: React.FC<MyModalProps> = ({
     dispatch(toggleCreateStoreModal(false));
     onClose();
   };
-
-  const handleOptionChange = (event: SelectChangeEvent<string>) => {
-    const optionId = event.target.value;
-    const selectedOption = options.find((option) => option.id === optionId);
-    setSelectedOption(selectedOption || null);
-  };
-
-  const handleChipDelete = (index: number) => {
-    const newChips = [...chips];
-    newChips.splice(index, 1);
-    setChips(newChips);
-  };
-
-  const handleInputChange = (event: any) => {
-    setInputValue(event.target.value);
-  };
-
-  const handleInputKeyDown = (event: any) => {
-    if (event.key === "Enter" && inputValue !== "") {
-      if (chips.length < 5) {
-        setChips([...chips, inputValue]);
-        setInputValue("");
-      } else {
-        event.preventDefault();
-      }
-    }
-  };
-
-  const addChip = () => {
-    if (chips.length < 5) {
-      setChips([...chips, inputValue]);
-      setInputValue("");
-    }
-  };
-
-  const getListCategories = React.useCallback(async () => {
-    try {
-      const url = `/arbitrary/categories`;
-      const response = await fetch(url, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json"
-        }
-      });
-      const responseData = await response.json();
-      setOptions(responseData);
-    } catch (error) {}
-  }, []);
-
-  React.useEffect(() => {
-    getListCategories();
-  }, [getListCategories]);
 
   const handleInputChangeId = (event: ChangeEvent<HTMLInputElement>) => {
     // Replace any non-alphanumeric and non-space characters with an empty string
@@ -184,6 +151,15 @@ const MyModal: React.FC<MyModalProps> = ({
         <Typography id="modal-title" variant="h6" component="h2">
           Create blog
         </Typography>
+        <ImageUploader onPick={(img: string) => setLogo(img)}>
+          <AddPhotoAlternateIcon
+            sx={{
+              height: "20px",
+              width: "auto",
+              cursor: "pointer"
+            }}
+          ></AddPhotoAlternateIcon>
+        </ImageUploader>
         <TextField
           id="modal-title-input"
           label="Url Preview"
@@ -200,6 +176,8 @@ const MyModal: React.FC<MyModalProps> = ({
           onChange={handleInputChangeId}
           fullWidth
           inputProps={{ maxLength: 25 }}
+          required
+          disabled={true}
         />
 
         <TextField
@@ -208,6 +186,7 @@ const MyModal: React.FC<MyModalProps> = ({
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           fullWidth
+          required
         />
         <TextField
           id="modal-description-input"
@@ -217,49 +196,25 @@ const MyModal: React.FC<MyModalProps> = ({
           multiline
           rows={4}
           fullWidth
+          required
         />
-        {options.length > 0 && (
-          <FormControl fullWidth sx={{ marginBottom: 2 }}>
-            <InputLabel id="Category">Select a Category</InputLabel>
-            <Select
-              labelId="Category"
-              input={<OutlinedInput label="Select a Category" />}
-              value={selectedOption?.id || ""}
-              onChange={handleOptionChange}
-            >
-              {options.map((option) => (
-                <MenuItem key={option.id} value={option.id}>
-                  {option.name}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-        )}
-        <FormControl fullWidth sx={{ marginBottom: 2 }}>
-          <Box sx={{ display: "flex", alignItems: "flex-end" }}>
-            <TextField
-              label="Add a tag"
-              value={inputValue}
-              onChange={handleInputChange}
-              onKeyDown={handleInputKeyDown}
-              disabled={chips.length === 3}
-            />
-
-            <IconButton onClick={addChip} disabled={chips.length === 3}>
-              <AddIcon />
-            </IconButton>
-          </Box>
-          <ChipContainer>
-            {chips.map((chip, index) => (
-              <Chip
-                key={index}
-                label={chip}
-                onDelete={() => handleChipDelete(index)}
-                deleteIcon={<CloseIcon />}
-              />
-            ))}
-          </ChipContainer>
-        </FormControl>
+        <TextField
+          id="modal-location-input"
+          label="Location"
+          value={location}
+          onChange={(e) => setLocation(e.target.value)}
+          fullWidth
+          required
+        />
+        <TextField
+          id="modal-shipsTo-input"
+          label="Ships To"
+          value={shipsTo}
+          onChange={(e) => setShipsTo(e.target.value)}
+          fullWidth
+          required
+        />
+        <FormControl fullWidth sx={{ marginBottom: 2 }}></FormControl>
         {errorMessage && (
           <Typography color="error" variant="body1">
             {errorMessage}
