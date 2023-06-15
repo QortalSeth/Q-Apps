@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { CommentEditor } from './CommentEditor'
+import { CommentEditor, addItem, updateItemDate } from './CommentEditor'
 import { Comment } from './Comment'
 import { Box, Button, Drawer, Typography, useTheme } from '@mui/material'
 import { styled } from '@mui/system'
@@ -7,8 +7,11 @@ import CloseIcon from '@mui/icons-material/Close'
 import { useSelector } from 'react-redux'
 import { RootState } from '../../../state/store'
 import CommentIcon from '@mui/icons-material/Comment'
+import { useNavigate, useLocation } from 'react-router-dom'
+
 interface CommentSectionProps {
   postId: string
+  postName: string
 }
 
 const Panel = styled('div')`
@@ -35,11 +38,25 @@ const Panel = styled('div')`
     background-color: #555;
   }
 `
-export const CommentSection = ({ postId }: CommentSectionProps) => {
+export const CommentSection = ({ postId, postName }: CommentSectionProps) => {
+  const navigate = useNavigate()
+  const location = useLocation()
   const [listComments, setListComments] = useState<any[]>([])
   const [isOpen, setIsOpen] = useState<boolean>(false)
   const { user } = useSelector((state: RootState) => state.auth)
   const [newMessages, setNewMessages] = useState(0)
+  const notifications = useSelector(
+    (state: RootState) => state.global.notifications
+  )
+  const notificationCreatorComment = useSelector(
+    (state: RootState) => state.global.notificationCreatorComment
+  )
+
+  const fullNotifications = useMemo(() => {
+    return [...notificationCreatorComment, ...notifications].sort(
+      (a, b) => b.created - a.created
+    )
+  }, [notificationCreatorComment, notifications])
   const theme = useTheme()
   const onSubmit = (obj?: any, isEdit?: boolean) => {
     if (isEdit) {
@@ -63,6 +80,29 @@ export const CommentSection = ({ postId }: CommentSectionProps) => {
       }
     ])
   }
+
+  useEffect(() => {
+    const query = new URLSearchParams(location.search)
+    let commentVar = query?.get('comment')
+    if (commentVar) {
+      if (commentVar && commentVar.endsWith('/')) {
+        commentVar = commentVar.slice(0, -1)
+      }
+      setIsOpen(true)
+      if (listComments.length > 0) {
+        const el = document.getElementById(commentVar)
+        if (el) {
+          el.scrollIntoView()
+          el.classList.add('glow')
+          setTimeout(() => {
+            el.classList.remove('glow')
+          }, 2000)
+        }
+        navigate(location.pathname, { replace: true })
+      }
+    }
+  }, [navigate, location, listComments])
+
   const getComments = useCallback(
     async (isNewMessages?: boolean, numberOfComments?: number) => {
       let offset: number = 0
@@ -111,6 +151,28 @@ export const CommentSection = ({ postId }: CommentSectionProps) => {
     },
     [postId]
   )
+
+  const checkAndUpdateNotification = async () => {
+    const filteredNotifications = fullNotifications.filter(
+      (notification) =>
+        postId.includes(notification?.partialPostId) ||
+        notification?.postId === postId
+    )
+    filteredNotifications.forEach((notification) => {
+      if (postId) {
+        updateItemDate({
+          id: notification?.identifier,
+          lastSeen: Date.now(),
+          postId
+        })
+      }
+    })
+  }
+  useEffect(() => {
+    if (fullNotifications && isOpen) {
+      checkAndUpdateNotification()
+    }
+  }, [fullNotifications, isOpen])
 
   useEffect(() => {
     getComments()
@@ -241,7 +303,19 @@ export const CommentSection = ({ postId }: CommentSectionProps) => {
             >
               {newMessages > 0 && (
                 <Button
-                  onClick={() => getComments(true, listComments.length)}
+                  onClick={() => {
+                    // addItem({
+                    //   id: notification.identifier,
+                    //   lastSeen: Date.now(),
+                    //   postId
+                    // })
+                    updateItemDate({
+                      id: '',
+                      lastSeen: Date.now(),
+                      postId
+                    })
+                    getComments(true, listComments.length)
+                  }}
                   variant="contained"
                   size="small"
                 >
@@ -285,6 +359,7 @@ export const CommentSection = ({ postId }: CommentSectionProps) => {
                     comment={comment}
                     onSubmit={onSubmit}
                     postId={postId}
+                    postName={postName}
                   />
                 )
               })}
@@ -298,7 +373,11 @@ export const CommentSection = ({ postId }: CommentSectionProps) => {
               flex: '0 0 100px'
             }}
           >
-            <CommentEditor onSubmit={onSubmit} postId={postId} />
+            <CommentEditor
+              onSubmit={onSubmit}
+              postId={postId}
+              postName={postName}
+            />
           </Box>
         </Panel>
       </Drawer>

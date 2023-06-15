@@ -13,6 +13,8 @@ import AttachFileIcon from '@mui/icons-material/AttachFile'
 import CloseIcon from '@mui/icons-material/Close'
 import CreateIcon from '@mui/icons-material/Create'
 import { setNotification } from '../../state/features/notificationsSlice'
+import { useNavigate, useLocation } from 'react-router-dom';
+
 import {
   objectToBase64,
   objectToUint8Array,
@@ -65,7 +67,9 @@ export const NewMessage = ({
     message:
       'To keep yourself anonymous remember to not use the same alias as the person you are messaging'
   })
+  const navigate = useNavigate();
   const dispatch = useDispatch()
+  const location = useLocation()
   const { getRootProps, getInputProps } = useDropzone({
     maxSize,
     onDrop: (acceptedFiles) => {
@@ -96,6 +100,25 @@ export const NewMessage = ({
     setIsOpen(false)
     setAliasValue('')
   }
+
+  console.log({location})
+  useEffect(() => {
+   const query = new URLSearchParams(location.search);
+    let toVar = query?.get('to')
+    console.log({toVar})
+    if(
+      toVar
+    ){
+      if (toVar && toVar.endsWith('/')) {
+        toVar = toVar.slice(0, -1);
+      }
+      setDestinationName(toVar); // Save the value to state
+      setIsOpen(true)
+      navigate(location.pathname, { replace: true }); // Remove query from the URL
+    }
+ 
+  }, [navigate, location]);
+
   useEffect(() => {
     if (replyTo) {
       setIsOpen(true)
