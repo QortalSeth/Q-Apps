@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState } from "react";
 import {
   Box,
   Button,
@@ -13,35 +13,35 @@ import {
   OutlinedInput,
   Chip,
   IconButton
-} from '@mui/material'
-import { useDispatch } from 'react-redux'
-import { togglePublishBlogModal } from '../../state/features/globalSlice'
-import AddIcon from '@mui/icons-material/Add'
-import CloseIcon from '@mui/icons-material/Close'
-import { styled } from '@mui/system'
+} from "@mui/material";
+import { useDispatch } from "react-redux";
+import { toggleCreateStoreModal } from "../../state/features/globalSlice";
+import AddIcon from "@mui/icons-material/Add";
+import CloseIcon from "@mui/icons-material/Close";
+import { styled } from "@mui/system";
 interface SelectOption {
-  id: string
-  name: string
+  id: string;
+  name: string;
 }
 interface MyModalProps {
-  open: boolean
-  onClose: () => void
+  open: boolean;
+  onClose: () => void;
   onPublish: (
     title: string,
     description: string,
     category: string,
     tags: string[]
-  ) => Promise<void>
-  currentBlog: any
+  ) => Promise<void>;
+  currentBlog: any;
 }
 
 const ChipContainer = styled(Box)({
-  display: 'flex',
-  flexWrap: 'wrap',
-  '& > *': {
-    margin: '4px'
+  display: "flex",
+  flexWrap: "wrap",
+  "& > *": {
+    margin: "4px"
   }
-})
+});
 
 const MyModal: React.FC<MyModalProps> = ({
   open,
@@ -49,98 +49,98 @@ const MyModal: React.FC<MyModalProps> = ({
   onPublish,
   currentBlog
 }) => {
-  const dispatch = useDispatch()
+  const dispatch = useDispatch();
 
-  const [title, setTitle] = useState<string>('')
-  const [description, setDescription] = useState<string>('')
-  const [errorMessage, setErrorMessage] = useState<string>('')
+  const [title, setTitle] = useState<string>("");
+  const [description, setDescription] = useState<string>("");
+  const [errorMessage, setErrorMessage] = useState<string>("");
   const [selectedOption, setSelectedOption] = useState<SelectOption | null>(
     null
-  )
-  const [inputValue, setInputValue] = useState<string>('')
-  const [chips, setChips] = useState<string[]>([])
+  );
+  const [inputValue, setInputValue] = useState<string>("");
+  const [chips, setChips] = useState<string[]>([]);
 
-  const [options, setOptions] = useState<SelectOption[]>([])
+  const [options, setOptions] = useState<SelectOption[]>([]);
   React.useEffect(() => {
     if (currentBlog) {
-      setTitle(currentBlog?.title || '')
-      setDescription(currentBlog?.description || '')
+      setTitle(currentBlog?.title || "");
+      setDescription(currentBlog?.description || "");
       const findCategory = options.find(
         (option) => option.id === currentBlog?.category
-      )
-      if (!findCategory) return
-      setSelectedOption(findCategory)
-      if (!currentBlog?.tags || !Array.isArray(currentBlog.tags)) return
-      setChips(currentBlog.tags)
+      );
+      if (!findCategory) return;
+      setSelectedOption(findCategory);
+      if (!currentBlog?.tags || !Array.isArray(currentBlog.tags)) return;
+      setChips(currentBlog.tags);
     }
-  }, [currentBlog, options])
+  }, [currentBlog, options]);
 
   const handlePublish = async (): Promise<void> => {
     try {
-      await onPublish(title, description, selectedOption?.id || '', chips)
-      handleClose()
+      await onPublish(title, description, selectedOption?.id || "", chips);
+      handleClose();
     } catch (error: any) {
-      setErrorMessage(error.message)
+      setErrorMessage(error.message);
     }
-  }
+  };
 
   const handleClose = (): void => {
-    setErrorMessage('')
-    dispatch(togglePublishBlogModal(false))
-    onClose()
-  }
+    setErrorMessage("");
+    dispatch(toggleCreateStoreModal(false));
+    onClose();
+  };
 
   const handleOptionChange = (event: SelectChangeEvent<string>) => {
-    const optionId = event.target.value
-    const selectedOption = options.find((option) => option.id === optionId)
-    setSelectedOption(selectedOption || null)
-  }
+    const optionId = event.target.value;
+    const selectedOption = options.find((option) => option.id === optionId);
+    setSelectedOption(selectedOption || null);
+  };
 
   const handleChipDelete = (index: number) => {
-    const newChips = [...chips]
-    newChips.splice(index, 1)
-    setChips(newChips)
-  }
+    const newChips = [...chips];
+    newChips.splice(index, 1);
+    setChips(newChips);
+  };
 
   const handleInputChange = (event: any) => {
-    setInputValue(event.target.value)
-  }
+    setInputValue(event.target.value);
+  };
 
   const handleInputKeyDown = (event: any) => {
-    if (event.key === 'Enter' && inputValue !== '') {
+    if (event.key === "Enter" && inputValue !== "") {
       if (chips.length < 5) {
-        setChips([...chips, inputValue])
-        setInputValue('')
+        setChips([...chips, inputValue]);
+        setInputValue("");
       } else {
-        event.preventDefault()
+        event.preventDefault();
       }
     }
-  }
+  };
 
   const addChip = () => {
     if (chips.length < 5) {
-      setChips([...chips, inputValue])
-      setInputValue('')
+      setChips([...chips, inputValue]);
+      setInputValue("");
     }
-  }
+  };
 
   const getListCategories = React.useCallback(async () => {
     try {
-      const url = `/arbitrary/categories`
+      const url = `/arbitrary/categories`;
       const response = await fetch(url, {
-        method: 'GET',
+        method: "GET",
         headers: {
-          'Content-Type': 'application/json'
+          "Content-Type": "application/json"
         }
-      })
-      const responseData = await response.json()
-      setOptions(responseData)
+      });
+      const responseData = await response.json();
+      setOptions(responseData);
     } catch (error) {}
-  }, [])
+  }, []);
 
   React.useEffect(() => {
-    getListCategories()
-  }, [getListCategories])
+    getListCategories();
+  }, [getListCategories]);
 
   return (
     <Modal
@@ -151,16 +151,16 @@ const MyModal: React.FC<MyModalProps> = ({
     >
       <Box
         sx={{
-          position: 'absolute',
-          top: '50%',
-          left: '50%',
-          transform: 'translate(-50%, -50%)',
+          position: "absolute",
+          top: "50%",
+          left: "50%",
+          transform: "translate(-50%, -50%)",
           width: 400,
-          bgcolor: 'background.paper',
+          bgcolor: "background.paper",
           boxShadow: 24,
           p: 4,
-          display: 'flex',
-          flexDirection: 'column',
+          display: "flex",
+          flexDirection: "column",
           gap: 2
         }}
       >
@@ -189,7 +189,7 @@ const MyModal: React.FC<MyModalProps> = ({
             <Select
               labelId="Category"
               input={<OutlinedInput label="Select a Category" />}
-              value={selectedOption?.id || ''}
+              value={selectedOption?.id || ""}
               onChange={handleOptionChange}
             >
               {options.map((option) => (
@@ -202,7 +202,7 @@ const MyModal: React.FC<MyModalProps> = ({
         )}
 
         <FormControl fullWidth sx={{ marginBottom: 2 }}>
-          <Box sx={{ display: 'flex', alignItems: 'flex-end' }}>
+          <Box sx={{ display: "flex", alignItems: "flex-end" }}>
             <TextField
               label="Add a tag"
               value={inputValue}
@@ -231,7 +231,7 @@ const MyModal: React.FC<MyModalProps> = ({
             {errorMessage}
           </Typography>
         )}
-        <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1 }}>
+        <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 1 }}>
           <Button variant="outlined" color="error" onClick={handleClose}>
             Cancel
           </Button>
@@ -241,7 +241,7 @@ const MyModal: React.FC<MyModalProps> = ({
         </Box>
       </Box>
     </Modal>
-  )
-}
+  );
+};
 
-export default MyModal
+export default MyModal;
