@@ -35,6 +35,7 @@ import {
   setFilterValue,
   setIsFiltering
 } from "../../../state/features/storeSlice";
+import { setIsOpen } from "../../../state/features/cartSlice";
 interface Props {
   isAuthenticated: boolean;
   userName: string | null;
@@ -213,7 +214,7 @@ const NavBar: React.FC<Props> = ({
             height={"32"}
             width={"32"}
             onClickFunc={() => {
-              navigate(`/product-manager`);
+              dispatch(toggleCreateStoreModal(true));
             }}
           />
         )}
@@ -223,7 +224,7 @@ const NavBar: React.FC<Props> = ({
               color="primary"
               startIcon={<AutoStoriesIcon />}
               onClick={() => {
-                dispatch(toggleCreateStoreModal(true));
+                dispatch(setIsOpen(true));
               }}
             >
               Cart

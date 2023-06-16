@@ -19,17 +19,6 @@ function App() {
   // const themeColor = window._qdnTheme
 
   const [theme, setTheme] = useState("dark");
-  const [error, setError] = useState<Error | null>(null);
-
-  useEffect(() => {
-    const errorHandler = (e: ErrorEvent): void => {
-      setError(e.error);
-    };
-    window.addEventListener("error", errorHandler);
-    return () => {
-      window.removeEventListener("error", errorHandler);
-    };
-  }, []);
 
   return (
     <Provider store={store}>
@@ -37,17 +26,13 @@ function App() {
         <Notification />
         <GlobalWrapper setTheme={(val: string) => setTheme(val)}>
           <CssBaseline />
-          {error?.message ? (
-            <ErrorElement message={error?.message} />
-          ) : (
-            <Routes>
-              <Route path="/:user/:store/:product" element={<Product />} />
-              <Route path="/product-manager" element={<ProductManager />} />
-              <Route path="/my-orders" element={<MyOrders />} />
-              <Route path="/:user/:store" element={<Store />} />
-              <Route path="/" element={<StoreList />} />
-            </Routes>
-          )}
+          <Routes>
+            <Route path="/:user/:store/:product" element={<Product />} />
+            <Route path="/product-manager" element={<ProductManager />} />
+            <Route path="/my-orders" element={<MyOrders />} />
+            <Route path="/:user/:store" element={<Store />} />
+            <Route path="/" element={<StoreList />} />
+          </Routes>
         </GlobalWrapper>
       </ThemeProvider>
     </Provider>

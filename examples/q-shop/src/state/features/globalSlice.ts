@@ -30,7 +30,7 @@ export interface Catalogue {
   products: Record<string, Product>
 }
 interface GlobalState {
-  isOpenPublishBlogModal: boolean
+  isOpenCreateStoreModal: boolean
   isLoadingCurrentBlog: boolean
   isLoadingGlobal: boolean
   isOpenEditBlogModal: boolean
@@ -60,7 +60,7 @@ interface GlobalState {
   myOrders: Order[]
 }
 const initialState: GlobalState = {
-  isOpenPublishBlogModal: false,
+  isOpenCreateStoreModal: false,
   isLoadingCurrentBlog: true,
   isLoadingGlobal: false,
   currentStore: null,
@@ -84,7 +84,7 @@ export const globalSlice = createSlice({
   initialState,
   reducers: {
     toggleCreateStoreModal: (state, action) => {
-      state.isOpenPublishBlogModal = action.payload
+      state.isOpenCreateStoreModal = action.payload
     },
     toggleEditBlogModal: (state, action) => {
       state.isOpenEditBlogModal = action.payload
