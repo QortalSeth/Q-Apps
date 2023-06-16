@@ -69,7 +69,7 @@ const GlobalWrapper: React.FC<Props> = ({ children, setTheme }) => {
   };
 
   const {
-    isOpenPublishBlogModal,
+    isOpenCreateStoreModal,
     currentStore,
     isLoadingGlobal,
     isOpenEditBlogModal
@@ -434,9 +434,9 @@ const GlobalWrapper: React.FC<Props> = ({ children, setTheme }) => {
     <>
       {isLoadingGlobal && <PageLoader />}
 
-      {isOpenPublishBlogModal && user?.name && (
+      {isOpenCreateStoreModal && user?.name && (
         <PublishStoreModal
-          open={isOpenPublishBlogModal}
+          open={isOpenCreateStoreModal}
           onClose={onClosePublishBlogModal}
           onPublish={createStore}
           username={user?.name || ""}
