@@ -1,4 +1,4 @@
-import { AppBar, Button, Toolbar, Typography, Box } from "@mui/material";
+import { AppBar, Button, Typography, Box } from "@mui/material";
 import { styled } from "@mui/system";
 import { LightModeSVG } from "../../../assets/svgs/LightModeSVG";
 import { DarkModeSVG } from "../../../assets/svgs/DarkModeSVG";
