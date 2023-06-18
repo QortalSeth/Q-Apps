@@ -1,29 +1,27 @@
-import React, { useRef } from "react";
-import { Box, Popover, useTheme, Input } from "@mui/material";
+import React, { useRef, useState } from "react";
+import { RootState } from "../../../state/store";
+import { useSelector } from "react-redux";
+import { Box, Popover, useTheme } from "@mui/material";
 import ExitToAppIcon from "@mui/icons-material/ExitToApp";
 import { useNavigate } from "react-router-dom";
 import { toggleCreateStoreModal } from "../../../state/features/globalSlice";
 import { useDispatch } from "react-redux";
-import AutoStoriesIcon from "@mui/icons-material/AutoStories";
 import BookmarkIcon from "@mui/icons-material/Bookmark";
 import { BlockedNamesModal } from "../../common/BlockedNamesModal/BlockedNamesModal";
-import SearchIcon from "@mui/icons-material/Search";
 import EmailIcon from "@mui/icons-material/Email";
-import BackspaceIcon from "@mui/icons-material/Backspace";
 import {
   AvatarContainer,
   CustomAppBar,
   DropdownContainer,
   DropdownText,
-  StyledButton,
   AuthenticateButton,
   NavbarName,
   LightModeIcon,
   DarkModeIcon,
   ThemeSelectRow,
   QShopLogoContainer,
-  SearchBox,
-  StoreManagerIcon
+  StoreManagerIcon,
+  CartIcon
 } from "./Navbar-styles";
 import { AccountCircleSVG } from "../../../assets/svgs/AccountCircleSVG";
 import QShopLogo from "../../../assets/img/QShopLogo.webp";
@@ -36,6 +34,8 @@ import {
   setIsFiltering
 } from "../../../state/features/storeSlice";
 import { setIsOpen } from "../../../state/features/cartSlice";
+import { Store } from "../../../state/features/storeSlice";
+import { OrdersSVG } from "../../../assets/svgs/OrdersSVG";
 interface Props {
   isAuthenticated: boolean;
   userName: string | null;
@@ -59,29 +59,43 @@ const NavBar: React.FC<Props> = ({
   const dispatch = useDispatch();
   const theme = useTheme();
 
-  const [anchorEl, setAnchorEl] = React.useState<HTMLButtonElement | null>(
-    null
-  );
-  const [isOpenModal, setIsOpenModal] = React.useState<boolean>(false);
+  const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
+  const [isOpenBlockedNamesModal, setIsOpenBlockedNamesModal] =
+    useState<boolean>(false);
+  const [openStoreManagerDropdown, setOpenStoreManagerDropdown] =
+    useState<boolean>(false);
+  const [openUserDropdown, setOpenUserDropdown] = useState<boolean>(false);
+
   const searchValRef = useRef("");
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const handleClick = (event: React.MouseEvent<HTMLDivElement>) => {
-    const target = event.currentTarget as unknown as HTMLButtonElement | null;
+  const allStores = useSelector(
+    (state: RootState) => state.store.hashMapStores
+  );
+  const userStores = Object.values(allStores).filter(
+    (store: Store) => store.owner === userName
+  );
+
+  const handleClick = (event?: React.MouseEvent<HTMLDivElement>) => {
+    const target = event?.currentTarget as unknown as HTMLButtonElement | null;
     setAnchorEl(target);
   };
 
-  const handleClose = () => {
+  const handleCloseUserDropdown = () => {
     setAnchorEl(null);
+    setOpenUserDropdown(false);
   };
 
-  const onClose = () => {
-    setIsOpenModal(false);
+  const handleCloseStoreDropdown = () => {
+    setAnchorEl(null);
+    setOpenStoreManagerDropdown(false);
   };
 
-  const open = Boolean(anchorEl);
+  const onCloseBlockedNames = () => {
+    setIsOpenBlockedNamesModal(false);
+  };
 
-  const id = open ? "simple-popover" : undefined;
+  console.log({ userStores });
 
   return (
     <CustomAppBar position="sticky" elevation={2}>
@@ -115,85 +129,6 @@ const NavBar: React.FC<Props> = ({
           }}
         />
       </ThemeSelectRow>
-      <SearchBox>
-        <Input
-          id="standard-adornment-name"
-          inputRef={inputRef}
-          onChange={(e) => {
-            searchValRef.current = e.target.value;
-          }}
-          onKeyDown={(event) => {
-            if (event.key === "Enter" || event.keyCode === 13) {
-              if (!searchValRef.current) {
-                dispatch(setIsFiltering(false));
-                dispatch(setFilterValue(""));
-                dispatch(addFilteredPosts([]));
-                searchValRef.current = "";
-                if (!inputRef.current) return;
-                inputRef.current.value = "";
-                return;
-              }
-              navigate("/");
-              dispatch(setIsFiltering(true));
-              dispatch(addFilteredPosts([]));
-              dispatch(setFilterValue(searchValRef.current));
-            }
-          }}
-          placeholder="Filter by name"
-          sx={{
-            "&&:before": {
-              borderBottom: "none"
-            },
-            "&&:after": {
-              borderBottom: "none"
-            },
-            "&&:hover:before": {
-              borderBottom: "none"
-            },
-            "&&.Mui-focused:before": {
-              borderBottom: "none"
-            },
-            "&&.Mui-focused": {
-              outline: "none"
-            },
-            fontSize: "18px"
-          }}
-        />
-        <SearchIcon
-          sx={{
-            cursor: "pointer"
-          }}
-          onClick={() => {
-            if (!searchValRef.current) {
-              dispatch(setIsFiltering(false));
-              dispatch(setFilterValue(""));
-              dispatch(addFilteredPosts([]));
-              searchValRef.current = "";
-              if (!inputRef.current) return;
-              inputRef.current.value = "";
-              return;
-            }
-            navigate("/");
-            dispatch(setIsFiltering(true));
-            dispatch(addFilteredPosts([]));
-            dispatch(setFilterValue(searchValRef.current));
-          }}
-        />
-        <BackspaceIcon
-          sx={{
-            marginLeft: "10px",
-            cursor: "pointer"
-          }}
-          onClick={() => {
-            dispatch(setIsFiltering(false));
-            dispatch(setFilterValue(""));
-            dispatch(addFilteredPosts([]));
-            searchValRef.current = "";
-            if (!inputRef.current) return;
-            inputRef.current.value = "";
-          }}
-        />
-      </SearchBox>
       <Box
         sx={{
           display: "flex",
@@ -201,7 +136,6 @@ const NavBar: React.FC<Props> = ({
           gap: "10px"
         }}
       >
-        {/* Add isAuthenticated && before username and wrap StyledButton in this condition*/}
         {!isAuthenticated && (
           <AuthenticateButton onClick={authenticate}>
             <ExitToAppIcon />
@@ -213,23 +147,32 @@ const NavBar: React.FC<Props> = ({
             color={theme.palette.text.primary}
             height={"32"}
             width={"32"}
-            onClickFunc={() => {
-              dispatch(toggleCreateStoreModal(true));
+            onClickFunc={(e: any) => {
+              if (allStores && userStores.length > 0) {
+                handleClick(e);
+                setOpenStoreManagerDropdown(true);
+              } else {
+                dispatch(toggleCreateStoreModal(true));
+              }
             }}
           />
         )}
         {isAuthenticated && userName && (
           <>
-            <StyledButton
-              color="primary"
-              startIcon={<AutoStoriesIcon />}
-              onClick={() => {
+            <CartIcon
+              color={theme.palette.text.primary}
+              height={"32"}
+              width={"32"}
+              onClickFunc={() => {
                 dispatch(setIsOpen(true));
               }}
+            />
+            <AvatarContainer
+              onClick={(e: any) => {
+                handleClick(e);
+                setOpenUserDropdown(true);
+              }}
             >
-              Cart
-            </StyledButton>
-            <AvatarContainer onClick={handleClick}>
               <NavbarName>{userName}</NavbarName>
               {!userAvatar ? (
                 <AccountCircleSVG
@@ -253,27 +196,56 @@ const NavBar: React.FC<Props> = ({
           </>
         )}
         <Popover
-          id={id}
-          open={open}
+          id={"store-manager-popover"}
+          open={openStoreManagerDropdown}
           anchorEl={anchorEl}
-          onClose={handleClose}
+          onClose={handleCloseStoreDropdown}
+          anchorOrigin={{
+            vertical: "bottom",
+            horizontal: "left"
+          }}
+        >
+          {userStores
+            .filter((store: Store): boolean => store.owner === userName)
+            .map((store: Store) => (
+              <DropdownContainer>
+                <DropdownText
+                  onClick={() => navigate(`/${userName}/${store.id}`)}
+                  key={store.id}
+                >
+                  {store.title}
+                </DropdownText>
+              </DropdownContainer>
+            ))}
+          <DropdownContainer>
+            <DropdownText
+              onClick={() => {
+                dispatch(toggleCreateStoreModal(true));
+              }}
+            >
+              Create Store
+            </DropdownText>
+          </DropdownContainer>
+        </Popover>
+        <Popover
+          id={"user-popover"}
+          open={openUserDropdown}
+          anchorEl={anchorEl}
+          onClose={handleCloseUserDropdown}
           anchorOrigin={{
             vertical: "bottom",
             horizontal: "left"
           }}
         >
           <DropdownContainer onClick={() => navigate("/my-orders")}>
-            <BookmarkIcon
-              sx={{
-                color: "#50e3c2"
-              }}
-            />
+            <OrdersSVG color={"#f9ff34"} height={"22"} width={"22"} />
             <DropdownText>My Orders</DropdownText>
           </DropdownContainer>
           <DropdownContainer
             onClick={() => {
-              setIsOpenModal(true);
-              handleClose();
+              setIsOpenBlockedNamesModal(true);
+              handleCloseUserDropdown();
+              handleCloseStoreDropdown();
             }}
           >
             <PersonOffIcon
@@ -304,8 +276,11 @@ const NavBar: React.FC<Props> = ({
             </a>
           </DropdownContainer>
         </Popover>
-        {isOpenModal && (
-          <BlockedNamesModal open={isOpenModal} onClose={onClose} />
+        {isOpenBlockedNamesModal && (
+          <BlockedNamesModal
+            open={isOpenBlockedNamesModal}
+            onClose={onCloseBlockedNames}
+          />
         )}
       </Box>
     </CustomAppBar>

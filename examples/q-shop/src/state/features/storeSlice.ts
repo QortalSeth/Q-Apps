@@ -53,7 +53,7 @@ export interface Store {
   tags?: string[]
   updated?: number
   isValid?: boolean
-
+  logo?: string
   location?: string
   shipsTo?: string
 }

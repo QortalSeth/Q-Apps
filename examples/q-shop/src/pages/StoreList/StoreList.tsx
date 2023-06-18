@@ -1,65 +1,59 @@
-import React, { FC, useCallback, useEffect, useRef, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { useDispatch, useSelector } from 'react-redux'
-import { RootState } from '../../state/store'
-import EditIcon from '@mui/icons-material/Edit'
+import { useState, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { RootState } from "../../state/store";
+import LazyLoad from "../../components/common/LazyLoad";
+import ContextMenuResource from "../../components/common/ContextMenu/ContextMenuResource";
+import { setIsLoadingGlobal } from "../../state/features/globalSlice";
+import { Store } from "../../state/features/storeSlice";
+import { useFetchStores } from "../../hooks/useFetchStores";
 import {
-  Box,
-  Button,
-  List,
-  ListItem,
-  Typography,
-  useTheme
-} from '@mui/material'
-import { useFetchProducts } from '../../hooks/useFetchProducts'
-import LazyLoad from '../../components/common/LazyLoad'
-import { removePrefix } from '../../utils/blogIdformats'
-import Masonry from 'react-masonry-css'
-import ContextMenuResource from '../../components/common/ContextMenu/ContextMenuResource'
-import { setIsLoadingGlobal } from '../../state/features/globalSlice'
-import { Store } from '../../state/features/storeSlice'
-import { useFetchStores } from '../../hooks/useFetchStores'
-
-const breakpointColumnsObj = {
-  default: 5,
-  1600: 4,
-  1300: 3,
-  940: 2,
-  700: 1,
-  500: 1
-}
+  StoreCard,
+  StoreCardDescription,
+  StoreCardImage,
+  StoreCardImageContainer,
+  StoreCardInfo,
+  StoreCardOwner,
+  StoreCardTitle,
+  StoreCardYouOwn,
+  StoresContainer,
+  StoresRow,
+  MyStoresRow,
+  MyStoresCard,
+  MyStoresCheckbox
+} from "./StoreList-styles";
+import DefaultStoreImage from "../../assets/img/Q-AppsLogo.webp";
+import { StarSVG } from "../../assets/svgs/StarSVG";
 interface BlogListProps {
-  mode?: string
+  mode?: string;
 }
 export const StoreList = ({ mode }: BlogListProps) => {
-  const theme = useTheme()
-  const dispatch = useDispatch()
-  const { user } = useSelector((state: RootState) => state.auth)
-  const [stores, setStores] = useState<Store[]>([])
+  const dispatch = useDispatch();
+  const { user } = useSelector((state: RootState) => state.auth);
+  const [stores, setStores] = useState<Store[]>([]);
+  const [filterUserStores, setFilterUserStores] = useState<boolean>(false);
   const hashMapStores = useSelector(
     (state: RootState) => state.store.hashMapStores
-  )
-  const { getStore, checkAndUpdateResource } = useFetchStores()
-  // const stores = useSelector(
-  //   (state: RootState) => state.store.stores
-  // )
-  const navigate = useNavigate()
+  );
+  const { getStore, checkAndUpdateResource } = useFetchStores();
+  const navigate = useNavigate();
 
-  const getUserStores = React.useCallback(async () => {
+  const getUserStores = useCallback(async () => {
     try {
-      dispatch(setIsLoadingGlobal(true))
-      const offset = stores.length
+      dispatch(setIsLoadingGlobal(true));
+      const offset = stores.length;
       //TODO - NAME SHOULD BE EXACT
-      const query = `q-store-general`
-      const url = `/arbitrary/resources/search?service=STORE&query=${query}&limit=20&exactmatchnames=true&includemetadata=true&offset=${offset}&reverse=true`
+      const query = `q-store-general`;
+      const url = `/arbitrary/resources/search?service=STORE&query=${query}&limit=20&exactmatchnames=true&includemetadata=true&offset=${offset}&reverse=true`;
       const response = await fetch(url, {
-        method: 'GET',
+        method: "GET",
         headers: {
-          'Content-Type': 'application/json'
+          "Content-Type": "application/json"
         }
-      })
-      const responseData = await response.json()
-      console.log({ responseData })
+      });
+      const responseData = await response.json();
+      console.log({ responseData });
+      // Data returned from that endpoint of the API
       const structureData = responseData.map((storeItem: any): Store => {
         return {
           title: storeItem?.metadata?.title,
@@ -71,85 +65,113 @@ export const StoreList = ({ mode }: BlogListProps) => {
           updated: storeItem.updated,
           owner: storeItem.name,
           id: storeItem.identifier
-        }
-      })
-      console.log({ structureData })
-      const copiedStores: Store[] = [...stores]
+        };
+      });
+      console.log({ structureData });
+      // Add stores & user stores to localstate & guard against duplicates
+      const copiedStores: Store[] = [...stores];
       structureData.forEach((storeItem: Store) => {
-        const index = stores.findIndex((p: Store) => p.id === storeItem.id)
+        const index = stores.findIndex((p: Store) => p.id === storeItem.id);
         if (index !== -1) {
-          copiedStores[index] = storeItem
+          copiedStores[index] = storeItem;
         } else {
-          copiedStores.push(storeItem)
+          copiedStores.push(storeItem);
         }
-      })
-      setStores(copiedStores)
+      });
+      setStores(copiedStores);
+      // Get the store raw data from getStore API Call only if the hashmapStore doesn't have the store or if the store is more recently updated than the existing store
       for (const content of structureData) {
         if (content.owner && content.id) {
           const res = checkAndUpdateResource({
             id: content.id,
             updated: content.updated
-          })
+          });
           if (res) {
-            getStore(content.owner, content.id, content)
+            getStore(content.owner, content.id, content);
           }
         }
       }
     } catch (error) {
     } finally {
-      dispatch(setIsLoadingGlobal(false))
+      dispatch(setIsLoadingGlobal(false));
     }
-  }, [stores])
-  const getStores = React.useCallback(async () => {
-    await getUserStores()
-  }, [getUserStores, user?.name])
+  }, [stores]);
 
-  console.log({ stores, hashMapStores })
+  const getStores = useCallback(async () => {
+    await getUserStores();
+  }, [getUserStores, user?.name]);
+
+  // Filter to show only the user's stores
+  const handleFilterUserStores = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    setFilterUserStores(event.target.checked);
+  };
+
+  const filteredStores = filterUserStores
+    ? stores.filter((store: Store) => store.owner === user?.name)
+    : stores;
+
+  console.log({ stores, hashMapStores });
   return (
     <>
-      <Masonry
-        breakpointCols={breakpointColumnsObj}
-        className="my-masonry-grid"
-        columnClassName="my-masonry-grid_column"
-      >
-        {stores.map((store: Store, index) => {
-          const existingStore = hashMapStores[store.id]
-          let storeItem = store
+      <StoresContainer container>
+        <MyStoresRow>
+          <MyStoresCard>
+            <MyStoresCheckbox
+              checked={filterUserStores}
+              onChange={handleFilterUserStores}
+              inputProps={{ "aria-label": "controlled" }}
+            />
+            See My Stores
+          </MyStoresCard>
+        </MyStoresRow>
+        {filteredStores.map((store: Store, index) => {
+          const existingStore = hashMapStores[store.id];
+          let storeItem = store;
           if (existingStore) {
-            storeItem = existingStore
+            storeItem = existingStore;
           }
-          const storeId = storeItem?.id || ''
-          const storeOwner = storeItem?.owner || ''
-          const storeTitle = storeItem?.title || 'missing metadata'
+          const storeId = storeItem?.id || "";
+          const storeOwner = storeItem?.owner || "";
+          const storeTitle = storeItem?.title || "missing metadata";
+          const storeLogo = storeItem?.logo || DefaultStoreImage;
+          const storeDescription = storeItem?.description || "missing metadata";
           return (
-            <Box
-              sx={{
-                display: 'flex',
-                gap: 1,
-                alignItems: 'center',
-                width: 'auto',
-                position: 'relative',
-                ' @media (max-width: 450px)': {
-                  width: '100%'
-                }
-              }}
-              key={storeId}
-            >
+            <StoresRow item key={storeId}>
               <ContextMenuResource
                 name={storeOwner}
                 service="STORE"
                 identifier={storeId}
                 link={`qortal://APP/Q-Store/${storeOwner}/${storeId}`}
               >
-                <p onClick={() => navigate(`/${storeOwner}/${storeId}`)}>
-                  {storeTitle}
-                </p>
+                <StoreCard
+                  container
+                  onClick={() => navigate(`/${storeOwner}/${storeId}`)}
+                >
+                  <StoreCardImageContainer item>
+                    <StoreCardImage src={storeLogo} alt={storeTitle} />
+                  </StoreCardImageContainer>
+                  <StoreCardInfo item>
+                    <StoreCardTitle>{storeTitle}</StoreCardTitle>
+                    <StoreCardDescription>
+                      {storeDescription}
+                    </StoreCardDescription>
+                  </StoreCardInfo>
+                  <StoreCardOwner>{storeOwner}</StoreCardOwner>
+                  {storeOwner === user?.name && (
+                    <StoreCardYouOwn>
+                      <StarSVG color={"#fbff2a"} width={"20"} height={"20"} />
+                      You own this store
+                    </StoreCardYouOwn>
+                  )}
+                </StoreCard>
               </ContextMenuResource>
-            </Box>
-          )
+            </StoresRow>
+          );
         })}
-      </Masonry>
+      </StoresContainer>
       <LazyLoad onLoadMore={getStores}></LazyLoad>
     </>
-  )
-}
+  );
+};

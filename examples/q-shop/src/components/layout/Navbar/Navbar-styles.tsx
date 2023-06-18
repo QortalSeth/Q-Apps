@@ -3,6 +3,7 @@ import { styled } from "@mui/system";
 import { LightModeSVG } from "../../../assets/svgs/LightModeSVG";
 import { DarkModeSVG } from "../../../assets/svgs/DarkModeSVG";
 import { StorefrontSVG } from "../../../assets/svgs/StorefrontSVG";
+import { CartSVG } from "../../../assets/svgs/CartSVG";
 
 export const CustomAppBar = styled(AppBar)(({ theme }) => ({
   display: "flex",
@@ -11,6 +12,8 @@ export const CustomAppBar = styled(AppBar)(({ theme }) => ({
   alignItems: "center",
   width: "100%",
   padding: "5px 16px",
+  backgroundImage: "none",
+  borderBottom: `1px solid ${theme.palette.primary.light}`,
   backgroundColor: theme.palette.background.default,
   [theme.breakpoints.only("xs")]: {
     gap: "15px"
@@ -27,26 +30,22 @@ export const QShopLogoContainer = styled("img")({
   cursor: "pointer"
 });
 
-export const SearchBox = styled(Box)(({ theme }) => ({
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-  border: "1px solid #9e9393",
-  borderRadius: "8px",
-  padding: "10px 13px"
-}));
-
 export const CustomTitle = styled(Typography)({
   fontWeight: 600,
   color: "#000000"
 });
 
-export const StyledButton = styled(Button)(({ theme }) => ({
-  fontWeight: 600,
-  color: theme.palette.text.primary
+export const StoreManagerIcon = styled(StorefrontSVG)(({ theme }) => ({
+  cursor: "pointer",
+  "&:hover": {
+    filter:
+      theme.palette.mode === "dark"
+        ? "drop-shadow(0px 4px 6px rgba(255, 255, 255, 0.6))"
+        : "drop-shadow(0px 4px 6px rgba(99, 88, 88, 0.1))"
+  }
 }));
 
-export const StoreManagerIcon = styled(StorefrontSVG)(({ theme }) => ({
+export const CartIcon = styled(CartSVG)(({ theme }) => ({
   cursor: "pointer",
   "&:hover": {
     filter:
@@ -112,7 +111,7 @@ export const DropdownContainer = styled(Box)(({ theme }) => ({
   display: "flex",
   alignItems: "center",
   gap: "5px",
-  backgroundColor: theme.palette.primary.main,
+  backgroundColor: theme.palette.background.paper,
   padding: "10px 15px",
   transition: "all 0.4s ease-in-out",
   "&:hover": {
@@ -122,14 +121,14 @@ export const DropdownContainer = styled(Box)(({ theme }) => ({
 }));
 
 export const DropdownText = styled(Typography)(({ theme }) => ({
-  fontFamily: "Arial",
+  fontFamily: "Raleway",
   fontSize: "16px",
   color: theme.palette.text.primary,
   userSelect: "none"
 }));
 
 export const NavbarName = styled(Typography)(({ theme }) => ({
-  fontFamily: "Arial",
+  fontFamily: "Raleway",
   fontSize: "18px",
   color: theme.palette.text.primary,
   margin: "0 10px"

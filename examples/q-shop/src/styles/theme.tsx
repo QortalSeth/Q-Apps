@@ -3,8 +3,11 @@ import { createTheme } from "@mui/material/styles";
 const commonThemeOptions = {
   typography: {
     fontFamily: [
-      "CambonLight",
+      "Cambon Light",
       "Raleway, sans-serif",
+      "Karla",
+      "Merriweather Sans",
+      "Proxima Nova",
       "Oxygen",
       "Catamaran",
       "Cairo",
@@ -87,9 +90,9 @@ const lightTheme = createTheme({
   palette: {
     mode: "light",
     primary: {
-      main: "#f4f4fb",
-      dark: "#eaecf4",
-      light: "#f9f9fd"
+      main: "#ffffff",
+      dark: "#F5F5F5",
+      light: "#FCFCFC"
     },
     secondary: {
       main: "#417Ed4",
@@ -97,7 +100,7 @@ const lightTheme = createTheme({
     },
     background: {
       default: "#fcfcfc",
-      paper: "#f0f0f0"
+      paper: "#F5F5F5"
     },
     text: {
       primary: "#000000",
@@ -137,10 +140,11 @@ const darkTheme = createTheme({
     primary: {
       main: "#2e3d60",
       dark: "#1a2744",
-      light: "#3f4b66"
+      light: "#353535"
     },
     secondary: {
-      main: "#417Ed4"
+      main: "#417Ed4",
+      dark: "#3e74c1"
     },
 
     background: {
