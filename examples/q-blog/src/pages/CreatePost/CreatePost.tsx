@@ -71,7 +71,7 @@ export const CreatePost = ({ mode }: CreatePostProps) => {
           setBlogContentForEdit(responseData)
         }
         //TODO - NAME SHOULD BE EXACT
-        // const url2 = `/arbitrary/resources/search?service=BLOG_POST&identifier=${fullPostId}&exactMatchNames=${username}&limit=1&includemetadata=true`
+        // const url2 = `/arbitrary/resources/search?mode=ALL&service=BLOG_POST&identifier=${fullPostId}&exactMatchNames=${username}&limit=1&includemetadata=true`
         const url2 = `/arbitrary/resources?service=BLOG_POST&identifier=${fullPostId}&name=${username}&limit=1&includemetadata=true`
 
         const responseBlogs = await fetch(url2, {

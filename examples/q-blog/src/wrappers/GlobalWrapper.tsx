@@ -139,7 +139,7 @@ const GlobalWrapper: React.FC<Props> = ({ children }) => {
   async function verifyIfBlogIdExtists(username: string, identifier: string) {
     let doesExist = true
     //TODO - SHOULD REMOVE NAME FILTER AND IDENTIFIER SHOULD BE EXACT
-    // const url2 = `/arbitrary/resources/search?service=BLOG&identifier=${identifier}&name=${username}&limit=1&includemetadata=true`
+    // const url2 = `/arbitrary/resources/search?mode=ALL&service=BLOG&identifier=${identifier}&name=${username}&limit=1&includemetadata=true`
     const url2 = `/arbitrary/resources?service=BLOG&identifier=${identifier}&name=${username}&limit=1&includemetadata=true`
     const responseBlogs = await fetch(url2, {
       method: 'GET',
@@ -165,7 +165,7 @@ const GlobalWrapper: React.FC<Props> = ({ children }) => {
   }
   async function getBlog(name: string) {
     //TODO NAME SHOULD BE EXACT
-    const url = `/arbitrary/resources/search?service=BLOG&identifier=q-blog-&exactmatchnames=true&name=${name}&prefix=true&limit=20&includemetadata=true`
+    const url = `/arbitrary/resources/search?mode=ALL&service=BLOG&identifier=q-blog-&exactmatchnames=true&name=${name}&prefix=true&limit=20&includemetadata=true`
     const responseBlogs = await fetch(url, {
       method: 'GET',
       headers: {
@@ -493,7 +493,8 @@ const GlobalWrapper: React.FC<Props> = ({ children }) => {
           excludeBlocked: true,
           limit: 1,
           offset: 0,
-          reverse: true
+          reverse: true,
+          mode: 'ALL'
         })
         if (response.length === 0) return
 
@@ -530,7 +531,8 @@ const GlobalWrapper: React.FC<Props> = ({ children }) => {
           exactMatchNames: true,
           limit: 5,
           offset: 0,
-          reverse: true
+          reverse: true,
+          mode: 'ALL'
         })
         const filterPosts = response.filter(
           (post) => post.created > threeDaysAgo
@@ -545,7 +547,8 @@ const GlobalWrapper: React.FC<Props> = ({ children }) => {
             excludeBlocked: true,
             limit: 1,
             offset: 0,
-            reverse: true
+            reverse: true,
+            mode: 'ALL'
           })
           if (response.length > 0 && response[0].name !== username) {
             comments.push({

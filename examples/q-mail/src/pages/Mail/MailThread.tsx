@@ -89,7 +89,7 @@ export default function MailThread({
         } else {
           try {
             const query = msgId?.identifier
-            const url = `/arbitrary/resources/search?service=${MAIL_SERVICE_TYPE}&query=${query}&limit=20&includemetadata=true&offset=0&reverse=true&excludeblocked=true&name=${msgId?.name}&exactmatchnames=true&`
+            const url = `/arbitrary/resources/search?mode=ALL&service=${MAIL_SERVICE_TYPE}&query=${query}&limit=20&includemetadata=true&offset=0&reverse=true&excludeblocked=true&name=${msgId?.name}&exactmatchnames=true&`
             const response = await fetch(url, {
               method: 'GET',
               headers: {

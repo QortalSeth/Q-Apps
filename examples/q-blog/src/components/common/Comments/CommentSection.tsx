@@ -109,7 +109,7 @@ export const CommentSection = ({ postId, postName }: CommentSectionProps) => {
       if (isNewMessages && numberOfComments) {
         offset = numberOfComments
       }
-      const url = `/arbitrary/resources/search?service=BLOG_COMMENT&query=qcomment_v1_qblog_${postId.slice(
+      const url = `/arbitrary/resources/search?mode=ALL&service=BLOG_COMMENT&query=qcomment_v1_qblog_${postId.slice(
         -12
       )}&limit=20&includemetadata=true&offset=${offset}&reverse=false&excludeblocked=true`
       const response = await fetch(url, {
@@ -198,7 +198,7 @@ export const CommentSection = ({ postId, postName }: CommentSectionProps) => {
   const checkNewComments = useCallback(async () => {
     try {
       const offset = listComments.length
-      const url = `/arbitrary/resources/search?service=BLOG_COMMENT&query=qcomment_v1_qblog_${postId.slice(
+      const url = `/arbitrary/resources/search?mode=ALL&service=BLOG_COMMENT&query=qcomment_v1_qblog_${postId.slice(
         -12
       )}&limit=20&includemetadata=true&offset=${offset}&reverse=false&excludeblocked=true`
       const response = await fetch(url, {

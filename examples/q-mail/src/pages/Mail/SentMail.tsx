@@ -83,7 +83,7 @@ export const SentMail = ({}: SentMailProps) => {
       try {
         if (!user?.name) return
         const query = `qortal_qmail_`
-        const url = `/arbitrary/resources/search?service=${MAIL_SERVICE_TYPE}&query=${query}&name=${user?.name}&limit=20&includemetadata=true&reverse=true&excludeblocked=true`
+        const url = `/arbitrary/resources/search?mode=ALL&service=${MAIL_SERVICE_TYPE}&query=${query}&name=${user?.name}&limit=20&includemetadata=true&reverse=true&excludeblocked=true`
         const response = await fetch(url, {
           method: 'GET',
           headers: {
@@ -147,7 +147,7 @@ export const SentMail = ({}: SentMailProps) => {
 
         dispatch(setIsLoadingGlobal(true))
         const query = `qortal_qmail_`
-        const url = `/arbitrary/resources/search?service=${MAIL_SERVICE_TYPE}&query=${query}&name=${user.name}&limit=20&includemetadata=true&offset=${offset}&reverse=true&excludeblocked=true`
+        const url = `/arbitrary/resources/search?mode=ALL&service=${MAIL_SERVICE_TYPE}&query=${query}&name=${user.name}&limit=20&includemetadata=true&offset=${offset}&reverse=true&excludeblocked=true`
         const response = await fetch(url, {
           method: 'GET',
           headers: {
