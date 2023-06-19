@@ -43,7 +43,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
   })
   console.log({ product })
   const [categoryList, setCategoryList] = useState<string[]>([])
-  const [selectedType, setSelectedType] = useState<string | null>(null)
+  const [selectedType, setSelectedType] = useState<string >('digital')
   const [images, setImages] = useState<string[]>([])
   const [selectedStatus, setSelectedStatus] = useState<string>('AVAILABLE')
   const [newCategory, setNewCategory] = useState<string>('')
@@ -142,15 +142,16 @@ export const ProductForm: React.FC<ProductFormProps> = ({
       sx={{
         display: 'flex',
         flexDirection: 'column',
-        alignItems: 'center'
+        alignItems: 'center',
+        gap: '10px',
       }}
     >
       <ImageUploader
         onPick={(img: string) => setImages((prev) => [...prev, img])}
-      >
+      ><span>Upload Image</span>
         <AddPhotoAlternateIcon
           sx={{
-            height: '20px',
+            height: '40px',
             width: 'auto',
             cursor: 'pointer'
           }}
@@ -159,7 +160,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
       <Box
         sx={{
           display: 'flex',
-          gap: 1
+          gap: 1,
         }}
       >
         {images.map((base64) => {
@@ -172,7 +173,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
                 borderRadius: '5px'
               }}
               src={base64}
-            />
+             alt={`${product.title} Image`}/>
           )
         })}
       </Box>
@@ -195,7 +196,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
       />
       <TextField
         name="price"
-        label="Price"
+        label="Price (QORT)"
         value={product.price}
         variant="outlined"
         type="number"
@@ -211,6 +212,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
         }}
         variant="outlined"
         required
+        fullWidth
       >
         <MenuItem value="digital">Digital</MenuItem>
         <MenuItem value="physical">Physical</MenuItem>
@@ -222,6 +224,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
         onChange={handleSelectChange}
         variant="outlined"
         required
+        fullWidth
       >
         {categoryList.map((category) => (
           <MenuItem value={category}>{category}</MenuItem>
