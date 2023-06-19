@@ -53,7 +53,7 @@ const CreateStoreModal: React.FC<CreateStoreModalProps> = ({
   const [location, setLocation] = useState<string>("");
   const [shipsTo, setShipsTo] = useState<string>("");
   const [errorMessage, setErrorMessage] = useState<string>("");
-  const [storeIdentifier, setStoreIdentifier] = useState(username || "");
+  const [storeIdentifier, setStoreIdentifier] = useState("");
   const [logo, setLogo] = useState<string | null>(null);
   const handlePublish = async (): Promise<void> => {
     try {

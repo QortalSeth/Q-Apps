@@ -86,11 +86,9 @@ const GlobalWrapper: React.FC<Props> = ({ children, setTheme }) => {
     }
   }
 
-  async function verifyIfBlogIdExtists(username: string, identifier: string) {
+  async function verifyIfStoreIdExists(username: string, identifier: string) {
     let doesExist = true;
-    //TODO - SHOULD REMOVE NAME FILTER AND IDENTIFIER SHOULD BE EXACT
-    // const url2 = `/arbitrary/resources/search?service=BLOG&identifier=${identifier}&name=${username}&limit=1&includemetadata=true`
-    const url2 = `/arbitrary/resources?service=BLOG&identifier=${identifier}&name=${username}&limit=1&includemetadata=true`;
+    const url2 = `/arbitrary/resources?service=STORE&identifier=${identifier}&name=${username}&limit=1&includemetadata=true`;
     const responseBlogs = await fetch(url2, {
       method: "GET",
       headers: {
@@ -242,12 +240,12 @@ const GlobalWrapper: React.FC<Props> = ({ children, setTheme }) => {
         throw new Error("Please insert a valid store id");
       }
       const identifier = `q-store-general-${formatBlogIdentifier}`;
-      const doesExitst = await verifyIfBlogIdExtists(name, identifier);
+      const doesExitst = await verifyIfStoreIdExists(name, identifier);
       if (doesExitst) {
         throw new Error("The store identifier already exists");
       }
 
-      const blogobj = {
+      const storeObj = {
         title,
         description,
         location,
@@ -262,7 +260,7 @@ const GlobalWrapper: React.FC<Props> = ({ children, setTheme }) => {
         owner: name,
         products: {}
       };
-      const blogPostToBase64 = await objectToBase64(blogobj);
+      const blogPostToBase64 = await objectToBase64(storeObj);
       const dataContainerToBase64 = await objectToBase64(dataContainer);
       try {
         const resourceResponse = await qortalRequest({
@@ -289,13 +287,17 @@ const GlobalWrapper: React.FC<Props> = ({ children, setTheme }) => {
             res();
           }, 1000);
         });
-
-        const blogfullObj = {
-          ...blogobj,
-          blogId: identifier
+        const createdAt = Date.now();
+        const storefullObj = {
+          ...storeObj,
+          id: identifier,
+          isValid: true,
+          owner: name,
+          created: createdAt,
+          updated: createdAt
         };
 
-        dispatch(setCurrentStore(blogfullObj));
+        dispatch(setCurrentStore(storefullObj));
         dispatch(
           setDataContainer({
             ...dataContainer,
