@@ -24,9 +24,15 @@ import { formatDate } from '../../../utils/time'
 interface CommentProps {
   comment: any
   postId: string
+  postName: string
   onSubmit: (obj?: any, isEdit?: boolean) => void
 }
-export const Comment = ({ comment, postId, onSubmit }: CommentProps) => {
+export const Comment = ({
+  comment,
+  postId,
+  postName,
+  onSubmit
+}: CommentProps) => {
   const [isReplying, setIsReplying] = useState<boolean>(false)
   const [isEditing, setIsEditing] = useState<boolean>(false)
   const { user } = useSelector((state: RootState) => state.auth)
@@ -41,6 +47,7 @@ export const Comment = ({ comment, postId, onSubmit }: CommentProps) => {
 
   return (
     <Box
+      id={comment?.identifier}
       sx={{
         display: 'flex',
         width: '100%',
@@ -67,6 +74,7 @@ export const Comment = ({ comment, postId, onSubmit }: CommentProps) => {
                 <CommentEditor
                   onSubmit={(obj) => handleSubmit(obj, true)}
                   postId={postId}
+                  postName={postName}
                   isEdit
                   commentId={currentEdit?.identifier}
                   commentMessage={currentEdit?.message}
@@ -168,6 +176,7 @@ export const Comment = ({ comment, postId, onSubmit }: CommentProps) => {
           <CommentEditor
             onSubmit={handleSubmit}
             postId={postId}
+            postName={postName}
             isReply
             commentId={comment.identifier}
           />
@@ -247,7 +256,8 @@ const CommentCard = ({
           variant="body2"
           color={theme.palette.text.primary}
           sx={{
-            fontSize: '16px'
+            fontSize: '16px',
+            wordBreak: 'break-word'
           }}
         >
           {message}
@@ -264,6 +274,7 @@ const CommentCard = ({
           return (
             <Box
               key={reply?.identifier}
+              id={reply?.identifier}
               sx={{
                 display: 'flex',
                 border: '1px solid grey',

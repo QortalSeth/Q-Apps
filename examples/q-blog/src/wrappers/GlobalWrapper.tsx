@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
 
@@ -11,6 +11,8 @@ import EditBlogModal from '../components/modals/EditBlogModal'
 import {
   setCurrentBlog,
   setIsLoadingGlobal,
+  setNotificationCreatorComment,
+  setNotifications,
   toggleEditBlogModal,
   togglePublishBlogModal
 } from '../state/features/globalSlice'
@@ -29,6 +31,8 @@ import { setNotification } from '../state/features/notificationsSlice'
 import { AudioPlayer } from '../components/common/AudioPlayer'
 import localForage from 'localforage'
 import ConsentModal from '../components/modals/ConsentModal'
+import localforage from 'localforage'
+import { Item } from '../components/common/Comments/CommentEditor'
 
 interface Props {
   children: React.ReactNode
@@ -36,17 +40,42 @@ interface Props {
 
 const uid = new ShortUniqueId()
 
+const notification = localforage.createInstance({
+  name: 'notification'
+})
+
 const GlobalWrapper: React.FC<Props> = ({ children }) => {
   const navigate = useNavigate()
   const dispatch = useDispatch()
 
   const [userAvatar, setUserAvatar] = useState<string>('')
-
+  const interval = useRef<any>(null)
   const { user } = useSelector((state: RootState) => state.auth)
   const { audios, currAudio } = useSelector((state: RootState) => state.global)
+  const notificationCreatorComment = useSelector(
+    (state: RootState) => state.global.notificationCreatorComment
+  )
+  const notifications = useSelector(
+    (state: RootState) => state.global.notifications
+  )
+
+  const fullNotifications = useMemo(() => {
+    return notificationCreatorComment.length + notifications.length
+  }, [notificationCreatorComment, notifications])
   const [hasAttemptedToFetchBlogInitial, setHasAttemptedToFetchBlogInitial] =
     useState(false)
   const favoritesLocalRef = useRef<any>(null)
+
+  const sendNotificationTab = async (fullNotifications: number) => {
+    await qortalRequest({
+      action: 'SET_TAB_NOTIFICATIONS',
+      count: fullNotifications
+    })
+  }
+
+  useEffect(() => {
+    sendNotificationTab(fullNotifications)
+  }, [fullNotifications])
 
   useEffect(() => {
     if (!user?.name) return
@@ -445,6 +474,154 @@ const GlobalWrapper: React.FC<Props> = ({ children }) => {
         })
     } catch (error) {}
   }, [user?.name])
+
+  const checkNotifications = useCallback(async (username: string) => {
+    try {
+      let notificationComments: Item[] =
+        (await notification.getItem('comments')) || []
+      notificationComments = notificationComments
+        .filter((nc) => nc.postId && nc.postName && nc.lastSeen)
+        .sort((a, b) => b.lastSeen - a.lastSeen)
+
+      let listOfNotifications = []
+      for (const comment of notificationComments) {
+        const response: any[] = await qortalRequest({
+          action: 'SEARCH_QDN_RESOURCES',
+          service: 'BLOG_COMMENT',
+          query: `_reply_${comment.id.slice(-6)}`,
+          exactMatchNames: true,
+          excludeBlocked: true,
+          limit: 1,
+          offset: 0,
+          reverse: true
+        })
+        if (response.length === 0) return
+
+        if (
+          response[0].created > comment.lastSeen &&
+          response[0].name !== username
+        ) {
+          const string = response[0].identifier
+          const startIndex = string.indexOf('blog_') + 5
+          const result = string.substr(startIndex, 12)
+          listOfNotifications.push({
+            ...response[0],
+            partialPostId: result,
+            postId: comment.postId,
+            postName: comment.postName
+          })
+        }
+      }
+      dispatch(setNotifications(listOfNotifications))
+    } catch (error) {
+      console.log({ error })
+    }
+  }, [])
+
+  const checkNotificationCreatorComment = useCallback(
+    async (username: string) => {
+      try {
+        const currentDate = Date.now()
+        const threeDaysAgo = currentDate - 259200000
+        const response: any[] = await qortalRequest({
+          action: 'SEARCH_QDN_RESOURCES',
+          service: 'BLOG_POST',
+          name: username,
+          exactMatchNames: true,
+          limit: 5,
+          offset: 0,
+          reverse: true
+        })
+        const filterPosts = response.filter(
+          (post) => post.created > threeDaysAgo
+        )
+        let comments = []
+        for (const post of filterPosts) {
+          const response: any[] = await qortalRequest({
+            action: 'SEARCH_QDN_RESOURCES',
+            service: 'BLOG_COMMENT',
+            query: `qcomment_v1_qblog_${post.identifier.slice(-12)}`,
+            exactMatchNames: true,
+            excludeBlocked: true,
+            limit: 1,
+            offset: 0,
+            reverse: true
+          })
+          if (response.length > 0 && response[0].name !== username) {
+            comments.push({
+              ...response[0],
+              postName: post.name,
+              postId: post.identifier
+            })
+          }
+        }
+        let listOfNotifications = []
+        let notificationComments: any =
+          (await notification.getItem('post-comments')) || {}
+        for (const comment of comments) {
+          const savedReference = notificationComments[comment.postId]
+          if (savedReference) {
+            if (savedReference.lastSeen < comment.created) {
+              listOfNotifications.push(comment)
+            }
+          } else {
+            listOfNotifications.push(comment)
+            notificationComments[comment.postId] = {
+              lastSeen: 0,
+              postName: comment?.postName,
+              id: comment?.identifier,
+              postId: comment?.postId
+            }
+          }
+        }
+
+        dispatch(setNotificationCreatorComment(listOfNotifications))
+        await notification.setItem('post-comments', notificationComments)
+      } catch (error) {
+        console.log({ error })
+      }
+    },
+    []
+  )
+
+  const checkNotificationsFunc = useCallback(
+    (username: string) => {
+      let isCalling = false
+      interval.current = setInterval(async () => {
+        if (isCalling) return
+        isCalling = true
+        const res = await checkNotifications(username)
+        isCalling = false
+      }, 20000)
+    },
+    [checkNotifications]
+  )
+
+  const checkNotificationCreatorCommentFunc = useCallback(
+    (username: string) => {
+      let isCalling = false
+      interval.current = setInterval(async () => {
+        if (isCalling) return
+        isCalling = true
+        const res = await checkNotificationCreatorComment(username)
+        isCalling = false
+      }, 20000)
+    },
+    [checkNotifications]
+  )
+  useEffect(() => {
+    if (!user?.name) return
+    checkNotificationsFunc(user.name)
+
+    // creator of posts comments coming in
+    checkNotificationCreatorCommentFunc(user.name)
+
+    return () => {
+      if (interval?.current) {
+        clearInterval(interval.current)
+      }
+    }
+  }, [checkNotificationsFunc, user])
 
   return (
     <>

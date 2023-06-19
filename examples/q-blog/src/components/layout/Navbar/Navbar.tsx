@@ -1,14 +1,19 @@
-import React, { useRef, useState } from 'react'
+import React, { useMemo, useRef, useState } from 'react'
 import {
   Typography,
   Box,
   Popover,
   useTheme,
   Button,
-  Input
+  Input,
+  List,
+  ListItem,
+  ListItemText
 } from '@mui/material'
 import AccountCircle from '@mui/icons-material/AccountCircle'
 import AddBoxIcon from '@mui/icons-material/AddBox'
+import Badge from '@mui/material/Badge'
+import NotificationsIcon from '@mui/icons-material/Notifications'
 import ExitToAppIcon from '@mui/icons-material/ExitToApp'
 import { useNavigate } from 'react-router-dom'
 import { togglePublishBlogModal } from '../../../state/features/globalSlice'
@@ -23,6 +28,10 @@ import SubscriptionsIcon from '@mui/icons-material/Subscriptions'
 import { BlockedNamesModal } from '../../common/BlockedNamesModal/BlockedNamesModal'
 import SearchIcon from '@mui/icons-material/Search'
 import EmailIcon from '@mui/icons-material/Email'
+import localforage from 'localforage'
+const notification = localforage.createInstance({
+  name: 'notification'
+})
 
 import BackspaceIcon from '@mui/icons-material/Backspace'
 import {
@@ -47,6 +56,8 @@ import {
   setFilterValue,
   setIsFiltering
 } from '../../../state/features/blogSlice'
+import { Item } from '../../common/Comments/CommentEditor'
+import { formatDate } from '../../../utils/time'
 interface Props {
   isAuthenticated: boolean
   hasBlog: boolean
@@ -75,8 +86,22 @@ const NavBar: React.FC<Props> = ({
   const theme = useTheme()
   const query = useQuery()
   const { visitingBlog } = useSelector((state: RootState) => state.global)
+  const notifications = useSelector(
+    (state: RootState) => state.global.notifications
+  )
+  const notificationCreatorComment = useSelector(
+    (state: RootState) => state.global.notificationCreatorComment
+  )
+
+  const fullNotifications = useMemo(() => {
+    return [...notificationCreatorComment, ...notifications].sort(
+      (a, b) => b.created - a.created
+    )
+  }, [notificationCreatorComment, notifications])
   const location = useLocation()
   const [anchorEl, setAnchorEl] = React.useState<HTMLButtonElement | null>(null)
+  const [anchorElNotification, setAnchorElNotification] =
+    React.useState<HTMLButtonElement | null>(null)
   const [isOpenModal, setIsOpenModal] = React.useState<boolean>(false)
   const [searchVal, setSearchVal] = useState<string>('')
   const searchValRef = useRef('')
@@ -97,6 +122,13 @@ const NavBar: React.FC<Props> = ({
     const target = event.currentTarget as unknown as HTMLButtonElement | null
     setAnchorEl(target)
   }
+  const openNotificationPopover = (event: any) => {
+    const target = event.currentTarget as unknown as HTMLButtonElement | null
+    setAnchorElNotification(target)
+  }
+  const closeNotificationPopover = () => {
+    setAnchorElNotification(null)
+  }
 
   const handleClose = () => {
     setAnchorEl(null)
@@ -106,6 +138,8 @@ const NavBar: React.FC<Props> = ({
   }
   const open = Boolean(anchorEl)
   const id = open ? 'simple-popover' : undefined
+  const openPopover = Boolean(anchorElNotification)
+  const idNotification = openPopover ? 'simple-popover-notification' : undefined
 
   return (
     <CustomAppBar position="sticky" elevation={2}>
@@ -221,6 +255,109 @@ const NavBar: React.FC<Props> = ({
               Authenticate
             </AuthenticateButton>
           )}
+          <Badge
+            badgeContent={fullNotifications.length}
+            color="primary"
+            sx={{
+              margin: '0px 12px'
+            }}
+          >
+            <Button
+              onClick={(e) => {
+                openNotificationPopover(e)
+              }}
+              sx={{
+                margin: '0px',
+                padding: '0px',
+                height: 'auto',
+                width: 'auto',
+                minWidth: 'unset'
+              }}
+            >
+              <NotificationsIcon color="action" />
+            </Button>
+          </Badge>
+          <Popover
+            id={idNotification}
+            open={openPopover}
+            anchorEl={anchorElNotification}
+            onClose={closeNotificationPopover}
+            anchorOrigin={{
+              vertical: 'bottom',
+              horizontal: 'left'
+            }}
+          >
+            <Box>
+              <List
+                sx={{
+                  maxHeight: '300px',
+                  overflow: 'auto'
+                }}
+              >
+                {fullNotifications.map((notification: any, index: number) => (
+                  <ListItem
+                    key={index}
+                    divider
+                    sx={{
+                      cursor: 'pointer'
+                    }}
+                    onClick={async () => {
+                      const str = notification.postId
+                      const arr = str.split('-post-')
+                      const str1 = arr[0]
+                      const str2 = arr[1]
+                      const blogId = removePrefix(str1)
+                      navigate(
+                        `/${notification.postName}/${blogId}/${str2}?comment=${notification.identifier}`
+                      )
+                    }}
+                  >
+                    <ListItemText
+                      primary={
+                        <React.Fragment>
+                          <Typography
+                            component="span"
+                            variant="body1"
+                            color="textPrimary"
+                          >
+                            From {notification.name}
+                          </Typography>
+                        </React.Fragment>
+                      }
+                      secondary={
+                        <React.Fragment>
+                          <Typography
+                            component="span"
+                            variant="body2"
+                            color="textSecondary"
+                          >
+                            {formatDate(notification.created)}
+                          </Typography>
+                          <Typography
+                            component="span"
+                            variant="body2"
+                            color="textSecondary"
+                          >
+                            {' -comment'}
+                          </Typography>
+                        </React.Fragment>
+                      }
+                    />
+                  </ListItem>
+                ))}
+              </List>
+            </Box>
+          </Popover>
+          {/* <button
+            onClick={async () => {
+              await qortalRequest({
+                action: 'SET_TAB_NOTIFICATIONS',
+                count: 2
+              })
+            }}
+          >
+            add notification
+          </button> */}
           {isAuthenticated &&
             userName &&
             hasAttemptedToFetchBlogInitial &&

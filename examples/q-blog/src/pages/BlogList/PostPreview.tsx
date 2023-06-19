@@ -224,7 +224,13 @@ const BlogPostPreview: React.FC<BlogPostPreviewProps> = ({
             </StyledCardCol>
           </StyledCardHeader>
           <StyledCardContent>
-            <Typography variant="body2" color={theme.palette.text.primary}>
+            <Typography
+              variant="body2"
+              color={theme.palette.text.primary}
+              sx={{
+                wordBreak: 'break-word'
+              }}
+            >
               {description}
             </Typography>
             <Box sx={{ textAlign: 'flex-start', width: '100%' }}>

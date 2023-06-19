@@ -37,7 +37,8 @@
     "short-unique-id": "^4.4.4",
     "slate": "^0.91.4",
     "slate-history": "^0.86.0",
-    "slate-react": "^0.91.11"
+    "slate-react": "^0.91.11",
+    "ts-key-enum": "^2.0.12"
   },
   "devDependencies": {
     "@mui/types": "^7.2.3",

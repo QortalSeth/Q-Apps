@@ -421,6 +421,7 @@ export const CreatePostBuilder = ({
       if (createTitleId.startsWith('-')) {
         createTitleId = createTitleId.slice(1)
       }
+      createTitleId = createTitleId.slice(0, 24)
       const identifier = `${currentBlog.blogId}-post-${createTitleId}-${id}`
       const blogPostToBase64 = await objectToBase64(postObject)
       let description = ''

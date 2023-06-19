@@ -121,18 +121,8 @@ export const BlogList = ({ mode }: BlogListProps) => {
   }, [filterValue, isFiltering, filteredPosts])
   // if (!favoritesLocal) return null
 
-  console.log({ posts })
   return (
     <>
-      {/* <List
-        sx={{
-          margin: '0px',
-          padding: '10px',
-          display: 'flex',
-          flexWrap: 'wrap',
-          justifyContent: 'center'
-        }}
-      > */}
       {!mode && countNewPosts > 0 && !isFiltering && (
         <Box
           sx={{

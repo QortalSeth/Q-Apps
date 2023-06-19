@@ -164,7 +164,8 @@ export const GenericModal: React.FC<GenericModalProps> = ({
         identifierPrefix,
         title,
         description,
-        base64: base64String,
+        // base64: base64String,
+        file,
         filename: filename,
         category: selectedOption?.id || '',
         ...formattedTags

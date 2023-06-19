@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { ReusableModal } from '../../components/modals/ReusableModal'
 import { Box, Button, Input, Typography } from '@mui/material'
 import { BuilderButton } from '../CreatePost/CreatePost-styles'
@@ -9,7 +9,7 @@ import ShortUniqueId from 'short-unique-id'
 import { useDispatch, useSelector } from 'react-redux'
 import { RootState } from '../../state/store'
 import AttachFileIcon from '@mui/icons-material/AttachFile'
-
+import DOMPurify from 'dompurify'
 import { setNotification } from '../../state/features/notificationsSlice'
 import {
   objectToBase64,
@@ -57,6 +57,11 @@ export const ShowMessage = ({
   const handleReply = () => {
     setReplyTo(message)
   }
+
+ let cleanHTML = ''
+ if(message?.htmlContent){
+   cleanHTML = DOMPurify.sanitize(message.htmlContent);
+ }
 
   return (
     <Box
@@ -226,7 +231,7 @@ export const ShowMessage = ({
                             fontSize: '16px'
                           }}
                         >
-                          {file?.filename}
+                          {file?.originalFilename || file?.filename}
                         </Typography>
                       </FileElement>
                     </Box>
@@ -239,6 +244,11 @@ export const ShowMessage = ({
           {message?.textContent && (
             <ReadOnlySlate content={message.textContent} mode="mail" />
           )}
+          {message?.htmlContent && (
+            <div dangerouslySetInnerHTML={{ __html: cleanHTML }} />
+          )}
+
+      
         </Box>
         <Box
           sx={{
