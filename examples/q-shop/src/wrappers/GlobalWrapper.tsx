@@ -27,6 +27,7 @@ import localForage from "localforage";
 import ConsentModal from "../components/modals/ConsentModal";
 import { objectToBase64 } from "../utils/toBase64";
 import { Cart } from "../pages/ProductManager/Cart";
+import { addToHashMapStores } from "../state/features/storeSlice";
 
 interface Props {
   children: React.ReactNode;
@@ -298,6 +299,7 @@ const GlobalWrapper: React.FC<Props> = ({ children, setTheme }) => {
         };
 
         dispatch(setCurrentStore(storefullObj));
+        dispatch(addToHashMapStores(storefullObj));
         dispatch(
           setDataContainer({
             ...dataContainer,
