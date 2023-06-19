@@ -1,9 +1,9 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../state/store";
 import { useParams } from "react-router-dom";
-import { Typography, Box, Button, useTheme } from "@mui/material";
+import { Typography, Box, Button, useTheme, Grid } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
 import { setIsLoadingGlobal } from "../../state/features/globalSlice";
 import { Product } from "../../state/features/storeSlice";
@@ -11,14 +11,21 @@ import { useFetchProducts } from "../../hooks/useFetchProducts";
 import LazyLoad from "../../components/common/LazyLoad";
 import ContextMenuResource from "../../components/common/ContextMenu/ContextMenuResource";
 import {
-  setProductToCart,
   setStoreId,
-  setStoreOwner
+  setStoreOwner,
+  setProductToCart
 } from "../../state/features/cartSlice";
 import { ProductCard } from "./ProductCard";
 import { ProductDataContainer } from "../../state/features/globalSlice";
 import { useFetchOrders } from "../../hooks/useFetchOrders";
-
+import {
+  ProductManagerRow,
+  ProductManagerButton,
+  BackToStorefrontButton,
+  ProductsContainer,
+  NoProductsContainer,
+  NoProductsText
+} from "./Store-styles";
 interface IListProducts {
   sort: string;
   products: ProductDataContainer[];
@@ -146,11 +153,12 @@ export const Store = () => {
     } catch (error) {}
   }, [username, store, dataContainer]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     setProducts([]);
     setUserStore(null);
     getStore();
   }, [username, store]);
+
   const getProductsHandler = React.useCallback(async () => {
     await getProducts();
   }, [getProducts]);
@@ -159,53 +167,77 @@ export const Store = () => {
   if (!userStore) return null;
   return (
     <>
-      <Box
-        sx={{
-          display: "flex",
-          flexWrap: "wrap",
-          gap: "15px",
-          margin: "15px"
-        }}
-      >
-        {products.map((product: Product, index) => {
-          let existingProduct = product;
-          if (
-            catalogueHashMap[product?.catalogueId] &&
-            catalogueHashMap[product.catalogueId].products[product?.id]
-          ) {
-            existingProduct = {
-              ...product,
-              ...catalogueHashMap[product.catalogueId].products[product?.id],
-              catalogueId: product?.catalogueId || ""
-            };
-          }
-          const storeId = currentStore?.id || "";
-          return (
-            <Box
-              key={existingProduct.id}
-              sx={{
-                display: "flex",
-                gap: 1,
-                alignItems: "center",
-                width: "auto",
-                position: "relative",
-                " @media (max-width: 450px)": {
-                  width: "100%"
-                }
-              }}
-            >
-              <ContextMenuResource
-                name={existingProduct.user}
-                service="PRODUCT"
-                identifier={existingProduct.id}
-                link={`qortal://APP/Q-Shop/${existingProduct.user}/${storeId}/${existingProduct.id}`}
+      <ProductManagerRow>
+        <BackToStorefrontButton
+          onClick={() => {
+            navigate("/");
+          }}
+        >
+          Back To All Shops
+        </BackToStorefrontButton>
+        {username === user?.name && (
+          <ProductManagerButton
+            onClick={() => {
+              navigate(`/product-manager`);
+            }}
+          >
+            Product Manager
+          </ProductManagerButton>
+        )}
+      </ProductManagerRow>
+      <ProductsContainer container sx={{}}>
+        {products.length > 0 ? (
+          products.map((product: Product, index) => {
+            let existingProduct = product;
+            if (
+              catalogueHashMap[product?.catalogueId] &&
+              catalogueHashMap[product.catalogueId].products[product?.id]
+            ) {
+              existingProduct = {
+                ...product,
+                ...catalogueHashMap[product.catalogueId].products[product?.id],
+                catalogueId: product?.catalogueId || ""
+              };
+            }
+            const storeId = currentStore?.id || "";
+            return (
+              <Grid
+                xs={12}
+                sm={6}
+                md={4}
+                lg={3}
+                item
+                key={existingProduct.id}
+                sx={{
+                  display: "flex",
+                  gap: 1,
+                  alignItems: "center",
+                  width: "auto",
+                  position: "relative",
+                  " @media (max-width: 450px)": {
+                    width: "100%"
+                  }
+                }}
               >
-                <ProductCard product={existingProduct} />
-              </ContextMenuResource>
-            </Box>
-          );
-        })}
-      </Box>
+                <ContextMenuResource
+                  name={existingProduct.user}
+                  service="PRODUCT"
+                  identifier={existingProduct.id}
+                  link={`qortal://APP/Q-Shop/${existingProduct.user}/${storeId}/${existingProduct.id}`}
+                >
+                  <ProductCard product={existingProduct} />
+                </ContextMenuResource>
+              </Grid>
+            );
+          })
+        ) : (
+          <NoProductsContainer>
+            <NoProductsText>
+              You currently have no products! Add some in the Product Manager.
+            </NoProductsText>
+          </NoProductsContainer>
+        )}
+      </ProductsContainer>
       <LazyLoad onLoadMore={getProductsHandler}></LazyLoad>
     </>
   );

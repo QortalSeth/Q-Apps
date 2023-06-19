@@ -136,6 +136,7 @@ const CreateStoreModal: React.FC<CreateStoreModalProps> = ({
             ></TimesIcon>
           </LogoPreviewRow>
         )}
+
         <CustomInputField
           id="modal-title-input"
           label="Url Preview"

@@ -87,13 +87,14 @@ export const TimesIcon = styled(TimesSVG)(({ theme }) => ({
 }));
 
 export const CustomInputField = styled(TextField)(({ theme }) => ({
-  fontFamily: "Karla",
-  fontSize: "17px",
   color: theme.palette.text.primary,
   backgroundColor: theme.palette.background.default,
   borderColor: theme.palette.background.paper,
   "& label": {
-    color: theme.palette.mode === "light" ? "#808183" : "#edeef0"
+    color: theme.palette.mode === "light" ? "#808183" : "#edeef0",
+    fontFamily: "Karla",
+    fontSize: "18px",
+    letterSpacing: "0px"
   },
   "& label.Mui-focused": {
     color: theme.palette.mode === "light" ? "#A0AAB4" : "#d7d8da"
@@ -111,6 +112,11 @@ export const CustomInputField = styled(TextField)(({ theme }) => ({
     "&.Mui-focused fieldset": {
       borderColor: "#6F7E8C"
     }
+  },
+  "& .MuiInputBase-root": {
+    fontFamily: "Karla",
+    fontSize: "18px",
+    letterSpacing: "0px"
   }
 }));
 
