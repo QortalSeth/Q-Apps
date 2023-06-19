@@ -64,7 +64,7 @@ export const CreateBlogButton = styled(Button)(({ theme }) => ({
   gap: "4px",
   backgroundColor: theme.palette.secondary.main,
   color: "#fff",
-  fontFamily: "Arial",
+  fontFamily: "Raleway",
   transition: "all 0.3s ease-in-out",
   boxShadow: "none",
   "&:hover": {
@@ -84,7 +84,7 @@ export const AuthenticateButton = styled(Button)(({ theme }) => ({
   gap: "4px",
   backgroundColor: theme.palette.secondary.main,
   color: "#fff",
-  fontFamily: "Arial",
+  fontFamily: "Raleway",
   transition: "all 0.3s ease-in-out",
   boxShadow: "none",
   "&:hover": {
@@ -116,7 +116,8 @@ export const DropdownContainer = styled(Box)(({ theme }) => ({
   transition: "all 0.4s ease-in-out",
   "&:hover": {
     cursor: "pointer",
-    filter: "brightness(0.95)"
+    filter:
+      theme.palette.mode === "light" ? "brightness(0.95)" : "brightness(1.1)"
   }
 }));
 

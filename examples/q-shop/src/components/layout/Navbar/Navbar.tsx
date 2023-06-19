@@ -205,27 +205,31 @@ const NavBar: React.FC<Props> = ({
             horizontal: "left"
           }}
         >
+          <DropdownContainer>
+            <DropdownText
+              onClick={() => {
+                dispatch(toggleCreateStoreModal(true));
+                handleCloseStoreDropdown();
+              }}
+            >
+              Create Store
+            </DropdownText>
+          </DropdownContainer>
           {userStores
             .filter((store: Store): boolean => store.owner === userName)
             .map((store: Store) => (
               <DropdownContainer>
                 <DropdownText
-                  onClick={() => navigate(`/${userName}/${store.id}`)}
+                  onClick={() => {
+                    navigate(`/${userName}/${store.id}`);
+                    handleCloseStoreDropdown();
+                  }}
                   key={store.id}
                 >
                   {store.title}
                 </DropdownText>
               </DropdownContainer>
             ))}
-          <DropdownContainer>
-            <DropdownText
-              onClick={() => {
-                dispatch(toggleCreateStoreModal(true));
-              }}
-            >
-              Create Store
-            </DropdownText>
-          </DropdownContainer>
         </Popover>
         <Popover
           id={"user-popover"}

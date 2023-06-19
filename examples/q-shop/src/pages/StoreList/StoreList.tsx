@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../state/store";
@@ -97,20 +97,27 @@ export const StoreList = ({ mode }: BlogListProps) => {
     }
   }, [stores]);
 
+  // Get all stores on mount or if user changes
+
   const getStores = useCallback(async () => {
     await getUserStores();
   }, [getUserStores, user?.name]);
 
   // Filter to show only the user's stores
+
   const handleFilterUserStores = (
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
     setFilterUserStores(event.target.checked);
   };
 
-  const filteredStores = filterUserStores
-    ? stores.filter((store: Store) => store.owner === user?.name)
-    : stores;
+  const filteredStores = useMemo(() => {
+    if (filterUserStores) {
+      return stores.filter((store) => store.owner === user?.name);
+    } else {
+      return stores;
+    }
+  }, [filterUserStores, stores, user?.name]);
 
   console.log({ stores, hashMapStores });
   return (
