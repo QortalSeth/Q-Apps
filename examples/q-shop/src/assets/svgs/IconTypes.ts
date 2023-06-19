@@ -3,5 +3,5 @@ export interface IconTypes {
   height: string;
   width: string;
   className?: string;
-  onClickFunc?: () => void;
+  onClickFunc?: (e?: any) => void;
 }

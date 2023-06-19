@@ -221,7 +221,7 @@ const GlobalWrapper: React.FC<Props> = ({ children, setTheme }) => {
       description,
       location,
       shipsTo,
-      blogIdentifier,
+      storeIdentifier,
       logo
     }: onPublishParam) => {
       if (!user || !user.name)
@@ -231,7 +231,7 @@ const GlobalWrapper: React.FC<Props> = ({ children, setTheme }) => {
       if (!location) throw new Error("A location is required");
       if (!shipsTo) throw new Error("Ships to is required");
       const name = user.name;
-      let formatBlogIdentifier = blogIdentifier;
+      let formatBlogIdentifier = storeIdentifier;
       if (formatBlogIdentifier.endsWith("-")) {
         formatBlogIdentifier = formatBlogIdentifier.slice(0, -1);
       }
