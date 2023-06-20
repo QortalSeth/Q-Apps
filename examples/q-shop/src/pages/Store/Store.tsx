@@ -3,18 +3,13 @@ import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../state/store";
 import { useParams } from "react-router-dom";
-import { Typography, Box, Button, useTheme, Grid } from "@mui/material";
-import EditIcon from "@mui/icons-material/Edit";
+import { useTheme, Grid } from "@mui/material";
 import { setIsLoadingGlobal } from "../../state/features/globalSlice";
 import { Product } from "../../state/features/storeSlice";
 import { useFetchProducts } from "../../hooks/useFetchProducts";
 import LazyLoad from "../../components/common/LazyLoad";
 import ContextMenuResource from "../../components/common/ContextMenu/ContextMenuResource";
-import {
-  setStoreId,
-  setStoreOwner,
-  setProductToCart
-} from "../../state/features/cartSlice";
+import { setStoreId, setStoreOwner } from "../../state/features/cartSlice";
 import { ProductCard } from "./ProductCard";
 import { ProductDataContainer } from "../../state/features/globalSlice";
 import { useFetchOrders } from "../../hooks/useFetchOrders";

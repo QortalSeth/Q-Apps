@@ -5,9 +5,9 @@ import { useNavigate } from "react-router-dom";
 import { addUser } from "../state/features/authSlice";
 import ShortUniqueId from "short-unique-id";
 import { RootState } from "../state/store";
-import PublishStoreModal, {
+import CreateStoreModal, {
   onPublishParam
-} from "../components/modals/PublishStoreModal";
+} from "../components/modals/CreateStoreModal";
 import EditBlogModal, {
   onPublishParamEdit
 } from "../components/modals/EditStoreModal";
@@ -437,16 +437,14 @@ const GlobalWrapper: React.FC<Props> = ({ children, setTheme }) => {
   return (
     <>
       {isLoadingGlobal && <PageLoader />}
-
       {isOpenCreateStoreModal && user?.name && (
-        <PublishStoreModal
+        <CreateStoreModal
           open={isOpenCreateStoreModal}
           onClose={onClosePublishBlogModal}
           onPublish={createStore}
           username={user?.name || ""}
         />
       )}
-
       <EditBlogModal
         open={isOpenEditBlogModal}
         onClose={onCloseEditBlogModal}

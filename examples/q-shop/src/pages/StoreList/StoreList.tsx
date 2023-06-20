@@ -123,16 +123,18 @@ export const StoreList = ({ mode }: BlogListProps) => {
   return (
     <>
       <StoresContainer container>
-        <MyStoresRow>
-          <MyStoresCard>
-            <MyStoresCheckbox
-              checked={filterUserStores}
-              onChange={handleFilterUserStores}
-              inputProps={{ "aria-label": "controlled" }}
-            />
-            See My Stores
-          </MyStoresCard>
-        </MyStoresRow>
+        {user && (
+          <MyStoresRow>
+            <MyStoresCard>
+              <MyStoresCheckbox
+                checked={filterUserStores}
+                onChange={handleFilterUserStores}
+                inputProps={{ "aria-label": "controlled" }}
+              />
+              See My Stores
+            </MyStoresCard>
+          </MyStoresRow>
+        )}
         {filteredStores.map((store: Store, index) => {
           const existingStore = hashMapStores[store.id];
           let storeItem = store;
