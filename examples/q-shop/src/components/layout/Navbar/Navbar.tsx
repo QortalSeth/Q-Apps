@@ -4,7 +4,10 @@ import { useSelector } from "react-redux";
 import { Box, Popover, useTheme } from "@mui/material";
 import ExitToAppIcon from "@mui/icons-material/ExitToApp";
 import { useNavigate } from "react-router-dom";
-import { toggleCreateStoreModal } from "../../../state/features/globalSlice";
+import {
+  resetProducts,
+  toggleCreateStoreModal
+} from "../../../state/features/globalSlice";
 import { useDispatch } from "react-redux";
 import BookmarkIcon from "@mui/icons-material/Bookmark";
 import { BlockedNamesModal } from "../../common/BlockedNamesModal/BlockedNamesModal";
@@ -36,6 +39,7 @@ import {
 import { setIsOpen } from "../../../state/features/cartSlice";
 import { Store } from "../../../state/features/storeSlice";
 import { OrdersSVG } from "../../../assets/svgs/OrdersSVG";
+import { resetOrders } from "../../../state/features/orderSlice";
 interface Props {
   isAuthenticated: boolean;
   userName: string | null;
@@ -94,8 +98,6 @@ const NavBar: React.FC<Props> = ({
   const onCloseBlockedNames = () => {
     setIsOpenBlockedNamesModal(false);
   };
-
-  console.log({ userStores });
 
   return (
     <CustomAppBar position="sticky" elevation={2}>
@@ -221,6 +223,8 @@ const NavBar: React.FC<Props> = ({
               <DropdownContainer>
                 <DropdownText
                   onClick={() => {
+                    dispatch(resetOrders());
+                    dispatch(resetProducts());
                     navigate(`/${userName}/${store.id}`);
                     handleCloseStoreDropdown();
                   }}

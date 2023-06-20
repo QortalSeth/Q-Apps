@@ -12,7 +12,7 @@ const initialState: OrderState = {
   isOpen: false
 }
 
-interface Details {}
+interface Details { }
 
 interface Delivery {
   customerName: string
@@ -71,10 +71,13 @@ export const orderSlice = createSlice({
         ...order,
         totalPrice: order.details.totalPrice
       }
-    }
+    },
+    resetOrders: (state) => {
+      state.orders = []
+    },
   }
 })
 
-export const { upsertOrders, addToHashMap } = orderSlice.actions
+export const { upsertOrders, addToHashMap, resetOrders } = orderSlice.actions
 
 export default orderSlice.reducer

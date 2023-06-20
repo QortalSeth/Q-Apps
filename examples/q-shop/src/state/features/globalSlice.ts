@@ -161,6 +161,10 @@ export const globalSlice = createSlice({
           state.myOrders.push(order)
         }
       })
+    },
+    resetProducts: (state) => {
+      state.products = []
+      state.productsToSave = {}
     }
   }
 })
@@ -179,7 +183,8 @@ export const {
   setProductsToSave,
   setCatalogueHashMap,
   upsertProducts,
-  upsertMyOrders
+  upsertMyOrders,
+  resetProducts
 } = globalSlice.actions
 
 export default globalSlice.reducer
