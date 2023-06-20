@@ -1,75 +1,65 @@
-import React, { Dispatch, useEffect, useState } from 'react'
-import { ReusableModal } from '../../components/modals/ReusableModal'
-import { Box, Button, Input, Typography, useTheme } from '@mui/material'
+import { useEffect, useState } from "react";
+import { ReusableModal } from "../../components/modals/ReusableModal";
+import { Box, Button, Typography, useTheme } from "@mui/material";
+import ShortUniqueId from "short-unique-id";
+import { useDispatch, useSelector } from "react-redux";
+import { RootState } from "../../state/store";
+import CreateIcon from "@mui/icons-material/Create";
+import { setNotification } from "../../state/features/notificationsSlice";
+import { ProductForm } from "./ProductForm";
+import { setProductsToSave } from "../../state/features/globalSlice";
+import { Product } from "../../state/features/storeSlice";
+import { CreateProductButton } from "./NewProduct-styles";
+import { AddSVG } from "../../assets/svgs/AddSVG";
 
-import { Descendant } from 'slate'
-import ShortUniqueId from 'short-unique-id'
-import { useDispatch, useSelector } from 'react-redux'
-import { RootState } from '../../state/store'
-
-import CreateIcon from '@mui/icons-material/Create'
-import { setNotification } from '../../state/features/notificationsSlice'
-import { objectToBase64 } from '../../utils/toBase64'
-import {
-  MAIL_ATTACHMENT_SERVICE_TYPE,
-  MAIL_SERVICE_TYPE
-} from '../../constants/mail'
-
-import { ProductForm } from './ProductForm'
-import { setProductsToSave } from '../../state/features/globalSlice'
-import { Product } from '../../state/features/storeSlice'
-
-const uid = new ShortUniqueId({ length: 10 })
-
+const uid = new ShortUniqueId({ length: 10 });
 interface ProductPrice {
-  currency: string
-  value: number
+  currency: string;
+  value: number;
 }
 export interface PublishProductParams {
-  title?: string
-  description?: string
-  type: string
-  images: string[]
-  price: ProductPrice[]
-  mainImageIndex: number
-  category: string
-  status?: string
+  title?: string;
+  description?: string;
+  type: string;
+  images: string[];
+  price: ProductPrice[];
+  mainImageIndex: number;
+  category: string;
+  status?: string;
 }
 interface NewMessageProps {
-  editProduct?: Product | null
-  onClose: () => void
+  editProduct?: Product | null;
+  onClose: () => void;
 }
-const maxSize = 25 * 1024 * 1024 // 25 MB in bytes
+
 export const NewProduct = ({ editProduct, onClose }: NewMessageProps) => {
-  const [isOpen, setIsOpen] = useState<boolean>(false)
+  const [isOpen, setIsOpen] = useState<boolean>(false);
 
-  const [destinationName, setDestinationName] = useState('')
-  const { user } = useSelector((state: RootState) => state.auth)
+  const { user } = useSelector((state: RootState) => state.auth);
 
-  const [imagePreviewFile, setImagePreviewFile] = useState<any>(null)
   const currentStore = useSelector(
     (state: RootState) => state.global.currentStore
-  )
+  );
   const dataContainer = useSelector(
     (state: RootState) => state.global.dataContainer
-  )
-  const theme = useTheme()
+  );
+  const theme = useTheme();
 
-  const dispatch = useDispatch()
+  const dispatch = useDispatch();
 
   const openModal = () => {
-    setIsOpen(true)
-  }
+    setIsOpen(true);
+  };
   const closeModal = () => {
-    setIsOpen(false)
-    onClose()
-  }
+    setIsOpen(false);
+    onClose();
+  };
 
   useEffect(() => {
     if (editProduct) {
-      setIsOpen(true)
+      setIsOpen(true);
     }
-  }, [editProduct])
+  }, [editProduct]);
 
   async function addProduct({
     title,
@@ -81,49 +71,49 @@ export const NewProduct = ({ editProduct, onClose }: NewMessageProps) => {
     category,
     status
   }: PublishProductParams) {
-    let address: string = ''
-    let name: string = ''
-    let errorMsg = ''
+    let address: string = "";
+    let name: string = "";
+    let errorMsg = "";
 
-    address = user?.address || ''
-    name = user?.name || ''
+    address = user?.address || "";
+    name = user?.name || "";
 
     if (!address) {
-      errorMsg = "Cannot send: your address isn't available"
+      errorMsg = "Cannot send: your address isn't available";
     }
     if (!name) {
-      errorMsg = 'Cannot send a message without a access to your name'
+      errorMsg = "Cannot send a message without a access to your name";
     }
     if (images.length === 0) {
-      errorMsg = 'Missing images'
+      errorMsg = "Missing images";
     }
     if (!currentStore) {
-      errorMsg = 'Cannot create a product without having a store'
+      errorMsg = "Cannot create a product without having a store";
     }
     if (!dataContainer) {
-      errorMsg = 'Cannot create a product without having a data-container'
+      errorMsg = "Cannot create a product without having a data-container";
     }
 
     if (errorMsg) {
       dispatch(
         setNotification({
           msg: errorMsg,
-          alertType: 'error'
+          alertType: "error"
         })
-      )
-      return
+      );
+      return;
     }
 
     try {
-      if (!currentStore?.id) throw new Error('Cannot find store id')
+      if (!currentStore?.id) throw new Error("Cannot find store id");
       if (!dataContainer?.products)
-        throw new Error('Cannot find data-container products')
-      const storeId: string = currentStore?.id
+        throw new Error("Cannot find data-container products");
+      const storeId: string = currentStore?.id;
 
-      const parts = storeId.split('q-store-general-')
-      const shortStoreId = parts[1]
-      const productId = uid()
-      if (!currentStore) return
+      const parts = storeId.split("q-store-general-");
+      const shortStoreId = parts[1];
+      const productId = uid();
+      if (!currentStore) return;
       if (editProduct) {
         const productObject: any = {
           ...editProduct,
@@ -136,11 +126,11 @@ export const NewProduct = ({ editProduct, onClose }: NewMessageProps) => {
           category,
           isUpdate: true,
           status
-        }
+        };
 
-        dispatch(setProductsToSave(productObject))
+        dispatch(setProductsToSave(productObject));
       } else {
-        const id = `q-store-product-${shortStoreId}-${productId}`
+        const id = `q-store-product-${shortStoreId}-${productId}`;
         const productObject: any = {
           title,
           description,
@@ -154,84 +144,61 @@ export const NewProduct = ({ editProduct, onClose }: NewMessageProps) => {
           shortStoreId,
           category,
           id
-        }
+        };
 
-        dispatch(setProductsToSave(productObject))
+        dispatch(setProductsToSave(productObject));
       }
 
-      closeModal()
+      closeModal();
     } catch (error: any) {
-      let notificationObj = null
-      if (typeof error === 'string') {
+      let notificationObj = null;
+      if (typeof error === "string") {
         notificationObj = {
-          msg: error || 'Failed to send message',
-          alertType: 'error'
-        }
-      } else if (typeof error?.error === 'string') {
+          msg: error || "Failed to send message",
+          alertType: "error"
+        };
+      } else if (typeof error?.error === "string") {
         notificationObj = {
-          msg: error?.error || 'Failed to send message',
-          alertType: 'error'
-        }
+          msg: error?.error || "Failed to send message",
+          alertType: "error"
+        };
       } else {
         notificationObj = {
-          msg: error?.message || 'Failed to send message',
-          alertType: 'error'
-        }
+          msg: error?.message || "Failed to send message",
+          alertType: "error"
+        };
       }
-      if (!notificationObj) return
-      dispatch(setNotification(notificationObj))
+      if (!notificationObj) return;
+      dispatch(setNotification(notificationObj));
 
-      throw new Error('Failed to send message')
+      throw new Error("Failed to send message");
     }
   }
 
   return (
     <Box
       sx={{
-        display: 'flex'
+        display: "flex",
+        padding: "5px 15px"
       }}
     >
-      <Box
-        className="step-2"
-        sx={{
-          display: 'flex',
-          alignItems: 'center',
-          background: theme.palette.background.default,
-          borderRadius: '25px',
-          height: 'auto',
-          padding: '10px',
-          cursor: 'pointer',
-          margin: '7px 10px 7px 0px;'
-        }}
-        onClick={openModal}
-      >
-        <CreateIcon
-          sx={{
-            cursor: 'pointer',
-            marginRight: '5px'
-          }}
-        />
-        <Typography
-          sx={{
-            fontSize: '14px'
-          }}
-        >
-          Add product
-        </Typography>
-      </Box>
+      <CreateProductButton onClick={openModal}>
+        <AddSVG color={"#ffffff"} height={"22"} width={"22"} />
+        Add Product
+      </CreateProductButton>
 
       <ReusableModal
         open={isOpen}
         customStyles={{
-          maxHeight: '95vh',
-          overflowY: 'auto'
+          maxHeight: "95vh",
+          overflowY: "auto"
         }}
       >
         <Box
           sx={{
-            display: 'flex',
-            alignItems: 'center',
-            flexDirection: 'column',
+            display: "flex",
+            alignItems: "center",
+            flexDirection: "column",
             gap: 1
           }}
         >
@@ -242,5 +209,5 @@ export const NewProduct = ({ editProduct, onClose }: NewMessageProps) => {
         </Button>
       </ReusableModal>
     </Box>
-  )
-}
+  );
+};

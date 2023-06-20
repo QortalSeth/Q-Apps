@@ -1,26 +1,10 @@
-import React, {
-  FC,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState
-} from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../state/store";
-import {
-  Box,
-  Button,
-  Input,
-  Typography,
-  useTheme,
-  IconButton
-} from "@mui/material";
+import { Box, Button, useTheme } from "@mui/material";
 import LazyLoad from "../../components/common/LazyLoad";
 import { NewProduct } from "./NewProduct";
-import Tabs from "@mui/material/Tabs";
-import Tab from "@mui/material/Tab";
 import { ShowOrder } from "./ShowOrder";
 import SimpleTable from "./ProductTable";
 import { setNotification } from "../../state/features/notificationsSlice";
@@ -34,7 +18,7 @@ import {
 import { Price, Product } from "../../state/features/storeSlice";
 import { useFetchOrders } from "../../hooks/useFetchOrders";
 import { AVAILABLE } from "../../constants/product-status";
-import { TabsContainer } from "./ProductManager-styles";
+import { TabsContainer, StyledTabs, StyledTab } from "./ProductManager-styles";
 import OrderTable from "./OrderTable";
 import { BackToStorefrontButton } from "../Store/Store-styles";
 
@@ -383,12 +367,12 @@ export const ProductManager = () => {
         >
           Back To Storefront
         </BackToStorefrontButton>
-        <Tabs
+        <StyledTabs
           value={valueTab}
           onChange={handleChange}
           aria-label="basic tabs example"
         >
-          <Tab
+          <StyledTab
             sx={{
               "&.Mui-selected": {
                 color: theme.palette.text.primary,
@@ -397,7 +381,7 @@ export const ProductManager = () => {
             }}
             label="Orders"
           />
-          <Tab
+          <StyledTab
             sx={{
               "&.Mui-selected": {
                 color: theme.palette.text.primary,
@@ -406,7 +390,7 @@ export const ProductManager = () => {
             }}
             label="Products"
           />
-        </Tabs>
+        </StyledTabs>
       </TabsContainer>
 
       {Object.keys(productsToSave).length > 0 && (

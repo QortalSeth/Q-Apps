@@ -14,7 +14,7 @@ export const ModalBody = styled(Box)(({ theme }) => ({
   padding: "15px 35px",
   display: "flex",
   flexDirection: "column",
-  gap: "15px",
+  gap: "17px",
   overflowY: "auto",
   maxHeight: "95vh",
   boxShadow:
@@ -117,6 +117,9 @@ export const CustomInputField = styled(TextField)(({ theme }) => ({
     fontFamily: "Karla",
     fontSize: "18px",
     letterSpacing: "0px"
+  },
+  "& .MuiFilledInput-root:after": {
+    borderBottomColor: theme.palette.secondary.main
   }
 }));
 

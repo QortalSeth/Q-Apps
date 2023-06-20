@@ -34,13 +34,13 @@ export const BackToStorefrontButton = styled(Button)(({ theme }) => ({
   fontFamily: "Raleway",
   fontSize: "15px",
   color: "#ffffff",
-  backgroundColor: "#bdba02",
+  backgroundColor: theme.palette.mode === "dark" ? "#bdba02" : "#e1dd04",
   border: "none",
   borderRadius: "5px",
   transition: "all 0.3s ease-in-out",
   "&:hover": {
     cursor: "pointer",
-    backgroundColor: "#a5a201"
+    backgroundColor: theme.palette.mode === "dark" ? "#a5a201" : "#c7c402"
   }
 }));
 
