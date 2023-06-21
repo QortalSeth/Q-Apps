@@ -1,9 +1,6 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
-
 import { addUser } from "../state/features/authSlice";
-import ShortUniqueId from "short-unique-id";
 import { RootState } from "../state/store";
 import CreateStoreModal, {
   onPublishParam
@@ -11,38 +8,39 @@ import CreateStoreModal, {
 import EditBlogModal, {
   onPublishParamEdit
 } from "../components/modals/EditStoreModal";
-
 import {
   setCurrentStore,
   setDataContainer,
-  setIsLoadingGlobal,
   toggleEditBlogModal,
   toggleCreateStoreModal
 } from "../state/features/globalSlice";
 import NavBar from "../components/layout/Navbar/Navbar";
 import PageLoader from "../components/common/PageLoader";
-
 import { setNotification } from "../state/features/notificationsSlice";
-import localForage from "localforage";
 import ConsentModal from "../components/modals/ConsentModal";
 import { objectToBase64 } from "../utils/toBase64";
 import { Cart } from "../pages/ProductManager/Cart";
-import { addToHashMapStores } from "../state/features/storeSlice";
-
+import {
+  Store,
+  addToAllMyStores,
+  addToHashMapStores,
+  setAllMyStores
+} from "../state/features/storeSlice";
+import { useFetchStores } from "../hooks/useFetchStores";
 interface Props {
   children: React.ReactNode;
   setTheme: (val: string) => void;
 }
 
-const uid = new ShortUniqueId();
-
 const GlobalWrapper: React.FC<Props> = ({ children, setTheme }) => {
-  const navigate = useNavigate();
   const dispatch = useDispatch();
+  const { user } = useSelector((state: RootState) => state.auth);
+
+  const { getStore, checkAndUpdateResource } = useFetchStores();
 
   const [userAvatar, setUserAvatar] = useState<string>("");
   const [isOpenCart, setIsOpenCart] = useState<boolean>(false);
-  const { user } = useSelector((state: RootState) => state.auth);
+
   const [hasAttemptedToFetchShopInitial, setHasAttemptedToFetchShopInitial] =
     useState(false);
 
@@ -113,7 +111,7 @@ const GlobalWrapper: React.FC<Props> = ({ children, setTheme }) => {
     return doesExist;
   }
 
-  async function getStore(name: string) {
+  async function getMyCurrentStore(name: string) {
     //TODO NAME SHOULD BE EXACT
     const url = `/arbitrary/resources/search?service=STORE&identifier=q-store-general-&exactmatchnames=true&name=${name}&prefix=true&limit=20&includemetadata=true`;
     const responseBlogs = await fetch(url, {
@@ -207,7 +205,7 @@ const GlobalWrapper: React.FC<Props> = ({ children, setTheme }) => {
       const name = await getNameInfo(account.address);
       dispatch(addUser({ ...account, name }));
 
-      const blog = await getStore(name);
+      const blog = await getMyCurrentStore(name);
       setHasAttemptedToFetchShopInitial(true);
     } catch (error) {
       console.error(error);
@@ -282,13 +280,23 @@ const GlobalWrapper: React.FC<Props> = ({ children, setTheme }) => {
           identifier: `${identifier}-datacontainer`,
           filename: "datacontainer.json"
         });
-        // navigate(`/${user.name}/${identifier}`)
         await new Promise<void>((res, rej) => {
           setTimeout(() => {
             res();
           }, 1000);
         });
         const createdAt = Date.now();
+
+        // Store data (other than the raw data or metadata) to add to Redux
+        const storeData = {
+          title: title,
+          description: description,
+          created: createdAt,
+          owner: name,
+          id: storeIdentifier,
+          logo: logo
+        };
+
         const storefullObj = {
           ...storeObj,
           id: identifier,
@@ -306,7 +314,7 @@ const GlobalWrapper: React.FC<Props> = ({ children, setTheme }) => {
             id: `${identifier}-datacontainer`
           })
         );
-        // getStore(name)
+        dispatch(addToAllMyStores(storeData));
         dispatch(
           setNotification({
             msg: "Store successfully created",
@@ -423,16 +431,73 @@ const GlobalWrapper: React.FC<Props> = ({ children, setTheme }) => {
     [user, currentStore]
   );
 
-  React.useEffect(() => {
-    askForAccountInformation();
-  }, []);
-
   const onClosePublishBlogModal = React.useCallback(() => {
     dispatch(toggleCreateStoreModal(false));
   }, []);
+
   const onCloseEditBlogModal = React.useCallback(() => {
     dispatch(toggleEditBlogModal(false));
   }, []);
+
+  // Get my stores
+
+  const getMyStores = async () => {
+    if (!user || !user?.name) return;
+    try {
+      const offset = 0;
+      //TODO - NAME SHOULD BE EXACT
+      const name = user?.name;
+      const url = `/arbitrary/resources/search?service=STORE&name=${name}&limit=20&exactmatchnames=true&includemetadata=true&offset=${offset}&reverse=true`;
+      const response = await fetch(url, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json"
+        }
+      });
+      const responseData = await response.json();
+      // Data returned from that endpoint of the API
+      const structureData = responseData.map((storeItem: any): Store => {
+        return {
+          title: storeItem?.metadata?.title,
+          category: storeItem?.metadata?.category,
+          categoryName: storeItem?.metadata?.categoryName,
+          tags: storeItem?.metadata?.tags || [],
+          description: storeItem?.metadata?.description,
+          created: storeItem.created,
+          updated: storeItem.updated,
+          owner: storeItem.name,
+          id: storeItem.identifier
+        };
+      });
+
+      // Add All My Stores to Redux
+      dispatch(setAllMyStores(structureData));
+
+      // Get the store raw data from getStore API Call only if the hashmapStore doesn't have my store or if my store is more recently updated than the existing store
+      for (const content of structureData) {
+        if (content.owner && content.id) {
+          const res = checkAndUpdateResource({
+            id: content.id,
+            updated: content.updated
+          });
+          if (res) {
+            getStore(content.owner, content.id, content);
+          }
+        }
+      }
+    } catch (error) {}
+  };
+
+  useEffect(() => {
+    askForAccountInformation();
+  }, []);
+
+  // Fetch My Stores on Mount once Auth Is Complete
+
+  useEffect(() => {
+    if (!user?.name) return;
+    getMyStores();
+  }, [user]);
 
   return (
     <>
@@ -457,7 +522,6 @@ const GlobalWrapper: React.FC<Props> = ({ children, setTheme }) => {
         isAuthenticated={!!user?.name}
         userName={user?.name || ""}
         userAvatar={userAvatar}
-        blog={currentStore}
         authenticate={askForAccountInformation}
         hasAttemptedToFetchShopInitial={hasAttemptedToFetchShopInitial}
       />

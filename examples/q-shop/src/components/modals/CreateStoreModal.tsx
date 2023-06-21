@@ -56,6 +56,7 @@ const CreateStoreModal: React.FC<CreateStoreModalProps> = ({
   const [errorMessage, setErrorMessage] = useState<string>("");
   const [storeIdentifier, setStoreIdentifier] = useState("");
   const [logo, setLogo] = useState<string | null>(null);
+
   const handlePublish = async (): Promise<void> => {
     try {
       setErrorMessage("");
@@ -167,6 +168,7 @@ const CreateStoreModal: React.FC<CreateStoreModalProps> = ({
           fullWidth
           required
           variant="filled"
+          inputProps={{ maxLength: 50 }}
         />
 
         <CustomInputField

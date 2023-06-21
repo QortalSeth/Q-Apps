@@ -117,7 +117,7 @@ export const DropdownContainer = styled(Box)(({ theme }) => ({
   "&:hover": {
     cursor: "pointer",
     filter:
-      theme.palette.mode === "light" ? "brightness(0.95)" : "brightness(1.1)"
+      theme.palette.mode === "light" ? "brightness(0.95)" : "brightness(1.7)"
   }
 }));
 
