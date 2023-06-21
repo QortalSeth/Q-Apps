@@ -4,14 +4,17 @@ import { RootState } from '../store'
 interface GlobalState {
   products: Product[]
   filteredProducts: Product[]
+  myStores: Store[]
   hashMapProducts: Record<string, Product>
   isFiltering: boolean
   filterValue: string
   hashMapStores: Record<string, Store>
 }
+
 const initialState: GlobalState = {
   products: [],
   filteredProducts: [],
+  myStores: [],
   hashMapProducts: {},
   isFiltering: false,
   filterValue: '',
@@ -68,6 +71,12 @@ export const storeSlice = createSlice({
     setFilterValue: (state, action) => {
       state.filterValue = action.payload
     },
+    setAllMyStores: (state, action) => {
+      state.myStores = action.payload
+    },
+    addToAllMyStores: (state, action) => {
+      state.myStores.push(action.payload)
+    },
     addPosts: (state, action) => {
       state.products = action.payload
     },
@@ -103,6 +112,7 @@ export const storeSlice = createSlice({
       const store = action.payload
       state.hashMapStores[store.id] = store
     },
+
     updateInHashMap: (state, action) => {
       const { id } = action.payload
       const post = action.payload
@@ -161,6 +171,8 @@ export const storeSlice = createSlice({
 
 export const {
   addPosts,
+  addToAllMyStores,
+  setAllMyStores,
   updatePost,
   removePost,
   addToHashMap,

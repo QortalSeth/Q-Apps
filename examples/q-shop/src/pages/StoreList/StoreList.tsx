@@ -32,9 +32,14 @@ export const StoreList = ({ mode }: BlogListProps) => {
   const { user } = useSelector((state: RootState) => state.auth);
   const [stores, setStores] = useState<Store[]>([]);
   const [filterUserStores, setFilterUserStores] = useState<boolean>(false);
+  // TODO: Need skeleton at first while the data is being fetched
+  // Will rerender and replace if the hashmap wasn't found initially
   const hashMapStores = useSelector(
     (state: RootState) => state.store.hashMapStores
   );
+
+  // Fetch My Stores from Redux
+  const { myStores } = useSelector((state: RootState) => state.store);
   const { getStore, checkAndUpdateResource } = useFetchStores();
   const navigate = useNavigate();
 
@@ -68,7 +73,7 @@ export const StoreList = ({ mode }: BlogListProps) => {
         };
       });
       console.log({ structureData });
-      // Add stores & user stores to localstate & guard against duplicates
+      // Add stores to localstate & guard against duplicates
       const copiedStores: Store[] = [...stores];
       structureData.forEach((storeItem: Store) => {
         const index = stores.findIndex((p: Store) => p.id === storeItem.id);
@@ -113,11 +118,11 @@ export const StoreList = ({ mode }: BlogListProps) => {
 
   const filteredStores = useMemo(() => {
     if (filterUserStores) {
-      return stores.filter((store) => store.owner === user?.name);
+      return myStores;
     } else {
       return stores;
     }
-  }, [filterUserStores, stores, user?.name]);
+  }, [filterUserStores, stores, myStores, user?.name]);
 
   console.log({ stores, hashMapStores });
   return (
@@ -136,8 +141,8 @@ export const StoreList = ({ mode }: BlogListProps) => {
           </MyStoresRow>
         )}
         {filteredStores.map((store: Store, index) => {
-          const existingStore = hashMapStores[store.id];
           let storeItem = store;
+          const existingStore = hashMapStores[store.id];
           if (existingStore) {
             storeItem = existingStore;
           }

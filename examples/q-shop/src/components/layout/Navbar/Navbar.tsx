@@ -44,7 +44,6 @@ interface Props {
   isAuthenticated: boolean;
   userName: string | null;
   userAvatar: string;
-  blog: any;
   authenticate: () => void;
   hasAttemptedToFetchShopInitial: boolean;
   setTheme: (val: string) => void;
@@ -54,7 +53,6 @@ const NavBar: React.FC<Props> = ({
   isAuthenticated,
   userName,
   userAvatar,
-  blog,
   authenticate,
   hasAttemptedToFetchShopInitial,
   setTheme
@@ -62,6 +60,10 @@ const NavBar: React.FC<Props> = ({
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const theme = useTheme();
+
+  // Get All My Stores from Redux To Display In Store Manager Dropdown
+
+  const { myStores } = useSelector((state: RootState) => state.store);
 
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
   const [isOpenBlockedNamesModal, setIsOpenBlockedNamesModal] =
@@ -75,9 +77,6 @@ const NavBar: React.FC<Props> = ({
 
   const allStores = useSelector(
     (state: RootState) => state.store.hashMapStores
-  );
-  const userStores = Object.values(allStores).filter(
-    (store: Store) => store.owner === userName
   );
 
   const handleClick = (event?: React.MouseEvent<HTMLDivElement>) => {
@@ -150,7 +149,7 @@ const NavBar: React.FC<Props> = ({
             height={"32"}
             width={"32"}
             onClickFunc={(e: any) => {
-              if (allStores && userStores.length > 0) {
+              if (myStores.length > 0) {
                 handleClick(e);
                 setOpenStoreManagerDropdown(true);
               } else {
@@ -217,9 +216,8 @@ const NavBar: React.FC<Props> = ({
               Create Store
             </DropdownText>
           </DropdownContainer>
-          {userStores
-            .filter((store: Store): boolean => store.owner === userName)
-            .map((store: Store) => (
+          {myStores.length > 0 &&
+            myStores.map((store: Store) => (
               <DropdownContainer>
                 <DropdownText
                   onClick={() => {
