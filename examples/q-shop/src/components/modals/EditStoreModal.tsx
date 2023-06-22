@@ -149,7 +149,7 @@ const MyModal: React.FC<MyModalProps> = ({
         }}
       >
         <Typography id="modal-title" variant="h6" component="h2">
-          Create blog
+          Edit Shop{" "}
         </Typography>
         <ImageUploader onPick={(img: string) => setLogo(img)}>
           <AddPhotoAlternateIcon
