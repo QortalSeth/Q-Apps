@@ -7,15 +7,38 @@ export const ProductManagerRow = styled(Box)(({ theme }) => ({
   alignItems: "center",
   justifyContent: "space-between",
   width: "100%",
-  padding: "5px"
+  padding: "15px 18px"
+}));
+
+export const StoreControlsRow = styled(Box)(({ theme }) => ({
+  display: "flex",
+  alignItems: "center",
+  gap: "10px"
+}));
+
+export const EditStoreButton = styled(Button)(({ theme }) => ({
+  display: "flex",
+  alignItems: "center",
+  padding: "3px 12px",
+  fontFamily: "Raleway",
+  fontSize: "15px",
+  color: "#ffffff",
+  backgroundColor: "#D4417E",
+  border: "none",
+  borderRadius: "5px",
+  transition: "all 0.3s ease-in-out",
+  "&:hover": {
+    cursor: "pointer",
+    backgroundColor: "#a13562"
+  }
 }));
 
 export const ProductManagerButton = styled(Button)(({ theme }) => ({
   display: "flex",
   alignItems: "center",
-  padding: "20px 10px 10px 20px",
+  padding: "3px 12px",
   fontFamily: "Raleway",
-  fontSize: "16px",
+  fontSize: "15px",
   color: "#ffffff",
   backgroundColor: theme.palette.secondary.main,
   border: "none",
@@ -54,10 +77,11 @@ export const ProductsContainer = styled(Grid)(({ theme }) => ({
 export const NoProductsContainer = styled(Box)(({ theme }) => ({
   position: "absolute",
   top: "40%",
+  left: 0,
   display: "flex",
   alignItems: "center",
   justifyContent: "center",
-  width: "100%"
+  transform: "translateX(-50%)"
 }));
 
 export const NoProductsText = styled(Typography)(({ theme }) => ({

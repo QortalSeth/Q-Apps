@@ -19,8 +19,11 @@ import {
   BackToStorefrontButton,
   ProductsContainer,
   NoProductsContainer,
-  NoProductsText
+  NoProductsText,
+  StoreControlsRow,
+  EditStoreButton
 } from "./Store-styles";
+import { toggleEditBlogModal } from "../../state/features/globalSlice";
 interface IListProducts {
   sort: string;
   products: ProductDataContainer[];
@@ -171,13 +174,22 @@ export const Store = () => {
           Back To All Shops
         </BackToStorefrontButton>
         {username === user?.name && (
-          <ProductManagerButton
-            onClick={() => {
-              navigate(`/product-manager`);
-            }}
-          >
-            Product Manager
-          </ProductManagerButton>
+          <StoreControlsRow>
+            <EditStoreButton
+              onClick={() => {
+                dispatch(toggleEditBlogModal(true));
+              }}
+            >
+              Edit Shop
+            </EditStoreButton>
+            <ProductManagerButton
+              onClick={() => {
+                navigate(`/product-manager`);
+              }}
+            >
+              Product Manager
+            </ProductManagerButton>
+          </StoreControlsRow>
         )}
       </ProductManagerRow>
       <ProductsContainer container sx={{}}>
