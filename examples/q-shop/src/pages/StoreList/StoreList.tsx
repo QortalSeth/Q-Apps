@@ -143,6 +143,8 @@ export const StoreList = ({ mode }: BlogListProps) => {
         {filteredStores.map((store: Store, index) => {
           let storeItem = store;
           const existingStore = hashMapStores[store.id];
+          // Check in case hashmap data isn't there yet due to async API calls.
+          // If it's not there, component will rerender once it receives the metadata
           if (existingStore) {
             storeItem = existingStore;
           }

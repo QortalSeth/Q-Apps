@@ -20,7 +20,27 @@ export const ModalBody = styled(Box)(({ theme }) => ({
   boxShadow:
     theme.palette.mode === "dark"
       ? "0px 4px 5px 0px hsla(0,0%,0%,0.14),  0px 1px 10px 0px hsla(0,0%,0%,0.12),  0px 2px 4px -1px hsla(0,0%,0%,0.2)"
-      : "rgba(99, 99, 99, 0.2) 0px 2px 8px 0px"
+      : "rgba(99, 99, 99, 0.2) 0px 2px 8px 0px",
+  "&::-webkit-scrollbar-track": {
+    backgroundColor: theme.palette.background.paper
+  },
+  "&::-webkit-scrollbar-track:hover": {
+    backgroundColor: theme.palette.background.paper
+  },
+  "&::-webkit-scrollbar": {
+    width: "16px",
+    height: "10px",
+    backgroundColor: theme.palette.mode === "light" ? "#f6f8fa" : "#292d3e"
+  },
+  "&::-webkit-scrollbar-thumb": {
+    backgroundColor: theme.palette.mode === "light" ? "#d3d9e1" : "#575757",
+    borderRadius: "8px",
+    backgroundClip: "content-box",
+    border: "4px solid transparent"
+  },
+  "&::-webkit-scrollbar-thumb:hover": {
+    backgroundColor: theme.palette.mode === "light" ? "#b7bcc4" : "#474646"
+  }
 }));
 
 export const ModalTitle = styled(Typography)(({ theme }) => ({
@@ -43,7 +63,7 @@ export const AddLogoButton = styled(Button)(({ theme }) => ({
   backgroundColor: theme.palette.secondary.main,
   color: "#fff",
   fontFamily: "Raleway",
-  fontSize: "18px",
+  fontSize: "17px",
   padding: "5px 10px",
   borderRadius: "5px",
   gap: "5px",

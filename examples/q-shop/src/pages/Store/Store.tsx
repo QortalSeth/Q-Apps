@@ -3,8 +3,11 @@ import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../state/store";
 import { useParams } from "react-router-dom";
-import { useTheme, Grid } from "@mui/material";
-import { setIsLoadingGlobal } from "../../state/features/globalSlice";
+import { useTheme, Grid, CircularProgress } from "@mui/material";
+import {
+  setCurrentStore,
+  setIsLoadingGlobal
+} from "../../state/features/globalSlice";
 import { Product } from "../../state/features/storeSlice";
 import { useFetchProducts } from "../../hooks/useFetchProducts";
 import LazyLoad from "../../components/common/LazyLoad";
@@ -36,23 +39,28 @@ export const Store = () => {
   const currentStore = useSelector(
     (state: RootState) => state.global.currentStore
   );
+  const { isLoadingGlobal } = useSelector((state: RootState) => state.global);
+
   const { checkAndUpdateResourceCatalogue, getCatalogue } = useFetchOrders();
   const { store, user: username } = useParams();
+
+  const { hashMapStores } = useSelector((state: RootState) => state.store);
   const catalogueHashMap = useSelector(
     (state: RootState) => state.global.catalogueHashMap
   );
   const dispatch = useDispatch();
-  const [userStore, setUserStore] = React.useState<any>(null);
-  const [dataContainer, setDataContainer] = useState(null);
   const { getProduct, hashMapProducts, checkAndUpdateResource } =
     useFetchProducts();
 
+  const [userStore, setUserStore] = React.useState<any>(null);
+  const [dataContainer, setDataContainer] = useState(null);
   const [products, setProducts] = React.useState<Product[]>([]);
   const [listProducts, setListProducts] = useState<IListProducts>({
     sort: "created",
     products: [],
     categories: []
   });
+
   const getProducts = React.useCallback(async () => {
     if (!store) return;
 
@@ -99,20 +107,53 @@ export const Store = () => {
       dispatch(setIsLoadingGlobal(false));
     }
   }, [products, listProducts]);
+
+  // Get store on mount & setCurrentStore when it's your own store
   const getStore = React.useCallback(async () => {
     let name = username;
 
     if (!name) return;
     if (!store) return;
     try {
-      const urlStore = `/arbitrary/STORE/${name}/${store}`;
-      const response = await fetch(urlStore, {
+      dispatch(setIsLoadingGlobal(true));
+      let myStore;
+      const url = `/arbitrary/resources/search?service=STORE&identifier=${store}&exactmatchnames=true&name=${name}&includemetadata=true`;
+      const info = await fetch(url, {
         method: "GET",
         headers: {
           "Content-Type": "application/json"
         }
       });
-      const responseData = await response.json();
+
+      const responseDataStore = await info.json();
+      const filterOut = responseDataStore.filter((store: any) =>
+        store.identifier.startsWith("q-store-general-")
+      );
+      if (filterOut.length === 0) return;
+      if (filterOut.length !== 0) {
+        myStore = filterOut[0];
+      }
+
+      const urlStore = `/arbitrary/STORE/${name}/${store}`;
+      const resource = await fetch(urlStore, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json"
+        }
+      });
+      const responseData = await resource.json();
+      // Dispatch userStore to local state now that you have the info/metadata & resource
+      setUserStore({
+        created: responseData?.created || "",
+        id: myStore.identifier,
+        title: responseData?.title || "",
+        location: responseData?.location,
+        shipsTo: responseData?.shipsTo,
+        description: responseData?.description || "",
+        category: myStore.metadata?.category,
+        tags: myStore.metadata?.tags || [],
+        logo: responseData?.logo || ""
+      });
       const urlDatacontainer = `/arbitrary/DOCUMENT/${name}/${store}-datacontainer`;
       const responseContainer = await fetch(urlDatacontainer, {
         method: "GET",
@@ -145,24 +186,41 @@ export const Store = () => {
         categories: Object.keys(categories).map((cat) => cat)
       });
 
-      setUserStore(responseData);
       dispatch(setStoreId(store));
       dispatch(setStoreOwner(name));
-    } catch (error) {}
+    } catch (error) {
+    } finally {
+      dispatch(setIsLoadingGlobal(false));
+    }
   }, [username, store, dataContainer]);
 
+  // Get Store and set it in local state
   useEffect(() => {
     setProducts([]);
     setUserStore(null);
     getStore();
   }, [username, store]);
 
+  // New useEffect to check if you need to change currentStore (user's own store) in Redux
+  // If it's not the same, dispatch the local store data to currentStore on Redux
+  useEffect(() => {
+    if (userStore && currentStore && user) {
+      if (userStore?.id !== currentStore?.id && username === user?.name) {
+        dispatch(
+          setCurrentStore({
+            ...userStore
+          })
+        );
+      }
+    }
+  }, [userStore?.id, currentStore?.id, user]);
+
   const getProductsHandler = React.useCallback(async () => {
     await getProducts();
   }, [getProducts]);
 
-  console.log({ products, hashMapProducts });
   if (!userStore) return null;
+  if (isLoadingGlobal) return <CircularProgress />;
   return (
     <>
       <ProductManagerRow>
@@ -237,10 +295,16 @@ export const Store = () => {
               </Grid>
             );
           })
-        ) : (
+        ) : products.length === 0 && username === user?.name ? (
           <NoProductsContainer>
             <NoProductsText>
               You currently have no products! Add some in the Product Manager.
+            </NoProductsText>
+          </NoProductsContainer>
+        ) : (
+          <NoProductsContainer>
+            <NoProductsText>
+              There are currently no products for sale!
             </NoProductsText>
           </NoProductsContainer>
         )}
