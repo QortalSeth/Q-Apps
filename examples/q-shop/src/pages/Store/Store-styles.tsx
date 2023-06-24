@@ -67,22 +67,18 @@ export const BackToStorefrontButton = styled(Button)(({ theme }) => ({
   }
 }));
 
-export const ProductsContainer = styled(Grid)(({ theme }) => ({
+export const ProductsContainer = styled(Grid)({
   display: "flex",
   flexWrap: "wrap",
   gap: "25px",
   padding: "15px 25px"
-}));
+});
 
-export const NoProductsContainer = styled(Box)(({ theme }) => ({
-  position: "absolute",
-  top: "40%",
-  left: 0,
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-  transform: "translateX(-50%)"
-}));
+export const NoProductsContainer = styled(Box)({
+  textAlign: "center",
+  width: "100%",
+  marginTop: "70px"
+});
 
 export const NoProductsText = styled(Typography)(({ theme }) => ({
   fontFamily: "Merriweather Sans",

@@ -1,5 +1,6 @@
 import { styled } from "@mui/system";
-import { Button } from "@mui/material";
+import { Button, Box, InputLabel } from "@mui/material";
+import { TimesSVG } from "../../assets/svgs/TimesSVG";
 
 export const CreateProductButton = styled(Button)(({ theme }) => ({
   backgroundColor: theme.palette.secondary.main,
@@ -20,4 +21,27 @@ export const CreateProductButton = styled(Button)(({ theme }) => ({
     boxShadow:
       "rgba(50, 50, 93, 0.35) 0px 3px 5px -1px, rgba(0, 0, 0, 0.4) 0px 2px 3px -1px;"
   }
+}));
+
+export const CloseIcon = styled(TimesSVG)(({ theme }) => ({
+  position: "absolute",
+  top: "0",
+  right: "8px",
+  transition: "all 0.2s ease-in-out",
+  "&:hover": {
+    cursor: "pointer",
+    transform: "scale(1.1)"
+  }
+}));
+
+export const ProductImagesRow = styled(Box)(({ theme }) => ({
+  display: "flex",
+  alignItems: "center",
+  gap: "10px"
+}));
+
+export const InputFieldCustomLabel = styled(InputLabel)(({ theme }) => ({
+  color: theme.palette.text.primary,
+  overflow: "visible",
+  fontSize: "16px"
 }));

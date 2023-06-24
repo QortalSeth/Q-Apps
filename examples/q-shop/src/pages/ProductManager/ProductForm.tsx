@@ -1,69 +1,82 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect } from "react";
 import {
-  Box,
-  TextField,
   Button,
   Select,
   MenuItem,
-  InputLabel,
-  SelectChangeEvent
-} from '@mui/material'
-import { useDropzone } from 'react-dropzone'
-import AddPhotoAlternateIcon from '@mui/icons-material/AddPhotoAlternate'
-import ImageUploader from '../../components/common/ImageUploader'
-import { PublishProductParams } from './NewProduct'
-import { Product } from '../../state/features/storeSlice'
-import { useSelector } from 'react-redux'
-import { RootState } from '../../state/store'
+  SelectChangeEvent,
+  useTheme,
+  Box
+} from "@mui/material";
+import { useDropzone } from "react-dropzone";
+import AddPhotoAlternateIcon from "@mui/icons-material/AddPhotoAlternate";
+import ImageUploader from "../../components/common/ImageUploader";
+import { PublishProductParams } from "./NewProduct";
+import { Product } from "../../state/features/storeSlice";
+import { useSelector } from "react-redux";
+import { RootState } from "../../state/store";
+import {
+  AddLogoButton,
+  AddLogoIcon,
+  LogoPreviewRow,
+  StoreLogoPreview,
+  CustomInputField
+} from "../../components/modals/CreateStoreModal-styles";
+import {
+  CloseIcon,
+  InputFieldCustomLabel,
+  ProductImagesRow
+} from "./NewProduct-styles";
 interface ProductFormProps {
-  onSubmit: (product: PublishProductParams) => void
-  editProduct?: Product | null
+  onSubmit: (product: PublishProductParams) => void;
+  onClose?: () => void;
+  editProduct?: Product | null;
 }
 
 interface ProductObj {
-  title?: string
-  description?: string
-  price: number
-  images: string[]
-  category?: string
+  title?: string;
+  description?: string;
+  price: number;
+  images: string[];
+  category?: string;
 }
 
 export const ProductForm: React.FC<ProductFormProps> = ({
+  onClose,
   onSubmit,
   editProduct
 }) => {
+  const theme = useTheme();
   const categories = useSelector(
     (state: RootState) => state.global.listProducts.categories
-  )
+  );
   const [product, setProduct] = useState<ProductObj>({
-    title: '',
-    description: '',
+    title: "",
+    description: "",
     price: 0,
     images: []
-  })
-  console.log({ product })
-  const [categoryList, setCategoryList] = useState<string[]>([])
-  const [selectedType, setSelectedType] = useState<string >('digital')
-  const [images, setImages] = useState<string[]>([])
-  const [selectedStatus, setSelectedStatus] = useState<string>('AVAILABLE')
-  const [newCategory, setNewCategory] = useState<string>('')
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
+  });
+  console.log({ product });
+  const [categoryList, setCategoryList] = useState<string[]>([]);
+  const [selectedType, setSelectedType] = useState<string>("digital");
+  const [images, setImages] = useState<string[]>([]);
+  const [selectedStatus, setSelectedStatus] = useState<string>("AVAILABLE");
+  const [newCategory, setNewCategory] = useState<string>("");
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setProduct({ ...product, [event.target.name]: event.target.value })
-  }
+    setProduct({ ...product, [event.target.name]: event.target.value });
+  };
 
   const handleSelectChange = (event: SelectChangeEvent<string | null>) => {
-    const optionId = event.target.value
-    const selectedOption = categoryList.find((option) => option === optionId)
-    setSelectedCategory(selectedOption || null)
-  }
+    const optionId = event.target.value;
+    const selectedOption = categoryList.find((option) => option === optionId);
+    setSelectedCategory(selectedOption || null);
+  };
   const handleNewCategory = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setNewCategory(event.target.value)
-  }
+    setNewCategory(event.target.value);
+  };
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault()
-    if (!selectedType || !selectedCategory) return
+  const handleSubmit = () => {
+    if (!selectedType || !selectedCategory) return;
     onSubmit({
       title: product.title,
       description: product.description,
@@ -73,30 +86,30 @@ export const ProductForm: React.FC<ProductFormProps> = ({
       status: selectedStatus,
       price: [
         {
-          currency: 'qort',
+          currency: "qort",
           value: product.price
         }
       ],
       mainImageIndex: 0
-    })
-  }
+    });
+  };
 
   const addNewCategoryToList = () => {
-    if (!newCategory) return
-    setSelectedCategory(newCategory)
-    setCategoryList((prev) => [...prev, newCategory])
-    setNewCategory('')
-  }
+    if (!newCategory) return;
+    setSelectedCategory(newCategory);
+    setCategoryList((prev) => [...prev, newCategory]);
+    setNewCategory("");
+  };
 
   useEffect(() => {
     if (categories) {
-      setCategoryList(categories)
+      setCategoryList(categories);
     }
-  }, [categories])
+  }, [categories]);
 
   useEffect(() => {
     if (editProduct) {
-      console.log({ editProduct })
+      console.log({ editProduct });
       try {
         const {
           title,
@@ -107,122 +120,122 @@ export const ProductForm: React.FC<ProductFormProps> = ({
           price,
           category,
           status
-        } = editProduct
+        } = editProduct;
         const findPrice =
-          price?.find((item) => item?.currency === 'qort')?.value || 0
-        console.log({ title, description, images, mainImageIndex, type, price })
+          price?.find((item) => item?.currency === "qort")?.value || 0;
+        console.log({
+          title,
+          description,
+          images,
+          mainImageIndex,
+          type,
+          price
+        });
         setProduct({
           title,
           description,
           images: [],
           price: findPrice
-        })
+        });
         if (images) {
-          setImages(images)
+          setImages(images);
         }
         if (type) {
-          setSelectedType(type)
+          setSelectedType(type);
         }
         if (category) {
-          setSelectedCategory(category)
+          setSelectedCategory(category);
         }
         if (status) {
-          setSelectedStatus(status)
+          setSelectedStatus(status);
         }
       } catch (error) {
-        console.log({ error })
+        console.log({ error });
       }
     }
-  }, [editProduct])
+  }, [editProduct]);
 
   return (
-    <Box
-      component="form"
-      onSubmit={handleSubmit}
-      sx={{
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        gap: '10px',
-      }}
-    >
-      <ImageUploader
-        onPick={(img: string) => setImages((prev) => [...prev, img])}
-      ><span>Upload Image</span>
-        <AddPhotoAlternateIcon
-          sx={{
-            height: '40px',
-            width: 'auto',
-            cursor: 'pointer'
-          }}
-        ></AddPhotoAlternateIcon>
-      </ImageUploader>
-      <Box
-        sx={{
-          display: 'flex',
-          gap: 1,
-        }}
-      >
-        {images.map((base64) => {
-          return (
-            <img
-              style={{
-                width: 150,
-                height: 150,
-                objectFit: 'contain',
-                borderRadius: '5px'
+    <>
+      {images.length > 0 ? (
+        <ProductImagesRow>
+          {images.map((img, index) => (
+            <LogoPreviewRow>
+              <Box style={{ position: "relative" }}>
+                <StoreLogoPreview src={img} alt={`product-img-${index}`} />
+                <CloseIcon
+                  color={theme.palette.text.primary}
+                  onClickFunc={() => {
+                    setImages((prev) => prev.filter((item) => item !== img));
+                  }}
+                  height={"22"}
+                  width={"22"}
+                ></CloseIcon>
+              </Box>
+            </LogoPreviewRow>
+          ))}
+        </ProductImagesRow>
+      ) : (
+        <ImageUploader
+          onPick={(img: string) => setImages((prev) => [...prev, img])}
+        >
+          <AddLogoButton>
+            Add Product Image
+            <AddLogoIcon
+              sx={{
+                height: "25px",
+                width: "auto"
               }}
-              src={base64}
-             alt={`${product.title} Image`}/>
-          )
-        })}
-      </Box>
-      <TextField
+            ></AddLogoIcon>
+          </AddLogoButton>
+        </ImageUploader>
+      )}
+      <CustomInputField
         name="title"
         label="Title"
-        variant="outlined"
+        variant="filled"
         value={product.title}
         onChange={handleInputChange}
         inputProps={{ maxLength: 180 }}
         required
       />
-      <TextField
+      <CustomInputField
         name="description"
         label="Description"
         value={product.description}
-        variant="outlined"
+        variant="filled"
         onChange={handleInputChange}
         required
       />
-      <TextField
+      <CustomInputField
         name="price"
         label="Price (QORT)"
         value={product.price}
-        variant="outlined"
+        variant="filled"
         type="number"
         onChange={handleInputChange}
         required
       />
-      <InputLabel id="type">Product Type</InputLabel>
+      <InputFieldCustomLabel id="type">Product Type</InputFieldCustomLabel>
       <Select
         name="type"
         value={selectedType}
         onChange={(event) => {
-          setSelectedType(event.target.value)
+          setSelectedType(event.target.value);
         }}
-        variant="outlined"
+        variant="filled"
         required
         fullWidth
       >
         <MenuItem value="digital">Digital</MenuItem>
         <MenuItem value="physical">Physical</MenuItem>
       </Select>
-      <InputLabel id="category">Category</InputLabel>
+      <InputFieldCustomLabel id="category">Category</InputFieldCustomLabel>
       <Select
         name="category"
         value={selectedCategory}
         onChange={handleSelectChange}
-        variant="outlined"
+        variant="filled"
         required
         fullWidth
       >
@@ -230,21 +243,21 @@ export const ProductForm: React.FC<ProductFormProps> = ({
           <MenuItem value={category}>{category}</MenuItem>
         ))}
       </Select>
-      <TextField
+      <CustomInputField
         name="newCategory"
         label="New Category"
-        variant="outlined"
+        variant="filled"
         value={newCategory}
         onChange={handleNewCategory}
       />
       {editProduct && (
         <>
-          <InputLabel id="status">Status</InputLabel>
+          <InputFieldCustomLabel id="status">Status</InputFieldCustomLabel>
           <Select
             name="status"
             value={selectedStatus}
             onChange={(e) => setSelectedStatus(e.target.value)}
-            variant="outlined"
+            variant="filled"
             required
           >
             <MenuItem value="AVAILABLE">Available</MenuItem>
@@ -257,9 +270,12 @@ export const ProductForm: React.FC<ProductFormProps> = ({
       <Button variant="contained" onClick={addNewCategoryToList}>
         Add Category
       </Button>
-      <Button variant="contained" type="submit">
+      <Button onClick={onClose} variant="contained">
+        Close
+      </Button>
+      <Button onClick={handleSubmit} variant="contained">
         Submit
       </Button>
-    </Box>
-  )
-}
+    </>
+  );
+};

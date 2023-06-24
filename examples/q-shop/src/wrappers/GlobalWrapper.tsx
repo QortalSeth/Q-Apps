@@ -5,7 +5,7 @@ import { RootState } from "../state/store";
 import CreateStoreModal, {
   onPublishParam
 } from "../components/modals/CreateStoreModal";
-import EditBlogModal, {
+import EditStoreModal, {
   onPublishParamEdit
 } from "../components/modals/EditStoreModal";
 import {
@@ -510,7 +510,7 @@ const GlobalWrapper: React.FC<Props> = ({ children, setTheme }) => {
           username={user?.name || ""}
         />
       )}
-      <EditBlogModal
+      <EditStoreModal
         open={isOpenEditBlogModal}
         onClose={onCloseEditBlogModal}
         onPublish={editStore}

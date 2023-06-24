@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { ReusableModal } from "../../components/modals/ReusableModal";
-import { Box, Button, Typography, useTheme } from "@mui/material";
+import { Box, Button, Modal, Typography, useTheme } from "@mui/material";
 import ShortUniqueId from "short-unique-id";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../state/store";
@@ -11,6 +11,7 @@ import { setProductsToSave } from "../../state/features/globalSlice";
 import { Product } from "../../state/features/storeSlice";
 import { CreateProductButton } from "./NewProduct-styles";
 import { AddSVG } from "../../assets/svgs/AddSVG";
+import { ModalBody } from "../../components/modals/CreateStoreModal-styles";
 
 const uid = new ShortUniqueId({ length: 10 });
 interface ProductPrice {
@@ -187,27 +188,20 @@ export const NewProduct = ({ editProduct, onClose }: NewMessageProps) => {
         Add Product
       </CreateProductButton>
 
-      <ReusableModal
+      <Modal
         open={isOpen}
-        customStyles={{
-          maxHeight: "95vh",
-          overflowY: "auto"
-        }}
+        onClose={closeModal}
+        aria-labelledby="modal-title"
+        aria-describedby="modal-description"
       >
-        <Box
-          sx={{
-            display: "flex",
-            alignItems: "center",
-            flexDirection: "column",
-            gap: 1
-          }}
-        >
-          <ProductForm editProduct={editProduct} onSubmit={addProduct} />
-        </Box>
-        <Button variant="contained" onClick={closeModal}>
-          Close
-        </Button>
-      </ReusableModal>
+        <ModalBody>
+          <ProductForm
+            onClose={closeModal}
+            editProduct={editProduct}
+            onSubmit={addProduct}
+          />
+        </ModalBody>
+      </Modal>
     </Box>
   );
 };
