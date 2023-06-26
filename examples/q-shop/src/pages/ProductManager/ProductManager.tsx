@@ -1,8 +1,8 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../state/store";
-import { Box, Button, useTheme } from "@mui/material";
+import { Box, useTheme } from "@mui/material";
 import LazyLoad from "../../components/common/LazyLoad";
 import { NewProduct } from "./NewProduct";
 import { ShowOrder } from "./ShowOrder";
@@ -13,14 +13,30 @@ import ShortUniqueId from "short-unique-id";
 import {
   Catalogue,
   CatalogueDataContainer,
-  DataContainer
+  DataContainer,
+  removeFromProductsToSave
 } from "../../state/features/globalSlice";
 import { Price, Product } from "../../state/features/storeSlice";
 import { useFetchOrders } from "../../hooks/useFetchOrders";
 import { AVAILABLE } from "../../constants/product-status";
-import { TabsContainer, StyledTabs, StyledTab } from "./ProductManager-styles";
+import {
+  TabsContainer,
+  StyledTabs,
+  StyledTab,
+  ProductsToSaveCard,
+  ProductToSaveCard,
+  CardHeader,
+  Bulletpoints,
+  TimesIcon,
+  CardButtonRow
+} from "./ProductManager-styles";
 import OrderTable from "./OrderTable";
 import { BackToStorefrontButton } from "../Store/Store-styles";
+import { QortalSVG } from "../../assets/svgs/QortalSVG";
+import { CategorySVG } from "../../assets/svgs/CategorySVG";
+import { LoyaltySVG } from "../../assets/svgs/LoyaltySVG";
+import useConfirmationModal from "../../hooks/useConfirmModal";
+import { CreateButton } from "../../components/modals/CreateStoreModal-styles";
 
 const uid = new ShortUniqueId({ length: 10 });
 
@@ -60,10 +76,7 @@ export const ProductManager = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const handleChange = (event: React.SyntheticEvent, newValue: number) => {
-    setValueTab(newValue);
-  };
-
+  // Publish productsToSave to QDN
   async function publishQDNResource() {
     let address: string = "";
     let name: string = "";
@@ -72,6 +85,7 @@ export const ProductManager = () => {
     address = user?.address || "";
     name = user?.name || "";
 
+    // Validation
     if (!address) {
       errorMsg = "Cannot send: your address isn't available";
     }
@@ -95,6 +109,7 @@ export const ProductManager = () => {
       );
       throw new Error(errorMsg);
     }
+
     if (!currentStore?.id) throw new Error("Cannot find store id");
     if (!dataContainer?.products)
       throw new Error("Cannot find data-container products");
@@ -106,58 +121,50 @@ export const ProductManager = () => {
       const shortStoreId = parts[1];
 
       if (!currentStore) throw new Error("Could not find your store");
-      console.log({ shortStoreId, currentStore });
-      // let lengthOfProducts = Object.keys(productsDataContainer || {})?.length
-
+      // Get last index catalogue inside data container catalogues array
       const lastCatalogue: CatalogueDataContainer | undefined =
         dataContainer?.catalogues?.at(-1);
       let catalogue = null;
       const listOfCataloguesToPublish: Catalogue[] = [];
+      // Initialize dataContainer to publish
       const dataContainerToPublish: DataContainer = {
         ...dataContainer,
         products: structuredClone(dataContainer.products),
         catalogues: structuredClone(dataContainer.catalogues)
       };
-      console.log({ dataContainerToPublish });
-      if (lastCatalogue && Object.keys(lastCatalogue?.products)?.length < 10) {
-        // create new catalogue
-        // add product to new catalogue
-        // add products to dataContainer catalogue products
 
+      if (lastCatalogue && Object.keys(lastCatalogue?.products)?.length < 10) {
+        // fetch last catalogue on QDN
         const catalogueResponse = await qortalRequest({
           action: "FETCH_QDN_RESOURCE",
           name: name,
           service: "DOCUMENT",
           identifier: lastCatalogue.id
         });
-        console.log({ catalogueResponse });
         if (catalogueResponse && !catalogueResponse?.error)
           catalogue = catalogueResponse;
       }
-      console.log({ catalogue });
+      // If catalogue was found on QDN, add it to the list of catalogues to publish when it has less than 10 products
       if (catalogue) listOfCataloguesToPublish.push(catalogue);
 
+      // Loop through productsToSave and add them to the catalogue if it has less than 10 products, otherwise create a new catalogue
       Object.keys(productsToSave)
         .filter((item) => !productsToSave[item]?.isUpdate)
         .forEach((key) => {
           const product = productsToSave[key];
-          console.log({ product });
           const priceInQort = product?.price?.find(
             (item: Price) => item?.currency === "qort"
           )?.value;
           if (!priceInQort)
             throw new Error("Cannot find price for one of your products");
+
           const lastCatalogueInList = listOfCataloguesToPublish.at(-1);
-          const lastCatalogueInListIndex = listOfCataloguesToPublish.length - 1;
-          console.log({ lastCatalogueInList, lastCatalogueInListIndex });
           if (
             lastCatalogueInList &&
             Object.keys(lastCatalogueInList?.products)?.length < 10
           ) {
             const copyLastCatalogue = { ...lastCatalogueInList };
-            console.log({ copyLastCatalogue });
             copyLastCatalogue.products[key] = product;
-            console.log("2", { copyLastCatalogue });
             dataContainerToPublish.products[key] = {
               created: product.created,
               priceQort: priceInQort,
@@ -165,15 +172,13 @@ export const ProductManager = () => {
               catalogueId: copyLastCatalogue.id,
               status: AVAILABLE
             };
-            console.log({ dataContainerToPublish });
             if (!dataContainerToPublish.catalogues)
               dataContainerToPublish.catalogues = [];
-
+            // Determine if data container's catalogue has products
             const findCatalogueInDataContainer =
               dataContainerToPublish.catalogues.findIndex(
                 (item) => item.id === copyLastCatalogue.id
               );
-            console.log({ findCatalogueInDataContainer });
             if (findCatalogueInDataContainer >= 0) {
               dataContainerToPublish.catalogues[
                 findCatalogueInDataContainer
@@ -190,16 +195,15 @@ export const ProductManager = () => {
               ];
             }
           } else {
+            // Create new catalogue
             const uidGenerator = uid();
             const catalogueId = `q-store-catalogue-${shortStoreId}-${uidGenerator}`;
-            console.log({ catalogueId });
             listOfCataloguesToPublish.push({
               id: catalogueId,
               products: {
                 [key]: product
               }
             });
-            console.log({ listOfCataloguesToPublish, dataContainerToPublish });
             try {
               dataContainerToPublish.products[key] = {
                 created: product.created,
@@ -219,6 +223,7 @@ export const ProductManager = () => {
               dataContainerToPublish.catalogues.findIndex(
                 (item) => item.id === catalogueId
               );
+            // Determine if data container's catalogue has products
             if (findCatalogueInDataContainer >= 0) {
               dataContainerToPublish.catalogues[
                 findCatalogueInDataContainer
@@ -236,6 +241,7 @@ export const ProductManager = () => {
             }
           }
         });
+      // Update products when sending productsToSave inside existing data container
       const productsToUpdate = Object.keys(productsToSave)
         .filter((item) => !!productsToSave[item]?.isUpdate)
         .map((key) => productsToSave[key]);
@@ -253,7 +259,7 @@ export const ProductManager = () => {
           catalogueId: product.catalogueId,
           status: product?.status || ""
         };
-
+        // Replace product from listOfCataloguesToPublish with updated product
         const findCatalogueFromExistingList =
           listOfCataloguesToPublish.findIndex(
             (cat) => cat.id === product.catalogueId
@@ -263,6 +269,7 @@ export const ProductManager = () => {
             product.id
           ] = product;
         } else {
+          // Otherwise fetch catalogue from QDN and add product to it
           const catalogueResponse = await qortalRequest({
             action: "FETCH_QDN_RESOURCE",
             name: name,
@@ -279,7 +286,7 @@ export const ProductManager = () => {
 
       if (!currentStore) return;
       let publishMultipleCatalogues = [];
-
+      // Loop through listOfCataloguesToPublish and publish the base64 converted object to QDN
       for (const catalogue of listOfCataloguesToPublish) {
         const catalogueToBase64 = await objectToBase64(catalogue);
         const publish = {
@@ -291,6 +298,7 @@ export const ProductManager = () => {
         };
         publishMultipleCatalogues.push(publish);
       }
+      // Convert dataContainer being published to base64
       const dataContainerToBase64 = await objectToBase64(
         dataContainerToPublish
       );
@@ -301,7 +309,7 @@ export const ProductManager = () => {
         filename: "datacontainer.json",
         data64: dataContainerToBase64
       };
-
+      // Publish the catalogues and the data container to QDN. Remember that there can be multiple catalogues because each catalogue holds a maximum of 10 products. Therefore, if you're publishing multiple products, you will possibly fill up the last catalogue, before then creating a new one.
       const multiplePublish = {
         action: "PUBLISH_MULTIPLE_QDN_RESOURCES",
         resources: [...publishMultipleCatalogues, publishDataContainer]
@@ -314,6 +322,7 @@ export const ProductManager = () => {
           alertType: "success"
         })
       );
+      // Error handling
     } catch (error: any) {
       let notificationObj = null;
       if (typeof error === "string") {
@@ -339,7 +348,26 @@ export const ProductManager = () => {
     }
   }
 
+  const handleChange = (event: React.SyntheticEvent, newValue: number) => {
+    setValueTab(newValue);
+  };
+
+  // Confirmation to delete product from productsToSave
+  const { Modal, showModal } = useConfirmationModal({
+    title: "Remove Product from List To Save to the Shop",
+    message: "Are you sure you want to proceed?"
+  });
+
+  const handleRemoveConfirmation = async (key: string) => {
+    const userConfirmed = await showModal();
+    if (userConfirmed) {
+      // User confirmed action
+      dispatch(removeFromProductsToSave(key));
+    }
+  };
+
   const { getOrders, getProducts } = useFetchOrders();
+
   const handleGetOrders = React.useCallback(async () => {
     await getOrders();
   }, [getOrders]);
@@ -347,8 +375,6 @@ export const ProductManager = () => {
   const handleGetProducts = React.useCallback(async () => {
     await getProducts();
   }, [getProducts]);
-
-  console.log({ productToEdit });
 
   return (
     <Box
@@ -393,18 +419,42 @@ export const ProductManager = () => {
         </StyledTabs>
       </TabsContainer>
 
+      {/* productsToSave card inside Product Manager */}
       {Object.keys(productsToSave).length > 0 && (
-        <Box
-          sx={{
-            position: "fixed",
-            right: "25px",
-            bottom: "25px"
-          }}
-        >
-          <Button variant="contained" onClick={publishQDNResource}>
-            Save Products
-          </Button>
-        </Box>
+        <ProductsToSaveCard>
+          {Object.keys(productsToSave).map((key: string) => {
+            const product = productsToSave[key];
+            const { id } = product;
+            return (
+              <ProductToSaveCard>
+                <CardHeader>{product?.title}</CardHeader>
+                <Bulletpoints>
+                  <QortalSVG color={"#000000"} height={"22"} width={"22"} />{" "}
+                  Price: {product?.price && product?.price[0].value} QORT
+                </Bulletpoints>
+                <Bulletpoints>
+                  <LoyaltySVG color={"#000000"} height={"22"} width={"22"} />
+                  Type: {product?.type}
+                </Bulletpoints>
+                <Bulletpoints>
+                  <CategorySVG color={"#000000"} height={"22"} width={"22"} />
+                  Category: {product?.category}
+                </Bulletpoints>
+                <TimesIcon
+                  onClickFunc={() => handleRemoveConfirmation(id)}
+                  color={"#000000"}
+                  height={"22"}
+                  width={"22"}
+                />
+              </ProductToSaveCard>
+            );
+          })}
+          <CardButtonRow>
+            <CreateButton onClick={publishQDNResource}>
+              Save Products
+            </CreateButton>
+          </CardButtonRow>
+        </ProductsToSaveCard>
       )}
 
       <TabPanel value={valueTab} index={0}>
@@ -447,6 +497,8 @@ export const ProductManager = () => {
         ></SimpleTable>
         <LazyLoad onLoadMore={handleGetProducts}></LazyLoad>
       </TabPanel>
+      {/* Confirm Remove Product from productsToSave in global state */}
+      <Modal />
     </Box>
   );
 };

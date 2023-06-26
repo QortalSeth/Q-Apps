@@ -243,7 +243,7 @@ const GlobalWrapper: React.FC<Props> = ({ children, setTheme }) => {
       if (doesExitst) {
         throw new Error("The store identifier already exists");
       }
-
+      // Store Object to send to QDN
       const storeObj = {
         title,
         description,
@@ -253,6 +253,7 @@ const GlobalWrapper: React.FC<Props> = ({ children, setTheme }) => {
         shortStoreId: formatBlogIdentifier,
         logo
       };
+      // Store Data Container to send to QDN (this will allow easier querying of products afterwards. Think of it as a database in the redux global state for the current store. Max 1 per store). At first there's no products, but they will be added later.
       const dataContainer = {
         storeId: identifier,
         shortStoreId: formatBlogIdentifier,
@@ -296,7 +297,7 @@ const GlobalWrapper: React.FC<Props> = ({ children, setTheme }) => {
           id: storeIdentifier,
           logo: logo
         };
-
+        // Store Full Object to send to redux hashMapStores
         const storefullObj = {
           ...storeObj,
           id: identifier,

@@ -120,6 +120,15 @@ export const globalSlice = createSlice({
       const download = action.payload
       state.downloads[download.identifier] = download
     },
+    removeFromProductsToSave: (state, action) => {
+      const productId = action.payload
+      // Create a copy of the productsToSave object
+      const updatedProductsToSave = { ...state.productsToSave };
+      // Remove the nested object based on the ID
+      delete updatedProductsToSave[productId];
+      // Return the updated state with the removed object
+      state.productsToSave = updatedProductsToSave;     
+    },
     setProductsToSave: (state, action) => {
       const product = action.payload
       state.productsToSave[product.id] = product
@@ -175,11 +184,10 @@ export const {
   setDataContainer,
   setIsLoadingGlobal,
   toggleEditBlogModal,
-
   setAddToDownloads,
   updateDownloads,
-
   setUserAvatarHash,
+  removeFromProductsToSave,
   setProductsToSave,
   setCatalogueHashMap,
   upsertProducts,

@@ -3,5 +3,5 @@ export interface IconTypes {
   height: string;
   width: string;
   className?: string;
-  onClickFunc?: (e?: any) => void;
+  onClickFunc?: ((e: React.MouseEvent<any>) => void) | ((params?: any) => void);
 }
