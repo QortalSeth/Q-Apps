@@ -115,6 +115,7 @@ export const NewProduct = ({ editProduct, onClose }: NewMessageProps) => {
       const shortStoreId = parts[1];
       const productId = uid();
       if (!currentStore) return;
+      // Edit Product
       if (editProduct) {
         const productObject: any = {
           ...editProduct,
@@ -146,7 +147,7 @@ export const NewProduct = ({ editProduct, onClose }: NewMessageProps) => {
           category,
           id
         };
-
+        // Add Product to productsToSave object in Global Slice Redux Store
         dispatch(setProductsToSave(productObject));
       }
 

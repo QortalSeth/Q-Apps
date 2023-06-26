@@ -161,12 +161,14 @@ export const Store = () => {
           "Content-Type": "application/json"
         }
       });
+      //
       const responseDataContainer = await responseContainer.json();
       setDataContainer({
         ...responseDataContainer,
         id: `${store}-datacontainer`
       });
       let categories: any = {};
+      // Add list products of the store global redux slice in order to facilitate mapping afterwards
       const mappedProducts = Object.keys(responseDataContainer.products)
         .map((key) => {
           const category = responseDataContainer?.products[key]?.category;

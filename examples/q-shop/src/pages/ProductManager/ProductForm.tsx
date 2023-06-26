@@ -1,14 +1,11 @@
 import React, { useState, useEffect } from "react";
 import {
-  Button,
   Select,
-  MenuItem,
   SelectChangeEvent,
   useTheme,
-  Box
+  Box,
+  FormControl
 } from "@mui/material";
-import { useDropzone } from "react-dropzone";
-import AddPhotoAlternateIcon from "@mui/icons-material/AddPhotoAlternate";
 import ImageUploader from "../../components/common/ImageUploader";
 import { PublishProductParams } from "./NewProduct";
 import { Product } from "../../state/features/storeSlice";
@@ -19,19 +16,26 @@ import {
   AddLogoIcon,
   LogoPreviewRow,
   StoreLogoPreview,
-  CustomInputField
+  CustomInputField,
+  ButtonRow,
+  CancelButton,
+  CreateButton
 } from "../../components/modals/CreateStoreModal-styles";
 import {
   CloseIcon,
   InputFieldCustomLabel,
-  ProductImagesRow
+  ProductImagesRow,
+  CustomSelect,
+  CategoryRow,
+  CustomMenuItem,
+  AddButton,
+  MaximumImagesRow
 } from "./NewProduct-styles";
 interface ProductFormProps {
   onSubmit: (product: PublishProductParams) => void;
   onClose?: () => void;
   editProduct?: Product | null;
 }
-
 interface ProductObj {
   title?: string;
   description?: string;
@@ -49,6 +53,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
   const categories = useSelector(
     (state: RootState) => state.global.listProducts.categories
   );
+
   const [product, setProduct] = useState<ProductObj>({
     title: "",
     description: "",
@@ -61,7 +66,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
   const [images, setImages] = useState<string[]>([]);
   const [selectedStatus, setSelectedStatus] = useState<string>("AVAILABLE");
   const [newCategory, setNewCategory] = useState<string>("");
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<string | null>("");
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setProduct({ ...product, [event.target.name]: event.target.value });
   };
@@ -71,6 +76,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
     const selectedOption = categoryList.find((option) => option === optionId);
     setSelectedCategory(selectedOption || null);
   };
+
   const handleNewCategory = (event: React.ChangeEvent<HTMLInputElement>) => {
     setNewCategory(event.target.value);
   };
@@ -155,6 +161,8 @@ export const ProductForm: React.FC<ProductFormProps> = ({
     }
   }, [editProduct]);
 
+  console.log({ selectedCategory });
+
   return (
     <>
       {images.length > 0 ? (
@@ -190,6 +198,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
           </AddLogoButton>
         </ImageUploader>
       )}
+      <MaximumImagesRow>*Maximum 3 images</MaximumImagesRow>
       <CustomInputField
         name="title"
         label="Title"
@@ -216,40 +225,65 @@ export const ProductForm: React.FC<ProductFormProps> = ({
         onChange={handleInputChange}
         required
       />
-      <InputFieldCustomLabel id="type">Product Type</InputFieldCustomLabel>
-      <Select
-        name="type"
-        value={selectedType}
-        onChange={(event) => {
-          setSelectedType(event.target.value);
-        }}
-        variant="filled"
-        required
-        fullWidth
-      >
-        <MenuItem value="digital">Digital</MenuItem>
-        <MenuItem value="physical">Physical</MenuItem>
-      </Select>
-      <InputFieldCustomLabel id="category">Category</InputFieldCustomLabel>
-      <Select
-        name="category"
-        value={selectedCategory}
-        onChange={handleSelectChange}
-        variant="filled"
-        required
-        fullWidth
-      >
-        {categoryList.map((category) => (
-          <MenuItem value={category}>{category}</MenuItem>
-        ))}
-      </Select>
-      <CustomInputField
-        name="newCategory"
-        label="New Category"
-        variant="filled"
-        value={newCategory}
-        onChange={handleNewCategory}
-      />
+      <Box>
+        <FormControl fullWidth>
+          <InputFieldCustomLabel id="product-type-label">
+            Product Type
+          </InputFieldCustomLabel>
+          <CustomSelect
+            labelId="product-type-label"
+            label="Product Type"
+            value={selectedType}
+            onChange={(event) => {
+              setSelectedType(event.target.value as string);
+            }}
+            required
+            fullWidth
+          >
+            <CustomMenuItem value="digital">Digital</CustomMenuItem>
+            <CustomMenuItem value="physical">Physical</CustomMenuItem>
+          </CustomSelect>
+        </FormControl>
+      </Box>
+      <CategoryRow style={{ marginBottom: "10px" }}>
+        <FormControl style={{ width: "60%" }}>
+          <InputFieldCustomLabel shrink={true} id="product-category-label">
+            Category
+          </InputFieldCustomLabel>
+          <CustomSelect
+            notched={true}
+            labelId="product-category-label"
+            label="Category"
+            value={selectedCategory}
+            displayEmpty={true}
+            onChange={(event) => {
+              handleSelectChange(event as SelectChangeEvent<string | null>);
+            }}
+            required
+            fullWidth
+          >
+            <CustomMenuItem value="">
+              <em>Add a Category</em>
+            </CustomMenuItem>
+            {categoryList.map((category) => (
+              <CustomMenuItem value={category}>{category}</CustomMenuItem>
+            ))}
+          </CustomSelect>
+        </FormControl>
+        <CategoryRow style={{ gap: "20px" }}>
+          <CustomInputField
+            style={{ flexGrow: 1 }}
+            name="newCategory"
+            label="New Category"
+            variant="filled"
+            value={newCategory}
+            onChange={handleNewCategory}
+          />
+          <AddButton variant="contained" onClick={addNewCategoryToList}>
+            Add
+          </AddButton>
+        </CategoryRow>
+      </CategoryRow>
       {editProduct && (
         <>
           <InputFieldCustomLabel id="status">Status</InputFieldCustomLabel>
@@ -260,22 +294,20 @@ export const ProductForm: React.FC<ProductFormProps> = ({
             variant="filled"
             required
           >
-            <MenuItem value="AVAILABLE">Available</MenuItem>
-            <MenuItem value="RETIRED">Retired</MenuItem>
-            <MenuItem value="OUT_OF_STOCK">Out of stock</MenuItem>
+            <CustomMenuItem value="AVAILABLE">Available</CustomMenuItem>
+            <CustomMenuItem value="RETIRED">Retired</CustomMenuItem>
+            <CustomMenuItem value="OUT_OF_STOCK">Out of stock</CustomMenuItem>
           </Select>
         </>
       )}
-
-      <Button variant="contained" onClick={addNewCategoryToList}>
-        Add Category
-      </Button>
-      <Button onClick={onClose} variant="contained">
-        Close
-      </Button>
-      <Button onClick={handleSubmit} variant="contained">
-        Submit
-      </Button>
+      <ButtonRow>
+        <CancelButton variant="outlined" color="error" onClick={onClose}>
+          Cancel
+        </CancelButton>
+        <CreateButton onClick={handleSubmit} variant="contained">
+          Add Product
+        </CreateButton>
+      </ButtonRow>
     </>
   );
 };
