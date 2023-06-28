@@ -60,7 +60,6 @@ export const ProductForm: React.FC<ProductFormProps> = ({
     price: 0,
     images: []
   });
-  console.log({ product });
   const [categoryList, setCategoryList] = useState<string[]>([]);
   const [selectedType, setSelectedType] = useState<string>("digital");
   const [images, setImages] = useState<string[]>([]);
@@ -115,7 +114,6 @@ export const ProductForm: React.FC<ProductFormProps> = ({
 
   useEffect(() => {
     if (editProduct) {
-      console.log({ editProduct });
       try {
         const {
           title,
@@ -129,14 +127,6 @@ export const ProductForm: React.FC<ProductFormProps> = ({
         } = editProduct;
         const findPrice =
           price?.find((item) => item?.currency === "qort")?.value || 0;
-        console.log({
-          title,
-          description,
-          images,
-          mainImageIndex,
-          type,
-          price
-        });
         setProduct({
           title,
           description,
@@ -160,8 +150,6 @@ export const ProductForm: React.FC<ProductFormProps> = ({
       }
     }
   }, [editProduct]);
-
-  console.log({ selectedCategory });
 
   return (
     <>

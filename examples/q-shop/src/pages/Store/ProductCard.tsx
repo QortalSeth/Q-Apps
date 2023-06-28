@@ -4,11 +4,13 @@ import {
   CardContent,
   CardMedia,
   Typography,
-  Button
+  Button,
+  useTheme
 } from "@mui/material";
 import { Product } from "../../state/features/storeSlice";
 import { useDispatch } from "react-redux";
 import { setProductToCart } from "../../state/features/cartSlice";
+import { QortalSVG } from "../../assets/svgs/QortalSVG";
 
 // export interface IProduct {
 //   id: string
@@ -29,14 +31,12 @@ function addEllipsis(str: string, limit: number) {
 
 interface ProductCardProps {
   product: Product;
-  onAddToCart?: (product: Product) => void;
 }
 
-export const ProductCard: React.FC<ProductCardProps> = ({
-  product,
-  onAddToCart
-}) => {
+export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const dispatch = useDispatch();
+  const theme = useTheme();
+
   const profileImg = product?.images?.[0];
   const price = product?.price?.find(
     (item) => item?.currency === "qort"
@@ -96,19 +96,15 @@ export const ProductCard: React.FC<ProductCardProps> = ({
           {addEllipsis(product?.description || "", 58)}
         </Typography>
         <Typography variant="body1" color="text.primary">
-          $ {price}
+          <QortalSVG
+            color={theme.palette.text.primary}
+            height={"22"}
+            width={"22"}
+          />{" "}
+          {price}
         </Typography>
       </CardContent>
-      <Button
-        color="primary"
-        onClick={() => {
-          if (onAddToCart) {
-            onAddToCart(product);
-          }
-        }}
-      >
-        Add to Cart
-      </Button>
+      <Button color="primary">Add to Cart</Button>
     </Card>
   );
 };

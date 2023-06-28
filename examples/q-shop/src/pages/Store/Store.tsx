@@ -5,8 +5,10 @@ import { RootState } from "../../state/store";
 import { useParams } from "react-router-dom";
 import { useTheme, Grid, CircularProgress } from "@mui/material";
 import {
+  resetListProducts,
   setCurrentStore,
-  setIsLoadingGlobal
+  setIsLoadingGlobal,
+  updateRecentlyVisitedStoreId
 } from "../../state/features/globalSlice";
 import { Product } from "../../state/features/storeSlice";
 import { useFetchProducts } from "../../hooks/useFetchProducts";
@@ -34,7 +36,6 @@ interface IListProducts {
 }
 export const Store = () => {
   const navigate = useNavigate();
-  const theme = useTheme();
   const { user } = useSelector((state: RootState) => state.auth);
   const currentStore = useSelector(
     (state: RootState) => state.global.currentStore
@@ -44,7 +45,6 @@ export const Store = () => {
   const { checkAndUpdateResourceCatalogue, getCatalogue } = useFetchOrders();
   const { store, user: username } = useParams();
 
-  const { hashMapStores } = useSelector((state: RootState) => state.store);
   const catalogueHashMap = useSelector(
     (state: RootState) => state.global.catalogueHashMap
   );
@@ -63,13 +63,11 @@ export const Store = () => {
 
   const getProducts = React.useCallback(async () => {
     if (!store) return;
-
     try {
       dispatch(setIsLoadingGlobal(true));
       const offset = products.length;
       const productList = listProducts.products;
       const responseData = productList.slice(offset, offset + 20);
-
       const structureData = responseData.map(
         (product: ProductDataContainer): Product => {
           return {
@@ -90,6 +88,7 @@ export const Store = () => {
           copiedProducts.push(product);
         }
       });
+      console.log({ copiedProducts });
       setProducts(copiedProducts);
 
       for (const content of structureData) {
@@ -111,9 +110,9 @@ export const Store = () => {
   // Get store on mount & setCurrentStore when it's your own store
   const getStore = React.useCallback(async () => {
     let name = username;
-
     if (!name) return;
     if (!store) return;
+
     try {
       dispatch(setIsLoadingGlobal(true));
       let myStore;
@@ -131,6 +130,7 @@ export const Store = () => {
       );
       if (filterOut.length === 0) return;
       if (filterOut.length !== 0) {
+        // Get first element since it returns an array of stores
         myStore = filterOut[0];
       }
 
@@ -161,14 +161,13 @@ export const Store = () => {
           "Content-Type": "application/json"
         }
       });
-      //
+      // Set dataContainer locally to do filtering in the future since it cannot be done on QDN at the moment
       const responseDataContainer = await responseContainer.json();
       setDataContainer({
         ...responseDataContainer,
         id: `${store}-datacontainer`
       });
       let categories: any = {};
-      // Add list products of the store global redux slice in order to facilitate mapping afterwards
       const mappedProducts = Object.keys(responseDataContainer.products)
         .map((key) => {
           const category = responseDataContainer?.products[key]?.category;
@@ -182,13 +181,15 @@ export const Store = () => {
           };
         })
         .sort((a, b) => b.created - a.created);
+      // Setting list products locally
       setListProducts({
         sort: "created",
         products: mappedProducts,
         categories: Object.keys(categories).map((cat) => cat)
       });
-
+      dispatch(resetListProducts());
       dispatch(setStoreId(store));
+      dispatch(updateRecentlyVisitedStoreId(store));
       dispatch(setStoreOwner(name));
     } catch (error) {
     } finally {
@@ -202,20 +203,6 @@ export const Store = () => {
     setUserStore(null);
     getStore();
   }, [username, store]);
-
-  // New useEffect to check if you need to change currentStore (user's own store) in Redux
-  // If it's not the same, dispatch the local store data to currentStore on Redux
-  useEffect(() => {
-    if (userStore && currentStore && user) {
-      if (userStore?.id !== currentStore?.id && username === user?.name) {
-        dispatch(
-          setCurrentStore({
-            ...userStore
-          })
-        );
-      }
-    }
-  }, [userStore?.id, currentStore?.id, user]);
 
   const getProductsHandler = React.useCallback(async () => {
     await getProducts();
@@ -244,7 +231,7 @@ export const Store = () => {
             </EditStoreButton>
             <ProductManagerButton
               onClick={() => {
-                navigate(`/product-manager`);
+                navigate(`/product-manager/${store}`);
               }}
             >
               Product Manager

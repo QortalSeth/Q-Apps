@@ -12,6 +12,17 @@ export interface ProductDataContainer {
   status: string
 }
 
+export interface CurrentStore {
+    createdAt: number
+    id: string
+    title: string
+    description: string
+    blogImage: string
+    category?: string
+    tags?: string[]
+    navbarConfig?: any
+}
+
 export interface DataContainer {
   storeId: string
   shortStoreId: string
@@ -34,19 +45,8 @@ interface GlobalState {
   isLoadingCurrentBlog: boolean
   isLoadingGlobal: boolean
   isOpenEditBlogModal: boolean
-  currentStore: {
-    createdAt: number
-    id: string
-    title: string
-    description: string
-    blogImage: string
-    category?: string
-    tags?: string[]
-    navbarConfig?: any
-  } | null
-
+  currentStore: CurrentStore | null
   downloads: any
-
   userAvatarHash: Record<string, string>
   dataContainer: DataContainer | null
   listProducts: {
@@ -57,7 +57,8 @@ interface GlobalState {
   productsToSave: Record<string, Product>
   catalogueHashMap: Record<string, Catalogue>
   products: Product[]
-  myOrders: Order[]
+  myOrders: Order[],
+  recentlyVisitedStoreId: string
 }
 const initialState: GlobalState = {
   isOpenCreateStoreModal: false,
@@ -76,7 +77,8 @@ const initialState: GlobalState = {
   products: [],
   productsToSave: {},
   catalogueHashMap: {},
-  myOrders: []
+  myOrders: [],
+  recentlyVisitedStoreId: "",
 }
 
 export const globalSlice = createSlice({
@@ -119,6 +121,9 @@ export const globalSlice = createSlice({
     setAddToDownloads: (state, action) => {
       const download = action.payload
       state.downloads[download.identifier] = download
+    },
+    clearAllProductsToSave: (state) => {
+      state.productsToSave = {}
     },
     removeFromProductsToSave: (state, action) => {
       const productId = action.payload
@@ -171,9 +176,19 @@ export const globalSlice = createSlice({
         }
       })
     },
+    updateRecentlyVisitedStoreId : (state, action) => {
+      state.recentlyVisitedStoreId = action.payload;
+    },  
     resetProducts: (state) => {
       state.products = []
       state.productsToSave = {}
+    },
+    resetListProducts: (state) => {
+      state.listProducts = {
+        sort: 'created',
+        products: [],
+        categories: []
+      }
     }
   }
 })
@@ -185,6 +200,7 @@ export const {
   setIsLoadingGlobal,
   toggleEditBlogModal,
   setAddToDownloads,
+  updateRecentlyVisitedStoreId,
   updateDownloads,
   setUserAvatarHash,
   removeFromProductsToSave,
@@ -192,7 +208,9 @@ export const {
   setCatalogueHashMap,
   upsertProducts,
   upsertMyOrders,
-  resetProducts
+  resetProducts,
+  clearAllProductsToSave,
+  resetListProducts
 } = globalSlice.actions
 
 export default globalSlice.reducer
