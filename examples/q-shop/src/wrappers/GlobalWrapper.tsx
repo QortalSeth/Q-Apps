@@ -14,7 +14,6 @@ import {
   toggleEditBlogModal,
   toggleCreateStoreModal,
   setIsLoadingGlobal,
-  CurrentStore,
   resetProducts
 } from "../state/features/globalSlice";
 import NavBar from "../components/layout/Navbar/Navbar";
@@ -22,7 +21,7 @@ import PageLoader from "../components/common/PageLoader";
 import { setNotification } from "../state/features/notificationsSlice";
 import ConsentModal from "../components/modals/ConsentModal";
 import { objectToBase64 } from "../utils/toBase64";
-import { Cart } from "../pages/ProductManager/Cart";
+import { Cart } from "../pages/Cart/Cart";
 import {
   Store,
   addToAllMyStores,
@@ -583,6 +582,7 @@ const GlobalWrapper: React.FC<Props> = ({ children, setTheme }) => {
         hasAttemptedToFetchShopInitial={hasAttemptedToFetchShopInitial}
       />
       <ConsentModal />
+      {/* Cart opens when setIsOpen action is dispatched to Redux Global State */}
       <Cart />
       {children}
     </>

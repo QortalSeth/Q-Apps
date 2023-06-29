@@ -6,7 +6,6 @@ import { useParams } from "react-router-dom";
 import { useTheme, Grid, CircularProgress } from "@mui/material";
 import {
   resetListProducts,
-  setCurrentStore,
   setIsLoadingGlobal,
   updateRecentlyVisitedStoreId
 } from "../../state/features/globalSlice";
@@ -14,7 +13,7 @@ import { Product } from "../../state/features/storeSlice";
 import { useFetchProducts } from "../../hooks/useFetchProducts";
 import LazyLoad from "../../components/common/LazyLoad";
 import ContextMenuResource from "../../components/common/ContextMenu/ContextMenuResource";
-import { setStoreId, setStoreOwner } from "../../state/features/cartSlice";
+import { setStoreId, setStoreOwner } from "../../state/features/storeSlice";
 import { ProductCard } from "./ProductCard";
 import { ProductDataContainer } from "../../state/features/globalSlice";
 import { useFetchOrders } from "../../hooks/useFetchOrders";
@@ -29,6 +28,8 @@ import {
   EditStoreButton
 } from "./Store-styles";
 import { toggleEditBlogModal } from "../../state/features/globalSlice";
+import { CartIcon } from "../../components/layout/Navbar/Navbar-styles";
+import { setIsOpen } from "../../state/features/cartSlice";
 interface IListProducts {
   sort: string;
   products: ProductDataContainer[];
@@ -36,21 +37,23 @@ interface IListProducts {
 }
 export const Store = () => {
   const navigate = useNavigate();
+
+  const theme = useTheme();
+
   const { user } = useSelector((state: RootState) => state.auth);
   const currentStore = useSelector(
     (state: RootState) => state.global.currentStore
   );
   const { isLoadingGlobal } = useSelector((state: RootState) => state.global);
-
-  const { checkAndUpdateResourceCatalogue, getCatalogue } = useFetchOrders();
-  const { store, user: username } = useParams();
-
   const catalogueHashMap = useSelector(
     (state: RootState) => state.global.catalogueHashMap
   );
+
+  const { checkAndUpdateResourceCatalogue, getCatalogue } = useFetchOrders();
+
+  const { store, user: username } = useParams();
+
   const dispatch = useDispatch();
-  const { getProduct, hashMapProducts, checkAndUpdateResource } =
-    useFetchProducts();
 
   const [userStore, setUserStore] = React.useState<any>(null);
   const [dataContainer, setDataContainer] = useState(null);
@@ -220,7 +223,7 @@ export const Store = () => {
         >
           Back To All Shops
         </BackToStorefrontButton>
-        {username === user?.name && (
+        {username === user?.name ? (
           <StoreControlsRow>
             <EditStoreButton
               onClick={() => {
@@ -237,6 +240,15 @@ export const Store = () => {
               Product Manager
             </ProductManagerButton>
           </StoreControlsRow>
+        ) : (
+          <CartIcon
+            color={theme.palette.text.primary}
+            height={"32"}
+            width={"32"}
+            onClickFunc={() => {
+              dispatch(setIsOpen(true));
+            }}
+          />
         )}
       </ProductManagerRow>
       <ProductsContainer container sx={{}}>

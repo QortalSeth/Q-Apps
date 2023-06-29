@@ -418,7 +418,7 @@ export const ProductManager = () => {
       <TabsContainer>
         <BackToStorefrontButton
           onClick={() => {
-            navigate(`${userName}/${currentStore?.id}`);
+            navigate(`/${userName}/${currentStore?.id}`);
           }}
         >
           Back To Storefront
