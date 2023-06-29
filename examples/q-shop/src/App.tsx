@@ -28,7 +28,10 @@ function App() {
           <CssBaseline />
           <Routes>
             <Route path="/:user/:store/:product" element={<Product />} />
-            <Route path="/product-manager" element={<ProductManager />} />
+            <Route
+              path="/product-manager/:store"
+              element={<ProductManager />}
+            />
             <Route path="/my-orders" element={<MyOrders />} />
             <Route path="/:user/:store" element={<Store />} />
             <Route path="/" element={<StoreList />} />

@@ -57,7 +57,6 @@ export const StoreList = ({ mode }: BlogListProps) => {
         }
       });
       const responseData = await response.json();
-      console.log({ responseData });
       // Data returned from that endpoint of the API
       const structureData = responseData.map((storeItem: any): Store => {
         return {
@@ -72,7 +71,6 @@ export const StoreList = ({ mode }: BlogListProps) => {
           id: storeItem.identifier
         };
       });
-      console.log({ structureData });
       // Add stores to localstate & guard against duplicates
       const copiedStores: Store[] = [...stores];
       structureData.forEach((storeItem: Store) => {
@@ -123,8 +121,6 @@ export const StoreList = ({ mode }: BlogListProps) => {
       return stores;
     }
   }, [filterUserStores, stores, myStores, user?.name]);
-
-  console.log({ stores, hashMapStores });
   return (
     <>
       <StoresContainer container>

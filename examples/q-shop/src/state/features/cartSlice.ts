@@ -2,23 +2,13 @@ import { createSlice } from '@reduxjs/toolkit'
 import { RootState } from '../store'
 
 interface CartState {
-  hashMapCarts: Record<string, Cart>
-  currentCart: {
-    orders: Record<string, Order>
-    lastUpdated: number | null
-    storeId: string | null
-    storeOwner: string | null
-  }
+  // hashMapCarts: Record<string, Cart>
+  carts: Record<string, Cart>
   isOpen: boolean
 }
 const initialState: CartState = {
-  hashMapCarts: {},
-  currentCart: {
-    orders: {},
-    lastUpdated: null,
-    storeId: null,
-    storeOwner: null
-  },
+  // hashMapCarts: {},
+  carts: {},
   isOpen: false
 }
 
@@ -30,7 +20,9 @@ export interface Order {
 
 export interface Cart {
   orders: Record<string, Order>
-  lastUpdated: number
+  lastUpdated: number,
+  storeId: string | null
+  storeOwner: string | null
 }
 
 export const cartSlice = createSlice({
@@ -38,37 +30,59 @@ export const cartSlice = createSlice({
   initialState,
   reducers: {
     setProductToCart: (state, action) => {
-      const { id, catalogueId } = action.payload
-      let order = state.currentCart?.orders[id]
+      const { storeId, storeOwner, productId, catalogueId } = action.payload;
 
-      if (order) {
-        // If an order already exists, increment its quantity.
-        order.quantity += 1
-      } else {
-        // If no order exists, create a new one with quantity 1.
-        order = {
-          quantity: 1,
-          productId: id,
-          catalogueId
+      if (state.carts[storeId]) {
+        // If the cart already exists, check if the order exists.
+        if (state.carts[storeId].orders[productId]) {
+          // If an order already exists, increment its quantity.
+          state.carts[storeId].orders[productId].quantity += 1;
+        } else {
+          // If no order exists, create a new one with quantity 1.
+          state.carts[storeId].orders[productId] = {
+            quantity: 1,
+            productId,
+            catalogueId,
+          };
         }
+      } else {
+        // If the cart doesn't exist yet, create a new one with the order.
+        state.carts[storeId] = {
+          orders: {
+            [productId]: {
+              quantity: 1,
+              productId,
+              catalogueId,
+            },
+          },
+          lastUpdated: Date.now(),
+          storeId,
+          storeOwner,
+        };
       }
-
-      state.currentCart.orders[id] = order
-      state.currentCart.lastUpdated = Date.now()
     },
     setIsOpen: (state, action) => {
       state.isOpen = action.payload
     },
-    setStoreId: (state, action) => {
-      state.currentCart.storeId = action.payload
+    addQuantityToCart: (state, action) => {
+      const { storeId, productId } = action.payload;
+      state.carts[storeId].orders[productId].quantity += 1;
     },
-    setStoreOwner: (state, action) => {
-      state.currentCart.storeOwner = action.payload
-    }
+    subtractQuantityFromCart: (state, action) => {
+      const { storeId, productId } = action.payload;
+      state.carts[storeId].orders[productId].quantity -= 1;
+      if(state.carts[storeId].orders[productId].quantity === 0) {
+        delete state.carts[storeId].orders[productId];
+      }
+    },
+    removeCartFromCarts: (state, action) => {
+      const { storeId } = action.payload;
+      delete state.carts[storeId];
+    },
   }
 })
 
-export const { setProductToCart, setIsOpen, setStoreId, setStoreOwner } =
+export const { setProductToCart, setIsOpen, addQuantityToCart, subtractQuantityFromCart, removeCartFromCarts } =
   cartSlice.actions
 
 export default cartSlice.reducer

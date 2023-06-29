@@ -1,24 +1,24 @@
-import { useState } from 'react'
+import { useState } from "react";
 import ConfirmationModal, {
   ModalProps
-} from '../components/common/ConfirmationModal'
+} from "../components/common/ConfirmationModal/ConfirmationModal";
 
 const useConfirmationModal = (props: any) => {
-  const [isModalOpen, setIsModalOpen] = useState<boolean>(false)
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [resolvePromise, setResolvePromise] =
-    useState<(value: boolean) => void>()
+    useState<(value: boolean) => void>();
 
   const showModal = async () => {
-    setIsModalOpen(true)
+    setIsModalOpen(true);
     return new Promise<boolean>((resolve) => {
-      setResolvePromise(() => resolve)
-    })
-  }
+      setResolvePromise(() => resolve);
+    });
+  };
 
   const handleUserAction = (userConfirmed: boolean) => {
-    setIsModalOpen(false)
-    resolvePromise?.(userConfirmed)
-  }
+    setIsModalOpen(false);
+    resolvePromise?.(userConfirmed);
+  };
 
   const Modal = () => (
     <ConfirmationModal
@@ -28,9 +28,9 @@ const useConfirmationModal = (props: any) => {
       handleConfirm={() => handleUserAction(true)}
       handleCancel={() => handleUserAction(false)}
     />
-  )
+  );
 
-  return { Modal, showModal }
-}
+  return { Modal, showModal };
+};
 
-export default useConfirmationModal
+export default useConfirmationModal;

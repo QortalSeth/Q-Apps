@@ -19,7 +19,6 @@ export const fetchAndEvaluateCatalogues = async (data: any) => {
       })
 
       const responseData = await response.json()
-      console.log({ responseData })
       if (!responseData.error) {
         obj = {
           ...responseData,
@@ -28,7 +27,6 @@ export const fetchAndEvaluateCatalogues = async (data: any) => {
           isValid: true
         }
       }
-      console.log({ obj })
       return obj
     } catch (error) {}
   }

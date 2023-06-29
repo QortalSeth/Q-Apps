@@ -1,8 +1,16 @@
 import { styled } from "@mui/system";
-import { Box, Typography } from "@mui/material";
+import { Box, Typography, Button } from "@mui/material";
 import Tabs from "@mui/material/Tabs";
 import Tab from "@mui/material/Tab";
 import { TimesSVG } from "../../assets/svgs/TimesSVG";
+import { MinimizeSVG } from "../../assets/svgs/MinimizeSVG";
+
+export const ProductManagerContainer = styled(Box)(({ theme }) => ({
+  display: "flex",
+  width: "100%",
+  flexDirection: "column",
+  backgroundColor: "background.paper"
+}));
 
 export const TabsContainer = styled(Box)(({ theme }) => ({
   borderBottom: 1,
@@ -40,9 +48,8 @@ export const ProductsToSaveCard = styled(Box)(({ theme }) => ({
   minHeight: "400px",
   gap: "10px",
   borderRadius: "8px",
-  backgroundColor: theme.palette.mode === "light" ? "#EFF3FD" : "#2b2d48",
+  backgroundColor: theme.palette.mode === "light" ? "#e8e8e8" : "#32333c",
   position: "absolute",
-  top: "25%",
   left: "50%",
   transform: "translateX(-50%)",
   padding: "25px",
@@ -109,9 +116,62 @@ export const TimesIcon = styled(TimesSVG)(({ theme }) => ({
   }
 }));
 
+export const AddMoreButton = styled(Button)(({ theme }) => ({
+  fontFamily: "Raleway",
+  fontSize: "15px",
+  backgroundColor: "#cfd432",
+  color: "black",
+  "&:hover": {
+    cursor: "pointer",
+    backgroundColor: "#afb428"
+  }
+}));
+
 export const CardButtonRow = styled(Box)(({ theme }) => ({
   display: "flex",
   width: "100%",
   alignItems: "center",
-  justifyContent: "flex-end"
+  justifyContent: "flex-end",
+  gap: "15px"
+}));
+
+export const MinimizeIcon = styled(MinimizeSVG)(({ theme }) => ({
+  position: "absolute",
+  top: "5px",
+  right: "5px",
+  padding: "3px",
+  backgroundColor: "transparent",
+  transition: "all 0.2s ease-in-out",
+  "&:hover": {
+    cursor: "pointer",
+    backgroundColor: "#ffffff73"
+  }
+}));
+
+export const DockedMinimizeIcon = styled(MinimizeSVG)(({ theme }) => ({
+  padding: "3px",
+  backgroundColor: "transparent",
+  transition: "all 0.2s ease-in-out",
+  "&:hover": {
+    cursor: "pointer",
+    backgroundColor: "#ffffff73"
+  }
+}));
+
+export const DockedProductsToSaveCard = styled(Box)(({ theme }) => ({
+  display: "flex",
+  alignItems: "center",
+  padding: "8px 25px",
+  fontFamily: "Raleway",
+  fontSize: "16px",
+  color: theme.palette.text.primary,
+  borderTopRightRadius: "8px",
+  borderTopLeftRadius: "8px",
+  borderBottomRightRadius: "0px",
+  borderBottomLeftRadius: "0px",
+  backgroundColor: theme.palette.mode === "light" ? "#e8e8e8" : "#32333c",
+  position: "absolute",
+  bottom: 0,
+  right: "20px",
+  gap: "15px"
 }));
