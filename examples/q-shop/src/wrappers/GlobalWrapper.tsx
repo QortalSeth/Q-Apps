@@ -12,14 +12,16 @@ import {
   setCurrentStore,
   setDataContainer,
   toggleEditBlogModal,
-  toggleCreateStoreModal
+  toggleCreateStoreModal,
+  setIsLoadingGlobal,
+  resetProducts
 } from "../state/features/globalSlice";
 import NavBar from "../components/layout/Navbar/Navbar";
 import PageLoader from "../components/common/PageLoader";
 import { setNotification } from "../state/features/notificationsSlice";
 import ConsentModal from "../components/modals/ConsentModal";
 import { objectToBase64 } from "../utils/toBase64";
-import { Cart } from "../pages/ProductManager/Cart";
+import { Cart } from "../pages/Cart/Cart";
 import {
   Store,
   addToAllMyStores,
@@ -35,11 +37,17 @@ interface Props {
 const GlobalWrapper: React.FC<Props> = ({ children, setTheme }) => {
   const dispatch = useDispatch();
   const { user } = useSelector((state: RootState) => state.auth);
+  // Fetch all my stores from global redux
+  const { myStores } = useSelector((state: RootState) => state.store);
+
+  // Fetch recentlyVisitedStoreId from cart redux
+  const { recentlyVisitedStoreId } = useSelector(
+    (state: RootState) => state.global
+  );
 
   const { getStore, checkAndUpdateResource } = useFetchStores();
 
   const [userAvatar, setUserAvatar] = useState<string>("");
-  const [isOpenCart, setIsOpenCart] = useState<boolean>(false);
 
   const [hasAttemptedToFetchShopInitial, setHasAttemptedToFetchShopInitial] =
     useState(false);
@@ -94,20 +102,10 @@ const GlobalWrapper: React.FC<Props> = ({ children, setTheme }) => {
         "Content-Type": "application/json"
       }
     });
-
     const dataMetadata = await responseBlogs.json();
-    // const url = `/arbitrary/metadata/BLOG/${username}/${identifier}}`
-    // const responseBlogs = await fetch(url, {
-    //   method: 'GET',
-    //   headers: {
-    //     'Content-Type': 'application/json'
-    //   }
-    // })
-    // const responseDataBlogs = await responseBlogs.json()
     if (dataMetadata.length === 0) {
       doesExist = false;
     }
-
     return doesExist;
   }
 
@@ -146,7 +144,7 @@ const GlobalWrapper: React.FC<Props> = ({ children, setTheme }) => {
       }
     });
     const responseData2 = await response2.json();
-
+    // Set currentStore in the Redux global state
     dispatch(
       setCurrentStore({
         created: responseData?.created || "",
@@ -159,8 +157,9 @@ const GlobalWrapper: React.FC<Props> = ({ children, setTheme }) => {
         tags: blog.metadata?.tags || []
       })
     );
-    console.log({ responseData2 });
+    // Set listProducts in the Redux global state
     if (responseData2 && !responseData2.error) {
+      console.log("responseData2", responseData2);
       dispatch(
         setDataContainer({
           ...responseData2,
@@ -186,14 +185,6 @@ const GlobalWrapper: React.FC<Props> = ({ children, setTheme }) => {
         identifier: `${blog.identifier}-datacontainer`
       });
     }
-    // const response = await fetch("/names/address/" + address);
-    // const nameData = await response.json();
-
-    //   if (nameData?.length > 0 ) {
-    //       return nameData[0].name;
-    //   } else {
-    //       return '';
-    //   }
   }
 
   const askForAccountInformation = React.useCallback(async () => {
@@ -494,11 +485,75 @@ const GlobalWrapper: React.FC<Props> = ({ children, setTheme }) => {
   }, []);
 
   // Fetch My Stores on Mount once Auth Is Complete
-
   useEffect(() => {
     if (!user?.name) return;
     getMyStores();
   }, [user]);
+
+  // Listener useEffect to fetch dataContainer and store data if store?.id changes and it is ours
+  // Make sure myStores is not empty before executing
+  // Will only run if storeId changes and is ours within our list of stores
+  // If no datacontainer is found, make sure to set it empty in global state
+  useEffect(() => {
+    if (recentlyVisitedStoreId && myStores) {
+      const myStoreFound = myStores.find(
+        (store: Store) => store.id === recentlyVisitedStoreId
+      );
+      if (myStoreFound) {
+        try {
+          dispatch(setIsLoadingGlobal(true));
+          const getStoreAndDataContainer = async () => {
+            // Fetch shop data on QDN
+            const urlShop = `/arbitrary/STORE/${myStoreFound.owner}/${myStoreFound.id}`;
+            const shopData = await fetch(urlShop, {
+              method: "GET",
+              headers: {
+                "Content-Type": "application/json"
+              }
+            });
+            const shopResource = await shopData.json();
+
+            // Fetch container data on QDN
+            const urlDataContainer = `/arbitrary/DOCUMENT/${myStoreFound.owner}/${myStoreFound.id}-datacontainer`;
+            const response = await fetch(urlDataContainer, {
+              method: "GET",
+              headers: {
+                "Content-Type": "application/json"
+              }
+            });
+            const responseData2 = await response.json();
+            if (responseData2 && !responseData2.error) {
+              dispatch(
+                setDataContainer({
+                  ...responseData2,
+                  id: `${myStoreFound.id}-datacontainer`
+                })
+              );
+            } else {
+              dispatch(setDataContainer(null));
+            }
+            dispatch(
+              setCurrentStore({
+                created: shopResource?.created || "",
+                id: myStoreFound.id,
+                title: shopResource?.title || "",
+                location: shopResource?.location,
+                shipsTo: shopResource?.shipsTo,
+                description: shopResource?.description || "",
+                category: myStoreFound?.category,
+                tags: myStoreFound?.tags || []
+              })
+            );
+            dispatch(resetProducts());
+          };
+          getStoreAndDataContainer();
+        } catch (error) {
+        } finally {
+          dispatch(setIsLoadingGlobal(false));
+        }
+      }
+    }
+  }, [recentlyVisitedStoreId, myStores]);
 
   return (
     <>
@@ -527,6 +582,7 @@ const GlobalWrapper: React.FC<Props> = ({ children, setTheme }) => {
         hasAttemptedToFetchShopInitial={hasAttemptedToFetchShopInitial}
       />
       <ConsentModal />
+      {/* Cart opens when setIsOpen action is dispatched to Redux Global State */}
       <Cart />
       {children}
     </>

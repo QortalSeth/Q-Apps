@@ -8,7 +8,9 @@ interface GlobalState {
   hashMapProducts: Record<string, Product>
   isFiltering: boolean
   filterValue: string
-  hashMapStores: Record<string, Store>
+  hashMapStores: Record<string, Store>,
+  storeId: string | null
+  storeOwner: string | null
 }
 
 const initialState: GlobalState = {
@@ -18,7 +20,9 @@ const initialState: GlobalState = {
   hashMapProducts: {},
   isFiltering: false,
   filterValue: '',
-  hashMapStores: {}
+  hashMapStores: {},
+  storeId: null,
+  storeOwner: null
 }
 
 export interface Price {
@@ -128,6 +132,12 @@ export const storeSlice = createSlice({
         state.hashMapProducts[post.id] = post
       })
     },
+    setStoreId: (state, action) => {
+      state.storeId = action.payload
+    },
+    setStoreOwner: (state, action) => {
+      state.storeOwner = action.payload
+    },
     upsertPosts: (state, action) => {
       action.payload.forEach((post: Product) => {
         const index = state.products.findIndex((p) => p.id === post.id)
@@ -186,7 +196,9 @@ export const {
   addFilteredPosts,
   setIsFiltering,
   setFilterValue,
-  addToHashMapStores
+  addToHashMapStores,
+  setStoreId, 
+  setStoreOwner
 } = storeSlice.actions
 
 export default storeSlice.reducer

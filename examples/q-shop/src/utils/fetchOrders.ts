@@ -29,7 +29,6 @@ export const fetchAndEvaluateOrders = async (data: any) => {
         identifier: orderId,
         encoding: 'base64'
       })
-      console.log({ data })
       const decryptedData = await qortalRequest({
         action: 'DECRYPT_DATA',
         encryptedData: data
@@ -52,7 +51,6 @@ export const fetchAndEvaluateOrders = async (data: any) => {
             identifier,
             encoding: 'base64'
           })
-          console.log({ dataStatus })
           if (dataStatus && !dataStatus.error) {
             const decryptedDataStatus = await qortalRequest({
               action: 'DECRYPT_DATA',
@@ -65,10 +63,8 @@ export const fetchAndEvaluateOrders = async (data: any) => {
           }
         } catch (error) { }
       }
-      console.log({ decryptedData })
 
       const dataToObject = await base64ToObject(decryptedData)
-      console.log({ dataToObject }, checkStructureOrders(dataToObject))
       if (checkStructureOrders(dataToObject)) {
         obj = {
           ...dataToObject,
@@ -79,7 +75,6 @@ export const fetchAndEvaluateOrders = async (data: any) => {
           isValid: true
         }
       }
-      console.log({ obj })
       return obj
     } catch (error) {
       console.log({ error })
