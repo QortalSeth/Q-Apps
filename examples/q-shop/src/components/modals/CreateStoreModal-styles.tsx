@@ -73,6 +73,7 @@ export const AddLogoButton = styled(Button)(({ theme }) => ({
     theme.palette.mode === "dark"
       ? "0px 4px 5px 0px hsla(0,0%,0%,0.14),  0px 1px 10px 0px hsla(0,0%,0%,0.12),  0px 2px 4px -1px hsla(0,0%,0%,0.2)"
       : "rgba(99, 99, 99, 0.2) 0px 2px 8px 0px",
+  marginBottom: "5px",
   "&:hover": {
     cursor: "pointer",
     boxShadow:

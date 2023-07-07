@@ -435,18 +435,18 @@ export const ProductManager = () => {
                 fontWeight: theme.typography.fontWeightMedium
               }
             }}
-            label="Orders"
-          />
-          <StyledTab
-            sx={{
-              "&.Mui-selected": {
-                color: theme.palette.text.primary,
-                fontWeight: theme.typography.fontWeightMedium
-              }
-            }}
             label="Products"
           />
         </StyledTabs>
+        <StyledTab
+          sx={{
+            "&.Mui-selected": {
+              color: theme.palette.text.primary,
+              fontWeight: theme.typography.fontWeightMedium
+            }
+          }}
+          label="Orders"
+        />
       </TabsContainer>
 
       {/* productsToSave card inside Product Manager */}
@@ -514,24 +514,7 @@ export const ProductManager = () => {
           </ProductsToSaveCard>
         </ReusableModal>
       )}
-
       <TabPanel value={valueTab} index={0}>
-        <ShowOrder
-          isOpen={isOpen}
-          setIsOpen={setIsOpen}
-          order={order}
-          from="ProductManager"
-        />
-        <OrderTable
-          openOrder={(order) => {
-            setOrder(order);
-            setIsOpen(true);
-          }}
-          data={orders}
-        ></OrderTable>
-        <LazyLoad onLoadMore={handleGetOrders}></LazyLoad>
-      </TabPanel>
-      <TabPanel value={valueTab} index={1}>
         <Box
           sx={{
             display: "flex",
@@ -557,6 +540,23 @@ export const ProductManager = () => {
         ></SimpleTable>
         <LazyLoad onLoadMore={handleGetProducts}></LazyLoad>
       </TabPanel>
+      <TabPanel value={valueTab} index={1}>
+        <ShowOrder
+          isOpen={isOpen}
+          setIsOpen={setIsOpen}
+          order={order}
+          from="ProductManager"
+        />
+        <OrderTable
+          openOrder={(order) => {
+            setOrder(order);
+            setIsOpen(true);
+          }}
+          data={orders}
+        ></OrderTable>
+        <LazyLoad onLoadMore={handleGetOrders}></LazyLoad>
+      </TabPanel>
+
       {/* Confirm Remove Product from productsToSave in global state */}
       <Modal />
     </ProductManagerContainer>
