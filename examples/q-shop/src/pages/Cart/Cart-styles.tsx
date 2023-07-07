@@ -2,9 +2,9 @@ import { styled } from "@mui/system";
 import { Box, Typography, Grid } from "@mui/material";
 import { PlusCircleSVG } from "../../assets/svgs/PlusCircle";
 import { MinusCircleSVG } from "../../assets/svgs/MinusCircle";
+import { GarbageSVG } from "../../assets/svgs/GarbageSVG";
 
 export const CartContainer = styled(Grid)(({ theme }) => ({
-  position: "relative",
   display: "flex",
   alignItems: "center",
   flexDirection: "column",
@@ -12,34 +12,46 @@ export const CartContainer = styled(Grid)(({ theme }) => ({
   flexGrow: 1,
   overflow: "auto",
   width: "100%",
-  backgroundColor: theme.palette.mode === "light" ? "#e8e8e8" : "#32333c"
+  padding: "35px",
+  overflowX: "hidden"
 }));
 
 export const ProductContainer = styled(Grid)(({ theme }) => ({
-  padding: "10px 25px",
-  borderTop: `1px solid ${theme.palette.background.paper}`,
-  borderBottom: `1px solid ${theme.palette.background.paper}`,
   display: "flex",
   alignItems: "center",
-  flexDirection: "column",
+  flexDirection: "row",
+  flexWrap: "nowrap",
+  padding: "15px 25px",
+  borderTop: `1px solid ${theme.palette.background.paper}`,
+  borderBottom: `1px solid ${theme.palette.background.paper}`,
   justifyContent: "space-evenly",
-  gap: "15px"
+  gap: "20px",
+  width: "100%",
+  height: "100%",
+  maxHeight: "250px"
 }));
 
 export const ProductInfoCol = styled(Grid)(({ theme }) => ({
   display: "flex",
   flexDirection: "column",
   gap: "5px",
-  alignItems: "flex-start",
+  alignItems: "center",
   flexGrow: 1
 }));
 
 export const ProductDetailsCol = styled(Grid)(({ theme }) => ({
+  boxSizing: "border-box",
+  margin: "0px",
+  flexBasis: "100%",
+  flexGrow: 0,
+  maxWidth: "100%",
   display: "flex",
   flexDirection: "column",
-  gap: "5px",
+  gap: "80px",
+  WebkitBoxAlign: "center",
   alignItems: "center",
-  justifyContent: "space-evenly"
+  justifyContent: "flex-end",
+  height: "100%"
 }));
 
 export const ProductTitle = styled(Typography)(({ theme }) => ({
@@ -54,15 +66,15 @@ export const QuantityRow = styled(Box)(({ theme }) => ({
   alignItems: "center",
   gap: "10px",
   fontFamily: "Karla",
-  fontSize: "17px",
+  fontSize: "18px",
   color: theme.palette.text.primary
 }));
 
 export const ProductImage = styled("img")({
-  width: "100px",
-  height: "100px",
+  height: "200px",
+  width: "-webkit-fill-available",
   borderRadius: "3px",
-  objectFit: "cover"
+  objectFit: "contain"
 });
 
 export const ProductDetailsRow = styled(Box)(({ theme }) => ({
@@ -82,19 +94,29 @@ export const RemoveQuantityButton = styled(MinusCircleSVG)(({ theme }) => ({
   transition: "all 0.2s ease-in-out",
   "&:hover": {
     cursor: "pointer",
-    transform: "scale(1.1)"
+    transform: "scale(1.05)"
   }
 }));
 
 export const AddQuantityButton = styled(PlusCircleSVG)(({ theme }) => ({
+  transition: "all 0.2s ease-in-out",
   "&:hover": {
-    cursor: "pointer"
+    cursor: "pointer",
+    transform: "scale(1.05)"
+  }
+}));
+
+export const GarbageIcon = styled(GarbageSVG)(({ theme }) => ({
+  transition: "all 0.2s ease-in-out",
+  "&:hover": {
+    cursor: "pointer",
+    transform: "scale(1.05)"
   }
 }));
 
 export const ProductPriceFont = styled(Typography)(({ theme }) => ({
   fontFamily: "Karla",
-  fontSize: "17px",
+  fontSize: "18px",
   color: theme.palette.text.primary,
   userSelect: "none"
 }));
@@ -102,11 +124,11 @@ export const ProductPriceFont = styled(Typography)(({ theme }) => ({
 export const TotalSumContainer = styled(Grid)(({ theme }) => ({
   border: `1px solid ${theme.palette.background.paper}`,
   borderRadius: "3px",
-  padding: "10px 5px",
+  padding: "15px",
   display: "flex",
   flexDirection: "column",
   alignItems: "center",
-  backgroundColor: theme.palette.background.primary,
+  backgroundColor: theme.palette.background.default,
   height: "100%",
   flexGrow: 1
 }));
@@ -116,9 +138,9 @@ export const TotalSumHeader = styled(Box)(({ theme }) => ({
   alignItems: "flex-start",
   fontFamily: "Karla",
   fontWeight: "bold",
-  fontSize: "17px",
+  fontSize: "18px",
   userSelect: "none",
-  padding: "5px 0px"
+  paddingBottom: "15px"
 }));
 
 export const TotalSumItems = styled(Box)(({ theme }) => ({
@@ -126,8 +148,8 @@ export const TotalSumItems = styled(Box)(({ theme }) => ({
   alignItems: "center",
   flexDirection: "column",
   width: "100%",
-  gap: "5px",
-  paddingBottom: "5px",
+  gap: "10px",
+  paddingBottom: "15px",
   borderBottom: `1px solid ${theme.palette.background.paper}`
 }));
 
@@ -141,18 +163,23 @@ export const TotalSumItem = styled(Box)(({ theme }) => ({
 
 export const TotalSumItemTitle = styled(Typography)(({ theme }) => ({
   fontFamily: "Karla",
-  fontSize: "17px",
+  fontSize: "18px",
   userSelect: "none",
-  color: theme.palette.text.primary
+  color: theme.palette.text.primary,
+  display: "flex",
+  gap: "3px"
 }));
 
 export const OrderTotalRow = styled(Box)(({ theme }) => ({
   display: "flex",
   alignItems: "center",
+  justifyContent: "center",
   color: theme.palette.text.primary,
   userSelect: "none",
   fontFamily: "Karla",
   fontWeight: "bold",
   borderBottom: `1px solid ${theme.palette.background.paper}`,
-  padding: "5px 0px"
+  padding: "15px 0px",
+  gap: "3px",
+  width: "100%"
 }));

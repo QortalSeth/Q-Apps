@@ -1,18 +1,12 @@
 import { useState, useEffect, useMemo } from "react";
 import { ReusableModal } from "../../components/modals/ReusableModal";
-import {
-  Box,
-  Button,
-  CircularProgress,
-  Grid,
-  Typography,
-  useTheme
-} from "@mui/material";
+import { CircularProgress, Grid, useTheme, useMediaQuery } from "@mui/material";
 import {
   addQuantityToCart,
   subtractQuantityFromCart,
   removeCartFromCarts,
-  Order
+  Order,
+  removeProductFromCart
 } from "../../state/features/cartSlice";
 import ShortUniqueId from "short-unique-id";
 import { useDispatch, useSelector } from "react-redux";
@@ -24,6 +18,7 @@ import { Cart as CartInterface } from "../../state/features/cartSlice";
 import {
   AddQuantityButton,
   CartContainer,
+  GarbageIcon,
   IconsRow,
   OrderTotalRow,
   ProductContainer,
@@ -41,11 +36,14 @@ import {
   TotalSumItemTitle,
   TotalSumItems
 } from "./Cart-styles";
-import { GarbageSVG } from "../../assets/svgs/GarbageSVG";
 import { TimesIcon } from "../ProductManager/ProductManager-styles";
 import { BackToStorefrontButton as CheckoutButton } from "../Store/Store-styles";
-import { Catalogue } from "../../state/features/globalSlice";
+import {
+  Catalogue,
+  setIsLoadingGlobal
+} from "../../state/features/globalSlice";
 import { QortalSVG } from "../../assets/svgs/QortalSVG";
+import { setNotification } from "../../state/features/notificationsSlice";
 
 const uid = new ShortUniqueId({
   length: 10
@@ -53,6 +51,8 @@ const uid = new ShortUniqueId({
 const mailUid = new ShortUniqueId();
 export const Cart = () => {
   const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+
   const dispatch = useDispatch();
   const username = useSelector((state: RootState) => state.auth.user?.name);
   const usernamePublicKey = useSelector(
@@ -85,7 +85,7 @@ export const Cart = () => {
     if (storeId && Object.keys(carts).length > 0) {
       const shopCart: CartInterface = carts[storeId];
       // Get the orders of this cart
-      const { orders } = shopCart;
+      const orders = shopCart?.orders || {};
       setLocalCart(shopCart);
       setCartOrders(Object.keys(orders));
     }
@@ -98,6 +98,9 @@ export const Cart = () => {
   const handlePurchase = async () => {
     if (!localCart) {
       throw new Error("Cannot find cart");
+    }
+    if (cartOrders.length === 0) {
+      throw new Error("You have no items in your cart");
     }
     const details = (cartOrders || []).reduce(
       (acc: any, key) => {
@@ -152,6 +155,7 @@ export const Cart = () => {
     const signature = responseSendCoin.signature;
 
     try {
+      dispatch(setIsLoadingGlobal(true));
       const orderObject: any = {
         created: Date.now(),
         version: 1,
@@ -219,7 +223,6 @@ export const Cart = () => {
         identifier
       };
 
-      // await qortalRequest(productRequestBody)
       const multiplePublish = {
         action: "PUBLISH_MULTIPLE_QDN_RESOURCES",
         resources: [productRequestBody, mailRequestBody],
@@ -229,8 +232,25 @@ export const Cart = () => {
       await qortalRequest(multiplePublish);
       // Clear this cart state from global carts redux
       dispatch(removeCartFromCarts(storeId));
+      // Close the modal and set notification message
+      closeModal();
+      dispatch(
+        setNotification({
+          alertType: "success",
+          msg: "Order placed successfully!"
+        })
+      );
     } catch (error) {
       console.log({ error });
+      const errMsg = "Order failed to be placed! Please try again!";
+      dispatch(
+        setNotification({
+          msg: errMsg,
+          alertType: "error"
+        })
+      );
+    } finally {
+      dispatch(setIsLoadingGlobal(false));
     }
   };
 
@@ -274,11 +294,19 @@ export const Cart = () => {
       customStyles={{
         width: "96%",
         maxWidth: 1500,
-        height: "96%"
+        height: "96%",
+        backgroundColor: theme.palette.mode === "light" ? "#e8e8e8" : "#32333c",
+        position: "relative",
+        padding: 0,
+        borderRadius: "3px"
       }}
     >
-      <CartContainer container>
-        <Grid item xs={12} sm={7}>
+      <CartContainer
+        container
+        direction={isMobile ? "column" : "row"}
+        spacing={2}
+      >
+        <Grid item xs={12} sm={9} sx={{ width: "100%" }}>
           {!localCart || cartOrders.length === 0 ? (
             <ProductTitle style={{ textAlign: "center" }}>
               No items in cart
@@ -304,7 +332,7 @@ export const Cart = () => {
                     <ProductTitle>{product.title}</ProductTitle>
                     <ProductImage
                       src={product?.images?.[0] || ""}
-                      alt={"product-image"}
+                      alt={`product-img-${productId}}`}
                     />
                   </ProductInfoCol>
                   <ProductDetailsCol item xs={12} sm={8}>
@@ -319,7 +347,12 @@ export const Cart = () => {
                         </ProductPriceFont>
                       )}
                       <IconsRow>
-                        <GarbageSVG
+                        <GarbageIcon
+                          onClickFunc={() => {
+                            dispatch(
+                              removeProductFromCart({ storeId, productId })
+                            );
+                          }}
                           color={theme.palette.text.primary}
                           height={"30"}
                           width={"30"}
@@ -355,7 +388,7 @@ export const Cart = () => {
             })
           )}
         </Grid>
-        <Grid item xs={12} sm={5}>
+        <Grid item xs={12} sm={3} sx={{ width: "100%" }}>
           <TotalSumContainer>
             <TotalSumHeader>Order Summary</TotalSumHeader>
             <TotalSumItems>
@@ -381,8 +414,8 @@ export const Cart = () => {
                     <TotalSumItemTitle>
                       <QortalSVG
                         color={theme.palette.text.primary}
-                        height={"20"}
-                        width={"20"}
+                        height={"18"}
+                        width={"18"}
                       />
                       {priceInQort}
                     </TotalSumItemTitle>
@@ -390,17 +423,30 @@ export const Cart = () => {
                 );
               })}
             </TotalSumItems>
-            <OrderTotalRow>{totalSum}</OrderTotalRow>
-            <CheckoutButton onClick={handlePurchase}>Purchase</CheckoutButton>
+            <OrderTotalRow>
+              Total:{" "}
+              <QortalSVG
+                color={theme.palette.text.primary}
+                height={"22"}
+                width={"22"}
+              />
+              {totalSum}
+            </OrderTotalRow>
+            <CheckoutButton
+              style={{ marginTop: "15px" }}
+              onClick={handlePurchase}
+            >
+              Purchase
+            </CheckoutButton>
           </TotalSumContainer>
         </Grid>
-        <TimesIcon
-          onClickFunc={closeModal}
-          color={theme.palette.text.primary}
-          height={"30"}
-          width={"30"}
-        />
       </CartContainer>
+      <TimesIcon
+        onClickFunc={closeModal}
+        color={theme.palette.text.primary}
+        height={"30"}
+        width={"30"}
+      />
     </ReusableModal>
   );
 };
