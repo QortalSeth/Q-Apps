@@ -10,6 +10,7 @@ import PageLoader from '../components/common/PageLoader'
 import localForage from 'localforage'
 import ConsentModal from '../components/modals/ConsentModal'
 import { AudioPlayer } from '../components/common/AudioPlayer'
+import { setPrivateGroups } from '../state/features/globalSlice'
 interface Props {
   children: React.ReactNode
 }
@@ -61,6 +62,51 @@ const GlobalWrapper: React.FC<Props> = ({ children }) => {
       return ''
     }
   }
+  async function getGroups(address: string) {
+    try {
+      const groups: any = {}
+      const response = await fetch('/groups/member/' + address)
+      const groupData = await response.json()
+      const filterPrivate = groupData?.filter(
+        (group: any) => group?.isOpen === false
+      )
+      if (filterPrivate?.length > 0) {
+        for (const group of filterPrivate) {
+          const groupNumber = group.groupId
+          const response = await fetch(`/groups/members/${groupNumber}?limit=0`)
+          const groupData = await response.json()
+          let members: any = {}
+          if (groupData && Array.isArray(groupData?.members)) {
+            for (const member of groupData.members) {
+              if (member.member) {
+                const res = await getNameInfo(member.member)
+                const resAddress = await qortalRequest({
+                  action: 'GET_ACCOUNT_DATA',
+                  address: member.member
+                })
+                const name = res
+                const publicKey = resAddress.publicKey
+                if (name) {
+                  members[name] = {
+                    publicKey,
+                    address: member.member
+                  }
+                }
+              }
+            }
+          }
+          groups[groupNumber] = {
+            ...group,
+            members
+          }
+        }
+
+        dispatch(setPrivateGroups(groups))
+      } else {
+        return ''
+      }
+    } catch (error) {}
+  }
 
   const askForAccountInformation = React.useCallback(async () => {
     try {
@@ -70,6 +116,7 @@ const GlobalWrapper: React.FC<Props> = ({ children }) => {
 
       const name = await getNameInfo(account.address)
       dispatch(addUser({ ...account, name }))
+      getGroups(account.address)
     } catch (error) {
       console.error(error)
     }

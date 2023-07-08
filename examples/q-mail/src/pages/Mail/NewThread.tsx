@@ -38,35 +38,31 @@ const initialValue: Descendant[] = [
 const uid = new ShortUniqueId()
 
 interface NewMessageProps {
-  replyTo?: any
-  setReplyTo: React.Dispatch<any>
-  alias?: string
   hideButton?: boolean
+  groupInfo: any
+  currentThread?: any
+  isMessage?: boolean
+  messageCallback?: (val: any) => void
 }
 const maxSize = 25 * 1024 * 1024 // 25 MB in bytes
-export const NewMessage = ({
-  setReplyTo,
-  replyTo,
-  alias,
-  hideButton
+export const NewThread = ({
+  groupInfo,
+  hideButton,
+  currentThread,
+  isMessage = false,
+  messageCallback
 }: NewMessageProps) => {
   const [isOpen, setIsOpen] = useState<boolean>(false)
   const [value, setValue] = useState(initialValue)
   const [title, setTitle] = useState<string>('')
   const [attachments, setAttachments] = useState<any[]>([])
-  const [description, setDescription] = useState<string>('')
   const [subject, setSubject] = useState<string>('')
+  const [threadTitle, setThreadTitle] = useState<string>('')
   const [destinationName, setDestinationName] = useState('')
-  const [aliasValue, setAliasValue] = useState<string>('')
   const { user } = useSelector((state: RootState) => state.auth)
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false)
-  const [showAlias, setShowAlias] = useState<boolean>(false)
   const theme = useTheme()
-  const { Modal, showModal } = useConfirmationModal({
-    title: 'Important',
-    message:
-      'To keep yourself anonymous remember to not use the same alias as the person you are messaging'
-  })
+
   const navigate = useNavigate()
   const dispatch = useDispatch()
   const location = useLocation()
@@ -87,97 +83,41 @@ export const NewMessage = ({
 
   const openModal = () => {
     setIsOpen(true)
-
-    setReplyTo(null)
   }
   const closeModal = () => {
     setAttachments([])
     setSubject('')
     setDestinationName('')
-    setShowAlias(false)
     setValue(initialValue)
-    setReplyTo(null)
     setIsOpen(false)
-    setAliasValue('')
   }
 
-  console.log({ location })
-  useEffect(() => {
-    const query = new URLSearchParams(location.search)
-    let toVar = query?.get('to')
-    console.log({ toVar })
-    if (toVar) {
-      if (toVar && toVar.endsWith('/')) {
-        toVar = toVar.slice(0, -1)
-      }
-      setDestinationName(toVar) // Save the value to state
-      setIsOpen(true)
-      navigate(location.pathname, { replace: true }) // Remove query from the URL
-    }
-  }, [navigate, location])
-
-  useEffect(() => {
-    if (replyTo) {
-      setIsOpen(true)
-      setDestinationName(replyTo?.user || '')
-    }
-  }, [replyTo])
-
-  const waitForUserAction = async () => {
-    return new Promise<void>((resolve, reject) => {
-      setIsModalOpen(true)
-
-      const handleConfirm = () => {
-        setIsModalOpen(false)
-        resolve()
-      }
-
-      const handleCancel = () => {
-        setIsModalOpen(false)
-        reject(new Error('User canceled'))
-      }
-
-      const modalProps = {
-        open: isModalOpen,
-        title: 'Confirmation',
-        message: 'Are you sure?',
-        handleConfirm,
-        handleCancel
-      }
-
-      return <ConfirmationModal {...modalProps} />
-    })
-  }
   async function publishQDNResource() {
-    let address: string = ''
+    console.log({ isMessage })
+    console.log({ groupInfo })
     let name: string = ''
     let errorMsg = ''
 
-    address = user?.address || ''
     name = user?.name || ''
 
     const missingFields: string[] = []
-    if (!address) {
-      errorMsg = "Cannot send: your address isn't available"
+
+    if (!isMessage && !threadTitle) {
+      errorMsg = 'Please provide a thread title'
     }
+
     if (!name) {
       errorMsg = 'Cannot send a message without a access to your name'
     }
-    if (!destinationName) {
-      errorMsg = 'Cannot send a message without a recipient name'
+    if (!groupInfo) {
+      errorMsg = 'Cannot access group information'
     }
+
     // if (!description) missingFields.push('subject')
     if (missingFields.length > 0) {
       const missingFieldsString = missingFields.join(', ')
       const errMsg = `Missing: ${missingFieldsString}`
       errorMsg = errMsg
-    }
-
-    if (alias && !aliasValue) {
-      errorMsg = 'An alias is required when inside an alias tab'
-    }
-    if (alias && alias === aliasValue) {
-      errorMsg = "The recipient's alias cannot be the same as yours"
     }
 
     if (errorMsg) {
@@ -190,54 +130,25 @@ export const NewMessage = ({
       throw new Error(errorMsg)
     }
 
-    if (aliasValue && !alias) {
-      const userConfirmed = await showModal()
-      if (userConfirmed === false) return
-    }
+    console.log({ currentThread })
+
     const mailObject: any = {
-      title,
-      // description,
       subject,
       createdAt: Date.now(),
       version: 1,
       attachments,
       textContent: value,
-      generalData: {
-        thread: []
-      },
-      recipient: destinationName
-    }
-    if (replyTo?.id) {
-      const previousTread = Array.isArray(replyTo?.generalData?.thread)
-        ? replyTo?.generalData?.thread
-        : []
-      mailObject.generalData.thread = [
-        ...previousTread,
-        {
-          identifier: replyTo.id,
-          name: replyTo.user,
-          service: MAIL_SERVICE_TYPE
-        }
-      ]
+      name,
+      threadOwner: currentThread?.threadData?.name || name
     }
 
     try {
-      if (!destinationName) return
-      const id = uid()
-      const recipientName = destinationName
-      const resName = await qortalRequest({
-        action: 'GET_NAME_DATA',
-        name: recipientName
-      })
-      if (!resName?.owner) return
-
-      const recipientAddress = resName.owner
-      const resAddress = await qortalRequest({
-        action: 'GET_ACCOUNT_DATA',
-        address: recipientAddress
-      })
-      if (!resAddress?.publicKey) return
-      const recipientPublicKey = resAddress.publicKey
+      const groupPublicKeys = Object.keys(groupInfo?.members)?.map(
+        (key: any) => groupInfo.members[key]?.publicKey
+      )
+      if (!groupPublicKeys || groupPublicKeys?.length === 0) {
+        throw new Error('No members in this group could be found')
+      }
 
       // START OF ATTACHMENT LOGIC
 
@@ -282,44 +193,97 @@ export const NewMessage = ({
           action: 'PUBLISH_MULTIPLE_QDN_RESOURCES',
           resources: [...attachmentArray],
           encrypt: true,
-          publicKeys: [recipientPublicKey]
+          publicKeys: groupPublicKeys
         }
         await qortalRequest(multiplePublish)
       }
 
       //END OF ATTACHMENT LOGIC
+      if (!isMessage) {
+        const idThread = uid()
+        const messageToBase64 = await objectToBase64(mailObject)
+        const threadObject = {
+          title: threadTitle,
+          groupId: groupInfo.id,
+          createdAt: Date.now(),
+          name
+        }
+        const threadToBase64 = await objectToBase64(threadObject)
+        let identifierThread = `qortal_qmail_thread_group${groupInfo.id}_${idThread}`
+        let requestBodyThread: any = {
+          name: name,
+          service: MAIL_SERVICE_TYPE,
+          data64: threadToBase64,
+          identifier: identifierThread
+        }
+        const idMsg = uid()
+        let groupIndex = identifierThread.indexOf('group')
+        let result = identifierThread.substring(groupIndex)
+        let identifier = `qortal_qmail_thmsg_${result}_${idMsg}`
+        let requestBody: any = {
+          name: name,
+          service: MAIL_SERVICE_TYPE,
+          data64: messageToBase64,
+          identifier
+        }
+        console.log({ groupPublicKeys })
+        const multiplePublishMsg = {
+          action: 'PUBLISH_MULTIPLE_QDN_RESOURCES',
+          resources: [requestBody, requestBodyThread],
+          encrypt: true,
+          publicKeys: groupPublicKeys
+        }
+        await qortalRequest(multiplePublishMsg)
+        dispatch(
+          setNotification({
+            msg: 'Message sent',
+            alertType: 'success'
+          })
+        )
 
-      const blogPostToBase64 = await objectToBase64(mailObject)
-      let identifier = `qortal_qmail_${recipientName.slice(
-        0,
-        20
-      )}_${recipientAddress.slice(-6)}_mail_${id}`
+        closeModal()
+      } else {
+        if (!currentThread) throw new Error('unable to locate thread Id')
+        const idThread = currentThread.threadId
+        console.log({ idThread, mailObject })
+        const messageToBase64 = await objectToBase64(mailObject)
+        console.log({ messageToBase64 })
+        const idMsg = uid()
+        let groupIndex = idThread.indexOf('group')
+        let result = idThread.substring(groupIndex)
+        let identifier = `qortal_qmail_thmsg_${result}_${idMsg}`
+        let requestBody: any = {
+          name: name,
+          service: MAIL_SERVICE_TYPE,
+          data64: messageToBase64,
+          identifier
+        }
+        console.log({ groupPublicKeys })
+        const multiplePublishMsg = {
+          action: 'PUBLISH_MULTIPLE_QDN_RESOURCES',
+          resources: [requestBody],
+          encrypt: true,
+          publicKeys: groupPublicKeys
+        }
+        await qortalRequest(multiplePublishMsg)
+        dispatch(
+          setNotification({
+            msg: 'Message sent',
+            alertType: 'success'
+          })
+        )
+        if (messageCallback) {
+          messageCallback({
+            identifier,
+            name,
+            service: MAIL_SERVICE_TYPE,
+            created: Date.now(),
+            ...mailObject
+          })
+        }
 
-      if (aliasValue) {
-        identifier = `qortal_qmail_${aliasValue}_mail_${id}`
+        closeModal()
       }
-
-      let requestBody: any = {
-        action: 'PUBLISH_QDN_RESOURCE',
-        name: name,
-        service: MAIL_SERVICE_TYPE,
-        data64: blogPostToBase64,
-        title: title,
-        // description: description,
-        identifier,
-        encrypt: true,
-        publicKeys: [recipientPublicKey]
-      }
-
-      await qortalRequest(requestBody)
-      dispatch(
-        setNotification({
-          msg: 'Message sent',
-          alertType: 'success'
-        })
-      )
-
-      closeModal()
     } catch (error: any) {
       let notificationObj = null
       if (typeof error === 'string') {
@@ -380,7 +344,7 @@ export const NewMessage = ({
               fontSize: '14px'
             }}
           >
-            Compose
+            {isMessage ? 'New Message' : 'New Thread'}
           </Typography>
         </Box>
       )}
@@ -409,66 +373,21 @@ export const NewMessage = ({
               width: '100%'
             }}
           >
-            <Input
-              id="standard-adornment-name"
-              value={destinationName}
-              onChange={(e) => {
-                setDestinationName(e.target.value)
-              }}
-              placeholder="To (name)"
-              sx={{
-                width: '100%',
-                fontSize: '16px'
-              }}
-            />
-            <Box
-              sx={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 1,
-                width: '100%'
-              }}
-            >
-              {(alias || showAlias) && (
-                <Input
-                  id="standard-adornment-alias"
-                  value={aliasValue}
-                  onChange={(e) => {
-                    setAliasValue(e.target.value)
-                  }}
-                  placeholder={`Alias ${alias ? '' : '-optional'}`}
-                  sx={{
-                    width: '100%',
-                    fontSize: '16px'
-                  }}
-                />
-              )}
-              {!alias && !showAlias && (
-                <Button
-                  onClick={() => setShowAlias(true)}
-                  size="small"
-                  variant="contained"
-                  sx={{
-                    textTransform: 'none'
-                  }}
-                >
-                  Add Alias - optional
-                </Button>
-              )}
-            </Box>
+            {!isMessage && (
+              <Input
+                id="standard-adornment-name"
+                value={threadTitle}
+                onChange={(e) => {
+                  setThreadTitle(e.target.value)
+                }}
+                placeholder="New Thread Title"
+                sx={{
+                  width: '100%',
+                  fontSize: '16px'
+                }}
+              />
+            )}
 
-            <Input
-              id="standard-adornment-name"
-              value={subject}
-              onChange={(e) => {
-                setSubject(e.target.value)
-              }}
-              placeholder="Subject"
-              sx={{
-                width: '100%',
-                fontSize: '16px'
-              }}
-            />
             <Box
               {...getRootProps()}
               sx={{
@@ -529,12 +448,9 @@ export const NewMessage = ({
             disableMaxHeight
           />
         </Box>
-        <BuilderButton onClick={sendMail}>
-          {replyTo ? 'Send reply mail' : 'Send mail'}
-        </BuilderButton>
+        <BuilderButton onClick={sendMail}>{'Post message'}</BuilderButton>
         <BuilderButton onClick={closeModal}>Close</BuilderButton>
       </ReusableModal>
-      <Modal />
     </Box>
   )
 }

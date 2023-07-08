@@ -21,6 +21,7 @@ import { useFetchMail } from '../../hooks/useFetchMail'
 import { ShowMessage } from './ShowMessage'
 import { fetchAndEvaluateMail } from '../../utils/fetchMail'
 import { addToHashMapMail } from '../../state/features/mailSlice'
+import MailIcon from '@mui/icons-material/Mail'
 import {
   setIsLoadingGlobal,
   setUserAvatarHash
@@ -28,11 +29,15 @@ import {
 import SimpleTable from './MailTable'
 import { MAIL_SERVICE_TYPE } from '../../constants/mail'
 import { BlogPost } from '../../state/features/blogSlice'
+import { base64ToUint8Array, uint8ArrayToObject } from '../../utils/toBase64'
+import { formatDate } from '../../utils/time'
+import { NewThread } from './NewThread'
+import { Thread } from './Thread'
 
 interface AliasMailProps {
-  value: string
+  groupInfo: any
 }
-export const AliasMail = ({ value }: AliasMailProps) => {
+export const GroupMail = ({ groupInfo }: AliasMailProps) => {
   const theme = useTheme()
   const { user } = useSelector((state: RootState) => state.auth)
   const [isOpen, setIsOpen] = useState<boolean>(false)
@@ -41,6 +46,8 @@ export const AliasMail = ({ value }: AliasMailProps) => {
   const [valueTab, setValueTab] = React.useState(0)
   const [aliasValue, setAliasValue] = useState('')
   const [alias, setAlias] = useState<string[]>([])
+  const [recentThreads, setRecentThreads] = useState<any[]>([])
+  const [currentThread, setCurrentThread] = useState<any>(null)
   const hashMapPosts = useSelector(
     (state: RootState) => state.blog.hashMapPosts
   )
@@ -48,6 +55,10 @@ export const AliasMail = ({ value }: AliasMailProps) => {
   const hashMapMailMessages = useSelector(
     (state: RootState) => state.mail.hashMapMailMessages
   )
+
+  const groupId = useMemo(() => {
+    return groupInfo?.id
+  }, [groupInfo])
 
   const fullMailMessages = useMemo(() => {
     return mailMessages.map((msg) => {
@@ -82,7 +93,7 @@ export const AliasMail = ({ value }: AliasMailProps) => {
   const checkNewMessages = React.useCallback(
     async (recipientName: string, recipientAddress: string) => {
       try {
-        const query = `qortal_qmail_${value}_mail`
+        const query = `qortal_qmail_${groupId}_mail`
         const url = `/arbitrary/resources/search?mode=ALL&service=${MAIL_SERVICE_TYPE}&query=${query}&limit=50&includemetadata=true&reverse=true&excludeblocked=true`
         const response = await fetch(url, {
           method: 'GET',
@@ -139,70 +150,103 @@ export const AliasMail = ({ value }: AliasMailProps) => {
     [mailMessages]
   )
 
-  const getMailMessages = React.useCallback(
-    async (recipientName: string, recipientAddress: string) => {
-      try {
-        const offset = mailMessages.length
-
-        dispatch(setIsLoadingGlobal(true))
-        const query = `qortal_qmail_${value}_mail`
-        const url = `/arbitrary/resources/search?mode=ALL&service=${MAIL_SERVICE_TYPE}&query=${query}&limit=50&includemetadata=true&offset=${offset}&reverse=true&excludeblocked=true`
-        const response = await fetch(url, {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json'
-          }
-        })
-        const responseData = await response.json()
-        const structureData = responseData.map((post: any): BlogPost => {
-          return {
-            title: post?.metadata?.title,
-            category: post?.metadata?.category,
-            categoryName: post?.metadata?.categoryName,
-            tags: post?.metadata?.tags || [],
-            description: post?.metadata?.description,
-            createdAt: post?.created,
-            updated: post?.updated,
-            user: post.name,
-            id: post.identifier
-          }
-        })
-        setMailMessages((prev) => {
-          const updatedMessages = [...prev]
-
-          structureData.forEach((newMessage: any) => {
-            const existingIndex = updatedMessages.findIndex(
-              (prevMessage) => prevMessage.id === newMessage.id
-            )
-
-            if (existingIndex !== -1) {
-              // Replace existing message
-              updatedMessages[existingIndex] = newMessage
-            } else {
-              // Add new message
-              updatedMessages.push(newMessage)
-            }
-          })
-
-          return updatedMessages
-        })
-
-        for (const content of structureData) {
-          if (content.user && content.id) {
-            getAvatar(content.user)
-          }
+  const getMailMessages = React.useCallback(async (groupId: string) => {
+    try {
+      dispatch(setIsLoadingGlobal(true))
+      const query = `qortal_qmail_thmsg_group${groupId}`
+      const url = `/arbitrary/resources/search?mode=ALL&service=${MAIL_SERVICE_TYPE}&query=${query}&limit=4&includemetadata=true&offset=${0}&reverse=true&excludeblocked=true`
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json'
         }
-      } catch (error) {
-      } finally {
-        dispatch(setIsLoadingGlobal(false))
+      })
+      const responseData = await response.json()
+      console.log({ responseData })
+      const messagesForThread: any = {}
+
+      for (const message of responseData) {
+        console.log({ message })
+        let str = message.identifier
+        let parts = str.split('_').reverse()
+        let result = parts[1]
+        const checkMessage = messagesForThread[result]
+        if (!checkMessage) {
+          messagesForThread[result] = message
+        }
       }
-    },
-    [mailMessages, hashMapMailMessages]
-  )
+      console.log({ messagesForThread })
+      const newArray = Object.keys(messagesForThread)
+        .map((key) => {
+          return {
+            ...messagesForThread[key],
+            threadId: `qortal_qmail_thread_group${groupId}_${key}`
+          }
+        })
+        .sort((a, b) => b.created - a.created)
+      console.log({ newArray })
+      let fullThreadArray = []
+      for (const message of newArray) {
+        try {
+          let messageRes = await qortalRequest({
+            action: 'FETCH_QDN_RESOURCE',
+            name: message.name,
+            service: MAIL_SERVICE_TYPE,
+            identifier: message.identifier,
+            encoding: 'base64'
+          })
+          console.log({ messageRes })
+          let requestEncryptBody: any = {
+            action: 'DECRYPT_DATA',
+            encryptedData: messageRes
+          }
+          const resDecrypt = await qortalRequest(requestEncryptBody)
+          console.log({ resDecrypt })
+
+          const decryptToUnit8ArrayMessage = base64ToUint8Array(resDecrypt)
+          const responseDataMessage = uint8ArrayToObject(
+            decryptToUnit8ArrayMessage
+          )
+          let threadRes = await qortalRequest({
+            action: 'FETCH_QDN_RESOURCE',
+            name: responseDataMessage.threadOwner,
+            service: MAIL_SERVICE_TYPE,
+            identifier: message.threadId,
+            encoding: 'base64'
+          })
+          console.log({ threadRes })
+          let requestEncryptThread: any = {
+            action: 'DECRYPT_DATA',
+            encryptedData: threadRes
+          }
+          const resDecryptThread = await qortalRequest(requestEncryptThread)
+          const decryptToUnit8ArrayThread = base64ToUint8Array(resDecryptThread)
+          const responseDataThread = uint8ArrayToObject(
+            decryptToUnit8ArrayThread
+          )
+          console.log({ resDecryptThread })
+          const fullObject = {
+            ...message,
+            threadData: responseDataThread,
+            messageData: responseDataMessage
+          }
+          console.log({ fullObject })
+          fullThreadArray.push(fullObject)
+        } catch (error) {
+          console.log({ error })
+        }
+      }
+      setRecentThreads(fullThreadArray)
+      console.log({ fullThreadArray })
+    } catch (error) {
+    } finally {
+      dispatch(setIsLoadingGlobal(false))
+    }
+  }, [])
   const getMessages = React.useCallback(async () => {
-    if (!user?.name || !user?.address) return
-    await getMailMessages(user.name, user.address)
-  }, [getMailMessages, user])
+    if (!user?.name || !groupId) return
+    await getMailMessages(groupId)
+  }, [getMailMessages, user, groupId])
 
   const interval = useRef<any>(null)
 
@@ -256,31 +300,73 @@ export const AliasMail = ({ value }: AliasMailProps) => {
 
   const firstMount = useRef(false)
   useEffect(() => {
-    if (user?.name && !firstMount.current) {
+    if (user?.name && groupId && !firstMount.current) {
       getMessages()
       firstMount.current = true
     }
-  }, [user])
+  }, [user, groupId])
+
+  const closeThread = useCallback(() => {
+    setCurrentThread(null)
+  }, [])
 
   return (
-    <>
-      <NewMessage
-        replyTo={replyTo}
-        setReplyTo={setReplyTo}
-        alias={value}
-        hideButton
+    <div
+      style={{
+        position: 'relative'
+      }}
+    >
+      <Thread
+        currentThread={currentThread}
+        groupInfo={groupInfo}
+        closeThread={closeThread}
       />
-      <ShowMessage
-        isOpen={isOpen}
-        setIsOpen={setIsOpen}
-        message={message}
-        setReplyTo={setReplyTo}
-        alias={value}
-      />
-      <SimpleTable
-        openMessage={openMessage}
-        data={fullMailMessages}
-      ></SimpleTable>
+      <NewThread groupInfo={groupInfo} />
+
+      <div>
+        <p>Latest threads</p>
+      </div>
+      {recentThreads.map((thread) => {
+        return (
+          <div
+            onClick={() => {
+              setCurrentThread(thread)
+            }}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              width: '100%',
+              gap: '20px',
+              padding: '20px 10px'
+            }}
+          >
+            <div>
+              <MailIcon />
+            </div>
+            <div
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'center'
+              }}
+            >
+              <Typography>{thread?.threadData?.title}</Typography>
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center'
+                }}
+              >
+                <Typography>@{thread.name}</Typography> - last message -
+                <Typography>{formatDate(thread?.created)}</Typography>
+              </div>
+            </div>
+          </div>
+        )
+      })}
+      <div>
+        <Typography>Rest of threads by date created</Typography>
+      </div>
       <Box
         sx={{
           width: '100%',
@@ -291,7 +377,6 @@ export const AliasMail = ({ value }: AliasMailProps) => {
           <Button onClick={getMessages}>Load Older Messages</Button>
         )}
       </Box>
-      {/* <LazyLoad onLoadMore={getMessages}></LazyLoad> */}
-    </>
+    </div>
   )
 }

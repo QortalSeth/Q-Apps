@@ -14,13 +14,20 @@ import CloseIcon from '@mui/icons-material/Close'
 import Joyride, { ACTIONS, EVENTS, STATUS, Step } from 'react-joyride'
 import SendIcon from '@mui/icons-material/Send'
 import MailIcon from '@mui/icons-material/Mail'
+import GroupIcon from '@mui/icons-material/Group'
 import {
   Box,
   Button,
   Input,
   Typography,
   useTheme,
-  IconButton
+  IconButton,
+  Select,
+  InputLabel,
+  FormControl,
+  MenuItem,
+  OutlinedInput,
+  SelectChangeEvent
 } from '@mui/material'
 import { useFetchPosts } from '../../hooks/useFetchPosts'
 import LazyLoad from '../../components/common/LazyLoad'
@@ -36,6 +43,8 @@ import { setIsLoadingGlobal } from '../../state/features/globalSlice'
 import SimpleTable from './MailTable'
 import { AliasMail } from './AliasMail'
 import { SentMail } from './SentMail'
+import { NewThread } from './NewThread'
+import { GroupMail } from './GroupMail'
 
 const steps: Step[] = [
   {
@@ -138,13 +147,25 @@ export const Mail = () => {
   const [isOpen, setIsOpen] = useState<boolean>(false)
   const [message, setMessage] = useState<any>(null)
   const [replyTo, setReplyTo] = useState<any>(null)
-  const [valueTab, setValueTab] = React.useState(0)
+  const [valueTab, setValueTab] = React.useState<null | number>(0)
+  const [valueTabGroups, setValueTabGroups] = React.useState<null | number>(
+    null
+  )
   const [aliasValue, setAliasValue] = useState('')
   const [alias, setAlias] = useState<string[]>([])
   const [run, setRun] = useState(false)
-  const hashMapPosts = useSelector(
-    (state: RootState) => state.blog.hashMapPosts
+  const privateGroups = useSelector(
+    (state: RootState) => state.global.privateGroups
   )
+  const options = useMemo(() => {
+    return Object.keys(privateGroups).map((key) => {
+      return {
+        ...privateGroups[key],
+        name: privateGroups[key].groupName,
+        id: key
+      }
+    })
+  }, [privateGroups])
   const hashMapMailMessages = useSelector(
     (state: RootState) => state.mail.hashMapMailMessages
   )
@@ -243,6 +264,15 @@ export const Mail = () => {
 
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
     setValueTab(newValue)
+    setValueTabGroups(null)
+  }
+
+  const handleChangeGroups = (
+    event: React.SyntheticEvent,
+    newValue: number
+  ) => {
+    setValueTabGroups(newValue)
+    setValueTab(null)
   }
 
   function CustomTabLabelDefault({ label }: any) {
@@ -301,6 +331,21 @@ export const Mail = () => {
     )
   }
 
+  function CustomTabLabelGroup({ index, label }: any) {
+    return (
+      <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+        <GroupIcon />
+        <span
+          style={{
+            textTransform: 'none'
+          }}
+        >
+          {label}
+        </span>
+      </div>
+    )
+  }
+
   useEffect(() => {
     const savedTourStatus = localStorage.getItem('tourStatus-qmail')
     if (!savedTourStatus || savedTourStatus === STATUS.SKIPPED) {
@@ -327,6 +372,11 @@ export const Mail = () => {
       setRun(false)
       localStorage.setItem('tourStatus-qmail', status)
     }
+  }
+
+  const handleOptionChange = (event: SelectChangeEvent<string>) => {
+    const optionId = event.target.value
+    const selectedOption = options.find((option: any) => option.id === optionId)
   }
 
   return (
@@ -415,6 +465,7 @@ export const Mail = () => {
           />
           <Button
             onClick={() => {
+              if (!aliasValue) return
               const newList = [...alias, aliasValue]
               if (userName) {
                 try {
@@ -432,6 +483,49 @@ export const Mail = () => {
           >
             + alias
           </Button>
+          {/* <Select
+            labelId="Private Groups"
+            input={<OutlinedInput label="Select group" />}
+            onChange={handleOptionChange}
+            MenuProps={{
+              sx: {
+                maxHeight: '300px' // Adjust this value to set the max height,
+              }
+            }}
+          >
+            {options.map((option: any) => (
+              <MenuItem
+                sx={{ color: theme.palette.text.primary }}
+                key={option.id}
+                value={option.id}
+              >
+                {option.name}
+              </MenuItem>
+            ))}
+          </Select> */}
+          <Tabs
+            value={valueTabGroups}
+            onChange={handleChangeGroups}
+            aria-label="basic tabs example"
+          >
+            {options.map((group, index) => {
+              return (
+                <Tab
+                  sx={{
+                    '&.Mui-selected': {
+                      color: theme.palette.text.primary,
+                      fontWeight: theme.typography.fontWeightMedium
+                    }
+                  }}
+                  key={group.id}
+                  label={
+                    <CustomTabLabelGroup index={index} label={group.name} />
+                  }
+                  {...a11yProps(1 + index)}
+                />
+              )
+            })}
+          </Tabs>
         </Box>
       </Box>
       <Box
@@ -499,12 +593,15 @@ export const Mail = () => {
         ) : (
           <div />
         )}
-
-        <NewMessage
-          replyTo={replyTo}
-          setReplyTo={setReplyTo}
-          alias={valueTab === 0 ? '' : alias[valueTab - 1]}
-        />
+        {!valueTabGroups && valueTabGroups !== 0 && (
+          <NewMessage
+            replyTo={replyTo}
+            setReplyTo={setReplyTo}
+            alias={
+              valueTab === 0 || valueTab === null ? '' : alias[valueTab - 1]
+            }
+          />
+        )}
       </Box>
       <ShowMessage
         isOpen={isOpen}
@@ -532,6 +629,13 @@ export const Mail = () => {
           </TabPanel>
         )
       })}
+      {options.map((group, index) => {
+        return (
+          <TabPanel key={group.id} value={valueTabGroups} index={index}>
+            <GroupMail groupInfo={group} />
+          </TabPanel>
+        )
+      })}
 
       <Joyride
         steps={steps}
@@ -549,7 +653,7 @@ export const Mail = () => {
 interface TabPanelProps {
   children?: React.ReactNode
   index: number
-  value: number
+  value: number | null
 }
 
 export function TabPanel(props: TabPanelProps) {
