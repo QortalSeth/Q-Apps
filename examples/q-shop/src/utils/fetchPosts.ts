@@ -21,7 +21,6 @@ export const fetchAndEvaluateProducts = async (data: any) => {
       })
 
       const responseData = await response.json()
-      console.log({ responseData })
       if (checkStructure(responseData)) {
         obj = {
           ...responseData,
@@ -33,7 +32,6 @@ export const fetchAndEvaluateProducts = async (data: any) => {
           isValid: true
         }
       }
-      console.log({ obj })
       return obj
     } catch (error) {}
   }

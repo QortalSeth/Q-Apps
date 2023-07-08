@@ -31,11 +31,16 @@ export interface PublishProductParams {
 interface NewMessageProps {
   editProduct?: Product | null;
   onClose: () => void;
+  openAddProduct: boolean;
+  setOpenAddProduct: (value: boolean) => void;
 }
 
-export const NewProduct = ({ editProduct, onClose }: NewMessageProps) => {
-  const [isOpen, setIsOpen] = useState<boolean>(false);
-
+export const NewProduct = ({
+  editProduct,
+  onClose,
+  openAddProduct,
+  setOpenAddProduct
+}: NewMessageProps) => {
   const { user } = useSelector((state: RootState) => state.auth);
 
   const currentStore = useSelector(
@@ -49,16 +54,17 @@ export const NewProduct = ({ editProduct, onClose }: NewMessageProps) => {
   const dispatch = useDispatch();
 
   const openModal = () => {
-    setIsOpen(true);
+    setOpenAddProduct(true);
   };
+
   const closeModal = () => {
-    setIsOpen(false);
+    setOpenAddProduct(false);
     onClose();
   };
 
   useEffect(() => {
     if (editProduct) {
-      setIsOpen(true);
+      setOpenAddProduct(true);
     }
   }, [editProduct]);
 
@@ -190,7 +196,7 @@ export const NewProduct = ({ editProduct, onClose }: NewMessageProps) => {
       </CreateProductButton>
 
       <Modal
-        open={isOpen}
+        open={openAddProduct}
         onClose={closeModal}
         aria-labelledby="modal-title"
         aria-describedby="modal-description"

@@ -1,15 +1,15 @@
 import React, { useState, useEffect } from "react";
 import {
-  Select,
   SelectChangeEvent,
   useTheme,
   Box,
-  FormControl
+  FormControl,
+  Select
 } from "@mui/material";
 import ImageUploader from "../../components/common/ImageUploader";
 import { PublishProductParams } from "./NewProduct";
 import { Product } from "../../state/features/storeSlice";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../state/store";
 import {
   AddLogoButton,
@@ -31,6 +31,7 @@ import {
   AddButton,
   MaximumImagesRow
 } from "./NewProduct-styles";
+import { setNotification } from "../../state/features/notificationsSlice";
 interface ProductFormProps {
   onSubmit: (product: PublishProductParams) => void;
   onClose?: () => void;
@@ -50,6 +51,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
   editProduct
 }) => {
   const theme = useTheme();
+  const dispatch = useDispatch();
   const categories = useSelector(
     (state: RootState) => state.global.listProducts.categories
   );
@@ -60,7 +62,6 @@ export const ProductForm: React.FC<ProductFormProps> = ({
     price: 0,
     images: []
   });
-  console.log({ product });
   const [categoryList, setCategoryList] = useState<string[]>([]);
   const [selectedType, setSelectedType] = useState<string>("digital");
   const [images, setImages] = useState<string[]>([]);
@@ -68,7 +69,24 @@ export const ProductForm: React.FC<ProductFormProps> = ({
   const [newCategory, setNewCategory] = useState<string>("");
   const [selectedCategory, setSelectedCategory] = useState<string | null>("");
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setProduct({ ...product, [event.target.name]: event.target.value });
+    if (event.target.name === "price") {
+      const price = parseInt(event.target.value);
+      if (isNaN(price)) {
+        dispatch(
+          setNotification({
+            alertType: "error",
+            msg: "Price must be a number!"
+          })
+        );
+        return;
+      }
+      setProduct({ ...product, [event.target.name]: price });
+      return;
+    }
+    setProduct({
+      ...product,
+      [event.target.name]: event.target.value as string | number
+    });
   };
 
   const handleSelectChange = (event: SelectChangeEvent<string | null>) => {
@@ -115,7 +133,6 @@ export const ProductForm: React.FC<ProductFormProps> = ({
 
   useEffect(() => {
     if (editProduct) {
-      console.log({ editProduct });
       try {
         const {
           title,
@@ -129,14 +146,6 @@ export const ProductForm: React.FC<ProductFormProps> = ({
         } = editProduct;
         const findPrice =
           price?.find((item) => item?.currency === "qort")?.value || 0;
-        console.log({
-          title,
-          description,
-          images,
-          mainImageIndex,
-          type,
-          price
-        });
         setProduct({
           title,
           description,
@@ -160,8 +169,6 @@ export const ProductForm: React.FC<ProductFormProps> = ({
       }
     }
   }, [editProduct]);
-
-  console.log({ selectedCategory });
 
   return (
     <>

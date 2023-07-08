@@ -123,7 +123,8 @@ export const MyStoresCard = styled(Box)(({ theme }) => ({
   padding: "5px 10px",
   fontFamily: "Raleway",
   fontSize: "18px",
-  color: theme.palette.text.primary
+  color: theme.palette.text.primary,
+  userSelect: "none"
 }));
 
 export const MyStoresCheckbox = styled(Checkbox)(({ theme }) => ({

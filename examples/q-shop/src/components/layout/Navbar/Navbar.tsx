@@ -75,10 +75,6 @@ const NavBar: React.FC<Props> = ({
   const searchValRef = useRef("");
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const allStores = useSelector(
-    (state: RootState) => state.store.hashMapStores
-  );
-
   const handleClick = (event?: React.MouseEvent<HTMLDivElement>) => {
     const target = event?.currentTarget as unknown as HTMLButtonElement | null;
     setAnchorEl(target);
@@ -160,14 +156,6 @@ const NavBar: React.FC<Props> = ({
         )}
         {isAuthenticated && userName && (
           <>
-            <CartIcon
-              color={theme.palette.text.primary}
-              height={"32"}
-              width={"32"}
-              onClickFunc={() => {
-                dispatch(setIsOpen(true));
-              }}
-            />
             <AvatarContainer
               onClick={(e: any) => {
                 handleClick(e);

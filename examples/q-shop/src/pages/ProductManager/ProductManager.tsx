@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../state/store";
@@ -14,7 +14,9 @@ import {
   Catalogue,
   CatalogueDataContainer,
   DataContainer,
-  removeFromProductsToSave
+  clearAllProductsToSave,
+  removeFromProductsToSave,
+  updateRecentlyVisitedStoreId
 } from "../../state/features/globalSlice";
 import { Price, Product } from "../../state/features/storeSlice";
 import { useFetchOrders } from "../../hooks/useFetchOrders";
@@ -28,7 +30,12 @@ import {
   CardHeader,
   Bulletpoints,
   TimesIcon,
-  CardButtonRow
+  CardButtonRow,
+  AddMoreButton,
+  MinimizeIcon,
+  DockedMinimizeIcon,
+  DockedProductsToSaveCard,
+  ProductManagerContainer
 } from "./ProductManager-styles";
 import OrderTable from "./OrderTable";
 import { BackToStorefrontButton } from "../Store/Store-styles";
@@ -37,37 +44,45 @@ import { CategorySVG } from "../../assets/svgs/CategorySVG";
 import { LoyaltySVG } from "../../assets/svgs/LoyaltySVG";
 import useConfirmationModal from "../../hooks/useConfirmModal";
 import { CreateButton } from "../../components/modals/CreateStoreModal-styles";
+import { useProductsToSaveLocalStorage } from "../../hooks/useProductsToSaveLocalStorage";
+import { ReusableModal } from "../../components/modals/ReusableModal";
+import { useParams } from "react-router-dom";
 
 const uid = new ShortUniqueId({ length: 10 });
 
 export const ProductManager = () => {
   const theme = useTheme();
   const { user } = useSelector((state: RootState) => state.auth);
+
   const productsToSave = useSelector(
     (state: RootState) => state.global.productsToSave
   );
-  const productsDataContainer = useSelector(
-    (state: RootState) => state.global?.dataContainer?.products
-  );
+
   const currentStore = useSelector(
     (state: RootState) => state.global.currentStore
   );
+
   const dataContainer = useSelector(
     (state: RootState) => state.global.dataContainer
   );
+
   const orders = useSelector((state: RootState) => state.order.orders);
-  const hashMapOrders = useSelector(
-    (state: RootState) => state.order.hashMapOrders
-  );
+
   const products = useSelector((state: RootState) => state.global.products);
 
-  console.log({ orders, hashMapOrders });
+  // Get store id from url
+  const { store } = useParams();
+
+  console.log("products", products);
 
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [order, setOrder] = useState<any>(null);
   const [valueTab, setValueTab] = React.useState(0);
   const [productToEdit, setProductToEdit] = useState<Product | null>(null);
+  const [openAddProduct, setOpenAddProduct] = useState<boolean>(false);
+  const [dockProductsToSave, setDockProductsToSave] = useState<boolean>(false);
 
+  // Get authenticated user's name
   const userName = useMemo(() => {
     if (!user?.name) return "";
     return user.name;
@@ -75,6 +90,26 @@ export const ProductManager = () => {
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
+
+  // get and set productsToSave from local storage
+  const { productsToSaveLS, saveProductsToLocalStorage } =
+    useProductsToSaveLocalStorage();
+
+  // When component mounts, updated recently viewed store id in global redux store to get latest data container and current store inside product manager
+  useEffect(() => {
+    if (store) {
+      dispatch(updateRecentlyVisitedStoreId(store));
+    }
+  }, [store]);
+
+  console.log("productsToSaveLS", productsToSaveLS);
+
+  // Get productsToSave from Redux store and set them in local storage
+  useEffect(() => {
+    if (Object.keys(productsToSave).length > 0) {
+      saveProductsToLocalStorage(productsToSave);
+    }
+  }, [productsToSave]);
 
   // Publish productsToSave to QDN
   async function publishQDNResource() {
@@ -315,7 +350,8 @@ export const ProductManager = () => {
         resources: [...publishMultipleCatalogues, publishDataContainer]
       };
       await qortalRequest(multiplePublish);
-
+      // Clear productsToSave from Redux store
+      dispatch(clearAllProductsToSave());
       dispatch(
         setNotification({
           msg: "Products saved",
@@ -366,6 +402,7 @@ export const ProductManager = () => {
     }
   };
 
+  // Get products & orders from Redux
   const { getOrders, getProducts } = useFetchOrders();
 
   const handleGetOrders = React.useCallback(async () => {
@@ -377,18 +414,11 @@ export const ProductManager = () => {
   }, [getProducts]);
 
   return (
-    <Box
-      sx={{
-        display: "flex",
-        width: "100%",
-        flexDirection: "column",
-        backgroundColor: "background.paper"
-      }}
-    >
+    <ProductManagerContainer>
       <TabsContainer>
         <BackToStorefrontButton
           onClick={() => {
-            navigate(`/${userName}/${currentStore?.id}}`);
+            navigate(`/${userName}/${currentStore?.id}`);
           }}
         >
           Back To Storefront
@@ -405,59 +435,112 @@ export const ProductManager = () => {
                 fontWeight: theme.typography.fontWeightMedium
               }
             }}
-            label="Orders"
-          />
-          <StyledTab
-            sx={{
-              "&.Mui-selected": {
-                color: theme.palette.text.primary,
-                fontWeight: theme.typography.fontWeightMedium
-              }
-            }}
             label="Products"
           />
         </StyledTabs>
+        <StyledTab
+          sx={{
+            "&.Mui-selected": {
+              color: theme.palette.text.primary,
+              fontWeight: theme.typography.fontWeightMedium
+            }
+          }}
+          label="Orders"
+        />
       </TabsContainer>
 
       {/* productsToSave card inside Product Manager */}
-      {Object.keys(productsToSave).length > 0 && (
-        <ProductsToSaveCard>
-          {Object.keys(productsToSave).map((key: string) => {
-            const product = productsToSave[key];
-            const { id } = product;
-            return (
-              <ProductToSaveCard>
-                <CardHeader>{product?.title}</CardHeader>
-                <Bulletpoints>
-                  <QortalSVG color={"#000000"} height={"22"} width={"22"} />{" "}
-                  Price: {product?.price && product?.price[0].value} QORT
-                </Bulletpoints>
-                <Bulletpoints>
-                  <LoyaltySVG color={"#000000"} height={"22"} width={"22"} />
-                  Type: {product?.type}
-                </Bulletpoints>
-                <Bulletpoints>
-                  <CategorySVG color={"#000000"} height={"22"} width={"22"} />
-                  Category: {product?.category}
-                </Bulletpoints>
-                <TimesIcon
-                  onClickFunc={() => handleRemoveConfirmation(id)}
-                  color={"#000000"}
-                  height={"22"}
-                  width={"22"}
-                />
-              </ProductToSaveCard>
-            );
-          })}
-          <CardButtonRow>
-            <CreateButton onClick={publishQDNResource}>
-              Save Products
-            </CreateButton>
-          </CardButtonRow>
-        </ProductsToSaveCard>
+      {dockProductsToSave ? (
+        <DockedProductsToSaveCard>
+          Products Ready To Be Listed
+          <DockedMinimizeIcon
+            color={theme.palette.text.primary}
+            height={"22"}
+            width={"22"}
+            onClickFunc={() => {
+              setDockProductsToSave(false);
+            }}
+          />
+        </DockedProductsToSaveCard>
+      ) : (
+        <ReusableModal
+          customStyles={{ top: "15%" }}
+          open={Object.keys(productsToSave).length > 0}
+        >
+          <ProductsToSaveCard>
+            {Object.keys(productsToSave).map((key: string) => {
+              const product = productsToSave[key];
+              const { id } = product;
+              return (
+                <ProductToSaveCard>
+                  <CardHeader>{product?.title}</CardHeader>
+                  <Bulletpoints>
+                    <QortalSVG color={"#000000"} height={"22"} width={"22"} />{" "}
+                    Price: {product?.price && product?.price[0].value} QORT
+                  </Bulletpoints>
+                  <Bulletpoints>
+                    <LoyaltySVG color={"#000000"} height={"22"} width={"22"} />
+                    Type: {product?.type}
+                  </Bulletpoints>
+                  <Bulletpoints>
+                    <CategorySVG color={"#000000"} height={"22"} width={"22"} />
+                    Category: {product?.category}
+                  </Bulletpoints>
+                  <TimesIcon
+                    onClickFunc={() => handleRemoveConfirmation(id)}
+                    color={"#000000"}
+                    height={"22"}
+                    width={"22"}
+                  />
+                </ProductToSaveCard>
+              );
+            })}
+            <CardButtonRow>
+              <AddMoreButton onClick={() => setOpenAddProduct(true)}>
+                Add Another Product
+              </AddMoreButton>
+              <CreateButton onClick={publishQDNResource}>
+                Save Products
+              </CreateButton>
+            </CardButtonRow>
+            <MinimizeIcon
+              color={theme.palette.text.primary}
+              height={"22"}
+              width={"22"}
+              onClickFunc={() => {
+                setDockProductsToSave(true);
+              }}
+            />
+          </ProductsToSaveCard>
+        </ReusableModal>
       )}
-
       <TabPanel value={valueTab} index={0}>
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            width: "100%"
+          }}
+        >
+          <NewProduct
+            editProduct={productToEdit}
+            onClose={() => {
+              setProductToEdit(null);
+            }}
+            openAddProduct={openAddProduct}
+            setOpenAddProduct={(val: boolean) => setOpenAddProduct(val)}
+          />
+        </Box>
+        <SimpleTable
+          openProduct={(product) => {
+            setProductToEdit(product);
+          }}
+          data={products}
+        ></SimpleTable>
+        <LazyLoad onLoadMore={handleGetProducts}></LazyLoad>
+      </TabPanel>
+      <TabPanel value={valueTab} index={1}>
         <ShowOrder
           isOpen={isOpen}
           setIsOpen={setIsOpen}
@@ -473,33 +556,10 @@ export const ProductManager = () => {
         ></OrderTable>
         <LazyLoad onLoadMore={handleGetOrders}></LazyLoad>
       </TabPanel>
-      <TabPanel value={valueTab} index={1}>
-        <Box
-          sx={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            width: "100%"
-          }}
-        >
-          <NewProduct
-            editProduct={productToEdit}
-            onClose={() => {
-              setProductToEdit(null);
-            }}
-          />
-        </Box>
-        <SimpleTable
-          openProduct={(product) => {
-            setProductToEdit(product);
-          }}
-          data={products}
-        ></SimpleTable>
-        <LazyLoad onLoadMore={handleGetProducts}></LazyLoad>
-      </TabPanel>
+
       {/* Confirm Remove Product from productsToSave in global state */}
       <Modal />
-    </Box>
+    </ProductManagerContainer>
   );
 };
 
