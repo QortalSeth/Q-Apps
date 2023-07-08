@@ -93,8 +93,6 @@ export const NewThread = ({
   }
 
   async function publishQDNResource() {
-    console.log({ isMessage })
-    console.log({ groupInfo })
     let name: string = ''
     let errorMsg = ''
 
@@ -129,8 +127,6 @@ export const NewThread = ({
       )
       throw new Error(errorMsg)
     }
-
-    console.log({ currentThread })
 
     const mailObject: any = {
       subject,
@@ -226,7 +222,6 @@ export const NewThread = ({
           data64: messageToBase64,
           identifier
         }
-        console.log({ groupPublicKeys })
         const multiplePublishMsg = {
           action: 'PUBLISH_MULTIPLE_QDN_RESOURCES',
           resources: [requestBody, requestBodyThread],
@@ -245,9 +240,7 @@ export const NewThread = ({
       } else {
         if (!currentThread) throw new Error('unable to locate thread Id')
         const idThread = currentThread.threadId
-        console.log({ idThread, mailObject })
         const messageToBase64 = await objectToBase64(mailObject)
-        console.log({ messageToBase64 })
         const idMsg = uid()
         let groupIndex = idThread.indexOf('group')
         let result = idThread.substring(groupIndex)
@@ -258,7 +251,6 @@ export const NewThread = ({
           data64: messageToBase64,
           identifier
         }
-        console.log({ groupPublicKeys })
         const multiplePublishMsg = {
           action: 'PUBLISH_MULTIPLE_QDN_RESOURCES',
           resources: [requestBody],

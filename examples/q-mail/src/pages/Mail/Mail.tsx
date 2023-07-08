@@ -460,10 +460,15 @@ export const Mail = () => {
               '&&.Mui-focused': {
                 outline: 'none'
               },
-              fontSize: '18px'
+              fontSize: '14px'
             }}
           />
           <Button
+            sx={{
+              height: '30px',
+              alignSelf: 'center',
+              marginRight: '10px'
+            }}
             onClick={() => {
               if (!aliasValue) return
               const newList = [...alias, aliasValue]

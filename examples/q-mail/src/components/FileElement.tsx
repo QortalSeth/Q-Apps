@@ -95,7 +95,7 @@ export default function FileElement({
   const [pdfSrc, setPdfSrc] = React.useState('')
   const { downloads } = useSelector((state: RootState) => state.global)
   const { user: username } = useSelector((state: RootState) => state.auth)
-
+  const hasCommencedDownload = React.useRef(false)
   const dispatch = useDispatch()
   const download = React.useMemo(() => {
     if (!downloads || !fileInfo?.identifier) return {}
@@ -130,6 +130,7 @@ export default function FileElement({
   }
   const handlePlay = async () => {
     if (disable) return
+    hasCommencedDownload.current = true
     if (
       resourceStatus?.status === 'READY' &&
       download?.url &&
@@ -295,7 +296,8 @@ export default function FileElement({
     if (
       resourceStatus?.status === 'READY' &&
       download?.url &&
-      download?.blogPost?.filename
+      download?.blogPost?.filename &&
+      hasCommencedDownload.current
     ) {
       setIsLoading(false)
       dispatch(

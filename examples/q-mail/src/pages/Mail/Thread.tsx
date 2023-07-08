@@ -30,60 +30,65 @@ export const Thread = ({
   const { user } = useSelector((state: RootState) => state.auth)
   const [messages, setMessages] = useState<any[]>([])
 
-  const getMailMessages = React.useCallback(async (groupInfo: any) => {
-    try {
-      let str = groupInfo.threadId
-      let parts = str.split('_').reverse()
-      let result = parts[0]
-      const threadId = result
-      const query = `qortal_qmail_thmsg_group${groupInfo?.threadData?.groupId}_${threadId}`
-      const url = `/arbitrary/resources/search?mode=ALL&service=${MAIL_SERVICE_TYPE}&query=${query}&limit=20&includemetadata=true&offset=${0}&reverse=true&excludeblocked=true`
-      const response = await fetch(url, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      })
-      const responseData = await response.json()
-      let fullArrayMsg = []
-
-      for (const message of responseData) {
-        try {
-          let messageRes = await qortalRequest({
-            action: 'FETCH_QDN_RESOURCE',
-            name: message.name,
-            service: MAIL_SERVICE_TYPE,
-            identifier: message.identifier,
-            encoding: 'base64'
-          })
-          console.log({ messageRes })
-          let requestEncryptBody: any = {
-            action: 'DECRYPT_DATA',
-            encryptedData: messageRes
+  const getMailMessages = React.useCallback(
+    async (groupInfo: any) => {
+      try {
+        let str = groupInfo.threadId
+        let parts = str.split('_').reverse()
+        let result = parts[0]
+        const threadId = result
+        const offset = messages.length
+        const query = `qortal_qmail_thmsg_group${groupInfo?.threadData?.groupId}_${threadId}`
+        const url = `/arbitrary/resources/search?mode=ALL&service=${MAIL_SERVICE_TYPE}&query=${query}&limit=20&includemetadata=true&offset=${offset}&reverse=true&excludeblocked=true`
+        const response = await fetch(url, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json'
           }
-          const resDecrypt = await qortalRequest(requestEncryptBody)
-          console.log({ resDecrypt })
-          const decryptToUnit8ArrayMessage = base64ToUint8Array(resDecrypt)
-          const responseDataMessage = uint8ArrayToObject(
-            decryptToUnit8ArrayMessage
-          )
+        })
+        const responseData = await response.json()
+        let fullArrayMsg = [...messages]
 
-          const fullObject = {
-            ...message,
-            ...(responseDataMessage || {})
-          }
+        for (const message of responseData) {
+          try {
+            let messageRes = await qortalRequest({
+              action: 'FETCH_QDN_RESOURCE',
+              name: message.name,
+              service: MAIL_SERVICE_TYPE,
+              identifier: message.identifier,
+              encoding: 'base64'
+            })
+            let requestEncryptBody: any = {
+              action: 'DECRYPT_DATA',
+              encryptedData: messageRes
+            }
+            const resDecrypt = await qortalRequest(requestEncryptBody)
+            const decryptToUnit8ArrayMessage = base64ToUint8Array(resDecrypt)
+            const responseDataMessage = uint8ArrayToObject(
+              decryptToUnit8ArrayMessage
+            )
 
-          fullArrayMsg.push(fullObject)
-        } catch (error) {
-          console.log({ error })
+            const fullObject = {
+              ...message,
+              ...(responseDataMessage || {})
+            }
+            const index = messages.findIndex(
+              (p) => p.identifier === fullObject.identifier
+            )
+            if (index !== -1) {
+              fullArrayMsg[index] = fullObject
+            } else {
+              fullArrayMsg.push(fullObject)
+            }
+          } catch (error) {}
         }
+        setMessages(fullArrayMsg)
+      } catch (error) {
+      } finally {
       }
-      setMessages(fullArrayMsg)
-    } catch (error) {
-      console.log({ error })
-    } finally {
-    }
-  }, [])
+    },
+    [messages]
+  )
   const getMessages = React.useCallback(async () => {
     if (!user?.name || !currentThread) return
     await getMailMessages(currentThread)
@@ -120,7 +125,7 @@ export const Thread = ({
         const latestMessage = messages[0]
         if (!latestMessage) return
         const findMessage = responseData?.findIndex(
-          (item: any) => item?.identifier === latestMessage?.id
+          (item: any) => item?.identifier === latestMessage?.identifier
         )
         let sliceLength = responseData.length
         if (findMessage !== -1) {
@@ -138,13 +143,11 @@ export const Thread = ({
               identifier: message.identifier,
               encoding: 'base64'
             })
-            console.log({ messageRes })
             let requestEncryptBody: any = {
               action: 'DECRYPT_DATA',
               encryptedData: messageRes
             }
             const resDecrypt = await qortalRequest(requestEncryptBody)
-            console.log({ resDecrypt })
             const decryptToUnit8ArrayMessage = base64ToUint8Array(resDecrypt)
             const responseDataMessage = uint8ArrayToObject(
               decryptToUnit8ArrayMessage
@@ -163,13 +166,10 @@ export const Thread = ({
             } else {
               fullArrayMsg.unshift(fullObject)
             }
-          } catch (error) {
-            console.log({ error })
-          }
+          } catch (error) {}
         }
         setMessages(fullArrayMsg)
       } catch (error) {
-        console.log({ error })
       } finally {
       }
     },
@@ -198,8 +198,6 @@ export const Thread = ({
 
   if (!currentThread) return null
 
-  console.log({ messages })
-
   return (
     <div
       style={{
@@ -209,29 +207,47 @@ export const Thread = ({
         left: '0px',
         right: '0px',
         overflowY: 'auto',
-        backgroundColor: theme.palette.background.paper
+        backgroundColor: theme.palette.background.paper,
+        zIndex: 1
       }}
     >
       <Box
         sx={{
           display: 'flex',
-          gap: '20px'
+          gap: '20px',
+          margin: '2px 10px 10px 10px',
+          alignItems: 'center',
+          justifyContent: 'space-between'
         }}
       >
+        <Button
+          sx={{
+            height: '45px'
+          }}
+          variant="contained"
+          onClick={() => closeThread()}
+        >
+          Close Thread
+        </Button>
         <NewThread
           groupInfo={groupInfo}
           isMessage={true}
           currentThread={currentThread}
           messageCallback={messageCallback}
         />
-        <Button variant="contained" onClick={() => closeThread()}>
-          Close Thread
-        </Button>
       </Box>
 
       {messages.map((message) => {
         return <ShowMessage key={message?.identifier} message={message} />
       })}
+      {messages.length > 0 && (
+        <Button
+          variant="contained"
+          onClick={() => getMailMessages(currentThread)}
+        >
+          Load older messages
+        </Button>
+      )}
     </div>
   )
 }

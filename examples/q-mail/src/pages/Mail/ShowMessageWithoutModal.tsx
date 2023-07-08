@@ -77,13 +77,13 @@ export const ShowMessage = ({ message }: any) => {
               gap: '10px'
             }}
           >
-            <AvatarWrapper user={message?.user} />
+            <AvatarWrapper user={message?.name} />
             <Typography
               sx={{
                 fontSize: '16px'
               }}
             >
-              {message?.user}
+              {message?.name}
             </Typography>
           </Box>
           <Box
@@ -139,7 +139,7 @@ export const ShowMessage = ({ message }: any) => {
                       fileInfo={file}
                       title={file?.filename}
                       mode="mail"
-                      otherUser={message?.user}
+                      otherUser={message?.name}
                     >
                       <AttachFileIcon
                         sx={{
