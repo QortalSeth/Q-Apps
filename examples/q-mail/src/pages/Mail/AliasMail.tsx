@@ -50,16 +50,14 @@ export const AliasMail = ({ value }: AliasMailProps) => {
   )
 
   const fullMailMessages = useMemo(() => {
-    return mailMessages
-      .map((msg) => {
-        let message = msg
-        const existingMessage = hashMapMailMessages[msg.id]
-        if (existingMessage) {
-          message = existingMessage
-        }
-        return message
-      })
-      .filter((item: any) => item?.user !== user?.name)
+    return mailMessages.map((msg) => {
+      let message = msg
+      const existingMessage = hashMapMailMessages[msg.id]
+      if (existingMessage) {
+        message = existingMessage
+      }
+      return message
+    })
   }, [mailMessages, hashMapMailMessages, user])
   const dispatch = useDispatch()
   const navigate = useNavigate()
@@ -85,7 +83,7 @@ export const AliasMail = ({ value }: AliasMailProps) => {
     async (recipientName: string, recipientAddress: string) => {
       try {
         const query = `qortal_qmail_${value}_mail`
-        const url = `/arbitrary/resources/search?service=${MAIL_SERVICE_TYPE}&query=${query}&limit=50&includemetadata=true&reverse=true&excludeblocked=true`
+        const url = `/arbitrary/resources/search?mode=ALL&service=${MAIL_SERVICE_TYPE}&query=${query}&limit=50&includemetadata=true&reverse=true&excludeblocked=true`
         const response = await fetch(url, {
           method: 'GET',
           headers: {
@@ -148,7 +146,7 @@ export const AliasMail = ({ value }: AliasMailProps) => {
 
         dispatch(setIsLoadingGlobal(true))
         const query = `qortal_qmail_${value}_mail`
-        const url = `/arbitrary/resources/search?service=${MAIL_SERVICE_TYPE}&query=${query}&limit=50&includemetadata=true&offset=${offset}&reverse=true&excludeblocked=true`
+        const url = `/arbitrary/resources/search?mode=ALL&service=${MAIL_SERVICE_TYPE}&query=${query}&limit=50&includemetadata=true&offset=${offset}&reverse=true&excludeblocked=true`
         const response = await fetch(url, {
           method: 'GET',
           headers: {

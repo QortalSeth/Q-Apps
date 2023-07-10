@@ -31,6 +31,7 @@ interface QortalRequestOptions {
   amount?: number
   blob?: Blob
   mimeType?: string
+  mode?: string
 }
 
 declare function qortalRequest(options: QortalRequestOptions): Promise<any>

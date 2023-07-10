@@ -71,7 +71,7 @@ export const useFetchPosts = () => {
 
   const checkNewMessages = React.useCallback(async () => {
     try {
-      const url = `/arbitrary/resources/search?service=BLOG_POST&query=q-blog-&limit=20&includemetadata=true&reverse=true&excludeblocked=true`
+      const url = `/arbitrary/resources/search?mode=ALL&service=BLOG_POST&query=q-blog-&limit=20&includemetadata=true&reverse=true&excludeblocked=true`
       const response = await fetch(url, {
         method: 'GET',
         headers: {
@@ -98,7 +98,7 @@ export const useFetchPosts = () => {
     try {
       dispatch(setIsLoadingGlobal(true))
       dispatch(setCountNewPosts(0))
-      const url = `/arbitrary/resources/search?service=BLOG_POST&query=q-blog-&limit=20&includemetadata=true&reverse=true&excludeblocked=true`
+      const url = `/arbitrary/resources/search?mode=ALL&service=BLOG_POST&query=q-blog-&limit=20&includemetadata=true&reverse=true&excludeblocked=true`
       const response = await fetch(url, {
         method: 'GET',
         headers: {
@@ -158,7 +158,7 @@ export const useFetchPosts = () => {
       const offset = posts.length
 
       dispatch(setIsLoadingGlobal(true))
-      const url = `/arbitrary/resources/search?service=BLOG_POST&query=q-blog-&limit=20&includemetadata=true&offset=${offset}&reverse=true&excludeblocked=true`
+      const url = `/arbitrary/resources/search?mode=ALL&service=BLOG_POST&query=q-blog-&limit=20&includemetadata=true&offset=${offset}&reverse=true&excludeblocked=true`
       const response = await fetch(url, {
         method: 'GET',
         headers: {
@@ -201,7 +201,7 @@ export const useFetchPosts = () => {
         const offset = filteredPosts.length
 
         dispatch(setIsLoadingGlobal(true))
-        const url = `/arbitrary/resources/search?service=BLOG_POST&query=q-blog-&limit=20&includemetadata=true&offset=${offset}&reverse=true&excludeblocked=true&name=${filterValue}`
+        const url = `/arbitrary/resources/search?mode=ALL&service=BLOG_POST&query=q-blog-&limit=20&includemetadata=true&offset=${offset}&reverse=true&excludeblocked=true&name=${filterValue}`
         const response = await fetch(url, {
           method: 'GET',
           headers: {
@@ -246,7 +246,7 @@ export const useFetchPosts = () => {
       try {
         const offset = subscriptionPosts.length
         dispatch(setIsLoadingGlobal(true))
-        const url = `/arbitrary/resources/search?service=BLOG_POST&query=q-blog-&limit=20&includemetadata=true&offset=${offset}&reverse=true&namefilter=q-blog-subscriptions-${username}&excludeblocked=true`
+        const url = `/arbitrary/resources/search?mode=ALL&service=BLOG_POST&query=q-blog-&limit=20&includemetadata=true&offset=${offset}&reverse=true&namefilter=q-blog-subscriptions-${username}&excludeblocked=true`
         const response = await fetch(url, {
           method: 'GET',
           headers: {
@@ -307,7 +307,7 @@ export const useFetchPosts = () => {
           //     reverse: true
           // });
           //TODO - NAME SHOULD BE EXACT
-          const url = `/arbitrary/resources/search?service=BLOG_POST&identifier=${item.id}&exactmatchnames=true&name=${item.user}&limit=20&includemetadata=true&reverse=true&excludeblocked=true`
+          const url = `/arbitrary/resources/search?mode=ALL&service=BLOG_POST&identifier=${item.id}&exactmatchnames=true&name=${item.user}&limit=20&includemetadata=true&reverse=true&excludeblocked=true`
           const response = await fetch(url, {
             method: 'GET',
             headers: {
