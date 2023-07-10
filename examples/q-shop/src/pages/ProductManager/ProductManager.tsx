@@ -16,6 +16,10 @@ import {
   DataContainer,
   clearAllProductsToSave,
   removeFromProductsToSave,
+  setCatalogueHashMap,
+  setDataContainer,
+  setProducts,
+  updateCatalogueHashMap,
   updateRecentlyVisitedStoreId
 } from "../../state/features/globalSlice";
 import { Price, Product } from "../../state/features/storeSlice";
@@ -67,13 +71,11 @@ export const ProductManager = () => {
   );
 
   const orders = useSelector((state: RootState) => state.order.orders);
-
+  // Products to map
   const products = useSelector((state: RootState) => state.global.products);
 
   // Get store id from url
   const { store } = useParams();
-
-  console.log("products", products);
 
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [order, setOrder] = useState<any>(null);
@@ -92,8 +94,8 @@ export const ProductManager = () => {
   const navigate = useNavigate();
 
   // get and set productsToSave from local storage
-  const { productsToSaveLS, saveProductsToLocalStorage } =
-    useProductsToSaveLocalStorage();
+  // const { productsToSaveLS, saveProductsToLocalStorage } =
+  //   useProductsToSaveLocalStorage();
 
   // When component mounts, updated recently viewed store id in global redux store to get latest data container and current store inside product manager
   useEffect(() => {
@@ -102,14 +104,12 @@ export const ProductManager = () => {
     }
   }, [store]);
 
-  console.log("productsToSaveLS", productsToSaveLS);
-
   // Get productsToSave from Redux store and set them in local storage
-  useEffect(() => {
-    if (Object.keys(productsToSave).length > 0) {
-      saveProductsToLocalStorage(productsToSave);
-    }
-  }, [productsToSave]);
+  // useEffect(() => {
+  //   if (Object.keys(productsToSave).length > 0) {
+  //     saveProductsToLocalStorage(productsToSave);
+  //   }
+  // }, [productsToSave]);
 
   // Publish productsToSave to QDN
   async function publishQDNResource() {
@@ -182,7 +182,7 @@ export const ProductManager = () => {
       // If catalogue was found on QDN, add it to the list of catalogues to publish when it has less than 10 products
       if (catalogue) listOfCataloguesToPublish.push(catalogue);
 
-      // Loop through productsToSave and add them to the catalogue if it has less than 10 products, otherwise create a new catalogue
+      // Loop through productsToSave and add them to the catalogue if it has less than 10 products, otherwise create a new catalogue. Also add new products to global redux store.
       Object.keys(productsToSave)
         .filter((item) => !productsToSave[item]?.isUpdate)
         .forEach((key) => {
@@ -192,7 +192,6 @@ export const ProductManager = () => {
           )?.value;
           if (!priceInQort)
             throw new Error("Cannot find price for one of your products");
-
           const lastCatalogueInList = listOfCataloguesToPublish.at(-1);
           if (
             lastCatalogueInList &&
@@ -350,14 +349,43 @@ export const ProductManager = () => {
         resources: [...publishMultipleCatalogues, publishDataContainer]
       };
       await qortalRequest(multiplePublish);
+
       // Clear productsToSave from Redux store
       dispatch(clearAllProductsToSave());
+
+      // Replace dataContainer in the store
+      dispatch(
+        setDataContainer({
+          ...dataContainerToPublish,
+          id: `${storeId}-datacontainer`
+        })
+      );
+
+      // Reset products to first 20 in the array of listProducts
+      dispatch(setProducts(Object.values(dataContainerToPublish.products)));
+      console.log("listOfCataloguesToPublish", listOfCataloguesToPublish);
+
+      const newCatalogueHashMapFunc = () => {
+        let newCatalogueHashMap: Record<string, Catalogue> = {};
+
+        listOfCataloguesToPublish.forEach((catalogue) => {
+          newCatalogueHashMap[catalogue.id] = catalogue;
+        });
+        console.log("newCatalogueHashMap", newCatalogueHashMap);
+        return newCatalogueHashMap;
+      };
+
+      const catalogueHashMapToDispatch = newCatalogueHashMapFunc();
+      dispatch(updateCatalogueHashMap(catalogueHashMapToDispatch));
+
+      // Toast
       dispatch(
         setNotification({
           msg: "Products saved",
           alertType: "success"
         })
       );
+
       // Error handling
     } catch (error: any) {
       let notificationObj = null;
@@ -413,6 +441,8 @@ export const ProductManager = () => {
     await getProducts();
   }, [getProducts]);
 
+  console.log("products", products);
+
   return (
     <ProductManagerContainer>
       <TabsContainer>
@@ -437,16 +467,16 @@ export const ProductManager = () => {
             }}
             label="Products"
           />
+          <StyledTab
+            sx={{
+              "&.Mui-selected": {
+                color: theme.palette.text.primary,
+                fontWeight: theme.typography.fontWeightMedium
+              }
+            }}
+            label="Orders"
+          />
         </StyledTabs>
-        <StyledTab
-          sx={{
-            "&.Mui-selected": {
-              color: theme.palette.text.primary,
-              fontWeight: theme.typography.fontWeightMedium
-            }
-          }}
-          label="Orders"
-        />
       </TabsContainer>
 
       {/* productsToSave card inside Product Manager */}
@@ -533,6 +563,7 @@ export const ProductManager = () => {
           />
         </Box>
         <SimpleTable
+          // editProduct gets changed here, as what comes from the ProductManager only contains id, status, created, user & catalogueId. After this you'll have all the metadata as well.
           openProduct={(product) => {
             setProductToEdit(product);
           }}

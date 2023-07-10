@@ -33,14 +33,9 @@ interface ColumnData {
 }
 
 const columns: ColumnData[] = [
-  // {
-  //   label: 'Sender',
-  //   dataKey: 'user',
-  //   width: 200
-  // },
   {
     label: "Title",
-    dataKey: "title"
+    dataKey: "title" // Obtained from the catalogueHashMap
   },
   {
     label: "Status",
@@ -81,6 +76,7 @@ function fixedHeaderContent() {
   );
 }
 
+// function to get the rest of the product data for editProduct, as what comes from the ProductManager only contains id, status, created, user & catalogueId
 function rowContent(_index: number, row: Product, openProduct: any) {
   const catalogueHashMap = useSelector(
     (state: RootState) => state.global.catalogueHashMap
@@ -96,7 +92,7 @@ function rowContent(_index: number, row: Product, openProduct: any) {
         ) {
           rowData = {
             ...row,
-            ...catalogueHashMap[row.catalogueId].products[row?.id],
+            ...catalogueHashMap[row?.catalogueId].products[row?.id],
             catalogueId: row?.catalogueId || ""
           };
         }
@@ -136,6 +132,7 @@ export default function SimpleTable({
   data,
   children
 }: SimpleTableProps) {
+  console.log("simple table", data);
   return (
     <Paper style={{ width: "100%" }}>
       <TableContainer component={Paper}>
