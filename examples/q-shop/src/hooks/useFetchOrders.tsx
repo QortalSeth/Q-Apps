@@ -57,6 +57,7 @@ export const useFetchOrders = () => {
       user,
       catalogueId
     });
+    console.log(res, "get catalogue here");
     if (res?.isValid) {
       dispatch(setCatalogueHashMap(res));
     }
@@ -191,13 +192,14 @@ export const useFetchOrders = () => {
 
   const getProducts = React.useCallback(async () => {
     if (!store) return;
-    console.log({ listProducts });
+    console.log("get products passes here");
+    console.log("listProducts", listProducts);
     try {
       dispatch(setIsLoadingGlobal(true));
       const offset = products.length;
       const productList = listProducts.products;
       const responseData = productList.slice(offset, offset + 20);
-
+      console.log("responseData inside getProducts()", responseData);
       const structureData = responseData.map(
         (product: ProductDataContainer): Product => {
           return {
@@ -209,8 +211,6 @@ export const useFetchOrders = () => {
           };
         }
       );
-
-      console.log("structureData", structureData);
 
       dispatch(upsertProducts(structureData));
       for (const content of structureData) {

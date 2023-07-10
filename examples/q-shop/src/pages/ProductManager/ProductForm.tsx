@@ -170,6 +170,8 @@ export const ProductForm: React.FC<ProductFormProps> = ({
     }
   }, [editProduct]);
 
+  console.log({ editProduct });
+
   return (
     <>
       {images.length > 0 ? (

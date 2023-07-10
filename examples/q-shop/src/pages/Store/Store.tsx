@@ -230,6 +230,7 @@ export const Store = () => {
         categories: Object.keys(categories).map((cat) => ({ label: cat }))
       });
       dispatch(resetListProducts());
+      // Have access to the storeId in global state for when you are in cart for example
       dispatch(setStoreId(store));
       dispatch(updateRecentlyVisitedStoreId(store));
       dispatch(setStoreOwner(name));
