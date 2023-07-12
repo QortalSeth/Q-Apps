@@ -12,6 +12,12 @@ import { Product } from "../../state/features/storeSlice";
 import { useDispatch, useSelector } from "react-redux";
 import { setProductToCart } from "../../state/features/cartSlice";
 import { QortalSVG } from "../../assets/svgs/QortalSVG";
+import {
+  AddToCartButton,
+  ProductDescription,
+  ProductTitle
+} from "./ProductCard-styles";
+import { CartSVG } from "../../assets/svgs/CartSVG";
 
 function addEllipsis(str: string, limit: number) {
   if (str.length > limit) {
@@ -45,11 +51,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
     (item) => item?.currency === "qort"
   )?.value;
   return (
-    <Card
-      sx={{
-        width: "225px"
-      }}
-    >
+    <Card>
       <CardMedia
         sx={{
           "&.MuiCardMedia-root": {
@@ -69,38 +71,21 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           padding: "8px 16px"
         }}
       >
-        <Typography
-          gutterBottom
-          component="div"
-          sx={{
-            wordBreak: "break-word",
-            maxHeight: "43px",
-            fontSize: "16px"
-          }}
-        >
-          {addEllipsis(product?.title || "", 39)}
-        </Typography>
-        <Typography
-          sx={{
-            fontSize: "16px",
-            wordBreak: "break-word",
-            maxHeight: "65px"
-          }}
-          color="text.secondary"
-        >
+        <ProductTitle>{addEllipsis(product?.title || "", 39)}</ProductTitle>
+        <ProductDescription>
           {addEllipsis(product?.description || "", 58)}
-        </Typography>
-        <Typography variant="body1" color="text.primary">
+        </ProductDescription>
+        <ProductDescription style={{ fontWeight: "bold" }}>
           <QortalSVG
             color={theme.palette.text.primary}
             height={"22"}
             width={"22"}
           />{" "}
           {price}
-        </Typography>
+        </ProductDescription>
       </CardContent>
       {storeOwner !== userName && (
-        <Button
+        <AddToCartButton
           color="primary"
           onClick={() => {
             dispatch(
@@ -113,8 +98,13 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
             );
           }}
         >
+          <CartSVG
+            color={theme.palette.text.primary}
+            height={"15"}
+            width={"15"}
+          />{" "}
           Add to Cart
-        </Button>
+        </AddToCartButton>
       )}
     </Card>
   );

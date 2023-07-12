@@ -52,7 +52,7 @@ const MyModal: React.FC<MyModalProps> = ({
   const [location, setLocation] = useState<string>("");
   const [shipsTo, setShipsTo] = useState<string>("");
   const [errorMessage, setErrorMessage] = useState<string>("");
-  const [blogIdentifier, setBlogIdentifier] = useState(username || "");
+  const [shopIdentifier, setShopIdentifier] = useState(username || "");
   const [logo, setLogo] = useState<string | null>(null);
 
   const theme = useTheme();
@@ -84,6 +84,7 @@ const MyModal: React.FC<MyModalProps> = ({
       setLogo(currentStore?.logo || null);
       setLocation(currentStore?.location || "");
       setShipsTo(currentStore?.shipsTo || "");
+      setShopIdentifier(currentStore?.id || "");
     }
   }, [currentStore]);
 
@@ -95,25 +96,25 @@ const MyModal: React.FC<MyModalProps> = ({
     onClose();
   };
 
-  const handleInputChangeId = (event: ChangeEvent<HTMLInputElement>) => {
-    // Replace any non-alphanumeric and non-space characters with an empty string
-    // Replace multiple spaces with a single dash and remove any dashes that come one after another
-    let newValue = event.target.value
-      .replace(/[^a-zA-Z0-9\s-]/g, "")
-      .replace(/\s+/g, "-")
-      .replace(/-+/g, "-")
-      .trim();
+  // const handleInputChangeId = (event: ChangeEvent<HTMLInputElement>) => {
+  //   // Replace any non-alphanumeric and non-space characters with an empty string
+  //   // Replace multiple spaces with a single dash and remove any dashes that come one after another
+  //   let newValue = event.target.value
+  //     .replace(/[^a-zA-Z0-9\s-]/g, "")
+  //     .replace(/\s+/g, "-")
+  //     .replace(/-+/g, "-")
+  //     .trim();
 
-    if (newValue.toLowerCase().includes("post")) {
-      // Replace the 'post' string with an empty string
-      newValue = newValue.replace(/post/gi, "");
-    }
-    if (newValue.toLowerCase().includes("q-blog")) {
-      // Replace the 'q-blog' string with an empty string
-      newValue = newValue.replace(/q-blog/gi, "");
-    }
-    setBlogIdentifier(newValue);
-  };
+  //   if (newValue.toLowerCase().includes("post")) {
+  //     // Replace the 'post' string with an empty string
+  //     newValue = newValue.replace(/post/gi, "");
+  //   }
+  //   if (newValue.toLowerCase().includes("q-blog")) {
+  //     // Replace the 'q-blog' string with an empty string
+  //     newValue = newValue.replace(/q-blog/gi, "");
+  //   }
+  //   setShopIdentifier(newValue);
+  // };
 
   return (
     <Modal
@@ -124,7 +125,7 @@ const MyModal: React.FC<MyModalProps> = ({
     >
       <ModalBody>
         <ModalTitle id="modal-title" variant="h6">
-          Edit Shop{" "}
+          Edit Shop
         </ModalTitle>
         {!logo ? (
           <ImageUploader onPick={(img: string) => setLogo(img)}>
@@ -149,27 +150,6 @@ const MyModal: React.FC<MyModalProps> = ({
             ></TimesIcon>
           </LogoPreviewRow>
         )}
-        <TextField
-          id="modal-title-input"
-          label="Url Preview"
-          value={`/${username}/${blogIdentifier}`}
-          // onChange={(e) => setTitle(e.target.value)}
-          fullWidth
-          disabled={true}
-        />
-
-        <CustomInputField
-          id="modal-blogId-input"
-          label="Blog Id"
-          value={blogIdentifier}
-          onChange={handleInputChangeId}
-          fullWidth
-          inputProps={{ maxLength: 25 }}
-          required
-          disabled={true}
-          variant="filled"
-        />
-
         <CustomInputField
           id="modal-title-input"
           label="Title"

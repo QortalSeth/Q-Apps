@@ -50,16 +50,14 @@ export const AliasMail = ({ value }: AliasMailProps) => {
   )
 
   const fullMailMessages = useMemo(() => {
-    return mailMessages
-      .map((msg) => {
-        let message = msg
-        const existingMessage = hashMapMailMessages[msg.id]
-        if (existingMessage) {
-          message = existingMessage
-        }
-        return message
-      })
-      .filter((item: any) => item?.user !== user?.name)
+    return mailMessages.map((msg) => {
+      let message = msg
+      const existingMessage = hashMapMailMessages[msg.id]
+      if (existingMessage) {
+        message = existingMessage
+      }
+      return message
+    })
   }, [mailMessages, hashMapMailMessages, user])
   const dispatch = useDispatch()
   const navigate = useNavigate()

@@ -1,32 +1,32 @@
-import { createSlice } from '@reduxjs/toolkit'
-import { RootState } from '../store'
+import { createSlice } from "@reduxjs/toolkit";
+import { RootState } from "../store";
 
 interface CartState {
   // hashMapCarts: Record<string, Cart>
-  carts: Record<string, Cart>
-  isOpen: boolean
+  carts: Record<string, Cart>;
+  isOpen: boolean;
 }
 const initialState: CartState = {
   // hashMapCarts: {},
   carts: {},
   isOpen: false
-}
+};
 
 export interface Order {
-  productId: string
-  quantity: number
-  catalogueId: string
+  productId: string;
+  quantity: number;
+  catalogueId: string;
 }
 
 export interface Cart {
-  orders: Record<string, Order>
-  lastUpdated: number,
-  storeId: string | null
-  storeOwner: string | null
+  orders: Record<string, Order>;
+  lastUpdated: number;
+  storeId: string | null;
+  storeOwner: string | null;
 }
 
 export const cartSlice = createSlice({
-  name: 'cart',
+  name: "cart",
   initialState,
   reducers: {
     setProductToCart: (state, action) => {
@@ -42,7 +42,7 @@ export const cartSlice = createSlice({
           state.carts[storeId].orders[productId] = {
             quantity: 1,
             productId,
-            catalogueId,
+            catalogueId
           };
         }
       } else {
@@ -52,17 +52,17 @@ export const cartSlice = createSlice({
             [productId]: {
               quantity: 1,
               productId,
-              catalogueId,
-            },
+              catalogueId
+            }
           },
           lastUpdated: Date.now(),
           storeId,
-          storeOwner,
+          storeOwner
         };
       }
     },
     setIsOpen: (state, action) => {
-      state.isOpen = action.payload
+      state.isOpen = action.payload;
     },
     addQuantityToCart: (state, action) => {
       const { storeId, productId } = action.payload;
@@ -71,18 +71,28 @@ export const cartSlice = createSlice({
     subtractQuantityFromCart: (state, action) => {
       const { storeId, productId } = action.payload;
       state.carts[storeId].orders[productId].quantity -= 1;
-      if(state.carts[storeId].orders[productId].quantity === 0) {
+      if (state.carts[storeId].orders[productId].quantity === 0) {
         delete state.carts[storeId].orders[productId];
       }
+    },
+    removeProductFromCart: (state, action) => {
+      const { storeId, productId } = action.payload;
+      delete state.carts[storeId].orders[productId];
     },
     removeCartFromCarts: (state, action) => {
       const { storeId } = action.payload;
       delete state.carts[storeId];
-    },
+    }
   }
-})
+});
 
-export const { setProductToCart, setIsOpen, addQuantityToCart, subtractQuantityFromCart, removeCartFromCarts } =
-  cartSlice.actions
+export const {
+  setProductToCart,
+  setIsOpen,
+  addQuantityToCart,
+  subtractQuantityFromCart,
+  removeCartFromCarts,
+  removeProductFromCart
+} = cartSlice.actions;
 
-export default cartSlice.reducer
+export default cartSlice.reducer;
