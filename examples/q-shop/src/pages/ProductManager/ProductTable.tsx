@@ -1,4 +1,4 @@
-import * as React from "react";
+import React, { useState, useEffect } from "react";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
 import TableCell from "@mui/material/TableCell";
@@ -6,10 +6,9 @@ import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
-import { Avatar, Box } from "@mui/material";
+import { Avatar, CircularProgress } from "@mui/material";
 import { useSelector } from "react-redux";
 import { RootState } from "../../state/store";
-import { formatTimestamp } from "../../utils/time";
 import { Product } from "../../state/features/storeSlice";
 import moment from "moment";
 
@@ -50,118 +49,114 @@ const columns: ColumnData[] = [
   }
 ];
 
-function fixedHeaderContent() {
-  return (
-    <TableRow>
-      {columns.map((column) => {
-        const { label } = column;
-        return (
-          <TableCell
-            key={column.dataKey}
-            variant="head"
-            align={column.numeric || false ? "right" : "left"}
-            style={{ width: column.width }}
-            sx={{
-              backgroundColor: "background.paper",
-              fontSize: tableCellFontSize,
-              padding:
-                label === "Title" || label === "Created" ? "7px 35px" : "7px"
-            }}
-          >
-            {column.label}
-          </TableCell>
-        );
-      })}
-    </TableRow>
-  );
-}
-
-// function to get the rest of the product data for editProduct, as what comes from the ProductManager only contains id, status, created, user & catalogueId
-function rowContent(_index: number, row: Product, openProduct: any) {
-  const catalogueHashMap = useSelector(
-    (state: RootState) => state.global.catalogueHashMap
-  );
-
-  return (
-    <React.Fragment>
-      {columns.map((column) => {
-        let rowData = row;
-        if (
-          catalogueHashMap[row?.catalogueId] &&
-          catalogueHashMap[row.catalogueId].products[row?.id]
-        ) {
-          rowData = {
-            ...row,
-            ...catalogueHashMap[row?.catalogueId].products[row?.id],
-            catalogueId: row?.catalogueId || ""
-          };
-        }
-        return (
-          <TableCell
-            onClick={() => openProduct(rowData)}
-            key={column.dataKey}
-            align={column.numeric || false ? "right" : "left"}
-            style={{ width: column.width, cursor: "pointer" }}
-            sx={{
-              fontSize: tableCellFontSize,
-              padding: "7px"
-            }}
-          >
-            <>
-              {column.dataKey === "created"
-                ? moment(rowData[column.dataKey]).format("llll")
-                : column.dataKey === "status"
-                ? rowData[column.dataKey] || "unknown"
-                : rowData[column.dataKey]}
-            </>
-          </TableCell>
-        );
-      })}
-    </React.Fragment>
-  );
-}
-
 interface SimpleTableProps {
   openProduct: (product: Product) => void;
   data: Product[];
   children?: React.ReactNode;
 }
 
-export default function SimpleTable({
+export const SimpleTable = ({
   openProduct,
   data,
   children
-}: SimpleTableProps) {
-  console.log("simple table", data);
+}: SimpleTableProps) => {
+  const catalogueHashMap = useSelector(
+    (state: RootState) => state.global.catalogueHashMap
+  );
+  const { isLoadingGlobal } = useSelector((state: RootState) => state.global);
+
+  // Rest of the product data for editProduct, as what comes from the ProductManager only contains id, status, created, user & catalogueId
+  const processedData = data.map((row, index) => {
+    let rowData = row;
+
+    if (
+      catalogueHashMap[row?.catalogueId] &&
+      catalogueHashMap[row.catalogueId].products[row?.id]
+    ) {
+      rowData = {
+        ...row,
+        ...catalogueHashMap[row?.catalogueId].products[row?.id],
+        catalogueId: row?.catalogueId || ""
+      };
+    }
+
+    return { index, rowData };
+  });
+
+  function rowContent(_index: number, rowData: Product, openProduct: any) {
+    return (
+      <>
+        {columns.map((column) => {
+          return (
+            <TableCell
+              onClick={() => openProduct(rowData)}
+              key={column.dataKey}
+              align={column.numeric || false ? "right" : "left"}
+              style={{ width: column.width, cursor: "pointer" }}
+              sx={{
+                fontSize: tableCellFontSize,
+                padding: "7px"
+              }}
+            >
+              <>
+                {column.dataKey === "created"
+                  ? moment(rowData[column.dataKey]).format("llll")
+                  : column.dataKey === "status"
+                  ? rowData[column.dataKey] || "unknown"
+                  : rowData[column.dataKey]}
+              </>
+            </TableCell>
+          );
+        })}
+      </>
+    );
+  }
+
+  function fixedHeaderContent() {
+    return (
+      <TableRow>
+        {columns.map((column) => {
+          const { label } = column;
+          return (
+            <TableCell
+              key={column.dataKey}
+              variant="head"
+              align={column.numeric || false ? "right" : "left"}
+              style={{ width: column.width }}
+              sx={{
+                backgroundColor: "background.paper",
+                fontSize: tableCellFontSize,
+                padding:
+                  label === "Title" || label === "Created" ? "7px 35px" : "7px"
+              }}
+            >
+              {column.label}
+            </TableCell>
+          );
+        })}
+      </TableRow>
+    );
+  }
+
+  if (isLoadingGlobal) return <CircularProgress />;
+
   return (
     <Paper style={{ width: "100%" }}>
       <TableContainer component={Paper}>
         <Table>
           <TableHead>{fixedHeaderContent()}</TableHead>
           <TableBody>
-            {data.map((row, index) => (
-              <TableRow key={index}>
-                {rowContent(index, row, openProduct)}
-              </TableRow>
-            ))}
+            {processedData
+              .sort((a, b) => a.rowData.created - b.rowData.created)
+              .map(({ index, rowData }) => (
+                <TableRow key={index}>
+                  {rowContent(index, rowData, openProduct)}
+                </TableRow>
+              ))}
           </TableBody>
         </Table>
       </TableContainer>
       {children}
     </Paper>
   );
-}
-
-export const AvatarWrapper = ({ user }: any) => {
-  const userAvatarHash = useSelector(
-    (state: RootState) => state.global.userAvatarHash
-  );
-  const avatarLink = React.useMemo(() => {
-    if (!user || !userAvatarHash) return "";
-    const findUserAvatar = userAvatarHash[user];
-    if (!findUserAvatar) return "";
-    return findUserAvatar;
-  }, [userAvatarHash, user]);
-
-  return <Avatar src={avatarLink} alt={`${user}'s avatar`} />;
 };
