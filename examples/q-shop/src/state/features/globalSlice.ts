@@ -96,6 +96,7 @@ export const globalSlice = createSlice({
       state.isLoadingCurrentBlog = false;
     },
     setDataContainer: (state, action) => {
+      console.log("setDataContainer", action.payload);
       let categories: any = {};
       state.dataContainer = action.payload;
       const mappedProducts = Object.keys(action.payload.products)
@@ -158,15 +159,11 @@ export const globalSlice = createSlice({
     updateCatalogueHashMap: (state, action) => {
       const catalogue = action.payload;
       Object.keys(catalogue).forEach((key) => {
-        state.catalogueHashMap = {
-          ...state.catalogueHashMap,
-          [key]: catalogue[key]
-        };
+        state.catalogueHashMap[key] = catalogue[key]
       });
     },
     setCatalogueHashMap: (state, action) => {
       const catalogue = action.payload;
-      console.log("setCatalogueHashMap", catalogue);
       state.catalogueHashMap[catalogue.id] = catalogue;
     },
     upsertProducts: (state, action) => {

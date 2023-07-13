@@ -174,7 +174,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
 
   return (
     <>
-      {images.length > 0 ? (
+      {images.length > 0 && (
         <ProductImagesRow>
           {images.map((img, index) => (
             <LogoPreviewRow>
@@ -192,7 +192,8 @@ export const ProductForm: React.FC<ProductFormProps> = ({
             </LogoPreviewRow>
           ))}
         </ProductImagesRow>
-      ) : (
+      )}
+      {(images.length === 0 || images.length < 3) && (
         <ImageUploader
           onPick={(img: string) => setImages((prev) => [...prev, img])}
         >
@@ -207,7 +208,9 @@ export const ProductForm: React.FC<ProductFormProps> = ({
           </AddLogoButton>
         </ImageUploader>
       )}
-      <MaximumImagesRow>*Maximum 3 images</MaximumImagesRow>
+      {images.length > 0 && (
+        <MaximumImagesRow>*Maximum 3 images</MaximumImagesRow>
+      )}
       <CustomInputField
         name="title"
         label="Title"
@@ -295,18 +298,24 @@ export const ProductForm: React.FC<ProductFormProps> = ({
       </CategoryRow>
       {editProduct && (
         <>
-          <InputFieldCustomLabel id="status">Status</InputFieldCustomLabel>
-          <Select
+          <InputFieldCustomLabel id="product-status">
+            Product Status
+          </InputFieldCustomLabel>
+          <CustomSelect
+            labelId="product-status"
             name="status"
+            label="Product Status"
             value={selectedStatus}
-            onChange={(e) => setSelectedStatus(e.target.value)}
-            variant="filled"
+            onChange={(event) =>
+              setSelectedStatus(event.target.value as string)
+            }
             required
+            fullWidth
           >
             <CustomMenuItem value="AVAILABLE">Available</CustomMenuItem>
             <CustomMenuItem value="RETIRED">Retired</CustomMenuItem>
             <CustomMenuItem value="OUT_OF_STOCK">Out of stock</CustomMenuItem>
-          </Select>
+          </CustomSelect>
         </>
       )}
       <ButtonRow>
@@ -314,7 +323,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
           Cancel
         </CancelButton>
         <CreateButton onClick={handleSubmit} variant="contained">
-          Add Product
+          {editProduct ? "Edit Product" : "Add Product"}
         </CreateButton>
       </ButtonRow>
     </>
