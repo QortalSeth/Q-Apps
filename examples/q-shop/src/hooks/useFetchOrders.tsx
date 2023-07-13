@@ -57,8 +57,7 @@ export const useFetchOrders = () => {
       user,
       catalogueId
     });
-    console.log(res, "get catalogue here");
-    if (res?.isValid) {
+    if (res?.isValid && !catalogueHashMap.hasOwnProperty(catalogueId)) {
       dispatch(setCatalogueHashMap(res));
     }
   };
@@ -192,8 +191,6 @@ export const useFetchOrders = () => {
 
   const getProducts = React.useCallback(async () => {
     if (!store) return;
-    console.log("get products passes here");
-    console.log("listProducts", listProducts);
     try {
       dispatch(setIsLoadingGlobal(true));
       const offset = products.length;
@@ -224,6 +221,7 @@ export const useFetchOrders = () => {
         }
       }
     } catch (error) {
+      console.error(error);
     } finally {
       dispatch(setIsLoadingGlobal(false));
     }

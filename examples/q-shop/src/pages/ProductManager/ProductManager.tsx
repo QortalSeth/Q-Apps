@@ -6,7 +6,7 @@ import { Box, useTheme } from "@mui/material";
 import LazyLoad from "../../components/common/LazyLoad";
 import { NewProduct } from "./NewProduct";
 import { ShowOrder } from "./ShowOrder";
-import SimpleTable from "./ProductTable";
+import { SimpleTable } from "./ProductTable";
 import { setNotification } from "../../state/features/notificationsSlice";
 import { objectToBase64 } from "../../utils/toBase64";
 import ShortUniqueId from "short-unique-id";
@@ -16,11 +16,9 @@ import {
   DataContainer,
   clearAllProductsToSave,
   removeFromProductsToSave,
-  setCatalogueHashMap,
   setDataContainer,
   setProducts,
-  updateCatalogueHashMap,
-  updateRecentlyVisitedStoreId
+  updateCatalogueHashMap
 } from "../../state/features/globalSlice";
 import { Price, Product } from "../../state/features/storeSlice";
 import { useFetchOrders } from "../../hooks/useFetchOrders";
@@ -48,9 +46,10 @@ import { CategorySVG } from "../../assets/svgs/CategorySVG";
 import { LoyaltySVG } from "../../assets/svgs/LoyaltySVG";
 import useConfirmationModal from "../../hooks/useConfirmModal";
 import { CreateButton } from "../../components/modals/CreateStoreModal-styles";
-import { useProductsToSaveLocalStorage } from "../../hooks/useProductsToSaveLocalStorage";
+// import { useProductsToSaveLocalStorage } from "../../hooks/useProductsToSaveLocalStorage";
 import { ReusableModal } from "../../components/modals/ReusableModal";
 import { useParams } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 
 const uid = new ShortUniqueId({ length: 10 });
 
@@ -71,6 +70,13 @@ export const ProductManager = () => {
   );
 
   const orders = useSelector((state: RootState) => state.order.orders);
+
+  const listProducts = useSelector(
+    (state: RootState) => state.global.listProducts
+  );
+
+  const { products: dataContainerProducts } = listProducts;
+
   // Products to map
   const products = useSelector((state: RootState) => state.global.products);
 
@@ -92,17 +98,29 @@ export const ProductManager = () => {
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const location = useLocation();
 
   // get and set productsToSave from local storage
   // const { productsToSaveLS, saveProductsToLocalStorage } =
   //   useProductsToSaveLocalStorage();
 
-  // When component mounts, updated recently viewed store id in global redux store to get latest data container and current store inside product manager
+  // Redirect to Store page if they're hot reloading
   useEffect(() => {
-    if (store) {
-      dispatch(updateRecentlyVisitedStoreId(store));
-    }
-  }, [store]);
+    const handleLoad = () => {
+      const { state } = location;
+
+      // Prevent automatic redirection if the state object exists or if the state.key is default (navigated from another component)
+      if (!state || state.key === "default") {
+        navigate(`/${userName}/${userName}/${store}`);
+      }
+    };
+
+    window.addEventListener("load", handleLoad);
+
+    return () => {
+      window.removeEventListener("load", handleLoad);
+    };
+  }, [navigate, location]);
 
   // Get productsToSave from Redux store and set them in local storage
   // useEffect(() => {
@@ -361,9 +379,18 @@ export const ProductManager = () => {
         })
       );
 
+      const newProductsArray = Object.keys(dataContainerToPublish.products).map(
+        (key) => {
+          const product = dataContainerToPublish.products[key];
+          return {
+            ...product,
+            id: key
+          };
+        }
+      );
+
       // Reset products to first 20 in the array of listProducts
-      dispatch(setProducts(Object.values(dataContainerToPublish.products)));
-      console.log("listOfCataloguesToPublish", listOfCataloguesToPublish);
+      dispatch(setProducts(newProductsArray));
 
       const newCatalogueHashMapFunc = () => {
         let newCatalogueHashMap: Record<string, Catalogue> = {};
@@ -371,7 +398,6 @@ export const ProductManager = () => {
         listOfCataloguesToPublish.forEach((catalogue) => {
           newCatalogueHashMap[catalogue.id] = catalogue;
         });
-        console.log("newCatalogueHashMap", newCatalogueHashMap);
         return newCatalogueHashMap;
       };
 
@@ -441,7 +467,9 @@ export const ProductManager = () => {
     await getProducts();
   }, [getProducts]);
 
-  console.log("products", products);
+  useEffect(() => {
+    handleGetProducts();
+  }, [dataContainerProducts]);
 
   return (
     <ProductManagerContainer>

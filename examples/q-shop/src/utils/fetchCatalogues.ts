@@ -28,7 +28,9 @@ export const fetchAndEvaluateCatalogues = async (data: any) => {
         }
       }
       return obj
-    } catch (error) {}
+    } catch (error) {
+      console.error(error);
+    }
   }
 
   const res = await getCatalogues()
