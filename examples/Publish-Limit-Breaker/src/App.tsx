@@ -6,8 +6,8 @@ import { lightTheme, darkTheme } from './styles/theme'
 import { Provider } from 'react-redux'
 import {GlobalWrapper} from './wrappers/GlobalWrapper'
 import Notification from './components/common/Notification/Notification'
-import { Home } from './pages/Home/Home'
 import { store } from './globalState/store'
+import SubmissionForm from "./pages/SubmissionForm";
 
 function App() {
   // @ts-ignore
@@ -19,7 +19,7 @@ function App() {
           <GlobalWrapper>
             <CssBaseline />
             <Routes>
-              <Route path="/" element={<Home />} />
+              <Route path="/" element={<SubmissionForm />} />
             </Routes>
           </GlobalWrapper>
       </ThemeProvider>
