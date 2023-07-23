@@ -1,5 +1,6 @@
 import { createSlice } from '@reduxjs/toolkit'
 import { RootState } from '../store'
+import { Product } from './storeSlice'
 
 interface OrderState {
   hashMapOrders: Record<string, Order>
@@ -11,8 +12,19 @@ const initialState: OrderState = {
   orders: [],
   isOpen: false
 }
+export interface TotalPriceDetails {
+  totalPrice: number;
+}
 
-interface Details { }
+export interface ProductDetails {
+  product: Product;
+  catalogueId: string;
+  quantity: number;
+  pricePerUnit: number;
+  totalProductPrice: number;
+}
+
+export type Details = TotalPriceDetails & Record<string, ProductDetails>;
 
 interface Delivery {
   customerName: string
@@ -43,8 +55,9 @@ export interface Order {
   communicationMethod?: CommunicationMethod[]
   user: string
   id: string
-  totalPrice?: string
+  totalPrice?: number
   status?: string
+  note?: string
 }
 
 export interface Status {
@@ -56,6 +69,7 @@ export const orderSlice = createSlice({
   initialState,
   reducers: {
     upsertOrders: (state, action) => {
+      console.log('action.payload orders', action.payload)
       action.payload.forEach((order: Order) => {
         const index = state.orders.findIndex((p) => p.id === order.id)
         if (index !== -1) {

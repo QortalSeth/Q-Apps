@@ -5,7 +5,7 @@ import { RootState } from "../../state/store";
 import { Box, useTheme } from "@mui/material";
 import LazyLoad from "../../components/common/LazyLoad";
 import { NewProduct } from "./NewProduct";
-import { ShowOrder } from "./ShowOrder";
+import { ShowOrder } from "./ShowOrder/ShowOrder";
 import { SimpleTable } from "./ProductTable";
 import { setNotification } from "../../state/features/notificationsSlice";
 import { objectToBase64 } from "../../utils/toBase64";
@@ -39,7 +39,7 @@ import {
   DockedProductsToSaveCard,
   ProductManagerContainer
 } from "./ProductManager-styles";
-import OrderTable from "./OrderTable";
+import { OrderTable } from "./OrderTable";
 import { BackToStorefrontButton } from "../Store/Store-styles";
 import { QortalSVG } from "../../assets/svgs/QortalSVG";
 import { CategorySVG } from "../../assets/svgs/CategorySVG";

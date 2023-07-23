@@ -1,12 +1,5 @@
-import React, { useMemo } from "react";
-import {
-  Card,
-  CardContent,
-  CardMedia,
-  Typography,
-  Button,
-  useTheme
-} from "@mui/material";
+import { useMemo } from "react";
+import { Card, CardContent, CardMedia, useTheme } from "@mui/material";
 import { RootState } from "../../state/store";
 import { Product } from "../../state/features/storeSlice";
 import { useDispatch, useSelector } from "react-redux";

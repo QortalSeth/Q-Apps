@@ -9,7 +9,6 @@ import {
   toggleCreateStoreModal
 } from "../../../state/features/globalSlice";
 import { useDispatch } from "react-redux";
-import BookmarkIcon from "@mui/icons-material/Bookmark";
 import { BlockedNamesModal } from "../../common/BlockedNamesModal/BlockedNamesModal";
 import EmailIcon from "@mui/icons-material/Email";
 import {
@@ -24,7 +23,7 @@ import {
   ThemeSelectRow,
   QShopLogoContainer,
   StoreManagerIcon,
-  CartIcon
+  StoresButton
 } from "./Navbar-styles";
 import { AccountCircleSVG } from "../../../assets/svgs/AccountCircleSVG";
 import QShopLogo from "../../../assets/img/QShopLogo.webp";
@@ -36,7 +35,6 @@ import {
   setFilterValue,
   setIsFiltering
 } from "../../../state/features/storeSlice";
-import { setIsOpen } from "../../../state/features/cartSlice";
 import { Store } from "../../../state/features/storeSlice";
 import { OrdersSVG } from "../../../assets/svgs/OrdersSVG";
 import { resetOrders } from "../../../state/features/orderSlice";
@@ -140,11 +138,8 @@ const NavBar: React.FC<Props> = ({
           </AuthenticateButton>
         )}
         {isAuthenticated && userName && hasAttemptedToFetchShopInitial && (
-          <StoreManagerIcon
-            color={theme.palette.text.primary}
-            height={"32"}
-            width={"32"}
-            onClickFunc={(e: any) => {
+          <StoresButton
+            onClick={(e: any) => {
               if (myStores.length > 0) {
                 handleClick(e);
                 setOpenStoreManagerDropdown(true);
@@ -152,7 +147,14 @@ const NavBar: React.FC<Props> = ({
                 dispatch(toggleCreateStoreModal(true));
               }
             }}
-          />
+          >
+            Stores
+            <StoreManagerIcon
+              color={theme.palette.text.primary}
+              height={"32"}
+              width={"32"}
+            />
+          </StoresButton>
         )}
         {isAuthenticated && userName && (
           <>
@@ -231,7 +233,13 @@ const NavBar: React.FC<Props> = ({
             horizontal: "left"
           }}
         >
-          <DropdownContainer onClick={() => navigate("/my-orders")}>
+          <DropdownContainer
+            onClick={() => {
+              handleCloseUserDropdown();
+              handleCloseStoreDropdown();
+              navigate("/my-orders");
+            }}
+          >
             <OrdersSVG color={"#f9ff34"} height={"22"} width={"22"} />
             <DropdownText>My Orders</DropdownText>
           </DropdownContainer>
@@ -257,7 +265,8 @@ const NavBar: React.FC<Props> = ({
                 width: "100%",
                 display: "flex",
                 gap: "5px",
-                alignItems: "center"
+                alignItems: "center",
+                textDecoration: "none"
               }}
             >
               <EmailIcon

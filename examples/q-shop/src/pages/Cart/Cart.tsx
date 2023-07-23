@@ -97,10 +97,22 @@ export const Cart = () => {
 
   const handlePurchase = async () => {
     if (!localCart) {
-      throw new Error("Cannot find cart");
+      dispatch(
+        setNotification({
+          alertType: "error",
+          msg: "Cannot find cart"
+        })
+      );
+      return;
     }
     if (cartOrders.length === 0) {
-      throw new Error("You have no items in your cart");
+      dispatch(
+        setNotification({
+          alertType: "error",
+          msg: "You have no items in your cart"
+        })
+      );
+      return;
     }
     const details = (cartOrders || []).reduce(
       (acc: any, key) => {
@@ -117,7 +129,15 @@ export const Cart = () => {
           product.price?.find(
             (priceItem: any) => priceItem?.currency === "qort"
           )?.value || null;
-        if (!priceInQort) throw new Error("Could not retrieve price");
+        if (!priceInQort) {
+          dispatch(
+            setNotification({
+              alertType: "error",
+              msg: "Could not find the price"
+            })
+          );
+          return;
+        }
         const totalProductPrice = priceInQort * quantity;
         acc[productId] = {
           product,
@@ -135,7 +155,15 @@ export const Cart = () => {
     );
     details["totalPrice"] = details["totalPrice"].toFixed(8);
     const priceToPay = details["totalPrice"];
-    if (!storeOwner) throw new Error("Cannot find store owner");
+    if (!storeOwner) {
+      dispatch(
+        setNotification({
+          alertType: "error",
+          msg: "Cannot find the store owner"
+        })
+      );
+      return;
+    }
     let res = await qortalRequest({
       action: "GET_NAME_DATA",
       name: storeOwner
@@ -145,7 +173,15 @@ export const Cart = () => {
       action: "GET_ACCOUNT_DATA",
       address: address
     });
-    if (!resAddress?.publicKey) throw new Error("Cannot find store owner");
+    if (!resAddress?.publicKey) {
+      dispatch(
+        setNotification({
+          alertType: "error",
+          msg: "Cannot find the store owner"
+        })
+      );
+      return;
+    }
     const responseSendCoin = await qortalRequest({
       action: "SEND_COIN",
       coin: "QORT",
@@ -161,7 +197,8 @@ export const Cart = () => {
         version: 1,
         details,
         delivery: {
-          customerName: "Phil",
+          // Needs to be changed and not hard-coded
+          customerName: username,
           shippingAddress: {
             streetAddress: "2323 Street name",
             city: "Milan",
@@ -195,6 +232,7 @@ export const Cart = () => {
         -6
       )}_mail_${mailId}`;
 
+      // HTML with the order details (Delivery address, what they bought, the price)
       const htmlContent = `
         <div>You have sold a product for your store!</div>
       `;
@@ -231,7 +269,7 @@ export const Cart = () => {
       };
       await qortalRequest(multiplePublish);
       // Clear this cart state from global carts redux
-      dispatch(removeCartFromCarts(storeId));
+      dispatch(removeCartFromCarts({ storeId }));
       // Close the modal and set notification message
       closeModal();
       dispatch(
@@ -388,58 +426,65 @@ export const Cart = () => {
             })
           )}
         </Grid>
-        <Grid item xs={12} sm={3} sx={{ width: "100%" }}>
-          <TotalSumContainer>
-            <TotalSumHeader>Order Summary</TotalSumHeader>
-            <TotalSumItems>
-              {(cartOrders || []).map((key) => {
-                const order = localCart?.orders[key];
-                const quantity = order?.quantity;
-                const productId = order?.productId;
-                const catalogueId = order?.catalogueId;
-                let product = null;
-                if (productId && catalogueId && catalogueHashMap[catalogueId]) {
-                  product = catalogueHashMap[catalogueId]?.products[productId];
-                }
-                if (!product) return null;
-                const priceInQort: number | null =
-                  product.price?.find(
-                    (priceItem: any) => priceItem?.currency === "qort"
-                  )?.value || null;
-                return (
-                  <TotalSumItem>
-                    <TotalSumItemTitle>
-                      x{quantity} {product.title}
-                    </TotalSumItemTitle>
-                    <TotalSumItemTitle>
-                      <QortalSVG
-                        color={theme.palette.text.primary}
-                        height={"18"}
-                        width={"18"}
-                      />
-                      {priceInQort}
-                    </TotalSumItemTitle>
-                  </TotalSumItem>
-                );
-              })}
-            </TotalSumItems>
-            <OrderTotalRow>
-              Total:{" "}
-              <QortalSVG
-                color={theme.palette.text.primary}
-                height={"22"}
-                width={"22"}
-              />
-              {totalSum}
-            </OrderTotalRow>
-            <CheckoutButton
-              style={{ marginTop: "15px" }}
-              onClick={handlePurchase}
-            >
-              Purchase
-            </CheckoutButton>
-          </TotalSumContainer>
-        </Grid>
+        {localCart && cartOrders.length > 0 && (
+          <Grid item xs={12} sm={3} sx={{ width: "100%" }}>
+            <TotalSumContainer>
+              <TotalSumHeader>Order Summary</TotalSumHeader>
+              <TotalSumItems>
+                {(cartOrders || []).map((key) => {
+                  const order = localCart?.orders[key];
+                  const quantity = order?.quantity;
+                  const productId = order?.productId;
+                  const catalogueId = order?.catalogueId;
+                  let product = null;
+                  if (
+                    productId &&
+                    catalogueId &&
+                    catalogueHashMap[catalogueId]
+                  ) {
+                    product =
+                      catalogueHashMap[catalogueId]?.products[productId];
+                  }
+                  if (!product) return null;
+                  const priceInQort: number | null =
+                    product.price?.find(
+                      (priceItem: any) => priceItem?.currency === "qort"
+                    )?.value || null;
+                  return (
+                    <TotalSumItem>
+                      <TotalSumItemTitle>
+                        x{quantity} {product.title}
+                      </TotalSumItemTitle>
+                      <TotalSumItemTitle>
+                        <QortalSVG
+                          color={theme.palette.text.primary}
+                          height={"18"}
+                          width={"18"}
+                        />
+                        {priceInQort}
+                      </TotalSumItemTitle>
+                    </TotalSumItem>
+                  );
+                })}
+              </TotalSumItems>
+              <OrderTotalRow>
+                Total:{" "}
+                <QortalSVG
+                  color={theme.palette.text.primary}
+                  height={"22"}
+                  width={"22"}
+                />
+                {totalSum}
+              </OrderTotalRow>
+              <CheckoutButton
+                style={{ marginTop: "15px" }}
+                onClick={handlePurchase}
+              >
+                Purchase
+              </CheckoutButton>
+            </TotalSumContainer>
+          </Grid>
+        )}
       </CartContainer>
       <TimesIcon
         onClickFunc={closeModal}

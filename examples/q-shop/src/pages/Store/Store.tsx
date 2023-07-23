@@ -99,10 +99,10 @@ export const Store = () => {
     categories: []
   });
   const [totalCartQuantity, setTotalCartQuantity] = useState<number>(0);
-  const [filterPrice, setFilterPrice] = useState<PriceFilter>(
-    PriceFilter.highest
+  const [filterPrice, setFilterPrice] = useState<PriceFilter | null>(null);
+  const [filterDate, setFilterDate] = useState<DateFilter | null>(
+    DateFilter.newest
   );
-  const [filterDate, setFilterDate] = useState<DateFilter>(DateFilter.newest);
   const [categoryChips, setCategoryChips] = useState<{ label: string }[]>([]);
 
   const getProducts = useCallback(async () => {
@@ -314,8 +314,10 @@ export const Store = () => {
     const newArray4: any = newArray3.sort((a: Product, b: Product) => {
       if (filterDate === DateFilter.newest) {
         return b?.created - a?.created;
-      } else {
+      } else if (filterDate === DateFilter.oldest) {
         return a?.created - b?.created;
+      } else {
+        return newArray3;
       }
     });
     return newArray4;
@@ -412,9 +414,10 @@ export const Store = () => {
               Highest
               <FiltersCheckbox
                 checked={filterPrice === PriceFilter.highest}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                  setFilterPrice(PriceFilter.highest)
-                }
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                  setFilterPrice(PriceFilter.highest);
+                  setFilterDate(null);
+                }}
                 inputProps={{ "aria-label": "controlled" }}
               />
             </FiltersRow>
@@ -422,9 +425,10 @@ export const Store = () => {
               Lowest
               <FiltersCheckbox
                 checked={filterPrice === PriceFilter.lowest}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                  setFilterPrice(PriceFilter.lowest)
-                }
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                  setFilterPrice(PriceFilter.lowest);
+                  setFilterDate(null);
+                }}
                 inputProps={{ "aria-label": "controlled" }}
               />
             </FiltersRow>
@@ -442,9 +446,10 @@ export const Store = () => {
               Most Recent
               <FiltersCheckbox
                 checked={filterDate === DateFilter.newest}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                  setFilterDate(DateFilter.newest)
-                }
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                  setFilterDate(DateFilter.newest);
+                  setFilterPrice(null);
+                }}
                 inputProps={{ "aria-label": "controlled" }}
               />
             </FiltersRow>
@@ -452,9 +457,10 @@ export const Store = () => {
               Oldest
               <FiltersCheckbox
                 checked={filterDate === DateFilter.oldest}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                  setFilterDate(DateFilter.oldest)
-                }
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                  setFilterDate(DateFilter.oldest);
+                  setFilterPrice(null);
+                }}
                 inputProps={{ "aria-label": "controlled" }}
               />
             </FiltersRow>

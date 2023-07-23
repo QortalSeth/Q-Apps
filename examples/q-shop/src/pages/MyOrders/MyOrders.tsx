@@ -1,70 +1,44 @@
-import React, {
-  FC,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState
-} from "react";
-import { useNavigate } from "react-router-dom";
-import { useDispatch, useSelector } from "react-redux";
+import { useMemo, useState, useCallback, useEffect } from "react";
+import { useSelector } from "react-redux";
 import { RootState } from "../../state/store";
-
-import {
-  Box,
-  Button,
-  Input,
-  Typography,
-  useTheme,
-  IconButton
-} from "@mui/material";
+import { CircularProgress, Typography } from "@mui/material";
+import { Box } from "@mui/material";
 import LazyLoad from "../../components/common/LazyLoad";
-import { NewProduct } from "../ProductManager/NewProduct";
-import Tabs from "@mui/material/Tabs";
-import Tab from "@mui/material/Tab";
-import { ShowOrder } from "../ProductManager/ShowOrder";
-import { SimpleTable } from "../ProductManager/ProductTable";
-import { setNotification } from "../../state/features/notificationsSlice";
-import { objectToBase64 } from "../../utils/toBase64";
-import ShortUniqueId from "short-unique-id";
-import {
-  Catalogue,
-  CatalogueDataContainer,
-  DataContainer
-} from "../../state/features/globalSlice";
-import { Price, Product } from "../../state/features/storeSlice";
+import { ShowOrder } from "../ProductManager/ShowOrder/ShowOrder";
 import { useFetchOrders } from "../../hooks/useFetchOrders";
-import { AVAILABLE } from "../../constants/product-status";
-import OrderTable from "../ProductManager/OrderTable";
-
-const uid = new ShortUniqueId({ length: 10 });
+import { OrderTable } from "../ProductManager/OrderTable";
 
 export const MyOrders = () => {
-  const theme = useTheme();
   const { user } = useSelector((state: RootState) => state.auth);
 
   const myOrders = useSelector((state: RootState) => state.global.myOrders);
+  const store = useSelector(
+    (state: RootState) => state.global?.currentStore?.id
+  );
+  // Redux loader state for spinner
+  const { isLoadingGlobal } = useSelector((state: RootState) => state.global);
 
-  const products = useSelector((state: RootState) => state.global.products);
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [order, setOrder] = useState<any>(null);
-  const [replyTo, setReplyTo] = useState<any>(null);
 
-  const [valueTab, setValueTab] = React.useState(0);
-  const [productToEdit, setProductToEdit] = useState<Product | null>(null);
   const userName = useMemo(() => {
     if (!user?.name) return "";
     return user.name;
   }, [user]);
 
-  const dispatch = useDispatch();
-  const navigate = useNavigate();
-
   const { getMyOrders } = useFetchOrders();
-  const handleGetOrders = React.useCallback(async () => {
+
+  const handleGetOrders = useCallback(async () => {
     if (!userName) return;
     await getMyOrders(userName);
   }, [getMyOrders, userName]);
+
+  // Get My Orders if store changes (on hyperlink for example, or if there's a page refresh)
+  useEffect(() => {
+    if (store) {
+      handleGetOrders();
+    }
+  }, [store]);
 
   return (
     <Box
@@ -86,7 +60,12 @@ export const MyOrders = () => {
           flexDirection: "column"
         }}
       >
-        <ShowOrder isOpen={isOpen} setIsOpen={setIsOpen} order={order} />
+        <ShowOrder
+          from="myOrders"
+          isOpen={isOpen}
+          setIsOpen={setIsOpen}
+          order={order}
+        />
         <OrderTable
           openOrder={(order) => {
             setOrder(order);
