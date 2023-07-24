@@ -57,7 +57,7 @@ export const ProductPage = () => {
 
 
         const getProductData = async () => {
-            const getFromQDN = true
+            const getFromQDN = false
             const productInRedux = global?.catalogueHashMap[catalogueID].products[productID]
             const dataExists = productID && catalogueID && storeOwner
 
