@@ -4,12 +4,16 @@ import {Cart as CartInterface, setIsOpen, setProductToCart} from '../../state/fe
 import {RootState} from "../../state/store";
 import {useParams} from "react-router-dom";
 import {Button, Drawer, IconButton, InputAdornment, TextField, useTheme} from "@mui/material";
+
 import TabImageList from "../../components/common/TabImageList";
 import {Product} from "../../state/features/storeSlice"
 import AddIcon from '@mui/icons-material/Add';
 import RemoveIcon from '@mui/icons-material/Remove';
+import DangerousIcon from '@mui/icons-material/Dangerous';
 import {CartIcon} from "../../components/layout/Navbar/Navbar-styles";
 import {CartIconContainer, NotificationBadge} from "../Store/Store-styles";
+import {DataContainer, ProductDataContainer} from "../../state/features/globalSlice";
+import { useFetchOrders } from "../../hooks/useFetchOrders";
 
 export const ProductPage = () => {
     const dispatch = useDispatch()
@@ -18,9 +22,9 @@ export const ProductPage = () => {
     const productID = params.product;
     const catalogueID = params.catalogue;
     const noProduct = <div>Product ID ${productID} Not Found</div>
-
-    const productDebugging = false
-    if (productID) {
+    const [product, setProduct] = useState<Product|undefined>(undefined)
+    const productDebugging = true
+    if (productID && catalogueID) {
 
         const [cartAddCount, setCartAddCount] = useState<string>('1')
         const [totalCartQuantity, setTotalCartQuantity] = useState<number>(0);
@@ -28,7 +32,8 @@ export const ProductPage = () => {
         const {carts} = useSelector((state: RootState) => state.cart);
         const { user } = useSelector((state: RootState) => state.auth);
         const { storeId, storeOwner } = useSelector((state: RootState) => state.store);
-
+        const { checkAndUpdateResourceCatalogue, getCatalogue } = useFetchOrders();
+        console.log('after useFetchOrders called')
         if (productDebugging) console.log('params is: ', params)
         if (productDebugging) console.log('ID is: ', productID)
 
@@ -49,18 +54,30 @@ export const ProductPage = () => {
             }
         }, [carts, user, storeId]);
 
-        const getProductData = (productID: string | undefined) => {
-            if (productID) {
-                if (catalogueID) {
-                    const productData: Product = global?.catalogueHashMap[catalogueID].products[productID];
-                    if (productDebugging) console.log('catalogueID is: ', catalogueID);
-                    return productData
-                } else return undefined
-            } else return undefined
+
+
+        const getProductData = async () => {
+            const getFromQDN = true
+            const productInRedux = global?.catalogueHashMap[catalogueID].products[productID]
+            const dataExists = productID && catalogueID && storeOwner
+
+            if ((!productInRedux || getFromQDN) && dataExists) {
+                {
+                    checkAndUpdateResourceCatalogue({id: catalogueID})
+                    await getCatalogue(storeOwner, catalogueID);
+                    if (productDebugging) console.log('catalogueHashMap retrieved from QDN')
+                }
+                    return global?.catalogueHashMap[catalogueID].products[productID];
+            }
+            else return undefined;
         }
 
-        const product = getProductData(productID)
-        console.log('Product is: ', product)
+        useEffect(() => {
+            if (productDebugging) console.log('in ProductPage useEffect')
+            const awaitProductData = async () => {
+            setProduct(await getProductData())
+            }
+            awaitProductData()}, [])
 
 
         // const priceInQort = useMemo(()=> {
@@ -128,6 +145,43 @@ export const ProductPage = () => {
         }
 
 
+        const status = product?.status
+        console.log('product status: ', status)
+        const available = status === 'AVAILABLE';
+        const availableJSX =                         (<><TextField InputProps={{
+            endAdornment: (
+                <InputAdornment position='end'>
+                    <IconButton onClick={(e) => changeValue(cartAddCount, 1)}><AddIcon/> </IconButton>
+                    <IconButton onClick={(e) => changeValue(cartAddCount, -1)}><RemoveIcon/> </IconButton>
+                </InputAdornment>)
+        }}
+                                                                value={cartAddCount}
+                                                                onChange={(e) => {
+                                                                    setCartAddCount(numFilter(e.currentTarget.value || '-1', minCart, maxCart))
+                                                                }}
+                                                                autoComplete='off'
+                                                                label='Quantity'
+                                                                style={{width: '34vw'}}
+        >
+        </TextField>
+        <Button style={{marginTop: '2px', width: '34vw'}} variant={'contained'} color={'primary'}
+                size={'large'} onClick={addToCart}>
+            <CartIcon
+                color={theme.palette.text.primary}
+                height={"32"}
+                width={"32"}
+            /><span style={{marginLeft: '5px'}}>Add to Cart</span>
+        </Button></>)
+
+        const unavailableJSX = <>
+            <Button style={{marginTop: '2px', width: '34vw'}} variant={'contained'} color={'error'} size={'large'}>
+            <DangerousIcon
+                height={"32"}
+                width={"32"}
+            /><span style={{marginLeft: '5px'}}>Out of Stock</span>
+        </Button></>
+
+
         return (
             product ?
                 <div>
@@ -137,29 +191,7 @@ export const ProductPage = () => {
                             <h1>{product.title}</h1>
                             <p>{product.description}</p>
                             <h3>Price: {price}</h3>
-                            <TextField InputProps={{
-                                endAdornment: (
-                                    <InputAdornment position='end'>
-                                        <IconButton onClick={(e) => changeValue(cartAddCount, 1)}><AddIcon/> </IconButton>
-                                        <IconButton onClick={(e) => changeValue(cartAddCount, -1)}><RemoveIcon/> </IconButton>
-                                    </InputAdornment>)
-                            }}
-                                       value={cartAddCount}
-                                       onChange={(e) => {
-                                           setCartAddCount(numFilter(e.currentTarget.value || '-1', minCart, maxCart))
-                                       }}
-                                       autoComplete='off'
-                                       label='Quantity'
-                                       style={{width: '34vw'}}
-                            >
-                            </TextField>
-                            <Button style={{marginTop: '2px', width: '34vw'}} variant={'contained'} color={'primary'}
-                                    size={'large'} onClick={addToCart}>
-                                <CartIcon
-                                    color={theme.palette.text.primary}
-                                    height={"32"}
-                                    width={"32"}
-                                /><span style={{marginLeft: '5px'}}>Add to Cart</span></Button>
+                            {available ? availableJSX: unavailableJSX}
                         </div>
                         {user?.name ? (
                             <div style={{display: 'flex', justifyContent:'end', paddingRight:'10px', paddingTop:'10px'}}>

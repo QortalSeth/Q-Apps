@@ -23,7 +23,7 @@ const TabImageList = ({divStyle={}, imgStyle={}, images}: TabImageListProps) => 
         }
             const imageRow = images.length > 1 ? images.map( (image,index)=>
                 <img style={imageFocusedIndex === index ? imageTabOutlineStyle:imageTabStyle}
-                     src={image} alt='No image found' onClick={() => switchMainImage(index)}/>):<div/>
+                     src={image} alt={`Image #${index}`} onClick={() => switchMainImage(index)}/>):<div/>
 
 
         const defaultStyle = {width: '100%'}
