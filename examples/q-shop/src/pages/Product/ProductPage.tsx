@@ -33,9 +33,6 @@ export const ProductPage = () => {
         const { user } = useSelector((state: RootState) => state.auth);
         const { storeId, storeOwner } = useSelector((state: RootState) => state.store);
         const { checkAndUpdateResourceCatalogue, getCatalogue } = useFetchOrders();
-        console.log('after useFetchOrders called')
-        if (productDebugging) console.log('params is: ', params)
-        if (productDebugging) console.log('ID is: ', productID)
 
 
         // Set cart notifications when cart changes
@@ -65,7 +62,6 @@ export const ProductPage = () => {
                 {
                     checkAndUpdateResourceCatalogue({id: catalogueID})
                     await getCatalogue(storeOwner, catalogueID);
-                    if (productDebugging) console.log('catalogueHashMap retrieved from QDN')
                 }
                     return global?.catalogueHashMap[catalogueID].products[productID];
             }
@@ -73,7 +69,6 @@ export const ProductPage = () => {
         }
 
         useEffect(() => {
-            if (productDebugging) console.log('in ProductPage useEffect')
             const awaitProductData = async () => {
             setProduct(await getProductData())
             }
@@ -119,9 +114,7 @@ export const ProductPage = () => {
         };
 
         const numFilter = (value: string, minValue: number, maxValue: number, emptyReturn = '') => {
-            if (debugNumFilter) console.log('starting value is: ', value);
             if (value === '-1') {
-                if (debugNumFilter) console.log('filtered value is: ', emptyReturn);
                 return emptyReturn;
             }
             const isPositiveNum = /^[0-9]+$/.test(value);
@@ -129,7 +122,6 @@ export const ProductPage = () => {
 
             if (isPositiveNum) {
                 const minMaxCheck = setMinMaxValueDec(value, minValue, maxValue);
-                if (debugNumFilter) console.log('filtered value is: ', minMaxCheck);
                 return minMaxCheck;
             }
 
@@ -146,7 +138,6 @@ export const ProductPage = () => {
 
 
         const status = product?.status
-        console.log('product status: ', status)
         const available = status === 'AVAILABLE';
         const availableJSX =                         (<><TextField InputProps={{
             endAdornment: (
