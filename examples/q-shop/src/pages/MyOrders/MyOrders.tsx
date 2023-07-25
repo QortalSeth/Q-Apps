@@ -6,7 +6,7 @@ import { Box } from "@mui/material";
 import LazyLoad from "../../components/common/LazyLoad";
 import { ShowOrder } from "../ProductManager/ShowOrder/ShowOrder";
 import { useFetchOrders } from "../../hooks/useFetchOrders";
-import { OrderTable } from "../ProductManager/OrderTable";
+import { OrderTable } from "../ProductManager/OrderTable/OrderTable";
 
 export const MyOrders = () => {
   const { user } = useSelector((state: RootState) => state.auth);

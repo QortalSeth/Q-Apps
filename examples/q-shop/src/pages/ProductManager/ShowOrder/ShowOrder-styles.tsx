@@ -1,5 +1,5 @@
 import { styled } from "@mui/system";
-import { Box, Typography } from "@mui/material";
+import { Box, Button, Typography } from "@mui/material";
 import { TimesSVG } from "../../../assets/svgs/TimesSVG";
 
 export const ShowOrderHeader = styled(Box)(({ theme }) => ({
@@ -57,15 +57,15 @@ export const ShowOrderContent = styled(Box)(({ theme }) => ({
   overflow: "auto",
   width: "100%",
   "&::-webkit-scrollbar-track": {
-    backgroundColor: theme.palette.mode === "light" ? "#f6f8fa" : "#292d3e"
+    backgroundColor: "transparent"
   },
   "&::-webkit-scrollbar-track:hover": {
-    backgroundColor: theme.palette.mode === "light" ? "#f6f8fa" : "#292d3e"
+    backgroundColor: "transparent"
   },
   "&::-webkit-scrollbar": {
     width: "16px",
     height: "10px",
-    backgroundColor: theme.palette.mode === "light" ? "#f6f8fa" : "#292d3e"
+    backgroundColor: "transparent"
   },
   "&::-webkit-scrollbar-thumb": {
     backgroundColor: theme.palette.mode === "light" ? "#d3d9e1" : "#414763",
@@ -106,15 +106,15 @@ export const OrderStatusNote = styled(Box)(({ theme }) => ({
   maxWidth: "300px",
   maxHeight: "500px",
   "&::-webkit-scrollbar-track": {
-    backgroundColor: theme.palette.mode === "light" ? "#f6f8fa" : "#292d3e"
+    backgroundColor: "transparent"
   },
   "&::-webkit-scrollbar-track:hover": {
-    backgroundColor: theme.palette.mode === "light" ? "#f6f8fa" : "#292d3e"
+    backgroundColor: "transparent"
   },
   "&::-webkit-scrollbar": {
     width: "16px",
     height: "10px",
-    backgroundColor: theme.palette.mode === "light" ? "#f6f8fa" : "#292d3e"
+    backgroundColor: "transparent"
   },
   "&::-webkit-scrollbar-thumb": {
     backgroundColor: theme.palette.mode === "light" ? "#d3d9e1" : "#414763",
@@ -140,7 +140,8 @@ export const OrderDetailsContainer = styled(Box)(({ theme }) => ({
   display: "flex",
   alignItems: "center",
   gap: "15px",
-  width: "100%"
+  width: "100%",
+  padding: "8px 0"
 }));
 
 export const OrderDetailsCard = styled(Box)(({ theme }) => ({
@@ -164,7 +165,10 @@ export const OrderTitle = styled(Typography)(({ theme }) => ({
   fontFamily: "Karla",
   letterSpacing: "0px",
   fontSize: "20px",
-  color: theme.palette.text.primary
+  color: theme.palette.text.primary,
+  "& span": {
+    fontWeight: 500
+  }
 }));
 
 export const OrderId = styled(Typography)(({ theme }) => ({
@@ -229,7 +233,7 @@ export const DetailsRow = styled(Box)(({ theme }) => ({
   "&:hover": {
     cursor: "pointer",
     filter:
-      theme.palette.mode === "dark" ? "brightness(1.1)" : "brightness(0.9)"
+      theme.palette.mode === "dark" ? "brightness(1.2)" : "brightness(0.9)"
   }
 }));
 
@@ -239,28 +243,29 @@ export const DetailsCard = styled(Box)(({ theme }) => ({
   right: "-150px",
   display: "flex",
   filter: "brightness(1.3)",
-  alignItems: "center",
+  alignItems: "flex-start",
   flexDirection: "column",
   padding: "15px 25px",
   borderRadius: "10px",
   boxShadow: "0px 0px 10px 0px rgba(0,0,0,0.1)",
   backgroundColor: theme.palette.background.paper,
-  fontFamily: "Raleway",
-  fontSize: "16px",
+  fontFamily: "Karla",
+  fontSize: "19px",
   color: theme.palette.text.primary,
   gap: "5px",
-  maxWidth: "300px",
-  maxHeight: "300px",
+  maxWidth: "400px",
+  maxHeight: "400px",
+  overflowY: "auto",
   "&::-webkit-scrollbar-track": {
-    backgroundColor: theme.palette.mode === "light" ? "#f6f8fa" : "#292d3e"
+    backgroundColor: "transparent"
   },
   "&::-webkit-scrollbar-track:hover": {
-    backgroundColor: theme.palette.mode === "light" ? "#f6f8fa" : "#292d3e"
+    backgroundColor: "transparent"
   },
   "&::-webkit-scrollbar": {
     width: "16px",
     height: "10px",
-    backgroundColor: theme.palette.mode === "light" ? "#f6f8fa" : "#292d3e"
+    backgroundColor: "transparent"
   },
   "&::-webkit-scrollbar-thumb": {
     backgroundColor: theme.palette.mode === "light" ? "#d3d9e1" : "#414763",
@@ -270,6 +275,9 @@ export const DetailsCard = styled(Box)(({ theme }) => ({
   },
   "&::-webkit-scrollbar-thumb:hover": {
     backgroundColor: theme.palette.mode === "light" ? "#b7bcc4" : "#40455f"
+  },
+  "& span": {
+    fontWeight: 500
   }
 }));
 
@@ -280,7 +288,28 @@ export const CloseDetailsCardIcon = styled(TimesSVG)(({ theme }) => ({
   transition: "all 0.2s ease-in-out",
   "&:hover": {
     cursor: "pointer",
-    filter:
-      theme.palette.mode === "dark" ? "brightness(1.1)" : "brightness(0.9)"
+    transform: "scale(1.1)"
   }
+}));
+
+export const DeliveryInfoCard = styled(Box)(({ theme }) => ({
+  display: "flex",
+  flexDirection: "column",
+  alignItems: "flex-start",
+  padding: "15px 15px",
+  borderRadius: "6px",
+  gap: "5px",
+  backgroundColor: theme.palette.mode === "dark" ? "#343434" : "#e8e8e8",
+  margin: "15px"
+}));
+
+export const CloseButtonRow = styled(Box)(({ theme }) => ({
+  display: "flex",
+  gap: 1,
+  justifyContent: "flex-end"
+}));
+
+export const CloseButton = styled(Button)(({ theme }) => ({
+  fontFamily: "Raleway",
+  fontSize: "15px"
 }));

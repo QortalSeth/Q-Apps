@@ -40,7 +40,10 @@ import {
   DetailsFont,
   DetailsRow,
   DetailsCard,
-  CloseDetailsCardIcon
+  CloseDetailsCardIcon,
+  DeliveryInfoCard,
+  CloseButton,
+  CloseButtonRow
 } from "./ShowOrder-styles";
 import moment from "moment";
 import { DialogsSVG } from "../../../assets/svgs/DialogsSVG";
@@ -258,9 +261,10 @@ export const ShowOrder: FC<ShowOrderProps> = ({
                               </OrderId>
                             </OrderTitleCol>
                             <OrderTitleCol>
-                              <OrderQuantityRow style={{ gap: "10px" }}>
-                                <OrderTitle>
-                                  x {product?.quantity} {product?.pricePerUnit}
+                              <OrderQuantityRow>
+                                <OrderTitle style={{ gap: "10px" }}>
+                                  {`x ${product?.quantity}`}
+                                  <span>{product?.pricePerUnit}</span>
                                 </OrderTitle>
                                 <QortalSVG
                                   width={"22"}
@@ -316,9 +320,9 @@ export const ShowOrder: FC<ShowOrderProps> = ({
                     <DetailsCard>
                       {Object.keys(paymentInfo || {}).map((key) => {
                         return (
-                          <Box>
-                            {key}: <span>{paymentInfo[key]}</span>
-                          </Box>
+                          <>
+                            <span>{key}:</span> <span>{paymentInfo[key]}</span>
+                          </>
                         );
                       })}
                       <CloseDetailsCardIcon
@@ -333,44 +337,29 @@ export const ShowOrder: FC<ShowOrderProps> = ({
               </>
             )}
           </>
-          <Box>
-            <Typography variant="body1" color="text.primary">
-              Delivery Information
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              Customer name:{order?.delivery?.customerName}
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              Shipping Address
-            </Typography>
+          <DeliveryInfoCard>
+            <ShowOrderTitle>Delivery Information</ShowOrderTitle>
+            <OrderTitle>
+              <span>Customer name:</span> {order?.delivery?.customerName}
+            </OrderTitle>
             {order?.delivery?.shippingAddress && (
-              <Box>
+              <>
                 {Object.entries(order?.delivery?.shippingAddress).map(
                   ([key, value]) => (
-                    <Typography
-                      variant="body2"
-                      color="text.secondary"
-                      key={key}
-                    >
-                      {key}: <span>{value}</span>
-                    </Typography>
+                    <OrderTitle key={key}>
+                      <span>{key}:</span> {value}
+                    </OrderTitle>
                   )
                 )}
-              </Box>
+              </>
             )}
-          </Box>
+          </DeliveryInfoCard>
         </ShowOrderContent>
-        <Box
-          sx={{
-            display: "flex",
-            gap: 1,
-            justifyContent: "flex-end"
-          }}
-        >
-          <Button variant="contained" onClick={closeModal}>
+        <CloseButtonRow>
+          <CloseButton variant="outlined" color="error" onClick={closeModal}>
             Close
-          </Button>
-        </Box>
+          </CloseButton>
+        </CloseButtonRow>
       </ReusableModal>
     </Box>
   );
