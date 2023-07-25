@@ -1,7 +1,7 @@
 // @ts-nocheck
 import { useEffect, useState } from "react";
 import { Routes, Route } from "react-router-dom";
-import { Product } from "./pages/Product/Product";
+import { ProductPage } from "./pages/Product/ProductPage";
 import { StoreList } from "./pages/StoreList/StoreList";
 import { ThemeProvider } from "@mui/material/styles";
 import { CssBaseline } from "@mui/material";
@@ -27,7 +27,7 @@ function App() {
         <GlobalWrapper setTheme={(val: string) => setTheme(val)}>
           <CssBaseline />
           <Routes>
-            <Route path="/:user/:store/:product" element={<Product />} />
+            <Route path="/:user/:store/:product/:catalogue" element={<ProductPage />} />
             <Route
               path="/product-manager/:store"
               element={<ProductManager />}
