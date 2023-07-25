@@ -98,6 +98,7 @@ export const useFetchOrders = () => {
     [catalogueHashMap]
   );
 
+  // Get the orders that you've received from your own store
   const getOrders = React.useCallback(async () => {
     if (!store) return;
 
@@ -142,6 +143,7 @@ export const useFetchOrders = () => {
     }
   }, [store, orders]);
 
+  // Get the orders that you've made from other stores (not the ones that you've received)
   const getMyOrders = React.useCallback(
     async (name: string) => {
       if (!store) return;
@@ -149,12 +151,8 @@ export const useFetchOrders = () => {
       try {
         dispatch(setIsLoadingGlobal(true));
         const offset = orders.length;
-        //TODO - NAME SHOULD BE EXACT
-        const parts = store.split("q-store-general-");
-        const shortStoreId = parts[1];
-
         const query = `q-store-order-`;
-        const url = `/arbitrary/resources/search?service=DOCUMENT_PRIVATE&query=${query}&limit=20&includemetadata=true&offset=${offset}&name=${name}&reverse=true`;
+        const url = `/arbitrary/resources/search?service=DOCUMENT_PRIVATE&query=${query}&limit=20&includemetadata=true&offset=${offset}&name=${name}&exactmatchnames=true&mode=ALL&reverse=true`;
         const response = await fetch(url, {
           method: "GET",
           headers: {

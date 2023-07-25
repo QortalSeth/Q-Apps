@@ -38,6 +38,11 @@
   src: url("./styles/fonts/Cairo.ttf") format("truetype");
 }
 
+@font-face {
+  font-family: 'Montserrat';
+  src: url("./styles/fonts/Montserrat.ttf") format("truetype");
+}
+
 :root {
   padding: 0px;
   margin: 0px;

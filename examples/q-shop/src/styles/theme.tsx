@@ -7,6 +7,7 @@ const commonThemeOptions = {
       "Raleway, sans-serif",
       "Karla",
       "Merriweather Sans",
+      "Montserrat",
       "Proxima Nova",
       "Oxygen",
       "Catamaran",
