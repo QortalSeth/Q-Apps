@@ -18,7 +18,7 @@ export const ProductDescription = styled(Box)(({ theme }) => ({
   color: theme.palette.text.primary,
   opacity: 0.95,
   wordBreak: "break-word",
-  maxHeight: "65px",
+  maxHeight: "75px",
   userSelect: "none"
 }));
 

@@ -46,6 +46,9 @@ const goToProductPage = () => {navigate(`/${userName}/${storeId}/${product?.id}/
   const price = product?.price?.find(
     (item) => item?.currency === "qort"
   )?.value;
+
+
+
   return (
     <Card>
       <CardMedia
@@ -63,7 +66,7 @@ const goToProductPage = () => {navigate(`/${userName}/${storeId}/${product?.id}/
       />
       <CardContent
         sx={{
-          height: "130px",
+          height: "140px",
           overflow: "hidden",
           padding: "8px 16px"
         }}
@@ -82,8 +85,10 @@ const goToProductPage = () => {navigate(`/${userName}/${storeId}/${product?.id}/
           {price}
         </ProductDescription>
       </CardContent>
+        <div style={{height:'37px'}}>
       {storeOwner !== userName && (
         <AddToCartButton
+            style={{display: product.status === 'AVAILABLE' ? 'flex': 'none'}}
           color="primary"
           onClick={() => {
             dispatch(
@@ -104,6 +109,7 @@ const goToProductPage = () => {navigate(`/${userName}/${storeId}/${product?.id}/
           Add to Cart
         </AddToCartButton>
       )}
+        </div>
     </Card>
   );
 };
