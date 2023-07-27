@@ -61,6 +61,9 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const price = product?.price?.find(
     (item) => item?.currency === "qort"
   )?.value;
+
+
+
   return (
     <Card>
       <CardMedia
@@ -78,7 +81,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
       />
       <CardContent
         sx={{
-          height: "130px",
+          height: "140px",
           overflow: "hidden",
           padding: "8px 16px"
         }}
@@ -97,8 +100,10 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           {price}
         </ProductDescription>
       </CardContent>
+        <div style={{height:'37px'}}>
       {storeOwner !== userName && (
         <AddToCartButton
+            style={{display: product.status === 'AVAILABLE' ? 'flex': 'none'}}
           color="primary"
           onClick={() => {
             dispatch(
@@ -119,6 +124,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           Add to Cart
         </AddToCartButton>
       )}
+        </div>
     </Card>
   );
 };
