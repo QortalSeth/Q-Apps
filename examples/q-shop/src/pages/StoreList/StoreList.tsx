@@ -1,11 +1,11 @@
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback, useMemo, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../state/store";
 import LazyLoad from "../../components/common/LazyLoad";
 import ContextMenuResource from "../../components/common/ContextMenu/ContextMenuResource";
 import { setIsLoadingGlobal } from "../../state/features/globalSlice";
-import { Store } from "../../state/features/storeSlice";
+import { Store, upsertStores } from "../../state/features/storeSlice";
 import { useFetchStores } from "../../hooks/useFetchStores";
 import {
   StoreCard,
@@ -29,9 +29,10 @@ interface BlogListProps {
 }
 export const StoreList = ({ mode }: BlogListProps) => {
   const dispatch = useDispatch();
-  const { user } = useSelector((state: RootState) => state.auth);
-  const [stores, setStores] = useState<Store[]>([]);
+  const user = useSelector((state: RootState) => state.auth.user);
+
   const [filterUserStores, setFilterUserStores] = useState<boolean>(false);
+
   // TODO: Need skeleton at first while the data is being fetched
   // Will rerender and replace if the hashmap wasn't found initially
   const hashMapStores = useSelector(
@@ -39,7 +40,9 @@ export const StoreList = ({ mode }: BlogListProps) => {
   );
 
   // Fetch My Stores from Redux
-  const { myStores } = useSelector((state: RootState) => state.store);
+  const myStores = useSelector((state: RootState) => state.store.myStores);
+  const stores = useSelector((state: RootState) => state.store.stores);
+
   const { getStore, checkAndUpdateResource } = useFetchStores();
   const navigate = useNavigate();
 
@@ -47,9 +50,9 @@ export const StoreList = ({ mode }: BlogListProps) => {
     try {
       dispatch(setIsLoadingGlobal(true));
       const offset = stores.length;
-      //TODO - NAME SHOULD BE EXACT
       const query = `q-store-general`;
-      const url = `/arbitrary/resources/search?service=STORE&query=${query}&limit=20&exactmatchnames=true&includemetadata=true&offset=${offset}&reverse=true`;
+      // Fetch list of user stores' resources from Qortal blockchain
+      const url = `/arbitrary/resources/search?service=STORE&query=${query}&limit=20&exactmatchnames=true&mode=ALL&includemetadata=true&offset=${offset}&reverse=true`;
       const response = await fetch(url, {
         method: "GET",
         headers: {
@@ -58,6 +61,7 @@ export const StoreList = ({ mode }: BlogListProps) => {
       });
       const responseData = await response.json();
       // Data returned from that endpoint of the API
+      // tags, category, categoryName are not being used at the moment
       const structureData = responseData.map((storeItem: any): Store => {
         return {
           title: storeItem?.metadata?.title,
@@ -81,7 +85,7 @@ export const StoreList = ({ mode }: BlogListProps) => {
           copiedStores.push(storeItem);
         }
       });
-      setStores(copiedStores);
+      dispatch(upsertStores(copiedStores));
       // Get the store raw data from getStore API Call only if the hashmapStore doesn't have the store or if the store is more recently updated than the existing store
       for (const content of structureData) {
         if (content.owner && content.id) {
@@ -101,7 +105,6 @@ export const StoreList = ({ mode }: BlogListProps) => {
   }, [stores]);
 
   // Get all stores on mount or if user changes
-
   const getStores = useCallback(async () => {
     await getUserStores();
   }, [getUserStores, user?.name]);
@@ -114,6 +117,7 @@ export const StoreList = ({ mode }: BlogListProps) => {
     setFilterUserStores(event.target.checked);
   };
 
+  // Memoize the filtered stores to prevent rerenders
   const filteredStores = useMemo(() => {
     if (filterUserStores) {
       return myStores;
@@ -121,6 +125,7 @@ export const StoreList = ({ mode }: BlogListProps) => {
       return stores;
     }
   }, [filterUserStores, stores, myStores, user?.name]);
+
   return (
     <>
       <StoresContainer container>

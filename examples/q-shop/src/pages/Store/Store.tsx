@@ -158,7 +158,7 @@ export const Store = () => {
     try {
       dispatch(setIsLoadingGlobal(true));
       let myStore;
-      const url = `/arbitrary/resources/search?service=STORE&identifier=${store}&exactmatchnames=true&name=${name}&includemetadata=true`;
+      const url = `/arbitrary/resources/search?service=STORE&identifier=${store}&exactmatchnames=true&mode=ALL&name=${name}&includemetadata=true`;
       const info = await fetch(url, {
         method: "GET",
         headers: {
@@ -519,7 +519,7 @@ export const Store = () => {
                     name={product.user}
                     service="PRODUCT"
                     identifier={product.id}
-                    link={`qortal://APP/Q-Shop/${product.user}/${storeId}/${product.id}`}
+                    link={`qortal://APP/Q-Shop/${product?.user}/${storeId}/${product?.id}/${product?.catalogueId}`}
                   >
                     <ProductCard product={product} />
                   </ContextMenuResource>

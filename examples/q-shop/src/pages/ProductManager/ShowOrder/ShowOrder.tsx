@@ -3,11 +3,9 @@ import { ReusableModal } from "../../../components/modals/ReusableModal";
 import {
   Box,
   Button,
-  InputLabel,
   MenuItem,
   Select,
   TextField,
-  Typography,
   useTheme
 } from "@mui/material";
 import EmailIcon from "@mui/icons-material/Email";
@@ -43,7 +41,12 @@ import {
   CloseDetailsCardIcon,
   DeliveryInfoCard,
   CloseButton,
-  CloseButtonRow
+  CloseButtonRow,
+  SellerOrderStatusRow,
+  CustomSelect,
+  CustomTextField,
+  UpdateStatusButton,
+  TotalPriceRow
 } from "./ShowOrder-styles";
 import moment from "moment";
 import { DialogsSVG } from "../../../assets/svgs/DialogsSVG";
@@ -193,13 +196,13 @@ export const ShowOrder: FC<ShowOrderProps> = ({
         </ShowOrderHeader>
         <ShowOrderContent>
           {from === "ProductManager" ? (
-            <Box>
-              <InputLabel id="status">Order Status</InputLabel>
-              <Select
+            <SellerOrderStatusRow>
+              <ShowOrderTitle>Order Status</ShowOrderTitle>
+              <CustomSelect
                 name="status"
                 value={selectedStatus}
                 onChange={(event) => {
-                  setSelectedStatus(event.target.value);
+                  setSelectedStatus(event.target.value as string);
                 }}
                 variant="outlined"
                 required
@@ -207,18 +210,20 @@ export const ShowOrder: FC<ShowOrderProps> = ({
                 <MenuItem value="Received">Received</MenuItem>
                 <MenuItem value="Shipped">Shipped</MenuItem>
                 <MenuItem value="Refunded">Refunded</MenuItem>
-              </Select>
-              <TextField
+              </CustomSelect>
+              <CustomTextField
                 name="note"
                 label="Note"
                 value={note}
                 variant="outlined"
                 onChange={(e) => setNote(e.target.value)}
+                size="small"
+                fullWidth
               />
-              <Button onClick={updateStatus} variant="contained">
+              <UpdateStatusButton onClick={updateStatus} variant="contained">
                 Update Status
-              </Button>
-            </Box>
+              </UpdateStatusButton>
+            </SellerOrderStatusRow>
           ) : (
             <OrderStatusRow>
               <OrderStatusCard
@@ -262,7 +267,9 @@ export const ShowOrder: FC<ShowOrderProps> = ({
                             </OrderTitleCol>
                             <OrderTitleCol>
                               <OrderQuantityRow>
-                                <OrderTitle style={{ gap: "10px" }}>
+                                <OrderTitle
+                                  style={{ display: "flex", gap: "10px" }}
+                                >
                                   {`x ${product?.quantity}`}
                                   <span>{product?.pricePerUnit}</span>
                                 </OrderTitle>
@@ -272,14 +279,14 @@ export const ShowOrder: FC<ShowOrderProps> = ({
                                   color={theme.palette.text.primary}
                                 />{" "}
                               </OrderQuantityRow>
-                              <OrderQuantityRow>
+                              <TotalPriceRow>
                                 Total: {product?.totalProductPrice}
                                 <QortalSVG
                                   width={"22"}
                                   height={"22"}
                                   color={theme.palette.text.primary}
                                 />
-                              </OrderQuantityRow>
+                              </TotalPriceRow>
                             </OrderTitleCol>
                           </OrderDetailsCard>
                         </OrderDetailsContainer>

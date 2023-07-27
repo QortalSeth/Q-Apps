@@ -27,7 +27,10 @@ function App() {
         <GlobalWrapper setTheme={(val: string) => setTheme(val)}>
           <CssBaseline />
           <Routes>
-            <Route path="/:user/:store/:product/:catalogue" element={<ProductPage />} />
+            <Route
+              path="/:user/:store/:product/:catalogue"
+              element={<ProductPage />}
+            />
             <Route
               path="/product-manager/:store"
               element={<ProductManager />}
