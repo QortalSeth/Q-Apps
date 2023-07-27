@@ -6,12 +6,13 @@ import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../../state/store";
 import moment from "moment";
 import { Order } from "../../../state/features/orderSlice";
 import { CircularProgress } from "@mui/material";
 import { StyledTableRow } from "./OrderTable-styles";
+import { setNotification } from "../../../state/features/notificationsSlice";
 
 const tableCellFontSize = "16px";
 
@@ -53,6 +54,8 @@ interface SimpleTableProps {
 }
 
 export const OrderTable = ({ openOrder, data, children }: SimpleTableProps) => {
+  const dispatch = useDispatch();
+
   const hashMapOrders = useSelector(
     (state: RootState) => state.order.hashMapOrders
   );
@@ -100,7 +103,18 @@ export const OrderTable = ({ openOrder, data, children }: SimpleTableProps) => {
         {columns.map((column) => {
           return (
             <TableCell
-              onClick={() => openOrder(rowData)}
+              onClick={() => {
+                if (!hashMapOrders[rowData.id]) {
+                  dispatch(
+                    setNotification({
+                      alertType: "error",
+                      msg: "Order Data Not Loaded Yet! Please Try Again or Refresh the Page."
+                    })
+                  );
+                  return;
+                }
+                openOrder(rowData);
+              }}
               key={column.dataKey}
               align={column.numeric || false ? "right" : "left"}
               style={{ width: column.width, cursor: "pointer" }}

@@ -467,6 +467,7 @@ export const ProductManager = () => {
     await getProducts();
   }, [getProducts]);
 
+  // Fetch products from hashMap if listProducts changes
   useEffect(() => {
     handleGetProducts();
   }, [dataContainerProducts]);
