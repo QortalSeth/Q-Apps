@@ -1,10 +1,8 @@
-import { useEffect, useState } from "react";
-import { ReusableModal } from "../../components/modals/ReusableModal";
-import { Box, Button, Modal, Typography, useTheme } from "@mui/material";
+import { useEffect } from "react";
+import { Box, Modal, useTheme } from "@mui/material";
 import ShortUniqueId from "short-unique-id";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../state/store";
-import CreateIcon from "@mui/icons-material/Create";
 import { setNotification } from "../../state/features/notificationsSlice";
 import { ProductForm } from "./ProductForm";
 import { setProductsToSave } from "../../state/features/globalSlice";

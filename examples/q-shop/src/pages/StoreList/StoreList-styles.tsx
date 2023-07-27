@@ -25,6 +25,7 @@ export const StoreCard = styled(Grid)(({ theme }) => ({
   position: "relative",
   display: "flex",
   flexDirection: "row",
+  flexWrap: "nowrap",
   width: "100%",
   height: "auto",
   backgroundColor: theme.palette.background.paper,

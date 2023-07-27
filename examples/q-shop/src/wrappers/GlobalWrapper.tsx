@@ -26,6 +26,7 @@ import {
   Store,
   addToAllMyStores,
   addToHashMapStores,
+  addToStores,
   setAllMyStores
 } from "../state/features/storeSlice";
 import { useFetchStores } from "../hooks/useFetchStores";
@@ -219,19 +220,19 @@ const GlobalWrapper: React.FC<Props> = ({ children, setTheme }) => {
       if (!location) throw new Error("A location is required");
       if (!shipsTo) throw new Error("Ships to is required");
       const name = user.name;
-      let formatBlogIdentifier = storeIdentifier;
-      if (formatBlogIdentifier.endsWith("-")) {
-        formatBlogIdentifier = formatBlogIdentifier.slice(0, -1);
+      let formatStoreIdentifier = storeIdentifier;
+      if (formatStoreIdentifier.endsWith("-")) {
+        formatStoreIdentifier = formatStoreIdentifier.slice(0, -1);
       }
-      if (formatBlogIdentifier.startsWith("-")) {
-        formatBlogIdentifier = formatBlogIdentifier.slice(1);
+      if (formatStoreIdentifier.startsWith("-")) {
+        formatStoreIdentifier = formatStoreIdentifier.slice(1);
       }
-      if (!formatBlogIdentifier) {
+      if (!formatStoreIdentifier) {
         throw new Error("Please insert a valid store id");
       }
-      const identifier = `q-store-general-${formatBlogIdentifier}`;
-      const doesExitst = await verifyIfStoreIdExists(name, identifier);
-      if (doesExitst) {
+      const identifier = `q-store-general-${formatStoreIdentifier}`;
+      const doesExist = await verifyIfStoreIdExists(name, identifier);
+      if (doesExist) {
         throw new Error("The store identifier already exists");
       }
       // Store Object to send to QDN
@@ -241,13 +242,13 @@ const GlobalWrapper: React.FC<Props> = ({ children, setTheme }) => {
         location,
         shipsTo,
         created: Date.now(),
-        shortStoreId: formatBlogIdentifier,
+        shortStoreId: formatStoreIdentifier,
         logo
       };
       // Store Data Container to send to QDN (this will allow easier querying of products afterwards. Think of it as a database in the redux global state for the current store. Max 1 per store). At first there's no products, but they will be added later.
       const dataContainer = {
         storeId: identifier,
-        shortStoreId: formatBlogIdentifier,
+        shortStoreId: formatStoreIdentifier,
         owner: name,
         products: {}
       };
@@ -300,6 +301,7 @@ const GlobalWrapper: React.FC<Props> = ({ children, setTheme }) => {
 
         dispatch(setCurrentStore(storefullObj));
         dispatch(addToHashMapStores(storefullObj));
+        dispatch(addToStores(storefullObj));
         dispatch(
           setDataContainer({
             ...dataContainer,
@@ -432,14 +434,12 @@ const GlobalWrapper: React.FC<Props> = ({ children, setTheme }) => {
   }, []);
 
   // Get my stores
-
   const getMyStores = async () => {
     if (!user || !user?.name) return;
     try {
       const offset = 0;
-      //TODO - NAME SHOULD BE EXACT
       const name = user?.name;
-      const url = `/arbitrary/resources/search?service=STORE&name=${name}&limit=20&exactmatchnames=true&includemetadata=true&offset=${offset}&reverse=true`;
+      const url = `/arbitrary/resources/search?service=STORE&name=${name}&limit=20&exactmatchnames=true&mode=ALL&includemetadata=true&offset=${offset}&reverse=true`;
       const response = await fetch(url, {
         method: "GET",
         headers: {

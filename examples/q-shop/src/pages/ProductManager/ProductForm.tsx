@@ -1,11 +1,5 @@
 import React, { useState, useEffect } from "react";
-import {
-  SelectChangeEvent,
-  useTheme,
-  Box,
-  FormControl,
-  Select
-} from "@mui/material";
+import { SelectChangeEvent, useTheme, Box, FormControl } from "@mui/material";
 import ImageUploader from "../../components/common/ImageUploader";
 import { PublishProductParams } from "./NewProduct";
 import { Product } from "../../state/features/storeSlice";

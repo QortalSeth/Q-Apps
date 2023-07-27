@@ -11,7 +11,8 @@ import {
   ProductTitle
 } from "./ProductCard-styles";
 import { CartSVG } from "../../assets/svgs/CartSVG";
-import {useNavigate} from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import { setNotification } from "../../state/features/notificationsSlice";
 
 function addEllipsis(str: string, limit: number) {
   if (str.length > limit) {
@@ -26,7 +27,7 @@ interface ProductCardProps {
 
 export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const dispatch = useDispatch();
-    const navigate = useNavigate();
+  const navigate = useNavigate();
   const theme = useTheme();
 
   const { storeId, storeOwner } = useSelector(
@@ -41,7 +42,21 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   }, [user]);
 
   const profileImg = product?.images?.[0];
-const goToProductPage = () => {navigate(`/${userName}/${storeId}/${product?.id}/${product.catalogueId}`)}
+
+  const goToProductPage = () => {
+    if (!product || !product?.id || !product?.catalogueId || !storeId) {
+      dispatch(
+        setNotification({
+          alertType: "error",
+          msg: "Unable to load product! Please try again!"
+        })
+      );
+      return;
+    }
+    navigate(
+      `/${product?.user}/${storeId}/${product?.id}/${product.catalogueId}`
+    );
+  };
 
   const price = product?.price?.find(
     (item) => item?.currency === "qort"
@@ -92,12 +107,12 @@ const goToProductPage = () => {navigate(`/${userName}/${storeId}/${product?.id}/
           color="primary"
           onClick={() => {
             dispatch(
-                setProductToCart({
-                  productId: product.id,
-                  catalogueId: product.catalogueId,
-                  storeId,
-                  storeOwner
-                })
+              setProductToCart({
+                productId: product.id,
+                catalogueId: product.catalogueId,
+                storeId,
+                storeOwner
+              })
             );
           }}
         >

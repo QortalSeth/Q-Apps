@@ -7,11 +7,12 @@ import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
 import { Avatar, CircularProgress } from "@mui/material";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../../state/store";
 import { Product } from "../../../state/features/storeSlice";
 import moment from "moment";
 import { StyledTableRow } from "./ProductTable-styles";
+import { setNotification } from "../../../state/features/notificationsSlice";
 
 const tableCellFontSize = "16px";
 
@@ -61,6 +62,8 @@ export const SimpleTable = ({
   data,
   children
 }: SimpleTableProps) => {
+  const dispatch = useDispatch();
+
   const catalogueHashMap = useSelector(
     (state: RootState) => state.global.catalogueHashMap
   );
@@ -90,7 +93,18 @@ export const SimpleTable = ({
         {columns.map((column) => {
           return (
             <TableCell
-              onClick={() => openProduct(rowData)}
+              onClick={() => {
+                if (!catalogueHashMap[rowData.catalogueId]) {
+                  dispatch(
+                    setNotification({
+                      alertType: "error",
+                      msg: "Product Data Not Loaded Yet! Please Try Again or Refresh the Page."
+                    })
+                  );
+                  return;
+                }
+                openProduct(rowData);
+              }}
               key={column.dataKey}
               align={column.numeric || false ? "right" : "left"}
               style={{ width: column.width, cursor: "pointer" }}
