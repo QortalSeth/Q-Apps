@@ -14,7 +14,8 @@ import {
   toggleEditBlogModal,
   toggleCreateStoreModal,
   setIsLoadingGlobal,
-  resetProducts
+  resetProducts,
+  resetListProducts
 } from "../state/features/globalSlice";
 import NavBar from "../components/layout/Navbar/Navbar";
 import PageLoader from "../components/common/PageLoader";
@@ -42,8 +43,8 @@ const GlobalWrapper: React.FC<Props> = ({ children, setTheme }) => {
   const { myStores } = useSelector((state: RootState) => state.store);
 
   // Fetch recentlyVisitedStoreId from cart redux
-  const { recentlyVisitedStoreId } = useSelector(
-    (state: RootState) => state.global
+  const recentlyVisitedStoreId = useSelector(
+    (state: RootState) => state.global.recentlyVisitedStoreId
   );
 
   const { getStore, checkAndUpdateResource } = useFetchStores();
@@ -512,8 +513,21 @@ const GlobalWrapper: React.FC<Props> = ({ children, setTheme }) => {
               }
             });
             const shopResource = await shopData.json();
-
-            // Fetch container data on QDN
+            // Clear product list from redux global state
+            dispatch(resetListProducts());
+            dispatch(
+              setCurrentStore({
+                created: shopResource?.created || "",
+                id: myStoreFound.id,
+                title: shopResource?.title || "",
+                location: shopResource?.location,
+                shipsTo: shopResource?.shipsTo,
+                description: shopResource?.description || "",
+                category: myStoreFound?.category,
+                tags: myStoreFound?.tags || []
+              })
+            );
+            // Fetch data container data on QDN (product resources)
             const urlDataContainer = `/arbitrary/DOCUMENT/${myStoreFound.owner}/${myStoreFound.id}-datacontainer`;
             const response = await fetch(urlDataContainer, {
               method: "GET",
@@ -532,18 +546,7 @@ const GlobalWrapper: React.FC<Props> = ({ children, setTheme }) => {
             } else {
               dispatch(setDataContainer(null));
             }
-            dispatch(
-              setCurrentStore({
-                created: shopResource?.created || "",
-                id: myStoreFound.id,
-                title: shopResource?.title || "",
-                location: shopResource?.location,
-                shipsTo: shopResource?.shipsTo,
-                description: shopResource?.description || "",
-                category: myStoreFound?.category,
-                tags: myStoreFound?.tags || []
-              })
-            );
+            // Clear product data from redux global state
             dispatch(resetProducts());
           };
           getStoreAndDataContainer();

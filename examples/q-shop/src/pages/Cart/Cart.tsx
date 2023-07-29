@@ -22,6 +22,7 @@ import {
   IconsRow,
   OrderTotalRow,
   ProductContainer,
+  ProductDescription,
   ProductDetailsCol,
   ProductDetailsRow,
   ProductImage,
@@ -374,7 +375,9 @@ export const Cart = () => {
                     />
                   </ProductInfoCol>
                   <ProductDetailsCol item xs={12} sm={8}>
-                    <TotalSumItemTitle>{product.description}</TotalSumItemTitle>
+                    <ProductDescription>
+                      {product.description}
+                    </ProductDescription>
                     <ProductDetailsRow>
                       <ProductPriceFont>
                         Price per unit: {priceInQort}

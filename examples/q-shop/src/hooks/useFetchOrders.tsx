@@ -146,8 +146,6 @@ export const useFetchOrders = () => {
   // Get the orders that you've made from other stores (not the ones that you've received)
   const getMyOrders = React.useCallback(
     async (name: string) => {
-      if (!store) return;
-
       try {
         dispatch(setIsLoadingGlobal(true));
         const offset = orders.length;
@@ -187,8 +185,8 @@ export const useFetchOrders = () => {
     [store, myOrders]
   );
 
+  // Fetch the product resources and set it with its metadata inside the catalogueHashMap. The product resources were originally set in Redux in the global wrapper by fetching the data-container from QDN
   const getProducts = React.useCallback(async () => {
-    if (!store) return;
     try {
       dispatch(setIsLoadingGlobal(true));
       const offset = products.length;

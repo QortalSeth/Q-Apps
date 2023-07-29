@@ -45,8 +45,6 @@ export const ProductsToSaveCard = styled(Box)(({ theme }) => ({
   flexDirection: "column",
   width: "85vw",
   height: "auto",
-  minHeight: "400px",
-  gap: "10px",
   borderRadius: "8px",
   backgroundColor: theme.palette.mode === "light" ? "#e8e8e8" : "#32333c",
   position: "absolute",
@@ -75,6 +73,16 @@ export const ProductToSaveCard = styled(Box)(({ theme }) => ({
   borderRadius: "8px",
   backgroundColor: "#f2f2f2",
   flexGrow: 1
+}));
+
+export const ProductsCol = styled(Box)(({ theme }) => ({
+  display: "flex",
+  flexDirection: "column",
+  maxHeight: "400px",
+  minHeight: "400px",
+  flexWrap: "wrap",
+  gap: "10px",
+  width: "fit-content"
 }));
 
 export const ProductToSaveImageRow = styled(Box)(({ theme }) => ({
@@ -170,7 +178,8 @@ export const DockedProductsToSaveCard = styled(Box)(({ theme }) => ({
   borderBottomRightRadius: "0px",
   borderBottomLeftRadius: "0px",
   backgroundColor: theme.palette.mode === "light" ? "#e8e8e8" : "#32333c",
-  position: "absolute",
+  position: "fixed",
+  zIndex: 55,
   bottom: 0,
   right: "20px",
   gap: "15px"

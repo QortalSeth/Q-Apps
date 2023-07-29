@@ -41,6 +41,7 @@ export const ShowOrderTitle = styled("a")(({ theme }) => ({
 export const CustomSelect = styled(Select)(({ theme }) => ({
   fontFamily: "Karla",
   fontSize: "18px",
+  fontWeight: 300,
   letterSpacing: 0,
   "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
     borderColor: theme.palette.secondary.main
@@ -50,6 +51,7 @@ export const CustomSelect = styled(Select)(({ theme }) => ({
 export const CustomTextField = styled(TextField)(({ theme }) => ({
   fontFamily: "Karla",
   fontSize: "18px",
+  fontWeight: 300,
   letterSpacing: 0,
   color: theme.palette.text.primary
 }));
@@ -58,6 +60,7 @@ export const UpdateStatusButton = styled(Button)(({ theme }) => ({
   fontFamily: "Karla",
   fontSize: "16px",
   letterSpacing: 0,
+  fontWeight: 300,
   padding: "5px 10px",
   color: "white",
   backgroundColor: theme.palette.secondary.main,
@@ -201,6 +204,7 @@ export const OrderTitle = styled(Typography)(({ theme }) => ({
   fontFamily: "Karla",
   letterSpacing: "0px",
   fontSize: "20px",
+  fontWeight: 300,
   color: theme.palette.text.primary,
   "& span": {
     fontWeight: 500
@@ -296,6 +300,7 @@ export const DetailsCard = styled(Box)(({ theme }) => ({
   backgroundColor: theme.palette.background.paper,
   fontFamily: "Karla",
   fontSize: "19px",
+  fontWeight: 300,
   color: theme.palette.text.primary,
   gap: "5px",
   maxWidth: "400px",

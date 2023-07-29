@@ -142,8 +142,6 @@ export const ShowOrder: FC<ShowOrderProps> = ({
     }
   };
 
-  console.log(order, "order here1");
-
   return (
     <Box
       sx={{

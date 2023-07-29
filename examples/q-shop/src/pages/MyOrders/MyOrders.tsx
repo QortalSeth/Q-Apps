@@ -9,19 +9,17 @@ import { useFetchOrders } from "../../hooks/useFetchOrders";
 import { OrderTable } from "../ProductManager/OrderTable/OrderTable";
 
 export const MyOrders = () => {
-  const { user } = useSelector((state: RootState) => state.auth);
+  const user = useSelector((state: RootState) => state.auth.user);
 
   const myOrders = useSelector((state: RootState) => state.global.myOrders);
   const store = useSelector(
     (state: RootState) => state.global?.currentStore?.id
   );
-  // Redux loader state for spinner
-  const { isLoadingGlobal } = useSelector((state: RootState) => state.global);
 
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [order, setOrder] = useState<any>(null);
 
-  const userName = useMemo(() => {
+  const userName: string = useMemo(() => {
     if (!user?.name) return "";
     return user.name;
   }, [user]);
@@ -35,10 +33,10 @@ export const MyOrders = () => {
 
   // Get My Orders if store changes (on hyperlink for example, or if there's a page refresh)
   useEffect(() => {
-    if (store) {
+    if (userName) {
       handleGetOrders();
     }
-  }, [store]);
+  }, [userName]);
 
   return (
     <Box

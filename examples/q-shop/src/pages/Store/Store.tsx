@@ -41,13 +41,17 @@ import {
   FiltersSubContainer,
   FilterSelect,
   FilterSelectMenuItems,
-  ProductCardCol
+  ProductCardCol,
+  StoreTitleCard,
+  StoreLogo
 } from "./Store-styles";
 import { toggleEditBlogModal } from "../../state/features/globalSlice";
 import { CartIcon } from "../../components/layout/Navbar/Navbar-styles";
 import { setIsOpen } from "../../state/features/cartSlice";
 import { Cart as CartInterface } from "../../state/features/cartSlice";
 import { ExpandMoreSVG } from "../../assets/svgs/ExpandMoreSVG";
+import { ReusableModal } from "../../components/modals/ReusableModal";
+import { StoreDetails } from "./StoreDetails/StoreDetails";
 interface IListProducts {
   sort: string;
   products: ProductDataContainer[];
@@ -66,27 +70,26 @@ enum DateFilter {
 
 export const Store = () => {
   const navigate = useNavigate();
-
   const theme = useTheme();
 
-  const { user } = useSelector((state: RootState) => state.auth);
+  const user = useSelector((state: RootState) => state.auth.user);
   const currentStore = useSelector(
     (state: RootState) => state.global.currentStore
   );
-  const { isLoadingGlobal } = useSelector((state: RootState) => state.global);
+  const isLoadingGlobal = useSelector(
+    (state: RootState) => state.global.isLoadingGlobal
+  );
   const catalogueHashMap = useSelector(
     (state: RootState) => state.global.catalogueHashMap
   );
+  // Fetch all carts from Redux
+  const carts = useSelector((state: RootState) => state.cart.carts);
+  // Get storeId from Redux
+  const storeId = useSelector((state: RootState) => state.store.storeId);
 
   const { checkAndUpdateResourceCatalogue, getCatalogue } = useFetchOrders();
 
   const { store, user: username } = useParams();
-
-  // Fetch all carts from Redux
-  const { carts } = useSelector((state: RootState) => state.cart);
-
-  // Get storeId from Redux
-  const { storeId } = useSelector((state: RootState) => state.store);
 
   const dispatch = useDispatch();
 
@@ -104,6 +107,7 @@ export const Store = () => {
     DateFilter.newest
   );
   const [categoryChips, setCategoryChips] = useState<{ label: string }[]>([]);
+  const [openStoreDetails, setOpenStoreDetails] = useState<boolean>(false);
 
   const getProducts = useCallback(async () => {
     if (!store) return;
@@ -184,7 +188,7 @@ export const Store = () => {
         }
       });
       const responseData = await resource.json();
-      // Dispatch userStore to local state now that you have the info/metadata & resource
+      // Set userStore to local state now that you have the info/metadata & resource
       setUserStore({
         created: responseData?.created || "",
         id: myStore.identifier,
@@ -229,7 +233,6 @@ export const Store = () => {
         products: mappedProducts,
         categories: Object.keys(categories).map((cat) => ({ label: cat }))
       });
-      dispatch(resetListProducts());
       // Have access to the storeId in global state for when you are in cart for example
       dispatch(setStoreId(store));
       dispatch(updateRecentlyVisitedStoreId(store));
@@ -270,20 +273,26 @@ export const Store = () => {
   // Filter products
 
   const filteredProducts = useMemo(() => {
-    const newArray: any = products.map((product: Product, index) => {
-      if (
-        catalogueHashMap[product?.catalogueId] &&
-        catalogueHashMap[product.catalogueId].products[product?.id]
-      ) {
-        return {
-          ...product,
-          ...catalogueHashMap[product.catalogueId].products[product?.id],
-          catalogueId: product?.catalogueId || ""
-        };
-      } else {
-        return products;
-      }
-    });
+    const newArray: any = products
+      .map((product: Product, index) => {
+        if (
+          catalogueHashMap[product?.catalogueId] &&
+          catalogueHashMap[product.catalogueId].products[product?.id]
+        ) {
+          return {
+            ...product,
+            ...catalogueHashMap[product.catalogueId].products[product?.id],
+            catalogueId: product?.catalogueId || ""
+          };
+        } else {
+          return products;
+        }
+      })
+      .filter((product: any) => {
+        const condition =
+          product?.status === "AVAILABLE" || product?.status === "OUT_OF_STOCK";
+        return condition;
+      });
     const newArray2 = newArray.sort((a: Product, b: Product) => {
       if (
         filterPrice === PriceFilter.highest &&
@@ -469,6 +478,14 @@ export const Store = () => {
       </FiltersCol>
       <Grid item xs={12} sm={9}>
         <ProductManagerRow>
+          <StoreTitleCard
+            onClick={() => {
+              setOpenStoreDetails(true);
+            }}
+          >
+            <StoreLogo src={userStore?.logo} alt={userStore?.id} />
+            {userStore?.title}
+          </StoreTitleCard>
           {username === user?.name ? (
             <StoreControlsRow>
               <EditStoreButton
@@ -542,6 +559,28 @@ export const Store = () => {
         </ProductsContainer>
         <LazyLoad onLoadMore={getProductsHandler}></LazyLoad>
       </Grid>
+      <ReusableModal
+        customStyles={{
+          width: "96%",
+          maxWidth: 700,
+          height: "70%",
+          backgroundColor:
+            theme.palette.mode === "light" ? "#e8e8e8" : "#32333c",
+          position: "relative",
+          padding: "25px 40px",
+          borderRadius: "5px",
+          outline: "none"
+        }}
+        open={openStoreDetails}
+      >
+        <StoreDetails
+          setOpenStoreDetails={setOpenStoreDetails}
+          storeTitle={userStore?.title || ""}
+          storeImage={userStore?.logo || ""}
+          storeOwner={username || ""}
+          dateCreated={userStore?.created || 0}
+        />
+      </ReusableModal>
     </Grid>
   );
 };
