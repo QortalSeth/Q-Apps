@@ -1,6 +1,6 @@
 import { styled } from "@mui/system";
 import { Button, Box, InputLabel, Select, MenuItem } from "@mui/material";
-import { TimesSVG } from "../../assets/svgs/TimesSVG";
+import { TimesSVG } from "../../../assets/svgs/TimesSVG";
 
 export const CreateProductButton = styled(Button)(({ theme }) => ({
   backgroundColor: theme.palette.secondary.main,

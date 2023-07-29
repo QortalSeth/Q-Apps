@@ -8,7 +8,9 @@ import { QortalSVG } from "../../assets/svgs/QortalSVG";
 import {
   AddToCartButton,
   ProductDescription,
-  ProductTitle
+  ProductTitle,
+  StyledCard,
+  StyledCardContent
 } from "./ProductCard-styles";
 import { CartSVG } from "../../assets/svgs/CartSVG";
 import { useNavigate } from "react-router-dom";
@@ -30,11 +32,11 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const navigate = useNavigate();
   const theme = useTheme();
 
-  const { storeId, storeOwner } = useSelector(
-    (state: RootState) => state.store
-  );
+  const storeId = useSelector((state: RootState) => state.store.storeId);
 
-  const { user } = useSelector((state: RootState) => state.auth);
+  const storeOwner = useSelector((state: RootState) => state.store.storeOwner);
+
+  const user = useSelector((state: RootState) => state.auth.user);
 
   const userName = useMemo(() => {
     if (!user?.name) return "";
@@ -62,10 +64,8 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
     (item) => item?.currency === "qort"
   )?.value;
 
-
-
   return (
-    <Card>
+    <StyledCard>
       <CardMedia
         sx={{
           "&.MuiCardMedia-root": {
@@ -79,14 +79,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
         alt={product?.title}
         onClick={goToProductPage}
       />
-      <CardContent
-        sx={{
-          height: "140px",
-          overflow: "hidden",
-          padding: "8px 16px"
-        }}
-        onClick={goToProductPage}
-      >
+      <StyledCardContent onClick={goToProductPage}>
         <ProductTitle>{addEllipsis(product?.title || "", 39)}</ProductTitle>
         <ProductDescription>
           {addEllipsis(product?.description || "", 58)}
@@ -99,32 +92,51 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           />{" "}
           {price}
         </ProductDescription>
-      </CardContent>
-        <div style={{height:'37px'}}>
-      {storeOwner !== userName && (
-        <AddToCartButton
-            style={{display: product.status === 'AVAILABLE' ? 'flex': 'none'}}
-          color="primary"
-          onClick={() => {
-            dispatch(
-              setProductToCart({
-                productId: product.id,
-                catalogueId: product.catalogueId,
-                storeId,
-                storeOwner
-              })
-            );
-          }}
-        >
-          <CartSVG
-            color={theme.palette.text.primary}
-            height={"15"}
-            width={"15"}
-          />{" "}
-          Add to Cart
-        </AddToCartButton>
-      )}
-        </div>
-    </Card>
+      </StyledCardContent>
+      <div style={{ height: "37px" }}>
+        {storeOwner !== userName && (
+          <AddToCartButton
+            style={{
+              cursor: product.status === "AVAILABLE" ? "pointer" : "not-allowed"
+            }}
+            color="primary"
+            onClick={() => {
+              if (product.status !== "AVAILABLE") {
+                dispatch(
+                  setNotification({
+                    alertType: "error",
+                    msg: "Product is not available!"
+                  })
+                );
+                return;
+              }
+              dispatch(
+                setProductToCart({
+                  productId: product.id,
+                  catalogueId: product.catalogueId,
+                  storeId,
+                  storeOwner
+                })
+              );
+            }}
+          >
+            {product.status === "AVAILABLE" ? (
+              <>
+                <CartSVG
+                  color={theme.palette.text.primary}
+                  height={"15"}
+                  width={"15"}
+                />{" "}
+                Add to Cart
+              </>
+            ) : product.status === "OUT_OF_STOCK" ? (
+              "Out of Stock"
+            ) : (
+              "Retired"
+            )}
+          </AddToCartButton>
+        )}
+      </div>
+    </StyledCard>
   );
 };

@@ -106,6 +106,15 @@ export const ProductPage = () => {
   )?.value;
 
   const addToCart = () => {
+    if (user?.name === storeOwner) {
+      dispatch(
+        setNotification({
+          alertType: "error",
+          msg: "You own this store! You cannot add your own products to your cart!"
+        })
+      );
+      return;
+    }
     if (product) {
       for (let i = 0; i < Number(cartAddCount); i++) {
         dispatch(
@@ -202,6 +211,15 @@ export const ProductPage = () => {
     <UnavailableButton
       variant={"contained"}
       onClick={() => {
+        if (user?.name === storeOwner) {
+          dispatch(
+            setNotification({
+              alertType: "error",
+              msg: "You own this store! You cannot add your own products to your cart!"
+            })
+          );
+          return;
+        }
         dispatch(
           setNotification({
             alertType: "error",
@@ -241,7 +259,7 @@ export const ProductPage = () => {
         </ProductPrice>
         {available ? availableJSX : unavailableJSX}
       </ProductDetailsContainer>
-      {user?.name ? (
+      {user?.name && user?.name !== storeOwner ? (
         <CartBox>
           <CartIconContainer>
             <CartIcon
