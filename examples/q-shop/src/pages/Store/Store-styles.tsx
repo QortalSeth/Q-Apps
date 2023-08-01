@@ -80,12 +80,41 @@ export const FilterSelectMenuItems = styled(TextField)(({ theme }) => ({
 }));
 
 export const ProductManagerRow = styled(Box)(({ theme }) => ({
-  display: "flex",
-  flexDirection: "row",
+  display: "grid",
+  gridTemplateColumns: "1fr auto",
   alignItems: "center",
   justifyContent: "flex-end",
   width: "100%",
   padding: "15px 18px"
+}));
+
+export const StoreTitleCard = styled(Box)(({ theme }) => ({
+  display: "flex",
+  alignItems: "center",
+  justifySelf: "center",
+  width: "fit-content",
+  borderRadius: "8px",
+  padding: "10px 15px",
+  fontFamily: "Raleway",
+  fontSize: "20px",
+  color: theme.palette.text.primary,
+  backgroundColor: theme.palette.background.paper,
+  gap: "10px",
+  transition: "all 0.3s ease-in-out",
+  "&:hover": {
+    cursor: "pointer",
+    boxShadow:
+      theme.palette.mode === "dark"
+        ? "0px 8px 10px 1px hsla(0,0%,0%,0.14), 0px 3px 14px 2px hsla(0,0%,0%,0.12), 0px 5px 5px -3px hsla(0,0%,0%,0.2)"
+        : "rgba(0, 0, 0, 0.1) 0px 4px 6px -1px, rgba(0, 0, 0, 0.06) 0px 2px 4px -1px;"
+  }
+}));
+
+export const StoreLogo = styled("img")(({ theme }) => ({
+  width: "70px",
+  height: "70px",
+  borderRadius: "3px",
+  objectFit: "cover"
 }));
 
 export const FiltersSubContainer = styled(Box)(({ theme }) => ({
@@ -161,7 +190,7 @@ export const BackToStorefrontButton = styled(Button)(({ theme }) => ({
 export const ProductsContainer = styled(Grid)({
   display: "flex",
   flexWrap: "wrap",
-  padding: "15px 25px"
+  padding: "5px 35px 15px 35px"
 });
 
 export const NoProductsContainer = styled(Box)({

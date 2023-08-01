@@ -43,14 +43,11 @@ export const ProductDetailsCol = styled(Grid)(({ theme }) => ({
   boxSizing: "border-box",
   margin: "0px",
   flexBasis: "100%",
+  WebkitBoxFlex: "0",
   flexGrow: 0,
   maxWidth: "100%",
-  display: "flex",
-  flexDirection: "column",
-  gap: "80px",
-  WebkitBoxAlign: "center",
-  alignItems: "center",
-  justifyContent: "flex-end",
+  display: "grid",
+  gridTemplateRows: "1fr auto",
   height: "100%"
 }));
 
@@ -61,12 +58,27 @@ export const ProductTitle = styled(Typography)(({ theme }) => ({
   userSelect: "none"
 }));
 
+export const ProductDescription = styled(Typography)(({ theme }) => ({
+  margin: "0px",
+  fontWeight: 300,
+  lineHeight: 1.5,
+  letterSpacing: "0.5px",
+  fontFamily: "Karla",
+  fontSize: "18px",
+  userSelect: "none",
+  color: theme.palette.text.primary,
+  display: "flex",
+  justifyContent: "center",
+  flexDirection: "column"
+}));
+
 export const QuantityRow = styled(Box)(({ theme }) => ({
   display: "flex",
   alignItems: "center",
   gap: "10px",
   fontFamily: "Karla",
   fontSize: "18px",
+  fontWeight: 300,
   color: theme.palette.text.primary
 }));
 
@@ -117,6 +129,7 @@ export const GarbageIcon = styled(GarbageSVG)(({ theme }) => ({
 export const ProductPriceFont = styled(Typography)(({ theme }) => ({
   fontFamily: "Karla",
   fontSize: "18px",
+  fontWeight: 300,
   color: theme.palette.text.primary,
   userSelect: "none"
 }));
@@ -164,6 +177,7 @@ export const TotalSumItem = styled(Box)(({ theme }) => ({
 export const TotalSumItemTitle = styled(Typography)(({ theme }) => ({
   fontFamily: "Karla",
   fontSize: "18px",
+  fontWeight: 300,
   userSelect: "none",
   color: theme.palette.text.primary,
   display: "flex",

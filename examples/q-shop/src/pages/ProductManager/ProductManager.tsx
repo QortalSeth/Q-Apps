@@ -4,7 +4,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../state/store";
 import { Box, useTheme } from "@mui/material";
 import LazyLoad from "../../components/common/LazyLoad";
-import { NewProduct } from "./NewProduct";
+import { NewProduct } from "./NewProduct/NewProduct";
 import { ShowOrder } from "./ShowOrder/ShowOrder";
 import { SimpleTable } from "./ProductTable/ProductTable";
 import { setNotification } from "../../state/features/notificationsSlice";
@@ -37,7 +37,8 @@ import {
   MinimizeIcon,
   DockedMinimizeIcon,
   DockedProductsToSaveCard,
-  ProductManagerContainer
+  ProductManagerContainer,
+  ProductsCol
 } from "./ProductManager-styles";
 import { OrderTable } from "./OrderTable/OrderTable";
 import { BackToStorefrontButton } from "../Store/Store-styles";
@@ -55,33 +56,30 @@ const uid = new ShortUniqueId({ length: 10 });
 
 export const ProductManager = () => {
   const theme = useTheme();
-  const { user } = useSelector((state: RootState) => state.auth);
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const location = useLocation();
+  // Get store id from url
+  const { store } = useParams();
 
+  const user = useSelector((state: RootState) => state.auth.user);
   const productsToSave = useSelector(
     (state: RootState) => state.global.productsToSave
   );
-
   const currentStore = useSelector(
     (state: RootState) => state.global.currentStore
   );
-
   const dataContainer = useSelector(
     (state: RootState) => state.global.dataContainer
   );
-
   const orders = useSelector((state: RootState) => state.order.orders);
-
   const listProducts = useSelector(
     (state: RootState) => state.global.listProducts
   );
-
-  const { products: dataContainerProducts } = listProducts;
-
   // Products to map
   const products = useSelector((state: RootState) => state.global.products);
 
-  // Get store id from url
-  const { store } = useParams();
+  const { products: dataContainerProducts } = listProducts;
 
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [order, setOrder] = useState<any>(null);
@@ -96,31 +94,11 @@ export const ProductManager = () => {
     return user.name;
   }, [user]);
 
-  const dispatch = useDispatch();
-  const navigate = useNavigate();
-  const location = useLocation();
-
   // get and set productsToSave from local storage
   // const { productsToSaveLS, saveProductsToLocalStorage } =
   //   useProductsToSaveLocalStorage();
 
   // Redirect to Store page if they're hot reloading
-  useEffect(() => {
-    const handleLoad = () => {
-      const { state } = location;
-
-      // Prevent automatic redirection if the state object exists or if the state.key is default (navigated from another component)
-      if (!state || state.key === "default") {
-        navigate(`/${userName}/${userName}/${store}`);
-      }
-    };
-
-    window.addEventListener("load", handleLoad);
-
-    return () => {
-      window.removeEventListener("load", handleLoad);
-    };
-  }, [navigate, location]);
 
   // Get productsToSave from Redux store and set them in local storage
   // useEffect(() => {
@@ -467,9 +445,18 @@ export const ProductManager = () => {
     await getProducts();
   }, [getProducts]);
 
+  // Fetch products from hashMap if listProducts changes
   useEffect(() => {
     handleGetProducts();
   }, [dataContainerProducts]);
+
+  useEffect(() => {
+    if (!dataContainer || !userName) {
+      navigate(`/${userName}/${store}`);
+    } else {
+      return;
+    }
+  }, [userName]);
 
   return (
     <ProductManagerContainer>
@@ -522,37 +509,47 @@ export const ProductManager = () => {
         </DockedProductsToSaveCard>
       ) : (
         <ReusableModal
-          customStyles={{ top: "15%" }}
+          customStyles={{ top: "15%", backgroundColor: "transparent" }}
           open={Object.keys(productsToSave).length > 0}
         >
           <ProductsToSaveCard>
-            {Object.keys(productsToSave).map((key: string) => {
-              const product = productsToSave[key];
-              const { id } = product;
-              return (
-                <ProductToSaveCard>
-                  <CardHeader>{product?.title}</CardHeader>
-                  <Bulletpoints>
-                    <QortalSVG color={"#000000"} height={"22"} width={"22"} />{" "}
-                    Price: {product?.price && product?.price[0].value} QORT
-                  </Bulletpoints>
-                  <Bulletpoints>
-                    <LoyaltySVG color={"#000000"} height={"22"} width={"22"} />
-                    Type: {product?.type}
-                  </Bulletpoints>
-                  <Bulletpoints>
-                    <CategorySVG color={"#000000"} height={"22"} width={"22"} />
-                    Category: {product?.category}
-                  </Bulletpoints>
-                  <TimesIcon
-                    onClickFunc={() => handleRemoveConfirmation(id)}
-                    color={"#000000"}
-                    height={"22"}
-                    width={"22"}
-                  />
-                </ProductToSaveCard>
-              );
-            })}
+            <ProductsCol>
+              {Object.keys(productsToSave).map((key: string) => {
+                const product = productsToSave[key];
+                const { id } = product;
+                return (
+                  <ProductToSaveCard>
+                    <CardHeader>{product?.title}</CardHeader>
+                    <Bulletpoints>
+                      <QortalSVG color={"#000000"} height={"22"} width={"22"} />{" "}
+                      Price: {product?.price && product?.price[0].value} QORT
+                    </Bulletpoints>
+                    <Bulletpoints>
+                      <LoyaltySVG
+                        color={"#000000"}
+                        height={"22"}
+                        width={"22"}
+                      />
+                      Type: {product?.type}
+                    </Bulletpoints>
+                    <Bulletpoints>
+                      <CategorySVG
+                        color={"#000000"}
+                        height={"22"}
+                        width={"22"}
+                      />
+                      Category: {product?.category}
+                    </Bulletpoints>
+                    <TimesIcon
+                      onClickFunc={() => handleRemoveConfirmation(id)}
+                      color={"#000000"}
+                      height={"22"}
+                      width={"22"}
+                    />
+                  </ProductToSaveCard>
+                );
+              })}
+            </ProductsCol>
             <CardButtonRow>
               <AddMoreButton onClick={() => setOpenAddProduct(true)}>
                 Add Another Product

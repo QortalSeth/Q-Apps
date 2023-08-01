@@ -8,10 +8,13 @@ import { QortalSVG } from "../../assets/svgs/QortalSVG";
 import {
   AddToCartButton,
   ProductDescription,
-  ProductTitle
+  ProductTitle,
+  StyledCard,
+  StyledCardContent
 } from "./ProductCard-styles";
 import { CartSVG } from "../../assets/svgs/CartSVG";
-import {useNavigate} from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import { setNotification } from "../../state/features/notificationsSlice";
 
 function addEllipsis(str: string, limit: number) {
   if (str.length > limit) {
@@ -26,14 +29,14 @@ interface ProductCardProps {
 
 export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const dispatch = useDispatch();
-    const navigate = useNavigate();
+  const navigate = useNavigate();
   const theme = useTheme();
 
-  const { storeId, storeOwner } = useSelector(
-    (state: RootState) => state.store
-  );
+  const storeId = useSelector((state: RootState) => state.store.storeId);
 
-  const { user } = useSelector((state: RootState) => state.auth);
+  const storeOwner = useSelector((state: RootState) => state.store.storeOwner);
+
+  const user = useSelector((state: RootState) => state.auth.user);
 
   const userName = useMemo(() => {
     if (!user?.name) return "";
@@ -41,13 +44,28 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   }, [user]);
 
   const profileImg = product?.images?.[0];
-const goToProductPage = () => {navigate(`/${userName}/${storeId}/${product?.id}/${product.catalogueId}`)}
+
+  const goToProductPage = () => {
+    if (!product || !product?.id || !product?.catalogueId || !storeId) {
+      dispatch(
+        setNotification({
+          alertType: "error",
+          msg: "Unable to load product! Please try again!"
+        })
+      );
+      return;
+    }
+    navigate(
+      `/${product?.user}/${storeId}/${product?.id}/${product.catalogueId}`
+    );
+  };
 
   const price = product?.price?.find(
     (item) => item?.currency === "qort"
   )?.value;
+
   return (
-    <Card>
+    <StyledCard>
       <CardMedia
         sx={{
           "&.MuiCardMedia-root": {
@@ -61,14 +79,7 @@ const goToProductPage = () => {navigate(`/${userName}/${storeId}/${product?.id}/
         alt={product?.title}
         onClick={goToProductPage}
       />
-      <CardContent
-        sx={{
-          height: "130px",
-          overflow: "hidden",
-          padding: "8px 16px"
-        }}
-        onClick={goToProductPage}
-      >
+      <StyledCardContent onClick={goToProductPage}>
         <ProductTitle>{addEllipsis(product?.title || "", 39)}</ProductTitle>
         <ProductDescription>
           {addEllipsis(product?.description || "", 58)}
@@ -81,29 +92,51 @@ const goToProductPage = () => {navigate(`/${userName}/${storeId}/${product?.id}/
           />{" "}
           {price}
         </ProductDescription>
-      </CardContent>
-      {storeOwner !== userName && (
-        <AddToCartButton
-          color="primary"
-          onClick={() => {
-            dispatch(
+      </StyledCardContent>
+      <div style={{ height: "37px" }}>
+        {storeOwner !== userName && (
+          <AddToCartButton
+            style={{
+              cursor: product.status === "AVAILABLE" ? "pointer" : "not-allowed"
+            }}
+            color="primary"
+            onClick={() => {
+              if (product.status !== "AVAILABLE") {
+                dispatch(
+                  setNotification({
+                    alertType: "error",
+                    msg: "Product is not available!"
+                  })
+                );
+                return;
+              }
+              dispatch(
                 setProductToCart({
                   productId: product.id,
                   catalogueId: product.catalogueId,
                   storeId,
                   storeOwner
                 })
-            );
-          }}
-        >
-          <CartSVG
-            color={theme.palette.text.primary}
-            height={"15"}
-            width={"15"}
-          />{" "}
-          Add to Cart
-        </AddToCartButton>
-      )}
-    </Card>
+              );
+            }}
+          >
+            {product.status === "AVAILABLE" ? (
+              <>
+                <CartSVG
+                  color={theme.palette.text.primary}
+                  height={"15"}
+                  width={"15"}
+                />{" "}
+                Add to Cart
+              </>
+            ) : product.status === "OUT_OF_STOCK" ? (
+              "Out of Stock"
+            ) : (
+              "Retired"
+            )}
+          </AddToCartButton>
+        )}
+      </div>
+    </StyledCard>
   );
 };

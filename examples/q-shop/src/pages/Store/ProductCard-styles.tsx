@@ -1,5 +1,5 @@
 import { styled } from "@mui/system";
-import { Box, Button } from "@mui/material";
+import { Box, Button, Card, CardContent } from "@mui/material";
 
 export const ProductTitle = styled(Box)(({ theme }) => ({
   displayq: "flex",
@@ -18,12 +18,11 @@ export const ProductDescription = styled(Box)(({ theme }) => ({
   color: theme.palette.text.primary,
   opacity: 0.95,
   wordBreak: "break-word",
-  maxHeight: "65px",
+  maxHeight: "75px",
   userSelect: "none"
 }));
 
 export const AddToCartButton = styled(Button)(({ theme }) => ({
-  border: `1px solid ${theme.palette.background.paper}`,
   borderRadius: "7px",
   padding: "5px 10px",
   display: "flex",
@@ -35,6 +34,27 @@ export const AddToCartButton = styled(Button)(({ theme }) => ({
   "&:hover": {
     cursor: "pointer",
     filter:
-      theme.palette.mode === "dark" ? "brightness(1.1)" : "brightness(0.9)"
+      theme.palette.mode === "dark" ? "brightness(1.8)" : "brightness(0.2)"
   }
+}));
+
+export const StyledCard = styled(Card)(({ theme }) => ({
+  backgroundColor: theme.palette.background.paper,
+  color: theme.palette.text.primary,
+  overflow: "hidden",
+  boxShadow: "none",
+  borderRadius: "8px",
+  transition: "all 0.3s ease-in-out 0s",
+  minHeight: ["auto", "400px"],
+  display: "flex",
+  flexDirection: "column"
+}));
+
+export const StyledCardContent = styled(CardContent)(({ theme }) => ({
+  height: "100%",
+  padding: "8px 16px",
+  gap: "10px",
+  display: "flex",
+  flexDirection: "column",
+  flexGrow: 1
 }));

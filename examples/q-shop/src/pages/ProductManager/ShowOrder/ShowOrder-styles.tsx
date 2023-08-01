@@ -1,5 +1,5 @@
 import { styled } from "@mui/system";
-import { Box, Button, Typography } from "@mui/material";
+import { Box, Button, Select, TextField, Typography } from "@mui/material";
 import { TimesSVG } from "../../../assets/svgs/TimesSVG";
 
 export const ShowOrderHeader = styled(Box)(({ theme }) => ({
@@ -36,6 +36,39 @@ export const ShowOrderTitle = styled("a")(({ theme }) => ({
   fontFamily: "Merriweather Sans, sans-serif",
   letterSpacing: "0px",
   fontSize: "21px"
+}));
+
+export const CustomSelect = styled(Select)(({ theme }) => ({
+  fontFamily: "Karla",
+  fontSize: "18px",
+  fontWeight: 300,
+  letterSpacing: 0,
+  "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+    borderColor: theme.palette.secondary.main
+  }
+}));
+
+export const CustomTextField = styled(TextField)(({ theme }) => ({
+  fontFamily: "Karla",
+  fontSize: "18px",
+  fontWeight: 300,
+  letterSpacing: 0,
+  color: theme.palette.text.primary
+}));
+
+export const UpdateStatusButton = styled(Button)(({ theme }) => ({
+  fontFamily: "Karla",
+  fontSize: "16px",
+  letterSpacing: 0,
+  fontWeight: 300,
+  padding: "5px 10px",
+  color: "white",
+  backgroundColor: theme.palette.secondary.main,
+  transition: "all 0.2s ease-in-out",
+  "&:hover": {
+    cursor: "pointer",
+    backgroundColor: theme.palette.secondary.dark
+  }
 }));
 
 export const ShowOrderDateCreated = styled(Box)(({ theme }) => ({
@@ -76,6 +109,12 @@ export const ShowOrderContent = styled(Box)(({ theme }) => ({
   "&::-webkit-scrollbar-thumb:hover": {
     backgroundColor: theme.palette.mode === "light" ? "#b7bcc4" : "#40455f"
   }
+}));
+
+export const SellerOrderStatusRow = styled(Box)(({ theme }) => ({
+  display: "flex",
+  flexDirection: "column",
+  gap: "10px"
 }));
 
 export const OrderStatusRow = styled(Box)(({ theme }) => ({
@@ -165,6 +204,7 @@ export const OrderTitle = styled(Typography)(({ theme }) => ({
   fontFamily: "Karla",
   letterSpacing: "0px",
   fontSize: "20px",
+  fontWeight: 300,
   color: theme.palette.text.primary,
   "& span": {
     fontWeight: 500
@@ -182,8 +222,17 @@ export const OrderId = styled(Typography)(({ theme }) => ({
 export const OrderQuantityRow = styled(Box)(({ theme }) => ({
   display: "flex",
   alignItems: "center",
+  justifyContent: "flex-end",
+  gap: "5px",
+  width: "100%"
+}));
+
+export const TotalPriceRow = styled(Box)(({ theme }) => ({
+  display: "flex",
+  alignItems: "center",
   justifyContent: "center",
-  gap: "5px"
+  gap: "5px",
+  width: "100%"
 }));
 
 export const TotalCostContainer = styled(Box)(({ theme }) => ({
@@ -251,6 +300,7 @@ export const DetailsCard = styled(Box)(({ theme }) => ({
   backgroundColor: theme.palette.background.paper,
   fontFamily: "Karla",
   fontSize: "19px",
+  fontWeight: 300,
   color: theme.palette.text.primary,
   gap: "5px",
   maxWidth: "400px",
