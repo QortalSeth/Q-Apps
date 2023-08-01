@@ -69,28 +69,32 @@ export const AudioPanel: React.FC<VideoPanelProps> = ({
   const [videos, setVideos] = useState<Video[]>([])
   const [isOpenVideoModal, setIsOpenVideoModal] = useState<boolean>(false)
   const { user } = useSelector((state: RootState) => state.auth)
-  const [editVideoIdentifier, setEditVideoIdentifier] = useState<string | null | undefined>()
+  const [editVideoIdentifier, setEditVideoIdentifier] = useState<
+    string | null | undefined
+  >()
 
   const fetchVideos = React.useCallback(async (): Promise<Video[]> => {
     if (!user?.name) return []
 
-    let res
+    let res = []
     try {
-      res = await qortalRequest({
-        action: 'LIST_QDN_RESOURCES',
-        service: 'AUDIO',
-        name: user.name,
-        includeMetadata: true,
-        limit: 100,
-        offset: 0,
-        reverse: true
-      })
-    } catch (error) {
+      // res = await qortalRequest({
+      //   action: 'LIST_QDN_RESOURCES',
+      //   service: 'AUDIO',
+      //   name: user.name,
+      //   includeMetadata: true,
+      //   limit: 100,
+      //   offset: 0,
+      //   reverse: true
+      // })
       const res2 = await fetch(
-        '/arbitrary/resources?&service=AUDIO&name=Phil&includemetadata=true&limit=100&offset=0&reverse=true'
+        `/arbitrary/resources?&service=AUDIO&name=${user.name}&includemetadata=true&limit=100&offset=0&reverse=true`
       )
-      res = await res2.json()
-    }
+      const resData = await res2.json()
+      if (Array.isArray(resData)) {
+        res = resData
+      }
+    } catch (error) {}
 
     // Replace this URL with the actual API endpoint
 
@@ -182,10 +186,16 @@ export const AudioPanel: React.FC<VideoPanelProps> = ({
                     secondary={video?.metadata?.description || ''}
                   />
                 </ButtonBase>
-                <Button size='small' variant='contained' onClick={()=> {
-                  setEditVideoIdentifier(video.identifier)
-                  setIsOpenVideoModal(true)
-                }}>Edit</Button>
+                <Button
+                  size="small"
+                  variant="contained"
+                  onClick={() => {
+                    setEditVideoIdentifier(video.identifier)
+                    setIsOpenVideoModal(true)
+                  }}
+                >
+                  Edit
+                </Button>
               </ListItem>
             ))}
           </List>
@@ -200,10 +210,9 @@ export const AudioPanel: React.FC<VideoPanelProps> = ({
             <PublishButton
               variant="contained"
               onClick={() => {
-
                 setEditVideoIdentifier(null)
                 setIsOpenVideoModal(true)
-              } }
+              }}
             >
               Publish new audio file
             </PublishButton>
@@ -214,7 +223,6 @@ export const AudioPanel: React.FC<VideoPanelProps> = ({
         onClose={() => {
           setIsOpenVideoModal(false)
           setEditVideoIdentifier(null)
-
         }}
         open={isOpenVideoModal}
         onPublish={(value) => {

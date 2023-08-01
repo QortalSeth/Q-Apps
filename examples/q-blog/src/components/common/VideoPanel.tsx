@@ -78,22 +78,30 @@ export const VideoPanel: React.FC<VideoPanelProps> = ({
   const fetchVideos = React.useCallback(async (): Promise<Video[]> => {
     if (!user?.name) return []
     // Replace this URL with the actual API endpoint
-    let res
+    let res = []
     try {
-      res = await qortalRequest({
-        action: 'LIST_QDN_RESOURCES',
-        service: 'VIDEO',
-        name: user.name,
-        includeMetadata: true,
-        limit: 100,
-        offset: 0,
-        reverse: true
-      })
-    } catch (error) {
+      // res = await qortalRequest({
+      //   action: 'LIST_QDN_RESOURCES',
+      //   service: 'VIDEO',
+      //   name: user.name,
+      //   includeMetadata: true,
+      //   limit: 100,
+      //   offset: 0,
+      //   reverse: true
+      // })
+
       const res2 = await fetch(
-        '/arbitrary/resources?&service=VIDEO&name=Phil&includemetadata=true&limit=100&offset=0&reverse=true'
+        `/arbitrary/resources?&service=VIDEO&name=${user.name}&includemetadata=true&limit=100&offset=0&reverse=true`
       )
-      res = await res2.json()
+      const resData = await res2.json()
+      if (Array.isArray(resData)) {
+        res = resData
+      }
+    } catch (error) {
+      // const res2 = await fetch(
+      //   '/arbitrary/resources?&service=VIDEO&name=Phil&includemetadata=true&limit=100&offset=0&reverse=true'
+      // )
+      // res = await res2.json()
     }
 
     return res
@@ -211,10 +219,12 @@ export const VideoPanel: React.FC<VideoPanelProps> = ({
                       )
                     }}
                   >
-                    <LinkIcon sx={{
-                      fontSize: '14px',
-                      cursor: 'pointer'
-                    }} />
+                    <LinkIcon
+                      sx={{
+                        fontSize: '14px',
+                        cursor: 'pointer'
+                      }}
+                    />
                   </CopyToClipboard>
                 </Box>
               </ListItem>
