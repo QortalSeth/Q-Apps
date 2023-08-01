@@ -15,6 +15,7 @@ import { MAIL_SERVICE_TYPE } from '../../constants/mail'
 import { base64ToUint8Array, uint8ArrayToObject } from '../../utils/toBase64'
 import { ShowMessage } from './ShowMessageWithoutModal'
 import { NewThread } from './NewThread'
+import { setIsLoadingGlobal } from '../../state/features/globalSlice'
 
 interface ThreadProps {
   currentThread: any
@@ -29,17 +30,18 @@ export const Thread = ({
   const theme = useTheme()
   const { user } = useSelector((state: RootState) => state.auth)
   const [messages, setMessages] = useState<any[]>([])
-
+  const dispatch = useDispatch()
   const getMailMessages = React.useCallback(
-    async (groupInfo: any) => {
+    async (groupInfo: any, reset?: boolean) => {
       try {
+        dispatch(setIsLoadingGlobal(true))
         let str = groupInfo.threadId
         let parts = str.split('_').reverse()
         let result = parts[0]
         const threadId = result
         const offset = messages.length
         const query = `qortal_qmail_thmsg_group${groupInfo?.threadData?.groupId}_${threadId}`
-        const url = `/arbitrary/resources/search?mode=ALL&service=${MAIL_SERVICE_TYPE}&query=${query}&limit=20&includemetadata=true&offset=${offset}&reverse=true&excludeblocked=true`
+        const url = `/arbitrary/resources/search?mode=ALL&service=${MAIL_SERVICE_TYPE}&query=${query}&limit=20&includemetadata=false&offset=${offset}&reverse=true&excludeblocked=true`
         const response = await fetch(url, {
           method: 'GET',
           headers: {
@@ -47,7 +49,7 @@ export const Thread = ({
           }
         })
         const responseData = await response.json()
-        let fullArrayMsg = [...messages]
+        let fullArrayMsg = reset ? [] : [...messages]
 
         for (const message of responseData) {
           try {
@@ -85,13 +87,14 @@ export const Thread = ({
         setMessages(fullArrayMsg)
       } catch (error) {
       } finally {
+        dispatch(setIsLoadingGlobal(false))
       }
     },
     [messages]
   )
   const getMessages = React.useCallback(async () => {
     if (!user?.name || !currentThread) return
-    await getMailMessages(currentThread)
+    await getMailMessages(currentThread, true)
   }, [getMailMessages, user, currentThread])
   const firstMount = useRef(false)
   useEffect(() => {
@@ -114,7 +117,7 @@ export const Thread = ({
         let result = parts[0]
         const threadId = result
         const query = `qortal_qmail_thmsg_group${groupInfo?.threadData?.groupId}_${threadId}`
-        const url = `/arbitrary/resources/search?mode=ALL&service=${MAIL_SERVICE_TYPE}&query=${query}&limit=20&includemetadata=true&offset=${0}&reverse=true&excludeblocked=true`
+        const url = `/arbitrary/resources/search?mode=ALL&service=${MAIL_SERVICE_TYPE}&query=${query}&limit=20&includemetadata=false&offset=${0}&reverse=true&excludeblocked=true`
         const response = await fetch(url, {
           method: 'GET',
           headers: {
@@ -197,18 +200,18 @@ export const Thread = ({
   }, [checkNewMessagesFunc])
 
   if (!currentThread) return null
-
+  console.log({ currentThread, groupInfo })
   return (
     <div
       style={{
         position: 'fixed',
         bottom: '0px',
-        top: '102px',
+        top: '0px',
         left: '0px',
         right: '0px',
         overflowY: 'auto',
         backgroundColor: theme.palette.background.paper,
-        zIndex: 1
+        zIndex: 10000
       }}
     >
       <Box
@@ -236,7 +239,18 @@ export const Thread = ({
           messageCallback={messageCallback}
         />
       </Box>
-
+      <Box
+        sx={{
+          width: '100%',
+          alignItems: 'center',
+          display: 'flex',
+          flexDirection: 'column',
+          margin: '10px 0px'
+        }}
+      >
+        <Typography variant="h2">{currentThread?.threadData?.title}</Typography>
+        <Typography variant="h6">Group: {groupInfo?.groupName}</Typography>
+      </Box>
       {messages.map((message) => {
         return <ShowMessage key={message?.identifier} message={message} />
       })}

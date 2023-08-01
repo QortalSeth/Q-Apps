@@ -98,7 +98,7 @@ export const GroupMail = ({ groupInfo }: AliasMailProps) => {
         const offset = allThreads.length
         dispatch(setIsLoadingGlobal(true))
         const query = `qortal_qmail_thread_group${groupId}`
-        const url = `/arbitrary/resources/search?mode=ALL&service=${MAIL_SERVICE_TYPE}&query=${query}&limit=${20}&includemetadata=true&offset=${offset}&reverse=true&excludeblocked=true`
+        const url = `/arbitrary/resources/search?mode=ALL&service=${MAIL_SERVICE_TYPE}&query=${query}&limit=${20}&includemetadata=false&offset=${offset}&reverse=true&excludeblocked=true`
         const response = await fetch(url, {
           method: 'GET',
           headers: {
@@ -155,7 +155,7 @@ export const GroupMail = ({ groupInfo }: AliasMailProps) => {
     try {
       dispatch(setIsLoadingGlobal(true))
       const query = `qortal_qmail_thmsg_group${groupId}`
-      const url = `/arbitrary/resources/search?mode=ALL&service=${MAIL_SERVICE_TYPE}&query=${query}&limit=100&includemetadata=true&offset=${0}&reverse=true&excludeblocked=true`
+      const url = `/arbitrary/resources/search?mode=ALL&service=${MAIL_SERVICE_TYPE}&query=${query}&limit=100&includemetadata=false&offset=${0}&reverse=true&excludeblocked=true`
       const response = await fetch(url, {
         method: 'GET',
         headers: {
@@ -274,7 +274,7 @@ export const GroupMail = ({ groupInfo }: AliasMailProps) => {
         groupInfo={groupInfo}
         closeThread={closeThread}
       />
-      <NewThread groupInfo={groupInfo} />
+      <NewThread groupInfo={groupInfo} refreshLatestThreads={getMessages} />
 
       <div>
         <p>Latest threads</p>

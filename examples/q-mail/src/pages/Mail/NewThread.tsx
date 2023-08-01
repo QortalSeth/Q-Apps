@@ -43,6 +43,7 @@ interface NewMessageProps {
   currentThread?: any
   isMessage?: boolean
   messageCallback?: (val: any) => void
+  refreshLatestThreads?: () => void
 }
 const maxSize = 25 * 1024 * 1024 // 25 MB in bytes
 export const NewThread = ({
@@ -50,7 +51,8 @@ export const NewThread = ({
   hideButton,
   currentThread,
   isMessage = false,
-  messageCallback
+  messageCallback,
+  refreshLatestThreads
 }: NewMessageProps) => {
   const [isOpen, setIsOpen] = useState<boolean>(false)
   const [value, setValue] = useState(initialValue)
@@ -235,7 +237,9 @@ export const NewThread = ({
             alertType: 'success'
           })
         )
-
+        if (refreshLatestThreads) {
+          refreshLatestThreads()
+        }
         closeModal()
       } else {
         if (!currentThread) throw new Error('unable to locate thread Id')

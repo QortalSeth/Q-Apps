@@ -101,11 +101,9 @@ export const NewMessage = ({
     setAliasValue('')
   }
 
-  console.log({ location })
   useEffect(() => {
     const query = new URLSearchParams(location.search)
     let toVar = query?.get('to')
-    console.log({ toVar })
     if (toVar) {
       if (toVar && toVar.endsWith('/')) {
         toVar = toVar.slice(0, -1)

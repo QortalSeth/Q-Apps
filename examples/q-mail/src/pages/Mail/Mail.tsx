@@ -15,6 +15,7 @@ import Joyride, { ACTIONS, EVENTS, STATUS, Step } from 'react-joyride'
 import SendIcon from '@mui/icons-material/Send'
 import MailIcon from '@mui/icons-material/Mail'
 import GroupIcon from '@mui/icons-material/Group'
+import { styled } from '@mui/system'
 import {
   Box,
   Button,
@@ -140,6 +141,10 @@ const steps: Step[] = [
     placement: 'bottom'
   }
 ]
+
+const GroupTabs = styled(Tabs)({
+  maxWidth: '50vw'
+})
 
 export const Mail = () => {
   const theme = useTheme()
@@ -403,6 +408,10 @@ export const Mail = () => {
           value={valueTab}
           onChange={handleChange}
           aria-label="basic tabs example"
+          variant="scrollable"
+          sx={{
+            maxWidth: '35vw'
+          }}
         >
           <Tab
             sx={{
@@ -460,14 +469,17 @@ export const Mail = () => {
               '&&.Mui-focused': {
                 outline: 'none'
               },
-              fontSize: '14px'
+              fontSize: '14px',
+              display: 'flex',
+              minWidth: '120px'
             }}
           />
           <Button
             sx={{
               height: '30px',
               alignSelf: 'center',
-              marginRight: '10px'
+              marginRight: '10px',
+              flexShrink: 0
             }}
             onClick={() => {
               if (!aliasValue) return
@@ -508,10 +520,11 @@ export const Mail = () => {
               </MenuItem>
             ))}
           </Select> */}
-          <Tabs
+          <GroupTabs
             value={valueTabGroups}
             onChange={handleChangeGroups}
             aria-label="basic tabs example"
+            variant="scrollable"
           >
             {options.map((group, index) => {
               return (
@@ -530,7 +543,7 @@ export const Mail = () => {
                 />
               )
             })}
-          </Tabs>
+          </GroupTabs>
         </Box>
       </Box>
       <Box
