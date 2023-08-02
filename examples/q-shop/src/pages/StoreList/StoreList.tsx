@@ -1,34 +1,42 @@
-import { useState, useCallback, useMemo, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useCallback, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../state/store";
 import LazyLoad from "../../components/common/LazyLoad";
-import ContextMenuResource from "../../components/common/ContextMenu/ContextMenuResource";
 import { setIsLoadingGlobal } from "../../state/features/globalSlice";
 import { Store, upsertStores } from "../../state/features/storeSlice";
 import { useFetchStores } from "../../hooks/useFetchStores";
 import {
-  StoreCard,
-  StoreCardDescription,
-  StoreCardImage,
-  StoreCardImageContainer,
-  StoreCardInfo,
-  StoreCardOwner,
-  StoreCardTitle,
-  StoreCardYouOwn,
   StoresContainer,
-  StoresRow,
-  MyStoresRow,
   MyStoresCard,
-  MyStoresCheckbox
+  MyStoresCheckbox,
+  WelcomeRow,
+  WelcomeFont,
+  WelcomeSubFont,
+  WelcomeCol
 } from "./StoreList-styles";
 import DefaultStoreImage from "../../assets/img/Q-AppsLogo.webp";
-import { StarSVG } from "../../assets/svgs/StarSVG";
-interface BlogListProps {
-  mode?: string;
-}
-export const StoreList = ({ mode }: BlogListProps) => {
+import { Grid } from "@mui/material";
+import { StoreCard } from "../Store/StoreCard/StoreCard";
+
+/* Reviews notes
+  Fetch 10 reviews of the store use fetch() API call
+  Add them all up and divide by # of reviews to get the average rating
+  In the resource of the review, we should put the rating inside the tag of the review.
+  Preview of the rating in the title metadata (which is part of the metadata of the resource) 60 chars
+  Preview of the review message in the description metadata (which is part of the metadata of the resource) 150 chars
+  Put the review number inside the raw data JSON as well
+  Use service DOCUMENT
+  And then when they click on the actual, review, it will show the full review message and the rating by fetching the raw data
+  When fetching the full list of reviews, don't use mode=ALL, use mode=LATEST
+  Filter reviews by query by minlevel 1 and above
+  Make sure user has at least one store order before beign able to leave a review
+  const url = `/arbitrary/resources/search?service=DOCUMENT_PRIVATE&query=${query}&limit=20&name=${name}&includemetadata=true&offset=${offset}&reverse=true`;
+
+*/
+
+export const StoreList = () => {
   const dispatch = useDispatch();
+
   const user = useSelector((state: RootState) => state.auth.user);
 
   const [filterUserStores, setFilterUserStores] = useState<boolean>(false);
@@ -44,7 +52,6 @@ export const StoreList = ({ mode }: BlogListProps) => {
   const stores = useSelector((state: RootState) => state.store.stores);
 
   const { getStore, checkAndUpdateResource } = useFetchStores();
-  const navigate = useNavigate();
 
   const getUserStores = useCallback(async () => {
     try {
@@ -129,64 +136,56 @@ export const StoreList = ({ mode }: BlogListProps) => {
   return (
     <>
       <StoresContainer container>
-        {user && (
-          <MyStoresRow>
-            <MyStoresCard>
-              <MyStoresCheckbox
-                checked={filterUserStores}
-                onChange={handleFilterUserStores}
-                inputProps={{ "aria-label": "controlled" }}
-              />
-              See My Stores
-            </MyStoresCard>
-          </MyStoresRow>
-        )}
-        {filteredStores.map((store: Store, index) => {
-          let storeItem = store;
-          const existingStore = hashMapStores[store.id];
-          // Check in case hashmap data isn't there yet due to async API calls.
-          // If it's not there, component will rerender once it receives the metadata
-          if (existingStore) {
-            storeItem = existingStore;
-          }
-          const storeId = storeItem?.id || "";
-          const storeOwner = storeItem?.owner || "";
-          const storeTitle = storeItem?.title || "missing metadata";
-          const storeLogo = storeItem?.logo || DefaultStoreImage;
-          const storeDescription = storeItem?.description || "missing metadata";
-          return (
-            <StoresRow item key={storeId}>
-              <ContextMenuResource
-                name={storeOwner}
-                service="STORE"
-                identifier={storeId}
-                link={`qortal://APP/Q-Store/${storeOwner}/${storeId}`}
-              >
+        <WelcomeRow item xs={12}>
+          <WelcomeCol>
+            <WelcomeFont>Welcome to Q-Shop 👋</WelcomeFont>
+            <WelcomeSubFont>
+              Explore the latest of what the Qortal community has for sale.
+            </WelcomeSubFont>
+          </WelcomeCol>
+          <WelcomeCol>
+            {user && (
+              <MyStoresCard>
+                <MyStoresCheckbox
+                  checked={filterUserStores}
+                  onChange={handleFilterUserStores}
+                  inputProps={{ "aria-label": "controlled" }}
+                />
+                See My Stores
+              </MyStoresCard>
+            )}
+          </WelcomeCol>
+        </WelcomeRow>
+        <Grid item xs={12}>
+          <Grid container spacing={3}>
+            {filteredStores.map((store: Store) => {
+              let storeItem = store;
+              const existingStore = hashMapStores[store.id];
+              // Check in case hashmap data isn't there yet due to async API calls.
+              // If it's not there, component will rerender once it receives the metadata
+              if (existingStore) {
+                storeItem = existingStore;
+              }
+              const storeId = storeItem?.id || "";
+              const storeOwner = storeItem?.owner || "";
+              const storeTitle = storeItem?.title || "missing metadata";
+              const storeLogo = storeItem?.logo || DefaultStoreImage;
+              const storeDescription =
+                storeItem?.description || "missing metadata";
+              return (
                 <StoreCard
-                  container
-                  onClick={() => navigate(`/${storeOwner}/${storeId}`)}
-                >
-                  <StoreCardImageContainer item>
-                    <StoreCardImage src={storeLogo} alt={storeTitle} />
-                  </StoreCardImageContainer>
-                  <StoreCardInfo item>
-                    <StoreCardTitle>{storeTitle}</StoreCardTitle>
-                    <StoreCardDescription>
-                      {storeDescription}
-                    </StoreCardDescription>
-                  </StoreCardInfo>
-                  <StoreCardOwner>{storeOwner}</StoreCardOwner>
-                  {storeOwner === user?.name && (
-                    <StoreCardYouOwn>
-                      <StarSVG color={"#fbff2a"} width={"20"} height={"20"} />
-                      You own this store
-                    </StoreCardYouOwn>
-                  )}
-                </StoreCard>
-              </ContextMenuResource>
-            </StoresRow>
-          );
-        })}
+                  storeTitle={storeTitle || ""}
+                  storeLogo={storeLogo || ""}
+                  storeDescription={storeDescription || ""}
+                  storeId={storeId || ""}
+                  storeOwner={storeOwner || ""}
+                  key={storeId}
+                  userName={user?.name || ""}
+                />
+              );
+            })}
+          </Grid>
+        </Grid>
       </StoresContainer>
       <LazyLoad onLoadMore={getStores}></LazyLoad>
     </>

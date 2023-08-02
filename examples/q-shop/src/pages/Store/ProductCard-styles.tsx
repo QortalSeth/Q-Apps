@@ -23,6 +23,9 @@ export const ProductDescription = styled(Box)(({ theme }) => ({
 }));
 
 export const AddToCartButton = styled(Button)(({ theme }) => ({
+  fontFamily: "Karla",
+  fontWeight: 300,
+  fontSize: "16.5px",
   borderRadius: "7px",
   padding: "5px 10px",
   display: "flex",
