@@ -211,7 +211,7 @@ export const Thread = ({
         right: '0px',
         overflowY: 'auto',
         backgroundColor: theme.palette.background.paper,
-        zIndex: 10000
+        zIndex: 1100
       }}
     >
       <Box
@@ -228,7 +228,10 @@ export const Thread = ({
             height: '45px'
           }}
           variant="contained"
-          onClick={() => closeThread()}
+          onClick={() => {
+            setMessages([])
+            closeThread()
+          }}
         >
           Close Thread
         </Button>

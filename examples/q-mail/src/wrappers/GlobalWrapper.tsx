@@ -23,7 +23,9 @@ const GlobalWrapper: React.FC<Props> = ({ children }) => {
   const { user } = useSelector((state: RootState) => state.auth)
   const { audios, currAudio } = useSelector((state: RootState) => state.global)
   const favoritesLocalRef = useRef<any>(null)
-
+  const privateGroups = useSelector(
+    (state: RootState) => state.global.privateGroups
+  )
   useEffect(() => {
     if (!user?.name) return
     const dynamicInstanceName = `q-blog-favorites-${user.name}` // Replace this with your dynamic value
@@ -62,8 +64,16 @@ const GlobalWrapper: React.FC<Props> = ({ children }) => {
       return ''
     }
   }
+
+  const privateGroupsRef = React.useRef<any>({})
+
+  React.useEffect(() => {
+    privateGroupsRef.current = privateGroups
+  }, [privateGroupsRef, privateGroups])
   async function getGroups(address: string) {
     try {
+      console.log({ privateGroups: privateGroupsRef.current })
+
       const groups: any = {}
       const response = await fetch('/groups/member/' + address)
       const groupData = await response.json()
@@ -73,12 +83,23 @@ const GlobalWrapper: React.FC<Props> = ({ children }) => {
       if (filterPrivate?.length > 0) {
         for (const group of filterPrivate) {
           const groupNumber = group.groupId
+          let prevGroupMembers = privateGroupsRef.current?.[groupNumber] || {}
+          if (prevGroupMembers) {
+            prevGroupMembers = { ...(prevGroupMembers?.membersByAddress || {}) }
+          }
+          console.log({ prevGroupMembers })
           const response = await fetch(`/groups/members/${groupNumber}?limit=0`)
           const groupData = await response.json()
+
           let members: any = {}
+          let membersByAddress: any = {}
           if (groupData && Array.isArray(groupData?.members)) {
             for (const member of groupData.members) {
               if (member.member) {
+                if (prevGroupMembers[member.member]) {
+                  delete prevGroupMembers[member.member]
+                  continue
+                }
                 const res = await getNameInfo(member.member)
                 const resAddress = await qortalRequest({
                   action: 'GET_ACCOUNT_DATA',
@@ -91,13 +112,39 @@ const GlobalWrapper: React.FC<Props> = ({ children }) => {
                     publicKey,
                     address: member.member
                   }
+                  membersByAddress[member.member] = true
                 }
               }
             }
           }
+
+          let oldGroup = privateGroupsRef.current?.[groupNumber]
+          if (oldGroup) {
+            oldGroup = structuredClone(privateGroupsRef.current[groupNumber])
+          }
+          let remainingMembers: any = {}
+          let remainingMembersByAddress: any = {}
+          for (const memberName of Object.keys(oldGroup?.members || {})) {
+            const member = oldGroup?.members[memberName]
+            if (member && prevGroupMembers[member.address]) {
+              continue
+            } else if (member) {
+              remainingMembers[memberName] = member
+              remainingMembersByAddress[member.address] = true
+            }
+          }
+          const addNewMembers = {
+            ...remainingMembers,
+            ...members
+          }
+          const addNewMembersByAddress = {
+            ...membersByAddress,
+            ...remainingMembersByAddress
+          }
           groups[groupNumber] = {
             ...group,
-            members
+            members: addNewMembers,
+            membersByAddress: addNewMembersByAddress
           }
         }
 
@@ -105,7 +152,9 @@ const GlobalWrapper: React.FC<Props> = ({ children }) => {
       } else {
         return ''
       }
-    } catch (error) {}
+    } catch (error) {
+      console.log({ error })
+    }
   }
   const interval = useRef<any>(null)
 
@@ -117,9 +166,9 @@ const GlobalWrapper: React.FC<Props> = ({ children }) => {
         isCalling = true
         const res = await getGroups(address)
         isCalling = false
-      }, 300000)
+      }, 600000)
     },
-    [getGroups]
+    [getGroups, privateGroups]
   )
 
   const askForAccountInformation = React.useCallback(async () => {

@@ -34,6 +34,7 @@ interface GlobalState {
   showingAudioPlayer: boolean
   userAvatarHash: Record<string, string>
   privateGroups: Record<string, any>
+  hasFetchedPrivateGroups: boolean
 }
 const initialState: GlobalState = {
   isOpenPublishBlogModal: false,
@@ -48,7 +49,8 @@ const initialState: GlobalState = {
   downloads: {},
   showingAudioPlayer: false,
   userAvatarHash: {},
-  privateGroups: {}
+  privateGroups: {},
+  hasFetchedPrivateGroups: false
 }
 
 export const globalSlice = createSlice({
@@ -108,6 +110,7 @@ export const globalSlice = createSlice({
     },
     setPrivateGroups: (state, action) => {
       state.privateGroups = action.payload
+      state.hasFetchedPrivateGroups = true
     },
   }
 })

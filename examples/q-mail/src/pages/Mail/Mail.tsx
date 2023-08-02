@@ -162,6 +162,9 @@ export const Mail = () => {
   const privateGroups = useSelector(
     (state: RootState) => state.global.privateGroups
   )
+  const hasFetchedPrivateGroups = useSelector(
+    (state: RootState) => state.global.hasFetchedPrivateGroups
+  )
   const options = useMemo(() => {
     return Object.keys(privateGroups).map((key) => {
       return {
@@ -520,6 +523,22 @@ export const Mail = () => {
               </MenuItem>
             ))}
           </Select> */}
+          {!hasFetchedPrivateGroups && (
+            <Box
+              sx={{
+                display: 'flex',
+                alignItems: 'center'
+              }}
+            >
+              <Typography
+                sx={{
+                  fontSize: '14px'
+                }}
+              >
+                Fetching groups...
+              </Typography>
+            </Box>
+          )}
           <GroupTabs
             value={valueTabGroups}
             onChange={handleChangeGroups}
