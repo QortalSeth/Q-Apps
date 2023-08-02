@@ -31,10 +31,20 @@ export const ProductContainer = styled(Grid)(({ theme }) => ({
   maxHeight: "250px"
 }));
 
+export const ColumnTitle = styled(Typography)(({ theme }) => ({
+  fontFamily: "Karla",
+  fontSize: "20px",
+  fontWeight: 300,
+  letterSpacing: 0,
+  userSelect: "none",
+  padding: "10px",
+  color: theme.palette.text.primary
+}));
+
 export const ProductInfoCol = styled(Grid)(({ theme }) => ({
   display: "flex",
   flexDirection: "column",
-  gap: "5px",
+  gap: "10px",
   alignItems: "center",
   flexGrow: 1
 }));
@@ -48,28 +58,51 @@ export const ProductDetailsCol = styled(Grid)(({ theme }) => ({
   maxWidth: "100%",
   display: "grid",
   gridTemplateRows: "1fr auto",
-  height: "100%"
+  height: "100%",
+  rowGap: "5px"
 }));
 
 export const ProductTitle = styled(Typography)(({ theme }) => ({
   fontFamily: "Merriweather Sans",
   fontSize: "22px",
   color: theme.palette.text.primary,
-  userSelect: "none"
+  userSelect: "none",
+  textOverflow: "ellipsis",
+  overflow: "hidden",
+  whiteSpace: "nowrap",
+  width: "100%"
 }));
 
 export const ProductDescription = styled(Typography)(({ theme }) => ({
   margin: "0px",
   fontWeight: 300,
   lineHeight: 1.5,
-  letterSpacing: "0.5px",
+  letterSpacing: 0,
   fontFamily: "Karla",
   fontSize: "18px",
   userSelect: "none",
   color: theme.palette.text.primary,
-  display: "flex",
-  justifyContent: "center",
-  flexDirection: "column"
+  overflowY: "auto",
+  "&::-webkit-scrollbar-track": {
+    backgroundColor: "transparent"
+  },
+  "&::-webkit-scrollbar-track:hover": {
+    backgroundColor: "transparent"
+  },
+  "&::-webkit-scrollbar": {
+    width: "8px",
+    height: "10px",
+    backgroundColor: "transparent"
+  },
+  "&::-webkit-scrollbar-thumb": {
+    backgroundColor: theme.palette.mode === "light" ? "#d3d9e1" : "#414763",
+    borderRadius: "8px",
+    backgroundClip: "content-box",
+    border: "4px solid transparent"
+  },
+  "&::-webkit-scrollbar-thumb:hover": {
+    backgroundColor: theme.palette.mode === "light" ? "#b7bcc4" : "#40455f"
+  }
 }));
 
 export const QuantityRow = styled(Box)(({ theme }) => ({
@@ -83,7 +116,7 @@ export const QuantityRow = styled(Box)(({ theme }) => ({
 }));
 
 export const ProductImage = styled("img")({
-  height: "200px",
+  height: "140px",
   width: "-webkit-fill-available",
   borderRadius: "3px",
   objectFit: "contain"

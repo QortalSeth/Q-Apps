@@ -76,7 +76,7 @@ export const StoreDetails: FC<StoreDetailsProps> = ({
               Email
             </IconsRow>
             <EmailUser
-              href={`qortal://APP/Q-Mail?to=${storeOwner}`}
+              href={`qortal://APP/Q-Mail/to/${storeOwner}`}
               className="qortal-link"
             >
               Message {storeOwner} on Q-Mail

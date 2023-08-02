@@ -38,10 +38,11 @@ interface Props {
 
 const GlobalWrapper: React.FC<Props> = ({ children, setTheme }) => {
   const dispatch = useDispatch();
-  const { user } = useSelector((state: RootState) => state.auth);
-  // Fetch all my stores from global redux
-  const { myStores } = useSelector((state: RootState) => state.store);
 
+  // Get user from auth
+  const user = useSelector((state: RootState) => state.auth.user);
+  // Fetch all my stores from global redux
+  const myStores = useSelector((state: RootState) => state.store.myStores);
   // Fetch recentlyVisitedStoreId from cart redux
   const recentlyVisitedStoreId = useSelector(
     (state: RootState) => state.global.recentlyVisitedStoreId
@@ -256,6 +257,7 @@ const GlobalWrapper: React.FC<Props> = ({ children, setTheme }) => {
       const blogPostToBase64 = await objectToBase64(storeObj);
       const dataContainerToBase64 = await objectToBase64(dataContainer);
       try {
+        // Publish Store to QDN
         const resourceResponse = await qortalRequest({
           action: "PUBLISH_QDN_RESOURCE",
           name: name,
@@ -266,6 +268,7 @@ const GlobalWrapper: React.FC<Props> = ({ children, setTheme }) => {
           description,
           identifier: identifier
         });
+        // Publish Data Container to QDN
         const resourceResponse2 = await qortalRequest({
           action: "PUBLISH_QDN_RESOURCE",
           name: name,

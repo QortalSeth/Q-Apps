@@ -177,7 +177,7 @@ export const ShowOrder: FC<ShowOrderProps> = ({
           </ShowOrderImages>
           <ShowOrderCol>
             <ShowOrderTitle
-              href={`qortal://APP/Q-Mail?to=${order?.delivery?.customerName}`}
+              href={`qortal://APP/Q-Mail/to/${order?.delivery?.customerName}`}
               className="qortal-link"
             >
               <EmailIcon

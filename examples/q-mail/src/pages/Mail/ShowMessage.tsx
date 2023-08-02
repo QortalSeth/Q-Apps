@@ -126,7 +126,8 @@ export const ShowMessage = ({
             gap: 1,
             flexGrow: 1,
             overflow: 'auto',
-            width: '100%'
+            width: '100%',
+            padding: "0 15px"
           }}
         >
           {isOpenMailThread &&
