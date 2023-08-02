@@ -107,6 +107,20 @@ const GlobalWrapper: React.FC<Props> = ({ children }) => {
       }
     } catch (error) {}
   }
+  const interval = useRef<any>(null)
+
+  const checkGroupMembers = React.useCallback(
+    (address: string) => {
+      let isCalling = false
+      interval.current = setInterval(async () => {
+        if (isCalling) return
+        isCalling = true
+        const res = await getGroups(address)
+        isCalling = false
+      }, 300000)
+    },
+    [getGroups]
+  )
 
   const askForAccountInformation = React.useCallback(async () => {
     try {
@@ -117,6 +131,7 @@ const GlobalWrapper: React.FC<Props> = ({ children }) => {
       const name = await getNameInfo(account.address)
       dispatch(addUser({ ...account, name }))
       getGroups(account.address)
+      checkGroupMembers(account.address)
     } catch (error) {
       console.error(error)
     }
