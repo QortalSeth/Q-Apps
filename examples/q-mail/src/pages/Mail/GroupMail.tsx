@@ -23,6 +23,7 @@ import { fetchAndEvaluateMail } from '../../utils/fetchMail'
 import { addToHashMapMail } from '../../state/features/mailSlice'
 import MailIcon from '@mui/icons-material/Mail'
 import {
+  setIsLoadingCustom,
   setIsLoadingGlobal,
   setUserAvatarHash
 } from '../../state/features/globalSlice'
@@ -34,6 +35,7 @@ import { formatDate } from '../../utils/time'
 import { NewThread } from './NewThread'
 import { Thread } from './Thread'
 import { current } from '@reduxjs/toolkit'
+import { delay } from '../../utils/helpers'
 
 interface AliasMailProps {
   groupInfo: any
@@ -96,7 +98,7 @@ export const GroupMail = ({ groupInfo }: AliasMailProps) => {
     async (groupId: string) => {
       try {
         const offset = allThreads.length
-        dispatch(setIsLoadingGlobal(true))
+        dispatch(setIsLoadingCustom('Loading messages. This may take time.'))
         const query = `qortal_qmail_thread_group${groupId}`
         const url = `/arbitrary/resources/search?mode=ALL&service=${MAIL_SERVICE_TYPE}&query=${query}&limit=${20}&includemetadata=false&offset=${offset}&reverse=true&excludeblocked=true`
         const response = await fetch(url, {
@@ -140,12 +142,15 @@ export const GroupMail = ({ groupInfo }: AliasMailProps) => {
             } else {
               fullArrayMsg.push(fullObject)
             }
-          } catch (error) {}
+          } catch (error) {
+          } finally {
+            dispatch(setIsLoadingCustom(null))
+          }
         }
         setAllThreads(fullArrayMsg)
       } catch (error) {
       } finally {
-        dispatch(setIsLoadingGlobal(false))
+        dispatch(setIsLoadingCustom(null))
       }
     },
     [allThreads]
@@ -153,7 +158,7 @@ export const GroupMail = ({ groupInfo }: AliasMailProps) => {
 
   const getMailMessages = React.useCallback(async (groupId: string) => {
     try {
-      dispatch(setIsLoadingGlobal(true))
+      dispatch(setIsLoadingCustom('Loading messages. This may take time.'))
       const query = `qortal_qmail_thmsg_group${groupId}`
       const url = `/arbitrary/resources/search?mode=ALL&service=${MAIL_SERVICE_TYPE}&query=${query}&limit=100&includemetadata=false&offset=${0}&reverse=true&excludeblocked=true`
       const response = await fetch(url, {
@@ -182,16 +187,19 @@ export const GroupMail = ({ groupInfo }: AliasMailProps) => {
           }
         })
         .sort((a, b) => b.created - a.created)
-      let fullThreadArray = []
-      for (const message of newArray) {
+      let fullThreadArray: any = []
+      const getMessageForThreads = newArray.map(async (message: any) => {
         try {
-          let messageRes = await qortalRequest({
-            action: 'FETCH_QDN_RESOURCE',
-            name: message.name,
-            service: MAIL_SERVICE_TYPE,
-            identifier: message.identifier,
-            encoding: 'base64'
-          })
+          let messageRes = await Promise.race([
+            qortalRequest({
+              action: 'FETCH_QDN_RESOURCE',
+              name: message.name,
+              service: MAIL_SERVICE_TYPE,
+              identifier: message.identifier,
+              encoding: 'base64'
+            }),
+            delay(7000)
+          ])
           let requestEncryptBody: any = {
             action: 'DECRYPT_DATA',
             encryptedData: messageRes
@@ -202,13 +210,17 @@ export const GroupMail = ({ groupInfo }: AliasMailProps) => {
           const responseDataMessage = uint8ArrayToObject(
             decryptToUnit8ArrayMessage
           )
-          let threadRes = await qortalRequest({
-            action: 'FETCH_QDN_RESOURCE',
-            name: responseDataMessage.threadOwner,
-            service: MAIL_SERVICE_TYPE,
-            identifier: message.threadId,
-            encoding: 'base64'
-          })
+          let threadRes = await Promise.race([
+            qortalRequest({
+              action: 'FETCH_QDN_RESOURCE',
+              name: responseDataMessage.threadOwner,
+              service: MAIL_SERVICE_TYPE,
+              identifier: message.threadId,
+              encoding: 'base64'
+            }),
+            delay(5000)
+          ])
+
           let requestEncryptThread: any = {
             action: 'DECRYPT_DATA',
             encryptedData: threadRes
@@ -225,11 +237,16 @@ export const GroupMail = ({ groupInfo }: AliasMailProps) => {
           }
           fullThreadArray.push(fullObject)
         } catch (error) {}
-      }
-      setRecentThreads(fullThreadArray)
+        return null
+      })
+      await Promise.all(getMessageForThreads)
+      const sorted = fullThreadArray.sort(
+        (a: any, b: any) => b.created - a.created
+      )
+      setRecentThreads(sorted)
     } catch (error) {
     } finally {
-      dispatch(setIsLoadingGlobal(false))
+      dispatch(setIsLoadingCustom(null))
     }
   }, [])
   const getMessages = React.useCallback(async () => {

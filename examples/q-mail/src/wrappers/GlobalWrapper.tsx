@@ -11,6 +11,7 @@ import localForage from 'localforage'
 import ConsentModal from '../components/modals/ConsentModal'
 import { AudioPlayer } from '../components/common/AudioPlayer'
 import { setPrivateGroups } from '../state/features/globalSlice'
+import { LoaderBar } from '../components/common/LoaderBar'
 interface Props {
   children: React.ReactNode
 }
@@ -52,8 +53,12 @@ const GlobalWrapper: React.FC<Props> = ({ children }) => {
     }
   }
 
-  const { isLoadingGlobal } = useSelector((state: RootState) => state.global)
-
+  const isLoadingGlobal = useSelector(
+    (state: RootState) => state.global.isLoadingGlobal
+  )
+  const isLoadingCustom = useSelector(
+    (state: RootState) => state.global.isLoadingCustom
+  )
   async function getNameInfo(address: string) {
     const response = await fetch('/names/address/' + address)
     const nameData = await response.json()
@@ -147,11 +152,8 @@ const GlobalWrapper: React.FC<Props> = ({ children }) => {
             membersByAddress: addNewMembersByAddress
           }
         }
-
-        dispatch(setPrivateGroups(groups))
-      } else {
-        return ''
       }
+      dispatch(setPrivateGroups(groups))
     } catch (error) {
       console.log({ error })
     }
@@ -193,7 +195,7 @@ const GlobalWrapper: React.FC<Props> = ({ children }) => {
   return (
     <>
       {isLoadingGlobal && <PageLoader />}
-
+      {isLoadingCustom && <LoaderBar message={isLoadingCustom} />}
       <NavBar
         isAuthenticated={!!user}
         userName={user?.name || ''}

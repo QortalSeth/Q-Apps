@@ -25,6 +25,7 @@ function App() {
 
             <Routes>
               <Route path="/" element={<Mail />} />
+              <Route path="/to/:name" element={<Mail isFromTo />} />
             </Routes>
           </GlobalWrapper>
         </DownloadWrapper>

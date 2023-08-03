@@ -5,6 +5,7 @@ interface GlobalState {
   isOpenPublishBlogModal: boolean
   isLoadingCurrentBlog: boolean
   isLoadingGlobal: boolean
+  isLoadingCustom: null | string;
   isOpenEditBlogModal: boolean
   currentBlog: {
     createdAt: number
@@ -40,6 +41,7 @@ const initialState: GlobalState = {
   isOpenPublishBlogModal: false,
   isLoadingCurrentBlog: true,
   isLoadingGlobal: false,
+  isLoadingCustom: null,
   currentBlog: null,
   isOpenEditBlogModal: false,
   visitingBlog: null,
@@ -90,6 +92,9 @@ export const globalSlice = createSlice({
     setIsLoadingGlobal: (state, action) => {
       state.isLoadingGlobal = action.payload
     },
+    setIsLoadingCustom: (state, action) => {
+      state.isLoadingCustom = action.payload
+    },
     setAddToDownloads: (state, action) => {
       const download = action.payload
       state.downloads[download.identifier] = download
@@ -128,7 +133,8 @@ export const {
   updateDownloads,
   setShowingAudioPlayer,
   setUserAvatarHash,
-  setPrivateGroups
+  setPrivateGroups,
+  setIsLoadingCustom
 } = globalSlice.actions
 
 export default globalSlice.reducer;

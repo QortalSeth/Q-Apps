@@ -10,12 +10,23 @@ import { useNavigate } from 'react-router-dom'
 import { useDispatch, useSelector } from 'react-redux'
 import { RootState } from '../../state/store'
 
-import { Box, Button, Input, Typography, useTheme } from '@mui/material'
+import {
+  Box,
+  Button,
+  Input,
+  Skeleton,
+  Typography,
+  useTheme
+} from '@mui/material'
 import { MAIL_SERVICE_TYPE } from '../../constants/mail'
 import { base64ToUint8Array, uint8ArrayToObject } from '../../utils/toBase64'
 import { ShowMessage } from './ShowMessageWithoutModal'
 import { NewThread } from './NewThread'
-import { setIsLoadingGlobal } from '../../state/features/globalSlice'
+import {
+  setIsLoadingCustom,
+  setIsLoadingGlobal
+} from '../../state/features/globalSlice'
+import { addToHashMapMail } from '../../state/features/mailSlice'
 
 interface ThreadProps {
   currentThread: any
@@ -31,10 +42,39 @@ export const Thread = ({
   const { user } = useSelector((state: RootState) => state.auth)
   const [messages, setMessages] = useState<any[]>([])
   const dispatch = useDispatch()
+  const hashMapMailMessages = useSelector(
+    (state: RootState) => state.mail.hashMapMailMessages
+  )
+  const getIndividualMsg = async (message: any) => {
+    try {
+      let messageRes = await qortalRequest({
+        action: 'FETCH_QDN_RESOURCE',
+        name: message.name,
+        service: MAIL_SERVICE_TYPE,
+        identifier: message.identifier,
+        encoding: 'base64'
+      })
+      let requestEncryptBody: any = {
+        action: 'DECRYPT_DATA',
+        encryptedData: messageRes
+      }
+      const resDecrypt = await qortalRequest(requestEncryptBody)
+      const decryptToUnit8ArrayMessage = base64ToUint8Array(resDecrypt)
+      const responseDataMessage = uint8ArrayToObject(decryptToUnit8ArrayMessage)
+
+      const fullObject = {
+        ...message,
+        ...(responseDataMessage || {}),
+        id: message.identifier
+      }
+      console.log({ fullObject })
+      dispatch(addToHashMapMail(fullObject))
+    } catch (error) {}
+  }
   const getMailMessages = React.useCallback(
     async (groupInfo: any, reset?: boolean) => {
       try {
-        dispatch(setIsLoadingGlobal(true))
+        dispatch(setIsLoadingCustom('Loading messages. This may take time.'))
         let str = groupInfo.threadId
         let parts = str.split('_').reverse()
         let result = parts[0]
@@ -49,45 +89,24 @@ export const Thread = ({
           }
         })
         const responseData = await response.json()
+        console.log({ responseData })
         let fullArrayMsg = reset ? [] : [...messages]
-
+        let newMessages: any[] = []
         for (const message of responseData) {
-          try {
-            let messageRes = await qortalRequest({
-              action: 'FETCH_QDN_RESOURCE',
-              name: message.name,
-              service: MAIL_SERVICE_TYPE,
-              identifier: message.identifier,
-              encoding: 'base64'
-            })
-            let requestEncryptBody: any = {
-              action: 'DECRYPT_DATA',
-              encryptedData: messageRes
-            }
-            const resDecrypt = await qortalRequest(requestEncryptBody)
-            const decryptToUnit8ArrayMessage = base64ToUint8Array(resDecrypt)
-            const responseDataMessage = uint8ArrayToObject(
-              decryptToUnit8ArrayMessage
-            )
-
-            const fullObject = {
-              ...message,
-              ...(responseDataMessage || {})
-            }
-            const index = messages.findIndex(
-              (p) => p.identifier === fullObject.identifier
-            )
-            if (index !== -1) {
-              fullArrayMsg[index] = fullObject
-            } else {
-              fullArrayMsg.push(fullObject)
-            }
-          } catch (error) {}
+          const index = fullArrayMsg.findIndex(
+            (p) => p.identifier === message.identifier
+          )
+          if (index !== -1) {
+            fullArrayMsg[index] = message
+          } else {
+            fullArrayMsg.push(message)
+            getIndividualMsg(message)
+          }
         }
         setMessages(fullArrayMsg)
       } catch (error) {
       } finally {
-        dispatch(setIsLoadingGlobal(false))
+        dispatch(setIsLoadingCustom(null))
       }
     },
     [messages]
@@ -198,9 +217,10 @@ export const Thread = ({
       }
     }
   }, [checkNewMessagesFunc])
+  console.log('sup')
 
   if (!currentThread) return null
-  console.log({ currentThread, groupInfo })
+  console.log({ messages })
   return (
     <div
       style={{
@@ -255,7 +275,52 @@ export const Thread = ({
         <Typography variant="h6">Group: {groupInfo?.groupName}</Typography>
       </Box>
       {messages.map((message) => {
-        return <ShowMessage key={message?.identifier} message={message} />
+        let fullMessage = message
+        console.log(
+          { hashMapMailMessages, message },
+          hashMapMailMessages[message?.identifer]
+        )
+        if (hashMapMailMessages[message?.identifier]) {
+          console.log('hello')
+          fullMessage = hashMapMailMessages[message.identifier]
+          return <ShowMessage key={message?.identifier} message={fullMessage} />
+        }
+
+        return (
+          <Box
+            sx={{
+              display: 'flex',
+              justifyContent: 'center',
+              width: '100%',
+              marginBottom: '15px'
+            }}
+          >
+            <Box
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                flexDirection: 'column',
+                gap: 1,
+                flexGrow: 1,
+                overflow: 'auto',
+                width: '100%',
+                maxWidth: '90%',
+                background: theme.palette.background.default,
+                padding: '10px',
+                borderRadius: '5px'
+              }}
+            >
+              <Skeleton
+                variant="rectangular"
+                style={{
+                  width: '100%',
+                  height: 60,
+                  borderRadius: '8px'
+                }}
+              />
+            </Box>
+          </Box>
+        )
       })}
       {messages.length > 0 && (
         <Button

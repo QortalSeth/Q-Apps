@@ -6,7 +6,7 @@ import React, {
   useRef,
   useState
 } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import { useDispatch, useSelector } from 'react-redux'
 import { RootState } from '../../state/store'
 import EditIcon from '@mui/icons-material/Edit'
@@ -146,7 +146,11 @@ const GroupTabs = styled(Tabs)({
   maxWidth: '50vw'
 })
 
-export const Mail = () => {
+interface MailProps {
+  isFromTo: boolean
+}
+
+export const Mail = ({ isFromTo }: MailProps) => {
   const theme = useTheme()
   const { user } = useSelector((state: RootState) => state.auth)
   const [isOpen, setIsOpen] = useState<boolean>(false)
@@ -156,6 +160,7 @@ export const Mail = () => {
   const [valueTabGroups, setValueTabGroups] = React.useState<null | number>(
     null
   )
+  const [paramTo, setParamTo] = useState<null | string>(null)
   const [aliasValue, setAliasValue] = useState('')
   const [alias, setAlias] = useState<string[]>([])
   const [run, setRun] = useState(false)
@@ -632,6 +637,7 @@ export const Mail = () => {
         )}
         {!valueTabGroups && valueTabGroups !== 0 && (
           <NewMessage
+            isFromTo={isFromTo}
             replyTo={replyTo}
             setReplyTo={setReplyTo}
             alias={
