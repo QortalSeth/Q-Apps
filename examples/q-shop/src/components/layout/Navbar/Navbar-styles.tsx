@@ -1,4 +1,4 @@
-import { AppBar, Button, Typography, Box } from "@mui/material";
+import { AppBar, Button, Typography, Box, Popover } from "@mui/material";
 import { styled } from "@mui/system";
 import { LightModeSVG } from "../../../assets/svgs/LightModeSVG";
 import { DarkModeSVG } from "../../../assets/svgs/DarkModeSVG";
@@ -182,5 +182,30 @@ export const StoresButton = styled(Button)(({ theme }) => ({
     backgroundColor: theme.palette.secondary.dark,
     boxShadow:
       "rgba(50, 50, 93, 0.35) 0px 3px 5px -1px, rgba(0, 0, 0, 0.4) 0px 2px 3px -1px;"
+  }
+}));
+
+export const CustomPopover = styled(Popover)(({ theme }) => ({
+  maxHeight: "400px",
+  overflowY: "auto",
+  "&::-webkit-scrollbar-track": {
+    backgroundColor: "transparent"
+  },
+  "&::-webkit-scrollbar-track:hover": {
+    backgroundColor: "transparent"
+  },
+  "&::-webkit-scrollbar": {
+    width: "8px",
+    height: "10px",
+    backgroundColor: "transparent"
+  },
+  "&::-webkit-scrollbar-thumb": {
+    backgroundColor: theme.palette.mode === "light" ? "#d3d9e1" : "#414763",
+    borderRadius: "8px",
+    backgroundClip: "content-box",
+    border: "4px solid transparent"
+  },
+  "&::-webkit-scrollbar-thumb:hover": {
+    backgroundColor: theme.palette.mode === "light" ? "#b7bcc4" : "#40455f"
   }
 }));

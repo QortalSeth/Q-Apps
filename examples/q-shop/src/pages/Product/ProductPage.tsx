@@ -65,7 +65,7 @@ export const ProductPage = () => {
 
   // Set cart notifications when cart changes
   useEffect(() => {
-    if (Object.keys(carts).length > 0 && user?.name && storeId) {
+    if (user?.name && storeId) {
       const shopCart: CartInterface = carts[storeId];
       // Get the orders of this cart
       const orders = shopCart?.orders || {};

@@ -124,8 +124,8 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
               <>
                 <CartSVG
                   color={theme.palette.text.primary}
-                  height={"15"}
-                  width={"15"}
+                  height={"18"}
+                  width={"18"}
                 />{" "}
                 Add to Cart
               </>
