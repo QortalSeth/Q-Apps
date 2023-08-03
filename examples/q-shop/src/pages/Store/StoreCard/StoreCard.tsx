@@ -14,9 +14,9 @@ import {
   YouOwnIcon
 } from "../../StoreList/StoreList-styles";
 import ContextMenuResource from "../../../components/common/ContextMenu/ContextMenuResource";
-import { StarSVG } from "../../../assets/svgs/StarSVG";
 import { useNavigate } from "react-router-dom";
 import { useTheme } from "@mui/material";
+import { BriefcaseSVG } from "../../../assets/svgs/BriefcaseSVG";
 
 interface StoreCardProps {
   storeTitle: string;
@@ -42,18 +42,31 @@ export const StoreCard: FC<StoreCardProps> = ({
   const [showCompleteStoreDescription, setShowCompleteStoreDescription] =
     useState<boolean>(false);
 
-  const limitCharFunc = (str: string, limit = 27) => {
+  const expandIconRef = useRef(null);
+
+  const handleStoreCardClick = (
+    e: React.MouseEvent<HTMLDivElement, MouseEvent>
+  ) => {
+    console.log(e.target);
+    console.log(document.getElementById(`expand-icon-${storeId}`));
+    if ((e.target as HTMLElement)?.id === `expand-icon-${storeId}`) {
+      return;
+    }
+    navigate(`/${storeOwner}/${storeId}`);
+  };
+
+  const limitCharFunc = (str: string, limit = 50) => {
     return str.length > limit ? `${str.slice(0, limit)}...` : str;
   };
 
   useEffect(() => {
-    if (storeDescription.length >= 27) {
+    if (storeDescription.length >= 50) {
       setIsEllipsisActive(true);
     }
   }, [storeDescription]);
 
   return (
-    <StoresRow item xs={12} sm={3} key={storeId}>
+    <StoresRow item xs={12} sm={6} md={3} key={storeId}>
       <ContextMenuResource
         name={storeOwner}
         service="STORE"
@@ -62,7 +75,7 @@ export const StoreCard: FC<StoreCardProps> = ({
       >
         <StyledStoreCard
           container
-          onClick={() => navigate(`/${storeOwner}/${storeId}`)}
+          onClick={handleStoreCardClick}
           showCompleteStoreDescription={
             showCompleteStoreDescription ? true : false
           }
@@ -80,11 +93,13 @@ export const StoreCard: FC<StoreCardProps> = ({
             </StoreCardDescription>
             {isEllipsisActive && (
               <ExpandDescriptionIcon
+                id={`expand-icon-${storeId}`}
                 width={"20"}
                 height={"20"}
                 color={theme.palette.text.primary}
                 onClickFunc={(e: React.MouseEvent<any>) => {
                   e.stopPropagation();
+                  console.log("clicked");
                   setShowCompleteStoreDescription((prevState) => !prevState);
                 }}
                 showCompleteStoreDescription={
@@ -97,7 +112,11 @@ export const StoreCard: FC<StoreCardProps> = ({
           {storeOwner === userName && (
             <StyledTooltip placement="top" title="You own this store">
               <YouOwnIcon>
-                <StarSVG color={"#fbff2a"} width={"23"} height={"23"} />
+                <BriefcaseSVG
+                  color={theme.palette.secondary.main}
+                  width={"23"}
+                  height={"23"}
+                />
               </YouOwnIcon>
             </StyledTooltip>
           )}

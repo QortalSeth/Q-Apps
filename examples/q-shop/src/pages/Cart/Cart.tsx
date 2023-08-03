@@ -46,7 +46,7 @@ import {
   TotalSumItems
 } from "./Cart-styles";
 import { TimesIcon } from "../ProductManager/ProductManager-styles";
-import { BackToStorefrontButton as CheckoutButton } from "../Store/Store-styles";
+import { BackToStorefrontButton as CheckoutButton } from "../Store/Store/Store-styles";
 import {
   Catalogue,
   setIsLoadingGlobal
@@ -108,17 +108,6 @@ export const Cart = () => {
   const [region, setRegion] = useState<string>("");
   const [zipCode, setZipCode] = useState<string>("");
   const [deliveryNote, setDeliveryNote] = useState<string>("");
-
-  console.log({
-    customerName,
-    streetAddress,
-    country,
-    state,
-    city,
-    region,
-    zipCode,
-    deliveryNote
-  });
 
   // Set cart & orders to local state
   useEffect(() => {
@@ -232,7 +221,6 @@ export const Cart = () => {
     );
     details["totalPrice"] = details["totalPrice"].toFixed(8);
     const priceToPay = details["totalPrice"];
-    console.log(details, "order details");
     if (!storeOwner) {
       dispatch(
         setNotification({

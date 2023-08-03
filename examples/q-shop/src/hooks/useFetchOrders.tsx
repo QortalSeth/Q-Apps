@@ -192,7 +192,6 @@ export const useFetchOrders = () => {
       const offset = products.length;
       const productList = listProducts.products;
       const responseData = productList.slice(offset, offset + 20);
-      console.log("responseData inside getProducts()", responseData);
       const structureData = responseData.map(
         (product: ProductDataContainer): Product => {
           return {

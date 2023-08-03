@@ -162,7 +162,6 @@ const GlobalWrapper: React.FC<Props> = ({ children, setTheme }) => {
     );
     // Set listProducts in the Redux global state
     if (responseData2 && !responseData2.error) {
-      console.log("responseData2", responseData2);
       dispatch(
         setDataContainer({
           ...responseData2,

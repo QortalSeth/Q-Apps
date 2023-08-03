@@ -80,7 +80,6 @@ export const cartSlice = createSlice({
       delete state.carts[storeId].orders[productId];
     },
     removeCartFromCarts: (state, action) => {
-      console.log(action.payload)
       const { storeId } = action.payload;
       delete state.carts[storeId];
     }

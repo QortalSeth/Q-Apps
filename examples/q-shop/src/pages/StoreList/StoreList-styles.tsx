@@ -73,7 +73,7 @@ export const StyledStoreCard = styled(Grid)<StoreListProps>(
     minWidth: "100%",
     maxWidth: "100%",
     height: "100%",
-    maxHeight: showCompleteStoreDescription ? "100%" : "400px",
+    maxHeight: showCompleteStoreDescription ? "100%" : "420px",
     backgroundColor: "transparent",
     borderRadius: "8px",
     paddingBottom: "20px",
@@ -98,7 +98,7 @@ export const StoreCardInfo = styled(Grid)(({ theme }) => ({
   display: "flex",
   flexDirection: "column",
   gap: "5px",
-  padding: "0 15px 25px 15px"
+  padding: "0 15px 10px 15px"
 }));
 
 export const StoreCardImageContainer = styled(Box)(({ theme }) => ({}));
@@ -108,13 +108,13 @@ export const OpenStoreCard = styled(Box)(({ theme }) => ({
   visibility: "hidden",
   top: "5px",
   right: "10px",
-  backgroundColor: theme.palette.mode === "dark" ? "#aaa1a1e8" : "#a29e9e",
+  backgroundColor: theme.palette.mode === "dark" ? "#aaa1a1e8" : "#f0f0f0",
   color: theme.palette.text.primary,
-  fontSize: "19px",
+  fontSize: "18px",
   fontFamily: "Karla",
   letterSpacing: "0px",
   fontWeight: 400,
-  padding: "5px 10px",
+  padding: "2px 8px",
   userSelect: "none",
   borderRadius: "20px",
   transition: "all 0.2s ease-in"
@@ -178,10 +178,12 @@ export const StoreCardOwner = styled(Typography)(({ theme }) => ({
 }));
 
 export const StyledTooltip = styled(Tooltip)(({ theme }) => ({
-  fontFamily: "Karla",
-  fontSize: "17px",
-  color: theme.palette.text.primary,
-  backgroundColor: theme.palette.background.default
+  "& .MuiTooltip-popper": {
+    fontFamily: "Karla",
+    fontSize: "17px",
+    color: theme.palette.text.primary,
+    backgroundColor: theme.palette.background.paper
+  }
 }));
 
 export const YouOwnIcon = styled(IconButton)(({ theme }) => ({
@@ -189,7 +191,16 @@ export const YouOwnIcon = styled(IconButton)(({ theme }) => ({
   width: "40px",
   position: "absolute",
   bottom: "70px",
-  right: "0px"
+  right: "0px",
+  backgroundColor: "transparent",
+  transition: "all 0.3s ease-in-out",
+  "&:hover": {
+    cursor: "pointer",
+    backgroundColor:
+      theme.palette.mode === "dark"
+        ? "rgba(255, 255, 255, 0.08);"
+        : "rgba(255, 255, 255, 0.06);"
+  }
 }));
 
 export const MyStoresRow = styled(Grid)(({ theme }) => ({
@@ -206,7 +217,7 @@ export const MyStoresCard = styled(Box)(({ theme }) => ({
   alignItems: "center",
   width: "auto",
   borderRadius: "4px",
-  backgroundColor: "rgb(26, 28, 30)",
+  backgroundColor: theme.palette.background.paper,
   padding: "6px 10px",
   fontFamily: "Raleway",
   fontSize: "15px",
@@ -226,11 +237,15 @@ export const MyStoresCheckbox = styled(Checkbox)(({ theme }) => ({
 export const ExpandDescriptionIcon = styled(DoubleArrowDownSVG)<StoreListProps>(
   ({ theme, showCompleteStoreDescription }) => ({
     position: "absolute",
-    bottom: 0,
-    right: 0,
+    bottom: "20px",
+    right: "5px",
     zIndex: 10,
     transition: "all 0.3s ease-in-out",
-    transform: showCompleteStoreDescription ? "rotate(180deg)" : "rotate(0deg)",
+    "& svg": {
+      transform: showCompleteStoreDescription
+        ? "rotate(180deg)"
+        : "rotate(0deg)"
+    },
     "&:hover": {
       cursor: "pointer",
       transform: showCompleteStoreDescription
@@ -239,3 +254,17 @@ export const ExpandDescriptionIcon = styled(DoubleArrowDownSVG)<StoreListProps>(
     }
   })
 );
+
+export const LogoRow = styled(Box)(({ theme }) => ({
+  display: "flex",
+  alignItems: "center",
+  flexDirection: "row",
+  gap: "5px"
+}));
+
+export const QShopLogo = styled("img")(({ theme }) => ({
+  width: "400px",
+  height: "100%",
+  objectFit: "contain",
+  userSelect: "none"
+}));

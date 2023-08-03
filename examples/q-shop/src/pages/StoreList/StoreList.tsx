@@ -12,11 +12,15 @@ import {
   WelcomeRow,
   WelcomeFont,
   WelcomeSubFont,
-  WelcomeCol
+  WelcomeCol,
+  QShopLogo,
+  LogoRow
 } from "./StoreList-styles";
 import DefaultStoreImage from "../../assets/img/Q-AppsLogo.webp";
-import { Grid } from "@mui/material";
+import { Grid, useTheme } from "@mui/material";
 import { StoreCard } from "../Store/StoreCard/StoreCard";
+import QShopLogoLight from "../../assets/img/QShopLogoLight.webp";
+import QShopLogoDark from "../../assets/img/QShopLogo.webp";
 
 /* Reviews notes
   Fetch 10 reviews of the store use fetch() API call
@@ -30,12 +34,12 @@ import { StoreCard } from "../Store/StoreCard/StoreCard";
   When fetching the full list of reviews, don't use mode=ALL, use mode=LATEST
   Filter reviews by query by minlevel 1 and above
   Make sure user has at least one store order before beign able to leave a review
-  const url = `/arbitrary/resources/search?service=DOCUMENT_PRIVATE&query=${query}&limit=20&name=${name}&includemetadata=true&offset=${offset}&reverse=true`;
-
+  const url = `/arbitrary/resources/search?service=DOCUMENT&query=${query}&limit=20&name=${name}&includemetadata=true&offset=${offset}&reverse=true`;
 */
 
 export const StoreList = () => {
   const dispatch = useDispatch();
+  const theme = useTheme();
 
   const user = useSelector((state: RootState) => state.auth.user);
 
@@ -137,12 +141,20 @@ export const StoreList = () => {
     <>
       <StoresContainer container>
         <WelcomeRow item xs={12}>
-          <WelcomeCol>
-            <WelcomeFont>Welcome to Q-Shop 👋</WelcomeFont>
-            <WelcomeSubFont>
-              Explore the latest of what the Qortal community has for sale.
-            </WelcomeSubFont>
-          </WelcomeCol>
+          <LogoRow>
+            <QShopLogo
+              src={
+                theme.palette.mode === "dark" ? QShopLogoLight : QShopLogoDark
+              }
+              alt="Q-Shop Logo"
+            />
+            <WelcomeCol>
+              <WelcomeFont>Welcome to Q-Shop 👋</WelcomeFont>
+              <WelcomeSubFont>
+                Explore the latest of what the Qortal community has for sale.
+              </WelcomeSubFont>
+            </WelcomeCol>
+          </LogoRow>
           <WelcomeCol>
             {user && (
               <MyStoresCard>

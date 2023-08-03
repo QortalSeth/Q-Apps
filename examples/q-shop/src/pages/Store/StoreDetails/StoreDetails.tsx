@@ -16,11 +16,13 @@ import {
 import { OwnerSVG } from "../../../assets/svgs/OwnerSVG";
 import { useTheme } from "@mui/material";
 import { CalendarSVG } from "../../../assets/svgs/CalendarSVG";
+import { DescriptionSVG } from "../../../assets/svgs/DescriptionSVG";
 
 interface StoreDetailsProps {
   storeTitle: string;
   storeImage: string;
   storeOwner: string;
+  storeDescription: string;
   dateCreated: number;
   setOpenStoreDetails: (open: boolean) => void;
 }
@@ -28,6 +30,7 @@ interface StoreDetailsProps {
 export const StoreDetails: FC<StoreDetailsProps> = ({
   storeTitle,
   storeImage,
+  storeDescription,
   storeOwner,
   dateCreated,
   setOpenStoreDetails
@@ -52,6 +55,17 @@ export const StoreDetails: FC<StoreDetailsProps> = ({
               Store Owner
             </IconsRow>
             {storeOwner}
+          </CardRow>
+          <CardRow>
+            <IconsRow>
+              <DescriptionSVG
+                width={"22"}
+                height={"22"}
+                color={theme.palette.text.primary}
+              />
+              Store Description
+            </IconsRow>
+            {storeDescription}
           </CardRow>
           <CardRow>
             <IconsRow>
