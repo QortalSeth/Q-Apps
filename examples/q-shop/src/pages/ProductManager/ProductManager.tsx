@@ -462,7 +462,6 @@ export const ProductManager = () => {
     <ProductManagerContainer>
       <TabsContainer>
         <BackToStorefrontButton
-          style={{ maxWidth: "70%", alignSelf: "center" }}
           onClick={() => {
             navigate(`/${userName}/${currentStore?.id}`);
           }}

@@ -110,6 +110,7 @@ export const TimesIcon = styled(TimesSVG)(({ theme }) => ({
 export const CustomInputField = styled(TextField)(({ theme }) => ({
   fontFamily: "Karla",
   fontSize: "17.5px",
+  fontWeight: 300,
   color: theme.palette.text.primary,
   backgroundColor: theme.palette.background.default,
   borderColor: theme.palette.background.paper,

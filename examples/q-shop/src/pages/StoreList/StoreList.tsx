@@ -22,21 +22,6 @@ import { StoreCard } from "../Store/StoreCard/StoreCard";
 import QShopLogoLight from "../../assets/img/QShopLogoLight.webp";
 import QShopLogoDark from "../../assets/img/QShopLogo.webp";
 
-/* Reviews notes
-  Fetch 10 reviews of the store use fetch() API call
-  Add them all up and divide by # of reviews to get the average rating
-  In the resource of the review, we should put the rating inside the tag of the review.
-  Preview of the rating in the title metadata (which is part of the metadata of the resource) 60 chars
-  Preview of the review message in the description metadata (which is part of the metadata of the resource) 150 chars
-  Put the review number inside the raw data JSON as well
-  Use service DOCUMENT
-  And then when they click on the actual, review, it will show the full review message and the rating by fetching the raw data
-  When fetching the full list of reviews, don't use mode=ALL, use mode=LATEST
-  Filter reviews by query by minlevel 1 and above
-  Make sure user has at least one store order before beign able to leave a review
-  const url = `/arbitrary/resources/search?service=DOCUMENT&query=${query}&limit=20&name=${name}&includemetadata=true&offset=${offset}&reverse=true`;
-*/
-
 export const StoreList = () => {
   const dispatch = useDispatch();
   const theme = useTheme();

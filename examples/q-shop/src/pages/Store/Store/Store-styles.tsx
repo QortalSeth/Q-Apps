@@ -9,6 +9,7 @@ import {
   Autocomplete,
   TextField
 } from "@mui/material";
+import { ReusableModal } from "../../../components/modals/ReusableModal";
 
 export const FiltersCol = styled(Grid)(({ theme }) => ({
   display: "flex",
@@ -247,7 +248,7 @@ export const StoreTitleCol = styled(Box)({
   display: "flex",
   alignItems: "center",
   flexDirection: "column",
-  gap: "5px"
+  gap: "15px"
 });
 
 export const RatingContainer = styled(Box)(({ theme }) => ({
@@ -260,5 +261,28 @@ export const RatingContainer = styled(Box)(({ theme }) => ({
   "&:hover": {
     cursor: "pointer",
     backgroundColor: "#e4ddddac"
+  }
+}));
+
+export const ReusableModalStyled = styled(ReusableModal)(({ theme }) => ({
+  "&::-webkit-scrollbar-track": {
+    backgroundColor: "transparent"
+  },
+  "&::-webkit-scrollbar-track:hover": {
+    backgroundColor: "transparent"
+  },
+  "&::-webkit-scrollbar": {
+    width: "8px",
+    height: "10px",
+    backgroundColor: "transparent"
+  },
+  "&::-webkit-scrollbar-thumb": {
+    backgroundColor: theme.palette.mode === "light" ? "#d3d9e1" : "#414763",
+    borderRadius: "8px",
+    backgroundClip: "content-box",
+    border: "4px solid transparent"
+  },
+  "&::-webkit-scrollbar-thumb:hover": {
+    backgroundColor: theme.palette.mode === "light" ? "#b7bcc4" : "#40455f"
   }
 }));

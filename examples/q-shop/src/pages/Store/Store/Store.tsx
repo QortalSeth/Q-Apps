@@ -47,7 +47,8 @@ import {
   StoreLogo,
   StoreTitleCol,
   StoreTitle,
-  RatingContainer
+  RatingContainer,
+  ReusableModalStyled
 } from "./Store-styles";
 import { toggleEditBlogModal } from "../../../state/features/globalSlice";
 import { CartIcon } from "../../../components/layout/Navbar/Navbar-styles";
@@ -358,6 +359,7 @@ export const Store = () => {
     <Grid container sx={{ width: "100%" }}>
       <FiltersCol item xs={12} sm={3}>
         <BackToStorefrontButton
+          style={{ maxWidth: "70%", alignSelf: "center" }}
           onClick={() => {
             navigate("/");
           }}
@@ -600,26 +602,28 @@ export const Store = () => {
           dateCreated={userStore?.created || 0}
         />
       </ReusableModal>
-      <ReusableModal
+      <ReusableModalStyled
         customStyles={{
           width: "96%",
-          maxWidth: 700,
-          height: "95%",
+          maxWidth: 1200,
+          height: "95vh",
           backgroundColor:
             theme.palette.mode === "light" ? "#e8e8e8" : "#32333c",
           position: "relative",
           padding: "25px 40px",
           borderRadius: "5px",
-          outline: "none"
+          outline: "none",
+          overflowY: "auto"
         }}
         open={openStoreReviews}
       >
         <StoreReviews
           storeTitle={userStore?.title || ""}
           storeImage={userStore?.logo || ""}
+          storeId={userStore?.id || ""}
           setOpenStoreReviews={setOpenStoreReviews}
         />
-      </ReusableModal>
+      </ReusableModalStyled>
     </Grid>
   );
 };

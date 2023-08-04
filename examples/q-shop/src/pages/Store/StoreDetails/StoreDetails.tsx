@@ -11,7 +11,8 @@ import {
   IconsRow,
   HeaderRow,
   CardDetailsContainer,
-  StoreTitle
+  StoreTitle,
+  StoreDescription
 } from "./StoreDetails-styles";
 import { OwnerSVG } from "../../../assets/svgs/OwnerSVG";
 import { useTheme } from "@mui/material";
@@ -65,7 +66,7 @@ export const StoreDetails: FC<StoreDetailsProps> = ({
               />
               Store Description
             </IconsRow>
-            {storeDescription}
+            <StoreDescription>{storeDescription}</StoreDescription>
           </CardRow>
           <CardRow>
             <IconsRow>

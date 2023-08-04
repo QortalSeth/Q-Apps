@@ -66,7 +66,8 @@ export const IconsRow = styled(Box)({
   alignItems: "center",
   gap: "5px",
   opacity: 0.9,
-  fontSize: "22px"
+  fontSize: "22px",
+  whiteSpace: "nowrap"
 });
 
 export const HeaderRow = styled(Box)(({ theme }) => ({
@@ -90,11 +91,18 @@ export const StoreLogo = styled("img")(({ theme }) => ({
 
 export const StoreTitle = styled(Box)(({ theme }) => ({
   display: "flex",
-  justifySelf: "center"
+  justifySelf: "center",
+  userSelect: "none"
 }));
 
 export const CardDetailsContainer = styled(Box)(({ theme }) => ({
   display: "flex",
   flexDirection: "column",
   flexGrow: 1
+}));
+
+export const StoreDescription = styled(Typography)(({ theme }) => ({
+  display: "flex",
+  flexDirection: "column",
+  maxWidth: "60%"
 }));

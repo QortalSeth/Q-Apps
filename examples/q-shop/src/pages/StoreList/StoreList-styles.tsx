@@ -27,7 +27,7 @@ export const WelcomeRow = styled(Grid)(({ theme }) => ({
   justifyContent: "space-between",
   width: "100%",
   gap: "10px",
-  padding: "0 15px 45px 15px"
+  padding: "0 15px 45px 0px"
 }));
 
 export const WelcomeFont = styled(Typography)(({ theme }) => ({
@@ -263,7 +263,7 @@ export const LogoRow = styled(Box)(({ theme }) => ({
 }));
 
 export const QShopLogo = styled("img")(({ theme }) => ({
-  width: "400px",
+  width: "200px",
   height: "100%",
   objectFit: "contain",
   userSelect: "none"

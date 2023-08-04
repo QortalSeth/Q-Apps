@@ -105,7 +105,6 @@ export const useFetchOrders = () => {
     try {
       dispatch(setIsLoadingGlobal(true));
       const offset = orders.length;
-      //TODO - NAME SHOULD BE EXACT
       const parts = store.split("q-store-general-");
       const shortStoreId = parts[1];
 
@@ -138,6 +137,7 @@ export const useFetchOrders = () => {
         }
       }
     } catch (error) {
+      console.error(error);
     } finally {
       dispatch(setIsLoadingGlobal(false));
     }
