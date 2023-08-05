@@ -150,7 +150,7 @@ export const NewThread = ({
 
       // START OF ATTACHMENT LOGIC
 
-      const attachmentArray = []
+      const attachmentArray: any[] = []
       for (const attachment of attachments) {
         const fileBase64 = await toBase64(attachment)
         if (typeof fileBase64 !== 'string' || !fileBase64)

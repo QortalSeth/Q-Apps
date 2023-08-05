@@ -30,13 +30,19 @@ import {
 import SimpleTable from './MailTable'
 import { MAIL_SERVICE_TYPE } from '../../constants/mail'
 import { BlogPost } from '../../state/features/blogSlice'
-import { base64ToUint8Array, uint8ArrayToObject } from '../../utils/toBase64'
+import {
+  base64ToUint8Array,
+  objectToBase64,
+  uint8ArrayToObject
+} from '../../utils/toBase64'
 import { formatDate } from '../../utils/time'
 import { NewThread } from './NewThread'
 import { Thread } from './Thread'
 import { current } from '@reduxjs/toolkit'
 import { delay } from '../../utils/helpers'
-
+import { setNotification } from '../../state/features/notificationsSlice'
+import { getNameInfo } from '../../utils/apiCalls'
+import BackupIcon from '@mui/icons-material/Backup'
 interface AliasMailProps {
   groupInfo: any
 }
@@ -132,7 +138,8 @@ export const GroupMail = ({ groupInfo }: AliasMailProps) => {
             const fullObject = {
               ...message,
               threadId: message.identifier,
-              threadData: responseDataThread
+              threadData: responseDataThread,
+              threadOwner: message.name
             }
             const index = allThreads.findIndex(
               (p) => p.identifier === fullObject.identifier
@@ -233,7 +240,8 @@ export const GroupMail = ({ groupInfo }: AliasMailProps) => {
           const fullObject = {
             ...message,
             threadData: responseDataThread,
-            messageData: responseDataMessage
+            messageData: responseDataMessage,
+            threadOwner: responseDataMessage.threadOwner
           }
           fullThreadArray.push(fullObject)
         } catch (error) {}
@@ -280,6 +288,65 @@ export const GroupMail = ({ groupInfo }: AliasMailProps) => {
     }
   }, [currentThread])
 
+  const republishThread = async (thread: any) => {
+    try {
+      dispatch(setIsLoadingGlobal(true))
+      const threadData = thread?.threadData
+      if (!threadData) throw new Error('Cannot find thread data')
+      const response = await fetch(
+        `/groups/members/${threadData?.groupId}?limit=0`
+      )
+      const groupData = await response.json()
+
+      let groupPublicKeys: string[] = []
+      if (groupData && Array.isArray(groupData?.members)) {
+        for (const member of groupData.members) {
+          if (member.member) {
+            const res = await getNameInfo(member.member)
+            const resAddress = await qortalRequest({
+              action: 'GET_ACCOUNT_DATA',
+              address: member.member
+            })
+            const name = res
+            const publicKey = resAddress.publicKey
+            if (publicKey) {
+              groupPublicKeys.push(publicKey)
+            }
+          }
+        }
+      }
+      if (!groupPublicKeys || groupPublicKeys.length < 1) {
+        throw new Error('Cannot get public keys')
+      }
+      const threadObject = threadData
+      const threadToBase64 = await objectToBase64(threadObject)
+
+      let requestBodyThread: any = {
+        name: thread.threadOwner,
+        service: MAIL_SERVICE_TYPE,
+        data64: threadToBase64,
+        identifier: thread.threadId
+      }
+
+      const multiplePublishMsg = {
+        action: 'PUBLISH_MULTIPLE_QDN_RESOURCES',
+        resources: [requestBodyThread],
+        encrypt: true,
+        publicKeys: groupPublicKeys
+      }
+      await qortalRequest(multiplePublishMsg)
+      dispatch(
+        setNotification({
+          msg: 'Re-published with new public keys',
+          alertType: 'success'
+        })
+      )
+    } catch (error) {
+    } finally {
+      dispatch(setIsLoadingGlobal(false))
+    }
+  }
+
   return (
     <div
       style={{
@@ -311,9 +378,30 @@ export const GroupMail = ({ groupInfo }: AliasMailProps) => {
               border: 'solid 1px',
               borderRadius: '5px',
               marginBottom: '10px',
-              cursor: 'pointer'
+              cursor: 'pointer',
+              position: 'relative'
             }}
           >
+            {user?.name === thread?.threadOwner && (
+              <Box
+                sx={{
+                  top: 0,
+                  right: '10px',
+                  position: 'absolute',
+                  cursor: 'pointer',
+                  transition: '0.2s all',
+                  '&:hover': {
+                    transform: 'scale(1.1)'
+                  }
+                }}
+                onClick={(e) => {
+                  e.stopPropagation()
+                  republishThread(thread)
+                }}
+              >
+                <BackupIcon />
+              </Box>
+            )}
             <div>
               <MailIcon />
             </div>
