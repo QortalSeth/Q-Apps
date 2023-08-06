@@ -237,6 +237,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
           <CustomSelect
             labelId="product-type-label"
             label="Product Type"
+            variant="filled"
             value={selectedType}
             onChange={(event) => {
               setSelectedType(event.target.value as string);

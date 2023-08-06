@@ -1,44 +1,81 @@
-import { useState } from "react";
+import { useState, FC, useEffect } from "react";
 import { Rating } from "@mui/material";
 import {
   ReviewContainer,
+  ReviewDateFont,
   ReviewDescriptionFont,
   ReviewHeader,
   ReviewTitleFont,
   ReviewTitleRow,
   ReviewUsernameFont
 } from "./StoreReviews-styles";
+import moment from "moment";
+import { StoreReview } from "../../../state/features/storeSlice";
+import { useFetchStoreReviews } from "../../../hooks/useFetchStoreReviews";
+import { useSelector } from "react-redux";
+import { RootState } from "../../../state/store";
 
-export const StoreReviewCard = () => {
+interface StoreReviewCardProps {
+  review: StoreReview;
+}
+
+export const StoreReviewCard: FC<StoreReviewCardProps> = ({ review }) => {
   const [showCompleteReview, setShowCompleteReview] = useState<boolean>(false);
 
-  const limitCharFunc = (str: string, limit = 150) => {
-    return str.length > limit ? `${str.slice(0, limit)}...` : str;
+  const [fullStoreTitle, setFullStoreTitle] = useState<string>("");
+  const [fullStoreDescription, setFullStoreDescription] = useState<string>("");
+
+  const hashMapStoreReviews = useSelector(
+    (state: RootState) => state.store.hashMapStoreReviews
+  );
+
+  const { created, name, title, rating, description } = review;
+
+  const { getReview, checkAndUpdateResource } = useFetchStoreReviews();
+
+  const handleFetchReviewRawData = async () => {
+    try {
+      if (review.name && review.id) {
+        const res = checkAndUpdateResource({
+          id: review?.id,
+          updated: review?.updated
+        });
+        if (res) {
+          getReview(review?.name, review?.id, review);
+        }
+      }
+    } catch (error) {
+      console.error(error);
+    }
   };
 
-  const exampleDescription =
-    "Sed ut perspiciatis unde omnis iste natus error sitvoluptatem accusantium doloremque laudantium, totam remaperiam, eaque ipsa quae ab illo inventore veritatis et quasiarchitecto beatae vitae dicta sunt explicabo. Nemo enim ipsamvoluptatem quia voluptas sit aspernatur aut odit aut fugit,sed quia consequuntur magni dolores eos qui ratione voluptatemsequi nesciunt. Neque porro quisquam est, qui dolorem ipsumquia dolor sit amet, consectetur, adipisci velit, sed quia nonnumquam eius modi tempora incidunt ut labore et dolore magnamaliquam quaerat voluptatem. Ut enim ad minima veniam, quisnostrum exercitationem ullam corporis suscipit laboriosam,nisi ut aliquid ex ea commodi consequatur? Quis autem vel eumiure reprehenderit qui in ea voluptate velit esse quam nihilmolestiae consequatur, vel illum qui dolorem eum fugiat quo voluptas nulla pariatur?";
+  useEffect(() => {
+    Object.keys(hashMapStoreReviews).find((key) => {
+      if (key === review.id) {
+        setFullStoreTitle(hashMapStoreReviews[key].title);
+        setFullStoreDescription(hashMapStoreReviews[key].description);
+      }
+    });
+  }, [hashMapStoreReviews]);
 
   return (
     <ReviewContainer
-      style={{ cursor: showCompleteReview ? "auto" : "pointer" }}
       onClick={() => {
         setShowCompleteReview(true);
+        handleFetchReviewRawData();
       }}
+      showCompleteReview={showCompleteReview ? true : false}
     >
       <ReviewHeader>
-        <ReviewUsernameFont>Username goes here</ReviewUsernameFont>
+        <ReviewUsernameFont>{name}</ReviewUsernameFont>
         <ReviewTitleRow>
-          <ReviewTitleFont>
-            This is an example title for a review!
-          </ReviewTitleFont>
-          <Rating precision={0.5} value={2} readOnly />
+          <ReviewTitleFont>{fullStoreTitle || title}</ReviewTitleFont>
+          <Rating precision={0.5} value={rating} readOnly />
         </ReviewTitleRow>
+        <ReviewDateFont>{moment(created).format("llll")}</ReviewDateFont>
       </ReviewHeader>
       <ReviewDescriptionFont>
-        {showCompleteReview
-          ? exampleDescription
-          : limitCharFunc(exampleDescription)}
+        {fullStoreDescription || description}
       </ReviewDescriptionFont>
     </ReviewContainer>
   );

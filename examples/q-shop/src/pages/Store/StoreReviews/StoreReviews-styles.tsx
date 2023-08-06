@@ -1,5 +1,10 @@
 import { styled } from "@mui/system";
 import { Box, Button, Typography } from "@mui/material";
+import { TimesSVG } from "../../../assets/svgs/TimesSVG";
+
+interface StoreReviewsProps {
+  showCompleteReview: boolean;
+}
 
 export const AddReviewButton = styled(Button)(({ theme }) => ({
   display: "flex",
@@ -62,19 +67,32 @@ export const TotalReviewsFont = styled(Typography)(({ theme }) => ({
   opacity: 0.8
 }));
 
-export const ReviewContainer = styled(Box)(({ theme }) => ({
-  display: "flex",
-  flexDirection: "column",
-  alignItems: "flex-start",
-  justifyContent: "flex-start",
-  gap: "10px",
-  width: "100%"
-}));
+export const ReviewContainer = styled(Box)<StoreReviewsProps>(
+  ({ theme, showCompleteReview }) => ({
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "flex-start",
+    justifyContent: "flex-start",
+    gap: "10px",
+    padding: "5px",
+    borderRadius: "5px",
+    width: "100%",
+    transition: "all 0.3s ease-in-out",
+    "&:hover": {
+      cursor: showCompleteReview ? "auto" : "pointer",
+      backgroundColor: showCompleteReview
+        ? "transparent"
+        : theme.palette.mode === "light"
+        ? "#e4ddddac"
+        : "#aeabab1e"
+    }
+  })
+);
 
 export const ReviewHeader = styled(Box)(({ theme }) => ({
   display: "flex",
   flexDirection: "column",
-  gap: "5px"
+  gap: "1px"
 }));
 
 export const ReviewTitleRow = styled(Box)(({ theme }) => ({
@@ -98,6 +116,15 @@ export const ReviewTitleFont = styled(Box)(({ theme }) => ({
   fontWeight: 400,
   letterSpacing: "0.5px",
   color: theme.palette.text.primary
+}));
+
+export const ReviewDateFont = styled(Typography)(({ theme }) => ({
+  fontFamily: "Karla",
+  fontSize: "15px",
+  fontWeight: 300,
+  letterSpacing: "0px",
+  color: theme.palette.text.primary,
+  opacity: 0.8
 }));
 
 export const ReviewDescriptionFont = styled(Box)(({ theme }) => ({
@@ -133,5 +160,16 @@ export const StoreReviewsContainer = styled(Box)(({ theme }) => ({
   },
   "&::-webkit-scrollbar-thumb:hover": {
     backgroundColor: theme.palette.mode === "light" ? "#b7bcc4" : "#40455f"
+  }
+}));
+
+export const CloseIconModal = styled(TimesSVG)(({ theme }) => ({
+  position: "absolute",
+  top: "15px",
+  right: "10px",
+  transition: "all 0.2s ease-in-out",
+  "&:hover": {
+    cursor: "pointer",
+    transform: "scale(1.1)"
   }
 }));

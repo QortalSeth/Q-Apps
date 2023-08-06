@@ -20,20 +20,16 @@ import { RootState, store } from "../../../../state/store";
 import ShortUniqueId from "short-unique-id";
 import { setNotification } from "../../../../state/features/notificationsSlice";
 import { objectToBase64 } from "../../../../utils/toBase64";
+import {
+  addToHashMapStoreReviews,
+  addToReviews
+} from "../../../../state/features/storeSlice";
 
 /* Reviews notes
-  Fetch 10 reviews of the store use fetch() API call
-  Add them all up and divide by # of reviews to get the average rating
-  In the resource of the review, we should put the rating inside the tag of the review.
-  Preview of the rating in the title metadata (which is part of the metadata of the resource) 60 chars
-  Preview of the review message in the description metadata (which is part of the metadata of the resource) 150 chars
-  Put the review number inside the raw data (complete resource data using resource's location) JSON as well
-  Use service DOCUMENT
-  And then when they click on the actual, review, it will show the full review message and the rating by fetching the raw data
-  When fetching the full list of reviews, don't use mode=ALL, use mode=LATEST
-  Filter reviews by query by minlevel 1 and above
-  Make sure user has at least one store order before beign able to leave a review
-  const url = `/arbitrary/resources/search?service=DOCUMENT&query=${query}&limit=20&name=${name}&includemetadata=true&offset=${offset}&reverse=true`;
+  Prevent them from adding a review to their own store
+  Filter their own review
+  Make sure user has at least one store order before being able to leave a review
+  Get first 100 reviews for the average (without metadata)
 */
 
 interface AddReviewProps {
@@ -120,7 +116,9 @@ export const AddReview: FC<AddReviewProps> = ({
     const shortStoreId = parts[1];
     const uidGenerator = uid();
     // Create identifier for the review
-    const reviewId = `q-store-review-${shortStoreId}-${uidGenerator}`;
+    const reviewId = `q-store-review-${shortStoreId}-${uidGenerator}-${
+      Number(rating) * 10
+    }`;
     // Check if review identifier already exists
     const doesExist = await verifyIfReviewIdExists(name, reviewId);
     if (doesExist) {
@@ -128,6 +126,7 @@ export const AddReview: FC<AddReviewProps> = ({
         "The review identifier already exists! Try changing your review's title"
       );
     }
+
     // Resource raw data
     const reviewObj = {
       title: reviewTitle,
@@ -135,7 +134,7 @@ export const AddReview: FC<AddReviewProps> = ({
       rating: rating,
       created: Date.now()
     };
-    console.log({ reviewObj });
+
     const reviewToBase64 = await objectToBase64(reviewObj);
     try {
       // Publish Review to QDN
@@ -148,10 +147,38 @@ export const AddReview: FC<AddReviewProps> = ({
         filename: "review.json",
         // Resource metadata down here
         title: reviewTitle.slice(0, 60),
-        description: reviewDescription.slice(0, 150),
-        tag1: rating?.toString()
+        description: reviewDescription.slice(0, 150)
       });
-      console.log({ resourceResponse });
+      setOpenLeaveReview(false);
+      dispatch(
+        addToReviews({
+          id: reviewId,
+          name: name,
+          created: Date.now(),
+          updated: Date.now(),
+          title: reviewTitle.slice(0, 60),
+          description: reviewDescription.slice(0, 150),
+          rating: rating
+        })
+      );
+      dispatch(
+        addToHashMapStoreReviews({
+          id: reviewId,
+          name: name,
+          created: Date.now(),
+          updated: Date.now(),
+          title: reviewTitle,
+          description: reviewDescription,
+          rating: rating,
+          isValid: true
+        })
+      );
+      dispatch(
+        setNotification({
+          alertType: "success",
+          msg: "Added Review Successfully!"
+        })
+      );
     } catch (error: any) {
       let notificationObj: any = null;
       if (typeof error === "string") {
@@ -183,49 +210,55 @@ export const AddReview: FC<AddReviewProps> = ({
   return (
     <AddReviewContainer>
       <AddReviewHeader>
-        <StoreTitle>{storeTitle}</StoreTitle>
+        <StoreTitle>{`Leave a review for ${storeTitle}`}</StoreTitle>
       </AddReviewHeader>
       <Divider />
-      <Rating
-        onChange={(e: React.ChangeEvent<{}>, newValue: number | null) => {
-          setRating(newValue);
-        }}
-        precision={0.5}
-        value={rating}
-        style={{ fontSize: "55px" }}
-      />
-      <CustomInputField
-        name="title"
-        label="Store Review Title"
-        variant="filled"
-        value={reviewTitle}
-        onChange={(e) => setReviewTitle(e.target.value as string)}
-        inputProps={{ maxLength: 180 }}
-        required
-        style={{ width: "100%" }}
-      />
-      <AddReviewDescription
-        aria-label="review-description"
-        minRows={3}
-        placeholder="Write a store review..."
-        value={reviewDescription}
-        onChange={(e) => setReviewDescription(e.target.value as string)}
-        required
-      />
-      <CloseButtonRow style={{ gap: "10px" }}>
-        <CloseButton
-          variant="outlined"
-          color="error"
-          onClick={() => {
-            setOpenLeaveReview(false);
-          }}
-        >
-          Close
-        </CloseButton>
-        <CreateButton variant="contained" onClick={addReviewFunc}>
-          Add Review
-        </CreateButton>
-      </CloseButtonRow>
+      <AddReviewContainer style={{ padding: 0 }}>
+        <AddReviewContainer style={{ padding: 0, gap: "15px" }}>
+          <Rating
+            onChange={(e: React.ChangeEvent<{}>, newValue: number | null) => {
+              setRating(newValue);
+            }}
+            precision={0.5}
+            value={rating}
+            style={{ fontSize: "55px" }}
+          />
+          <CustomInputField
+            name="title"
+            label="Store Review Title"
+            variant="filled"
+            value={reviewTitle}
+            onChange={(e) => setReviewTitle(e.target.value as string)}
+            inputProps={{ maxLength: 180 }}
+            required
+            style={{ width: "100%" }}
+          />
+          <AddReviewDescription
+            aria-label="review-description"
+            draggable={false}
+            minRows={3}
+            maxRows={10}
+            placeholder="Write a store review..."
+            value={reviewDescription}
+            onChange={(e) => setReviewDescription(e.target.value as string)}
+            required
+          />
+        </AddReviewContainer>
+        <CloseButtonRow style={{ gap: "10px" }}>
+          <CloseButton
+            variant="outlined"
+            color="error"
+            onClick={() => {
+              setOpenLeaveReview(false);
+            }}
+          >
+            Close
+          </CloseButton>
+          <CreateButton variant="contained" onClick={addReviewFunc}>
+            Add Review
+          </CreateButton>
+        </CloseButtonRow>
+      </AddReviewContainer>
     </AddReviewContainer>
   );
 };

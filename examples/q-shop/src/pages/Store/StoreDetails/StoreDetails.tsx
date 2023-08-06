@@ -3,8 +3,6 @@ import moment from "moment";
 import EmailIcon from "@mui/icons-material/Email";
 import {
   CardRow,
-  CloseButton,
-  CloseButtonRow,
   Divider,
   EmailUser,
   StoreLogo,
@@ -18,6 +16,7 @@ import { OwnerSVG } from "../../../assets/svgs/OwnerSVG";
 import { useTheme } from "@mui/material";
 import { CalendarSVG } from "../../../assets/svgs/CalendarSVG";
 import { DescriptionSVG } from "../../../assets/svgs/DescriptionSVG";
+import { CloseIconModal } from "../StoreReviews/StoreReviews-styles";
 
 interface StoreDetailsProps {
   storeTitle: string;
@@ -42,6 +41,12 @@ export const StoreDetails: FC<StoreDetailsProps> = ({
       <HeaderRow>
         <StoreLogo src={storeImage} alt={`${storeTitle}-logo`} />
         <StoreTitle>{storeTitle}</StoreTitle>
+        <CloseIconModal
+          onClickFunc={() => setOpenStoreDetails(false)}
+          color={theme.palette.text.primary}
+          height={"24"}
+          width={"24"}
+        />
       </HeaderRow>
       <Divider />
       <CardDetailsContainer>
@@ -98,17 +103,6 @@ export const StoreDetails: FC<StoreDetailsProps> = ({
             </EmailUser>
           </CardRow>
         </CardDetailsContainer>
-        <CloseButtonRow>
-          <CloseButton
-            variant="outlined"
-            color="error"
-            onClick={() => {
-              setOpenStoreDetails(false);
-            }}
-          >
-            Close
-          </CloseButton>
-        </CloseButtonRow>
       </CardDetailsContainer>
     </>
   );

@@ -788,7 +788,7 @@ export const Cart = () => {
                 })}
               </TotalSumItems>
               <OrderTotalRow>
-                Total:{" "}
+                <span>Total:</span>
                 <QortalSVG
                   color={theme.palette.text.primary}
                   height={"22"}

@@ -180,7 +180,7 @@ export const OrderDetailsContainer = styled(Box)(({ theme }) => ({
   alignItems: "center",
   gap: "15px",
   width: "100%",
-  padding: "8px 0"
+  padding: "8px 10px 8px 0"
 }));
 
 export const OrderDetailsCard = styled(Box)(({ theme }) => ({

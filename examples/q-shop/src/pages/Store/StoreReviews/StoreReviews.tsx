@@ -1,9 +1,7 @@
-import { FC, useState, useEffect } from "react";
-import { Grid, Rating, useTheme } from "@mui/material";
+import { FC, useState, useCallback } from "react";
+import { CircularProgress, Grid, Rating, useTheme } from "@mui/material";
 import {
   CardDetailsContainer,
-  CloseButton,
-  CloseButtonRow,
   Divider,
   HeaderRow,
   StoreLogo,
@@ -15,6 +13,7 @@ import {
   AddReviewButton,
   AverageReviewContainer,
   AverageReviewNumber,
+  CloseIconModal,
   ReviewsFont,
   StoreReviewsContainer,
   TotalReviewsFont
@@ -22,46 +21,46 @@ import {
 import { StoreReviewCard } from "./StoreReviewCard";
 import { ReusableModal } from "../../../components/modals/ReusableModal";
 import { AddReview } from "./AddReview/AddReview";
-import { useDispatch } from "react-redux";
-import { setIsLoadingGlobal } from "../../../state/features/globalSlice";
+import { useDispatch, useSelector } from "react-redux";
+import LazyLoad from "../../../components/common/LazyLoad";
+import { StoreReview, upsertReviews } from "../../../state/features/storeSlice";
+import { RootState } from "../../../state/store";
 
 interface StoreReviewsProps {
   storeId: string;
   storeTitle: string;
   storeImage: string;
+  averageStoreRating: number | null;
   setOpenStoreReviews: (open: boolean) => void;
-}
-
-interface StoreReview {
-  title: string;
-  description: string;
-  created: number;
-  rating: number;
 }
 
 export const StoreReviews: FC<StoreReviewsProps> = ({
   storeId,
   storeTitle,
   storeImage,
+  averageStoreRating,
   setOpenStoreReviews
 }) => {
   const theme = useTheme();
   const dispatch = useDispatch();
+  const storeReviews = useSelector(
+    (state: RootState) => state.store.storeReviews
+  );
 
   const [openLeaveReview, setOpenLeaveReview] = useState<boolean>(false);
-  const [storeReviews, setStoreReviews] = useState<StoreReview[]>([]);
+  const [loadingReviews, setLoadingReviews] = useState<boolean>(false);
 
-  // Fetch all the store reviews from QDN
-
-  const getStoreReviews = async () => {
+  // Fetch all the store review resources from QDN
+  const getStoreReviews = useCallback(async () => {
     if (!storeId) return;
     try {
-      dispatch(setIsLoadingGlobal(true));
+      setLoadingReviews(true);
       const offset = storeReviews.length;
       const parts = storeId.split("q-store-general-");
       const shortStoreId = parts[1];
       const query = `q-store-review-${shortStoreId}`;
-      const url = `/arbitrary/resources/search?service=DOCUMENT&query=${query}&limit=10&includemetadata=true&offset=${offset}&reverse=true`;
+      // Since it the url includes /resources, you know you're fetching the resources and not the raw data
+      const url = `/arbitrary/resources/search?service=DOCUMENT&query=${query}&limit=10&includemetadata=true&mode=LATEST&offset=${offset}&reverse=true`;
       const response = await fetch(url, {
         method: "GET",
         headers: {
@@ -69,20 +68,51 @@ export const StoreReviews: FC<StoreReviewsProps> = ({
         }
       });
       const responseData = await response.json();
-      console.log(responseData);
-      setStoreReviews(responseData);
+      // Modify resource into data that is more easily used on the front end
+      const structuredReviewData = responseData.map(
+        (review: any): StoreReview => {
+          const splitIdentifier = review.identifier.split("-");
+          return {
+            id: review?.identifier,
+            name: review?.name,
+            created: review?.created,
+            updated: review?.updated,
+            title: review?.metadata?.title,
+            description: review?.metadata?.description,
+            rating: Number(splitIdentifier[splitIdentifier.length - 1]) / 10
+          };
+        }
+      );
+
+      // Filter out duplicates by checking if the review id already exists in storeReviews in global redux store
+      const copiedStoreReviews: StoreReview[] = [...storeReviews];
+
+      structuredReviewData.forEach((review: StoreReview) => {
+        const index = storeReviews.findIndex(
+          (storeReview: StoreReview) => storeReview.id === review.id
+        );
+        if (index !== -1) {
+          copiedStoreReviews[index] = review;
+        } else {
+          copiedStoreReviews.push(review);
+        }
+      });
+
+      dispatch(upsertReviews(copiedStoreReviews));
     } catch (error) {
       console.error(error);
     } finally {
-      dispatch(setIsLoadingGlobal(false));
+      setLoadingReviews(false);
     }
-  };
+  }, [storeReviews, storeId]);
 
-  useEffect(() => {
-    if (storeId) {
-      getStoreReviews();
-    }
-  }, [storeId]);
+  // Pass this function down to lazy loader
+  const handleGetReviews = useCallback(async () => {
+    await getStoreReviews();
+  }, [getStoreReviews]);
+
+  console.log({ storeReviews });
+
   return (
     <>
       <HeaderRow>
@@ -98,42 +128,57 @@ export const StoreReviews: FC<StoreReviewsProps> = ({
             Add Review
           </AddReviewButton>
         </StoreTitleCol>
+        <CloseIconModal
+          onClickFunc={() => setOpenStoreReviews(false)}
+          color={theme.palette.text.primary}
+          height={"24"}
+          width={"24"}
+        />
       </HeaderRow>
       <Divider />
       <CardDetailsContainer>
-        <Grid container direction={"row"} flexWrap={"nowrap"}>
+        <Grid container direction={"row"} flexWrap={"nowrap"} rowGap={2}>
           <Grid item xs={12} sm={2} justifyContent={"center"}>
             <AverageReviewContainer>
-              <ReviewsFont>Reviews</ReviewsFont>
-              <AverageReviewNumber>3.5</AverageReviewNumber>
+              <ReviewsFont>Average Review</ReviewsFont>
+              <AverageReviewNumber>
+                {averageStoreRating || null}
+              </AverageReviewNumber>
               <Rating
                 style={{ marginBottom: "8px" }}
                 precision={0.5}
-                value={3.5}
+                value={averageStoreRating || 0}
                 readOnly
               />
-              <TotalReviewsFont>27 reviews</TotalReviewsFont>
+              <TotalReviewsFont>{`${storeReviews.length} review${
+                storeReviews.length > 1 ? "s" : ""
+              }`}</TotalReviewsFont>
             </AverageReviewContainer>
           </Grid>
-          <Grid item xs={12} sm={10}>
+          <Grid item xs={12} sm={10} style={{ position: "relative" }}>
+            {loadingReviews && (
+              <CircularProgress
+                style={{
+                  position: "absolute",
+                  top: "50%",
+                  left: "50%",
+                  transform: "translateX(-50%)"
+                }}
+              />
+            )}
             <StoreReviewsContainer>
-              <StoreReviewCard />
-              <StoreReviewCard />
-              <StoreReviewCard />
+              {storeReviews.length === 0 ? (
+                <ReviewsFont>No reviews yet</ReviewsFont>
+              ) : (
+                storeReviews.map((review: StoreReview) => {
+                  return <StoreReviewCard review={review} />;
+                })
+              )}
             </StoreReviewsContainer>
+
+            <LazyLoad onLoadMore={handleGetReviews}></LazyLoad>
           </Grid>
         </Grid>
-        <CloseButtonRow>
-          <CloseButton
-            variant="outlined"
-            color="error"
-            onClick={() => {
-              setOpenStoreReviews(false);
-            }}
-          >
-            Close
-          </CloseButton>
-        </CloseButtonRow>
       </CardDetailsContainer>
       <ReusableModal
         customStyles={{

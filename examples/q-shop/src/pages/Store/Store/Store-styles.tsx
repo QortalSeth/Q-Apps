@@ -265,24 +265,26 @@ export const RatingContainer = styled(Box)(({ theme }) => ({
 }));
 
 export const ReusableModalStyled = styled(ReusableModal)(({ theme }) => ({
-  "&::-webkit-scrollbar-track": {
-    backgroundColor: "transparent"
-  },
-  "&::-webkit-scrollbar-track:hover": {
-    backgroundColor: "transparent"
-  },
-  "&::-webkit-scrollbar": {
-    width: "8px",
-    height: "10px",
-    backgroundColor: "transparent"
-  },
-  "&::-webkit-scrollbar-thumb": {
-    backgroundColor: theme.palette.mode === "light" ? "#d3d9e1" : "#414763",
-    borderRadius: "8px",
-    backgroundClip: "content-box",
-    border: "4px solid transparent"
-  },
-  "&::-webkit-scrollbar-thumb:hover": {
-    backgroundColor: theme.palette.mode === "light" ? "#b7bcc4" : "#40455f"
+  "& #store-details": {
+    "&::-webkit-scrollbar-track": {
+      backgroundColor: "transparent"
+    },
+    "&::-webkit-scrollbar-track:hover": {
+      backgroundColor: "transparent"
+    },
+    "&::-webkit-scrollbar": {
+      width: "8px",
+      height: "10px",
+      backgroundColor: "transparent"
+    },
+    "&::-webkit-scrollbar-thumb": {
+      backgroundColor: theme.palette.mode === "light" ? "#d3d9e1" : "#414763",
+      borderRadius: "8px",
+      backgroundClip: "content-box",
+      border: "4px solid transparent"
+    },
+    "&::-webkit-scrollbar-thumb:hover": {
+      backgroundColor: theme.palette.mode === "light" ? "#b7bcc4" : "#40455f"
+    }
   }
 }));

@@ -58,6 +58,7 @@ export const CardRow = styled(Box)({
   width: "100%",
   fontFamily: "Karla",
   fontWeight: 300,
+  fontSize: "20px",
   letterSpacing: "0px"
 });
 
@@ -101,7 +102,7 @@ export const CardDetailsContainer = styled(Box)(({ theme }) => ({
   flexGrow: 1
 }));
 
-export const StoreDescription = styled(Typography)(({ theme }) => ({
+export const StoreDescription = styled(Box)(({ theme }) => ({
   display: "flex",
   flexDirection: "column",
   maxWidth: "60%"

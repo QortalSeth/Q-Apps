@@ -9,14 +9,13 @@ import {
   CircularProgress,
   Chip,
   FormControl,
-  Rating,
-  Typography
+  Rating
 } from "@mui/material";
 import {
   setIsLoadingGlobal,
   updateRecentlyVisitedStoreId
 } from "../../../state/features/globalSlice";
-import { Product } from "../../../state/features/storeSlice";
+import { Product, StoreReview } from "../../../state/features/storeSlice";
 import LazyLoad from "../../../components/common/LazyLoad";
 import ContextMenuResource from "../../../components/common/ContextMenu/ContextMenuResource";
 import { setStoreId, setStoreOwner } from "../../../state/features/storeSlice";
@@ -55,7 +54,6 @@ import { CartIcon } from "../../../components/layout/Navbar/Navbar-styles";
 import { setIsOpen } from "../../../state/features/cartSlice";
 import { Cart as CartInterface } from "../../../state/features/cartSlice";
 import { ExpandMoreSVG } from "../../../assets/svgs/ExpandMoreSVG";
-import { ReusableModal } from "../../../components/modals/ReusableModal";
 import { StoreDetails } from "../StoreDetails/StoreDetails";
 import { StoreReviews } from "../StoreReviews/StoreReviews";
 
@@ -116,6 +114,9 @@ export const Store = () => {
   const [categoryChips, setCategoryChips] = useState<{ label: string }[]>([]);
   const [openStoreDetails, setOpenStoreDetails] = useState<boolean>(false);
   const [openStoreReviews, setOpenStoreReviews] = useState<boolean>(false);
+  const [averageStoreRating, setAverageStoreRating] = useState<number | null>(
+    null
+  );
 
   const getProducts = useCallback(async () => {
     if (!store) return;
@@ -251,16 +252,54 @@ export const Store = () => {
     }
   }, [username, store, dataContainer]);
 
+  // Get 100 store reviews from QDN and calculate the average review
+  const getStoreAverageReview = async () => {
+    if (!storeId) return;
+    try {
+      const parts = storeId.split("q-store-general-");
+      const shortStoreId = parts[1];
+      const query = `q-store-review-${shortStoreId}`;
+      // Since it the url includes /resources, you know you're fetching the resources and not the raw data
+      const url = `/arbitrary/resources/search?service=DOCUMENT&query=${query}&limit=100&includemetadata=false&mode=LATEST&reverse=true`;
+      const response = await fetch(url, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json"
+        }
+      });
+      const responseData = await response.json();
+      // Modify resource into data that is more easily used on the front end
+      const storeRatingsArray = responseData.map((review: any) => {
+        const splitIdentifier = review.identifier.split("-");
+        const rating = Number(splitIdentifier[splitIdentifier.length - 1]) / 10;
+        return rating;
+      });
+
+      // Calculate average rating of the store
+      let averageRating =
+        storeRatingsArray.reduce((acc: number, curr: number) => {
+          return acc + curr;
+        }, 0) / storeRatingsArray.length;
+
+      averageRating = Math.ceil(averageRating * 2) / 2;
+
+      setAverageStoreRating(averageRating);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   // Get Store and set it in local state
   useEffect(() => {
     setProducts([]);
     setUserStore(null);
     getStore();
+    getStoreAverageReview();
   }, [username, store]);
 
   // Set cart notifications when cart changes
   useEffect(() => {
-    if (Object.keys(carts).length > 0 && user?.name && storeId) {
+    if (user?.name && storeId) {
       const shopCart: CartInterface = carts[storeId];
       // Get the orders of this cart
       const orders = shopCart?.orders || {};
@@ -502,7 +541,7 @@ export const Store = () => {
                   setOpenStoreReviews(true);
                 }}
               >
-                <Rating precision={0.5} value={3.5} readOnly />
+                <Rating precision={0.5} value={averageStoreRating} readOnly />
               </RatingContainer>
             </StoreTitleCol>
           </StoreTitleCard>
@@ -579,7 +618,8 @@ export const Store = () => {
         </ProductsContainer>
         <LazyLoad onLoadMore={getProductsHandler}></LazyLoad>
       </Grid>
-      <ReusableModal
+      <ReusableModalStyled
+        id={"store-details"}
         customStyles={{
           width: "96%",
           maxWidth: 700,
@@ -601,8 +641,9 @@ export const Store = () => {
           storeDescription={userStore?.description || ""}
           dateCreated={userStore?.created || 0}
         />
-      </ReusableModal>
+      </ReusableModalStyled>
       <ReusableModalStyled
+        id={"store-details"}
         customStyles={{
           width: "96%",
           maxWidth: 1200,
@@ -618,6 +659,7 @@ export const Store = () => {
         open={openStoreReviews}
       >
         <StoreReviews
+          averageStoreRating={averageStoreRating}
           storeTitle={userStore?.title || ""}
           storeImage={userStore?.logo || ""}
           storeId={userStore?.id || ""}
