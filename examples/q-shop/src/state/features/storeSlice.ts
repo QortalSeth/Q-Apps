@@ -12,6 +12,8 @@ interface GlobalState {
   storeId: string | null
   storeOwner: string | null
   stores: Store[]
+  storeReviews: StoreReview[]
+  hashMapStoreReviews: Record<string, StoreReview>
 }
 
 const initialState: GlobalState = {
@@ -24,7 +26,9 @@ const initialState: GlobalState = {
   hashMapStores: {},
   storeId: null,
   storeOwner: null,
-  stores: []
+  stores: [],
+  storeReviews: [],
+  hashMapStoreReviews: {},
 }
 
 export interface Price {
@@ -65,6 +69,16 @@ export interface Store {
   logo?: string
   location?: string
   shipsTo?: string
+}
+
+export interface StoreReview {
+  id: string;
+  name: string;
+  title: string;
+  description: string;
+  created: number;
+  rating: number;
+  updated?: number;
 }
 
 export const storeSlice = createSlice({
@@ -118,7 +132,10 @@ export const storeSlice = createSlice({
       const store = action.payload
       state.hashMapStores[store.id] = store
     },
-
+    addToHashMapStoreReviews: (state, action) => {
+      const review = action.payload
+      state.hashMapStoreReviews[review.id] = review
+    },
     updateInHashMap: (state, action) => {
       const { id } = action.payload
       const post = action.payload
@@ -160,10 +177,24 @@ export const storeSlice = createSlice({
         }
       })
     },
+    upsertReviews: (state, action) => {
+      action.payload.forEach((review: StoreReview) => {
+        const index = state.storeReviews.findIndex((p) => p.id === review.id)
+        if (index !== -1) {
+          state.storeReviews[index] = review
+        } else {
+          state.storeReviews.push(review)
+        }
+      })
+    },
     addToStores: (state, action) => {
       const newStore = action.payload;
       state.stores.unshift(newStore);
 
+    },
+    addToReviews: (state, action) => {
+      const newReview = action.payload;
+      state.storeReviews.unshift(newReview);
     },
     upsertFilteredPosts: (state, action) => {
       action.payload.forEach((post: Product) => {
@@ -217,7 +248,10 @@ export const {
   setStoreId, 
   setStoreOwner,
   upsertStores,
-  addToStores
+  upsertReviews,
+  addToStores,
+  addToHashMapStoreReviews,
+  addToReviews
 } = storeSlice.actions
 
 export default storeSlice.reducer

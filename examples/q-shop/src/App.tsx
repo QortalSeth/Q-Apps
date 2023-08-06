@@ -8,7 +8,7 @@ import { CssBaseline } from "@mui/material";
 import { lightTheme, darkTheme } from "./styles/theme";
 import { store } from "./state/store";
 import { Provider } from "react-redux";
-import { Store } from "./pages/Store/Store";
+import { Store } from "./pages/Store/Store/Store";
 import { MyOrders } from "./pages/MyOrders/MyOrders";
 import { ErrorElement } from "./components/common/Error/ErrorElement";
 import GlobalWrapper from "./wrappers/GlobalWrapper";

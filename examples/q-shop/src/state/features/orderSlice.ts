@@ -69,7 +69,6 @@ export const orderSlice = createSlice({
   initialState,
   reducers: {
     upsertOrders: (state, action) => {
-      console.log('action.payload orders', action.payload)
       action.payload.forEach((order: Order) => {
         const index = state.orders.findIndex((p) => p.id === order.id)
         if (index !== -1) {

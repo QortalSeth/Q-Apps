@@ -41,7 +41,7 @@ import {
   ProductsCol
 } from "./ProductManager-styles";
 import { OrderTable } from "./OrderTable/OrderTable";
-import { BackToStorefrontButton } from "../Store/Store-styles";
+import { BackToStorefrontButton } from "../Store/Store/Store-styles";
 import { QortalSVG } from "../../assets/svgs/QortalSVG";
 import { CategorySVG } from "../../assets/svgs/CategorySVG";
 import { LoyaltySVG } from "../../assets/svgs/LoyaltySVG";

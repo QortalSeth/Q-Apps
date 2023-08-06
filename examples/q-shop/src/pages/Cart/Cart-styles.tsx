@@ -208,12 +208,14 @@ export const TotalSumItem = styled(Box)(({ theme }) => ({
 }));
 
 export const TotalSumItemTitle = styled(Typography)(({ theme }) => ({
+  display: "flex",
+  alignItems: "center",
   fontFamily: "Karla",
   fontSize: "18px",
   fontWeight: 300,
+  letterSpacing: 0,
   userSelect: "none",
   color: theme.palette.text.primary,
-  display: "flex",
   gap: "3px"
 }));
 
@@ -225,8 +227,12 @@ export const OrderTotalRow = styled(Box)(({ theme }) => ({
   userSelect: "none",
   fontFamily: "Karla",
   fontWeight: "bold",
+  letterSpacing: 0,
   borderBottom: `1px solid ${theme.palette.background.paper}`,
   padding: "15px 0px",
   gap: "3px",
-  width: "100%"
+  width: "100%",
+  "& span": {
+    marginRight: "5px"
+  }
 }));

@@ -105,12 +105,11 @@ export const useFetchOrders = () => {
     try {
       dispatch(setIsLoadingGlobal(true));
       const offset = orders.length;
-      //TODO - NAME SHOULD BE EXACT
       const parts = store.split("q-store-general-");
       const shortStoreId = parts[1];
 
       const query = `q-store-order-${shortStoreId}`;
-      const url = `/arbitrary/resources/search?service=DOCUMENT_PRIVATE&query=${query}&limit=20&includemetadata=true&offset=${offset}&reverse=true`;
+      const url = `/arbitrary/resources/search?service=DOCUMENT_PRIVATE&query=${query}&limit=20&includemetadata=true&mode=ALL&offset=${offset}&reverse=true`;
       const response = await fetch(url, {
         method: "GET",
         headers: {
@@ -138,6 +137,7 @@ export const useFetchOrders = () => {
         }
       }
     } catch (error) {
+      console.error(error);
     } finally {
       dispatch(setIsLoadingGlobal(false));
     }
@@ -192,7 +192,6 @@ export const useFetchOrders = () => {
       const offset = products.length;
       const productList = listProducts.products;
       const responseData = productList.slice(offset, offset + 20);
-      console.log("responseData inside getProducts()", responseData);
       const structureData = responseData.map(
         (product: ProductDataContainer): Product => {
           return {

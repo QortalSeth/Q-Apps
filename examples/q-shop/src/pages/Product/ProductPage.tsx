@@ -21,7 +21,10 @@ import AddIcon from "@mui/icons-material/Add";
 import RemoveIcon from "@mui/icons-material/Remove";
 import DangerousIcon from "@mui/icons-material/Dangerous";
 import { CartIcon } from "../../components/layout/Navbar/Navbar-styles";
-import { CartIconContainer, NotificationBadge } from "../Store/Store-styles";
+import {
+  CartIconContainer,
+  NotificationBadge
+} from "../Store/Store/Store-styles";
 import { useFetchOrders } from "../../hooks/useFetchOrders";
 import {
   AddToCartButton,
@@ -82,7 +85,6 @@ export const ProductPage = () => {
   const getProductData = async () => {
     const productInRedux = catalogueHashMap[catalogueID]?.products[productID];
     const paramsLoaded = productID && catalogueID && storeOwner && storeId;
-    console.log({ productInRedux });
     if (productInRedux) {
       setProduct(productInRedux);
       return;

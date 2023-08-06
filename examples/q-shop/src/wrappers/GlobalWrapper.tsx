@@ -98,7 +98,7 @@ const GlobalWrapper: React.FC<Props> = ({ children, setTheme }) => {
 
   async function verifyIfStoreIdExists(username: string, identifier: string) {
     let doesExist = true;
-    const url2 = `/arbitrary/resources?service=STORE&identifier=${identifier}&name=${username}&limit=1&includemetadata=true`;
+    const url2 = `/arbitrary/resources?service=STORE&identifier=${identifier}&exactmatchnames=true&name=${username}&limit=1&includemetadata=true`;
     const responseBlogs = await fetch(url2, {
       method: "GET",
       headers: {
@@ -113,7 +113,6 @@ const GlobalWrapper: React.FC<Props> = ({ children, setTheme }) => {
   }
 
   async function getMyCurrentStore(name: string) {
-    //TODO NAME SHOULD BE EXACT
     const url = `/arbitrary/resources/search?service=STORE&identifier=q-store-general-&exactmatchnames=true&name=${name}&prefix=true&limit=20&includemetadata=true`;
     const responseBlogs = await fetch(url, {
       method: "GET",
@@ -162,7 +161,6 @@ const GlobalWrapper: React.FC<Props> = ({ children, setTheme }) => {
     );
     // Set listProducts in the Redux global state
     if (responseData2 && !responseData2.error) {
-      console.log("responseData2", responseData2);
       dispatch(
         setDataContainer({
           ...responseData2,
