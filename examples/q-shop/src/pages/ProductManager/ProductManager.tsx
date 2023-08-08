@@ -451,7 +451,7 @@ export const ProductManager = () => {
   }, [dataContainerProducts]);
 
   useEffect(() => {
-    if (!dataContainer || !userName) {
+    if (!dataContainer) {
       navigate(`/${userName}/${store}`);
     } else {
       return;

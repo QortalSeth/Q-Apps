@@ -1,4 +1,4 @@
-import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import { createSlice } from "@reduxjs/toolkit";
 import { Product } from "./storeSlice";
 import { Order } from "./orderSlice";
 
@@ -17,10 +17,9 @@ export interface CurrentStore {
   id: string;
   title: string;
   description: string;
-  blogImage: string;
-  category?: string;
-  tags?: string[];
-  navbarConfig?: any;
+  logo?: string;
+  location?: string;
+  shipsTo?: string;
 }
 
 export interface DataContainer {
@@ -44,7 +43,7 @@ interface GlobalState {
   isOpenCreateStoreModal: boolean;
   isLoadingCurrentBlog: boolean;
   isLoadingGlobal: boolean;
-  isOpenEditBlogModal: boolean;
+  isOpenEditStoreModal: boolean;
   currentStore: CurrentStore | null;
   downloads: any;
   userAvatarHash: Record<string, string>;
@@ -65,7 +64,7 @@ const initialState: GlobalState = {
   isLoadingCurrentBlog: true,
   isLoadingGlobal: false,
   currentStore: null,
-  isOpenEditBlogModal: false,
+  isOpenEditStoreModal: false,
   downloads: {},
   userAvatarHash: {},
   dataContainer: null,
@@ -88,8 +87,8 @@ export const globalSlice = createSlice({
     toggleCreateStoreModal: (state, action) => {
       state.isOpenCreateStoreModal = action.payload;
     },
-    toggleEditBlogModal: (state, action) => {
-      state.isOpenEditBlogModal = action.payload;
+    toggleEditStoreModal: (state, action) => {
+      state.isOpenEditStoreModal = action.payload;
     },
     setCurrentStore: (state, action) => {
       state.currentStore = action.payload;
@@ -207,7 +206,7 @@ export const {
   setCurrentStore,
   setDataContainer,
   setIsLoadingGlobal,
-  toggleEditBlogModal,
+  toggleEditStoreModal,
   setAddToDownloads,
   updateRecentlyVisitedStoreId,
   updateDownloads,

@@ -172,7 +172,7 @@ export const StoresButton = styled(Button)(({ theme }) => ({
   fontSize: "17px",
   borderRadius: "5px",
   border: "none",
-  color: "white",
+  color: theme.palette.text.primary,
   padding: "2px 15px",
   transition: "all 0.3s ease-in-out",
   boxShadow:

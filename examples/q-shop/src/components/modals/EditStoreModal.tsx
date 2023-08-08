@@ -1,15 +1,8 @@
-import { ChangeEvent, useState, useEffect } from "react";
-import {
-  TextField,
-  Typography,
-  Modal,
-  FormControl,
-  useTheme
-} from "@mui/material";
-import { useDispatch } from "react-redux";
+import { useState, useEffect } from "react";
+import { Typography, Modal, FormControl, useTheme } from "@mui/material";
+import { useDispatch, useSelector } from "react-redux";
 import { toggleCreateStoreModal } from "../../state/features/globalSlice";
-import ImageUploader from "../common/ImageUploader";
-
+import { RootState } from "../../state/store";
 import {
   AddLogoButton,
   AddLogoIcon,
@@ -23,6 +16,7 @@ import {
   StoreLogoPreview,
   TimesIcon
 } from "./CreateStoreModal-styles";
+import ImageUploader from "../common/ImageUploader";
 export interface onPublishParamEdit {
   title: string;
   description: string;
@@ -35,24 +29,19 @@ interface MyModalProps {
   onClose: () => void;
   onPublish: (param: onPublishParamEdit) => Promise<void>;
   username: string;
-  currentStore: any;
 }
 
-const MyModal: React.FC<MyModalProps> = ({
-  open,
-  onClose,
-  onPublish,
-  username,
-  currentStore
-}) => {
+const MyModal: React.FC<MyModalProps> = ({ open, onClose, onPublish }) => {
   const dispatch = useDispatch();
+  const currentStore = useSelector(
+    (state: RootState) => state.global.currentStore
+  );
 
   const [title, setTitle] = useState<string>("");
   const [description, setDescription] = useState<string>("");
   const [location, setLocation] = useState<string>("");
   const [shipsTo, setShipsTo] = useState<string>("");
   const [errorMessage, setErrorMessage] = useState<string>("");
-  const [shopIdentifier, setShopIdentifier] = useState(username || "");
   const [logo, setLogo] = useState<string | null>(null);
 
   const theme = useTheme();
@@ -84,7 +73,6 @@ const MyModal: React.FC<MyModalProps> = ({
       setLogo(currentStore?.logo || null);
       setLocation(currentStore?.location || "");
       setShipsTo(currentStore?.shipsTo || "");
-      setShopIdentifier(currentStore?.id || "");
     }
   }, [currentStore]);
 
@@ -96,26 +84,7 @@ const MyModal: React.FC<MyModalProps> = ({
     onClose();
   };
 
-  // const handleInputChangeId = (event: ChangeEvent<HTMLInputElement>) => {
-  //   // Replace any non-alphanumeric and non-space characters with an empty string
-  //   // Replace multiple spaces with a single dash and remove any dashes that come one after another
-  //   let newValue = event.target.value
-  //     .replace(/[^a-zA-Z0-9\s-]/g, "")
-  //     .replace(/\s+/g, "-")
-  //     .replace(/-+/g, "-")
-  //     .trim();
-
-  //   if (newValue.toLowerCase().includes("post")) {
-  //     // Replace the 'post' string with an empty string
-  //     newValue = newValue.replace(/post/gi, "");
-  //   }
-  //   if (newValue.toLowerCase().includes("q-blog")) {
-  //     // Replace the 'q-blog' string with an empty string
-  //     newValue = newValue.replace(/q-blog/gi, "");
-  //   }
-  //   setShopIdentifier(newValue);
-  // };
-
+  console.log({ currentStore });
   return (
     <Modal
       open={open}

@@ -39,6 +39,7 @@ export const AverageReviewContainer = styled(Box)(({ theme }) => ({
 }));
 
 export const ReviewsFont = styled(Typography)(({ theme }) => ({
+  textAlign: "center",
   fontFamily: "Raleway",
   fontSize: "19px",
   fontWeight: 600,
@@ -83,7 +84,7 @@ export const ReviewContainer = styled(Box)<StoreReviewsProps>(
       backgroundColor: showCompleteReview
         ? "transparent"
         : theme.palette.mode === "light"
-        ? "#e4ddddac"
+        ? "#d3d3d3ac"
         : "#aeabab1e"
     }
   })

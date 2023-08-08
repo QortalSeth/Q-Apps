@@ -107,7 +107,7 @@ export const SimpleTable = ({
               }}
               key={column.dataKey}
               align={column.numeric || false ? "right" : "left"}
-              style={{ width: column.width, cursor: "pointer" }}
+              style={{ width: column.width, padding: "15px 20px" }}
               sx={{
                 fontSize: tableCellFontSize,
                 padding: "7px"
@@ -117,7 +117,9 @@ export const SimpleTable = ({
                 {column.dataKey === "created"
                   ? moment(rowData[column.dataKey]).format("llll")
                   : column.dataKey === "status"
-                  ? rowData[column.dataKey] || "unknown"
+                  ? rowData[column.dataKey] === "OUT_OF_STOCK"
+                    ? "OUT OF STOCK"
+                    : rowData[column.dataKey] || "unknown"
                   : rowData[column.dataKey]}
               </>
             </TableCell>
@@ -129,7 +131,7 @@ export const SimpleTable = ({
 
   function fixedHeaderContent() {
     return (
-      <TableRow style={{ padding: "5px 10px" }}>
+      <TableRow>
         {columns.map((column) => {
           const { label } = column;
           return (
@@ -137,7 +139,7 @@ export const SimpleTable = ({
               key={column.dataKey}
               variant="head"
               align={column.numeric || false ? "right" : "left"}
-              style={{ width: column.width }}
+              style={{ width: column.width, padding: "15px 20px" }}
               sx={{
                 backgroundColor: "background.paper",
                 fontSize: tableCellFontSize,

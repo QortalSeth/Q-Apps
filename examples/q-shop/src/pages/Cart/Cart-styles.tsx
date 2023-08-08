@@ -12,7 +12,7 @@ export const CartContainer = styled(Grid)(({ theme }) => ({
   flexGrow: 1,
   overflow: "auto",
   width: "100%",
-  padding: "35px",
+  padding: "0 10px",
   overflowX: "hidden"
 }));
 
