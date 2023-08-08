@@ -216,7 +216,9 @@ export const storeSlice = createSlice({
         }
       })
     },
-
+    clearReviews: (state) => {
+      state.storeReviews = []
+    },
     blockUser: (state, action) => {
       const username = action.payload
       state.products = state.products.filter((item) => item.user !== username)
@@ -249,6 +251,7 @@ export const {
   setStoreOwner,
   upsertStores,
   upsertReviews,
+  clearReviews,
   addToStores,
   addToHashMapStoreReviews,
   addToReviews

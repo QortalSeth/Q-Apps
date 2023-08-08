@@ -11,7 +11,7 @@ import EditStoreModal, {
 import {
   setCurrentStore,
   setDataContainer,
-  toggleEditBlogModal,
+  toggleEditStoreModal,
   toggleCreateStoreModal,
   setIsLoadingGlobal,
   resetProducts,
@@ -47,6 +47,21 @@ const GlobalWrapper: React.FC<Props> = ({ children, setTheme }) => {
   const recentlyVisitedStoreId = useSelector(
     (state: RootState) => state.global.recentlyVisitedStoreId
   );
+  // Open create & edit shop modals
+  const isOpenCreateStoreModal = useSelector(
+    (state: RootState) => state.global.isOpenCreateStoreModal
+  );
+  const isOpenEditStoreModal = useSelector(
+    (state: RootState) => state.global.isOpenEditStoreModal
+  );
+  // Get current store from global store
+  const currentStore = useSelector(
+    (state: RootState) => state.global.currentStore
+  );
+  // Loading global state
+  const isLoadingGlobal = useSelector(
+    (state: RootState) => state.global.isLoadingGlobal
+  );
 
   const { getStore, checkAndUpdateResource } = useFetchStores();
 
@@ -77,13 +92,6 @@ const GlobalWrapper: React.FC<Props> = ({ children, setTheme }) => {
       console.error(error);
     }
   };
-
-  const {
-    isOpenCreateStoreModal,
-    currentStore,
-    isLoadingGlobal,
-    isOpenEditBlogModal
-  } = useSelector((state: RootState) => state.global);
 
   async function getNameInfo(address: string) {
     const response = await fetch("/names/address/" + address);
@@ -363,7 +371,7 @@ const GlobalWrapper: React.FC<Props> = ({ children, setTheme }) => {
       if (!shipsTo) throw new Error("Ships to is required");
       const name = user.name;
 
-      const blogobj = {
+      const storeObj = {
         ...currentStore,
         title,
         description,
@@ -371,13 +379,13 @@ const GlobalWrapper: React.FC<Props> = ({ children, setTheme }) => {
         shipsTo,
         logo
       };
-      const blogPostToBase64 = await objectToBase64(blogobj);
+      const storeToBase64 = await objectToBase64(storeObj);
       try {
         const resourceResponse = await qortalRequest({
           action: "PUBLISH_QDN_RESOURCE",
           name: name,
           service: "STORE",
-          data64: blogPostToBase64,
+          data64: storeToBase64,
           filename: "store.json",
           title,
           description,
@@ -390,7 +398,7 @@ const GlobalWrapper: React.FC<Props> = ({ children, setTheme }) => {
           }, 1000);
         });
 
-        dispatch(setCurrentStore(blogobj));
+        dispatch(setCurrentStore(storeObj));
         dispatch(
           setNotification({
             msg: "Store successfully updated",
@@ -431,17 +439,16 @@ const GlobalWrapper: React.FC<Props> = ({ children, setTheme }) => {
     dispatch(toggleCreateStoreModal(false));
   }, []);
 
-  const onCloseEditBlogModal = React.useCallback(() => {
-    dispatch(toggleEditBlogModal(false));
+  const onCloseEditStoreModal = React.useCallback(() => {
+    dispatch(toggleEditStoreModal(false));
   }, []);
 
   // Get my stores
   const getMyStores = async () => {
     if (!user || !user?.name) return;
     try {
-      const offset = 0;
       const name = user?.name;
-      const url = `/arbitrary/resources/search?service=STORE&name=${name}&limit=20&exactmatchnames=true&mode=ALL&includemetadata=true&offset=${offset}&reverse=true`;
+      const url = `/arbitrary/resources/search?service=STORE&name=${name}&limit=20&exactmatchnames=true&mode=ALL&includemetadata=true&reverse=true`;
       const response = await fetch(url, {
         method: "GET",
         headers: {
@@ -505,7 +512,7 @@ const GlobalWrapper: React.FC<Props> = ({ children, setTheme }) => {
         try {
           dispatch(setIsLoadingGlobal(true));
           const getStoreAndDataContainer = async () => {
-            // Fetch shop data on QDN
+            // Fetch shop raw data on QDN
             const urlShop = `/arbitrary/STORE/${myStoreFound.owner}/${myStoreFound.id}`;
             const shopData = await fetch(urlShop, {
               method: "GET",
@@ -525,7 +532,8 @@ const GlobalWrapper: React.FC<Props> = ({ children, setTheme }) => {
                 shipsTo: shopResource?.shipsTo,
                 description: shopResource?.description || "",
                 category: myStoreFound?.category,
-                tags: myStoreFound?.tags || []
+                tags: myStoreFound?.tags || [],
+                logo: shopResource?.logo
               })
             );
             // Fetch data container data on QDN (product resources)
@@ -571,10 +579,9 @@ const GlobalWrapper: React.FC<Props> = ({ children, setTheme }) => {
         />
       )}
       <EditStoreModal
-        open={isOpenEditBlogModal}
-        onClose={onCloseEditBlogModal}
+        open={isOpenEditStoreModal}
+        onClose={onCloseEditStoreModal}
         onPublish={editStore}
-        currentStore={currentStore}
         username={user?.name || ""}
       />
       <NavBar

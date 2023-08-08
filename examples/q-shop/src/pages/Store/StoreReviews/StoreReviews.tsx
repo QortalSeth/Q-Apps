@@ -1,4 +1,4 @@
-import { FC, useState, useCallback } from "react";
+import { FC, useState, useCallback, useEffect } from "react";
 import { CircularProgress, Grid, Rating, useTheme } from "@mui/material";
 import {
   CardDetailsContainer,
@@ -46,9 +46,37 @@ export const StoreReviews: FC<StoreReviewsProps> = ({
   const storeReviews = useSelector(
     (state: RootState) => state.store.storeReviews
   );
+  const storeOwner = useSelector((state: RootState) => state.store.storeOwner);
+  const user = useSelector((state: RootState) => state.auth.user);
 
   const [openLeaveReview, setOpenLeaveReview] = useState<boolean>(false);
   const [loadingReviews, setLoadingReviews] = useState<boolean>(false);
+  const [userHasStoreOrder, setUserHasStoreOrder] = useState<boolean>(false);
+
+  // Determine whether user can leave a review
+  const doesUserHaveOrderFunc = async () => {
+    if (!user?.name) return;
+    const parts = storeId.split("q-store-general-");
+    const shortStoreId = parts[1];
+
+    try {
+      const query = `q-store-order-${shortStoreId}`;
+      const url = `/arbitrary/resources/search?service=DOCUMENT_PRIVATE&name=${user?.name}&exactmatchnames=true&query=${query}&limit=1&includemetadata=false&mode=LATEST&reverse=true`;
+      const response = await fetch(url, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json"
+        }
+      });
+      const responseData = await response.json();
+      if (responseData.length > 0) {
+        setUserHasStoreOrder(true);
+        return;
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
   // Fetch all the store review resources from QDN
   const getStoreReviews = useCallback(async () => {
@@ -111,22 +139,27 @@ export const StoreReviews: FC<StoreReviewsProps> = ({
     await getStoreReviews();
   }, [getStoreReviews]);
 
-  console.log({ storeReviews });
-
+  useEffect(() => {
+    if (user?.name) {
+      doesUserHaveOrderFunc();
+    }
+  }, [user]);
   return (
     <>
       <HeaderRow>
         <StoreLogo src={storeImage} alt={`${storeTitle}-logo`} />
-        <StoreTitleCol>
+        <StoreTitleCol style={{ gap: "10px" }}>
           <StoreTitle>{storeTitle}</StoreTitle>
-          <AddReviewButton onClick={() => setOpenLeaveReview(true)}>
-            <StarSVG
-              color={theme.palette.mode === "dark" ? "#000000" : "#ffffff"}
-              height={"22"}
-              width={"22"}
-            />{" "}
-            Add Review
-          </AddReviewButton>
+          {userHasStoreOrder && (
+            <AddReviewButton onClick={() => setOpenLeaveReview(true)}>
+              <StarSVG
+                color={theme.palette.mode === "dark" ? "#000000" : "#ffffff"}
+                height={"22"}
+                width={"22"}
+              />{" "}
+              Add Review
+            </AddReviewButton>
+          )}
         </StoreTitleCol>
         <CloseIconModal
           onClickFunc={() => setOpenStoreReviews(false)}
@@ -138,24 +171,31 @@ export const StoreReviews: FC<StoreReviewsProps> = ({
       <Divider />
       <CardDetailsContainer>
         <Grid container direction={"row"} flexWrap={"nowrap"} rowGap={2}>
-          <Grid item xs={12} sm={2} justifyContent={"center"}>
-            <AverageReviewContainer>
-              <ReviewsFont>Average Review</ReviewsFont>
-              <AverageReviewNumber>
-                {averageStoreRating || null}
-              </AverageReviewNumber>
-              <Rating
-                style={{ marginBottom: "8px" }}
-                precision={0.5}
-                value={averageStoreRating || 0}
-                readOnly
-              />
-              <TotalReviewsFont>{`${storeReviews.length} review${
-                storeReviews.length > 1 ? "s" : ""
-              }`}</TotalReviewsFont>
-            </AverageReviewContainer>
-          </Grid>
-          <Grid item xs={12} sm={10} style={{ position: "relative" }}>
+          {averageStoreRating && (
+            <Grid item xs={12} sm={2} justifyContent={"center"}>
+              <AverageReviewContainer>
+                <ReviewsFont>Average Review</ReviewsFont>
+                <AverageReviewNumber>
+                  {averageStoreRating || null}
+                </AverageReviewNumber>
+                <Rating
+                  style={{ marginBottom: "8px" }}
+                  precision={0.5}
+                  value={averageStoreRating || 0}
+                  readOnly
+                />
+                <TotalReviewsFont>{`${storeReviews.length} review${
+                  storeReviews.length === 1 ? "" : "s"
+                }`}</TotalReviewsFont>
+              </AverageReviewContainer>
+            </Grid>
+          )}
+          <Grid
+            item
+            xs={12}
+            sm={averageStoreRating ? 10 : 12}
+            style={{ position: "relative" }}
+          >
             {loadingReviews && (
               <CircularProgress
                 style={{
@@ -170,9 +210,13 @@ export const StoreReviews: FC<StoreReviewsProps> = ({
               {storeReviews.length === 0 ? (
                 <ReviewsFont>No reviews yet</ReviewsFont>
               ) : (
-                storeReviews.map((review: StoreReview) => {
-                  return <StoreReviewCard review={review} />;
-                })
+                storeReviews
+                  .filter((review: StoreReview) => {
+                    return review.name !== storeOwner;
+                  })
+                  .map((review: StoreReview) => {
+                    return <StoreReviewCard review={review} />;
+                  })
               )}
             </StoreReviewsContainer>
 

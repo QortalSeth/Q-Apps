@@ -75,14 +75,14 @@ export const OrderTable = ({ openOrder, data, children }: SimpleTableProps) => {
 
   function fixedHeaderContent() {
     return (
-      <TableRow style={{ padding: "5px 10px" }}>
+      <TableRow>
         {columns.map((column) => {
           return (
             <TableCell
               key={column.dataKey}
               variant="head"
               align={column.numeric || false ? "right" : "left"}
-              style={{ width: column.width }}
+              style={{ width: column.width, padding: "15px 20px" }}
               sx={{
                 backgroundColor: "background.paper",
                 fontSize: tableCellFontSize,
@@ -117,7 +117,7 @@ export const OrderTable = ({ openOrder, data, children }: SimpleTableProps) => {
               }}
               key={column.dataKey}
               align={column.numeric || false ? "right" : "left"}
-              style={{ width: column.width, cursor: "pointer" }}
+              style={{ width: column.width, padding: "15px 20px" }}
               sx={{
                 fontSize: tableCellFontSize,
                 padding: "7px"
@@ -157,17 +157,3 @@ export const OrderTable = ({ openOrder, data, children }: SimpleTableProps) => {
     </Paper>
   );
 };
-
-// export const AvatarWrapper = ({ user }: any) => {
-//   const userAvatarHash = useSelector(
-//     (state: RootState) => state.global.userAvatarHash
-//   );
-//   const avatarLink = React.useMemo(() => {
-//     if (!user || !userAvatarHash) return "";
-//     const findUserAvatar = userAvatarHash[user];
-//     if (!findUserAvatar) return "";
-//     return findUserAvatar;
-//   }, [userAvatarHash, user]);
-
-//   return <Avatar src={avatarLink} alt={`${user}'s avatar`} />;
-// };
