@@ -148,7 +148,7 @@ const NavBar: React.FC<Props> = ({
               }
             }}
           >
-            Stores
+            My Stores
             <StoreManagerIcon
               color={theme.palette.text.primary}
               height={"32"}

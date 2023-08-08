@@ -96,7 +96,6 @@ export const globalSlice = createSlice({
       state.isLoadingCurrentBlog = false;
     },
     setDataContainer: (state, action) => {
-      console.log("setDataContainer", action.payload);
       let categories: any = {};
       state.dataContainer = action.payload;
       const mappedProducts = Object.keys(action.payload.products)

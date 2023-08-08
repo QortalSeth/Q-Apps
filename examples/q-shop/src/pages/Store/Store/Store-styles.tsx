@@ -9,6 +9,7 @@ import {
   Autocomplete,
   TextField
 } from "@mui/material";
+import { ReusableModal } from "../../../components/modals/ReusableModal";
 
 export const FiltersCol = styled(Grid)(({ theme }) => ({
   display: "flex",
@@ -95,18 +96,19 @@ export const StoreTitleCard = styled(Box)(({ theme }) => ({
   width: "fit-content",
   borderRadius: "8px",
   padding: "10px 15px",
+  backgroundColor: theme.palette.background.paper,
+  gap: "10px",
+  transition: "all 0.3s ease-in-out"
+}));
+
+export const StoreTitle = styled(Typography)(({ theme }) => ({
   fontFamily: "Raleway",
   fontSize: "20px",
   color: theme.palette.text.primary,
-  backgroundColor: theme.palette.background.paper,
-  gap: "10px",
   transition: "all 0.3s ease-in-out",
   "&:hover": {
     cursor: "pointer",
-    boxShadow:
-      theme.palette.mode === "dark"
-        ? "0px 8px 10px 1px hsla(0,0%,0%,0.14), 0px 3px 14px 2px hsla(0,0%,0%,0.12), 0px 5px 5px -3px hsla(0,0%,0%,0.2)"
-        : "rgba(0, 0, 0, 0.1) 0px 4px 6px -1px, rgba(0, 0, 0, 0.06) 0px 2px 4px -1px;"
+    textDecoration: "underline"
   }
 }));
 
@@ -239,5 +241,50 @@ export const ProductCardCol = styled(Grid)(({ theme }) => ({
   flexGrow: 1,
   [theme.breakpoints.down("sm")]: {
     width: "100%"
+  }
+}));
+
+export const StoreTitleCol = styled(Box)({
+  display: "flex",
+  alignItems: "center",
+  flexDirection: "column",
+  gap: "15px"
+});
+
+export const RatingContainer = styled(Box)(({ theme }) => ({
+  display: "flex",
+  alignItems: "center",
+  padding: "5px",
+  borderRadius: "5px",
+  backgroundColor: "transparent",
+  transition: "all 0.3s ease-in-out",
+  "&:hover": {
+    cursor: "pointer",
+    backgroundColor: "#e4ddddac"
+  }
+}));
+
+export const ReusableModalStyled = styled(ReusableModal)(({ theme }) => ({
+  "& #store-details": {
+    "&::-webkit-scrollbar-track": {
+      backgroundColor: "transparent"
+    },
+    "&::-webkit-scrollbar-track:hover": {
+      backgroundColor: "transparent"
+    },
+    "&::-webkit-scrollbar": {
+      width: "8px",
+      height: "10px",
+      backgroundColor: "transparent"
+    },
+    "&::-webkit-scrollbar-thumb": {
+      backgroundColor: theme.palette.mode === "light" ? "#d3d9e1" : "#414763",
+      borderRadius: "8px",
+      backgroundClip: "content-box",
+      border: "4px solid transparent"
+    },
+    "&::-webkit-scrollbar-thumb:hover": {
+      backgroundColor: theme.palette.mode === "light" ? "#b7bcc4" : "#40455f"
+    }
   }
 }));

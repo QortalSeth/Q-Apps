@@ -109,14 +109,15 @@ export const TimesIcon = styled(TimesSVG)(({ theme }) => ({
 
 export const CustomInputField = styled(TextField)(({ theme }) => ({
   fontFamily: "Karla",
-  fontSize: "17.5px",
+  fontSize: "18px",
+  fontWeight: 300,
   color: theme.palette.text.primary,
   backgroundColor: theme.palette.background.default,
   borderColor: theme.palette.background.paper,
   "& label": {
     color: theme.palette.mode === "light" ? "#808183" : "#edeef0",
     fontFamily: "Karla",
-    fontSize: "17.5px",
+    fontSize: "18px",
     letterSpacing: "0px"
   },
   "& label.Mui-focused": {

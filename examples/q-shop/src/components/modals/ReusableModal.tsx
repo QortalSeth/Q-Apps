@@ -7,9 +7,11 @@ interface MyModalProps {
   onSubmit?: (obj: any) => Promise<void>;
   children: any;
   customStyles?: any;
+  id?: string;
 }
 
 export const ReusableModal: React.FC<MyModalProps> = ({
+  id,
   open,
   onClose,
   onSubmit,
@@ -25,6 +27,7 @@ export const ReusableModal: React.FC<MyModalProps> = ({
       aria-describedby="modal-description"
     >
       <Box
+        id={id}
         sx={{
           position: "absolute",
           top: "50%",

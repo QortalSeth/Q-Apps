@@ -3,24 +3,26 @@ import moment from "moment";
 import EmailIcon from "@mui/icons-material/Email";
 import {
   CardRow,
-  CloseButton,
-  CloseButtonRow,
   Divider,
   EmailUser,
   StoreLogo,
   IconsRow,
   HeaderRow,
   CardDetailsContainer,
-  StoreTitle
+  StoreTitle,
+  StoreDescription
 } from "./StoreDetails-styles";
 import { OwnerSVG } from "../../../assets/svgs/OwnerSVG";
 import { useTheme } from "@mui/material";
 import { CalendarSVG } from "../../../assets/svgs/CalendarSVG";
+import { DescriptionSVG } from "../../../assets/svgs/DescriptionSVG";
+import { CloseIconModal } from "../StoreReviews/StoreReviews-styles";
 
 interface StoreDetailsProps {
   storeTitle: string;
   storeImage: string;
   storeOwner: string;
+  storeDescription: string;
   dateCreated: number;
   setOpenStoreDetails: (open: boolean) => void;
 }
@@ -28,6 +30,7 @@ interface StoreDetailsProps {
 export const StoreDetails: FC<StoreDetailsProps> = ({
   storeTitle,
   storeImage,
+  storeDescription,
   storeOwner,
   dateCreated,
   setOpenStoreDetails
@@ -38,6 +41,12 @@ export const StoreDetails: FC<StoreDetailsProps> = ({
       <HeaderRow>
         <StoreLogo src={storeImage} alt={`${storeTitle}-logo`} />
         <StoreTitle>{storeTitle}</StoreTitle>
+        <CloseIconModal
+          onClickFunc={() => setOpenStoreDetails(false)}
+          color={theme.palette.text.primary}
+          height={"24"}
+          width={"24"}
+        />
       </HeaderRow>
       <Divider />
       <CardDetailsContainer>
@@ -52,6 +61,17 @@ export const StoreDetails: FC<StoreDetailsProps> = ({
               Store Owner
             </IconsRow>
             {storeOwner}
+          </CardRow>
+          <CardRow>
+            <IconsRow>
+              <DescriptionSVG
+                width={"22"}
+                height={"22"}
+                color={theme.palette.text.primary}
+              />
+              Store Description
+            </IconsRow>
+            <StoreDescription>{storeDescription}</StoreDescription>
           </CardRow>
           <CardRow>
             <IconsRow>
@@ -83,17 +103,6 @@ export const StoreDetails: FC<StoreDetailsProps> = ({
             </EmailUser>
           </CardRow>
         </CardDetailsContainer>
-        <CloseButtonRow>
-          <CloseButton
-            variant="outlined"
-            color="error"
-            onClick={() => {
-              setOpenStoreDetails(false);
-            }}
-          >
-            Close
-          </CloseButton>
-        </CloseButtonRow>
       </CardDetailsContainer>
     </>
   );
