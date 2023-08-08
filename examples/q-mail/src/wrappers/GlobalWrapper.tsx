@@ -77,8 +77,6 @@ const GlobalWrapper: React.FC<Props> = ({ children }) => {
   }, [privateGroupsRef, privateGroups])
   async function getGroups(address: string) {
     try {
-      console.log({ privateGroups: privateGroupsRef.current })
-
       const groups: any = {}
       const response = await fetch('/groups/member/' + address)
       const groupData = await response.json()
@@ -92,7 +90,6 @@ const GlobalWrapper: React.FC<Props> = ({ children }) => {
           if (prevGroupMembers) {
             prevGroupMembers = { ...(prevGroupMembers?.membersByAddress || {}) }
           }
-          console.log({ prevGroupMembers })
           const response = await fetch(`/groups/members/${groupNumber}?limit=0`)
           const groupData = await response.json()
 

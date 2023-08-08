@@ -271,6 +271,7 @@ export const NewThread = ({
         if (messageCallback) {
           messageCallback({
             identifier,
+            id: identifier,
             name,
             service: MAIL_SERVICE_TYPE,
             created: Date.now(),

@@ -67,7 +67,6 @@ export const Thread = ({
         ...(responseDataMessage || {}),
         id: message.identifier
       }
-      console.log({ fullObject })
       dispatch(addToHashMapMail(fullObject))
     } catch (error) {}
   }
@@ -89,7 +88,6 @@ export const Thread = ({
           }
         })
         const responseData = await response.json()
-        console.log({ responseData })
         let fullArrayMsg = reset ? [] : [...messages]
         let newMessages: any[] = []
         for (const message of responseData) {
@@ -123,6 +121,7 @@ export const Thread = ({
     }
   }, [user, currentThread])
   const messageCallback = useCallback((msg: any) => {
+    dispatch(addToHashMapMail(msg))
     setMessages((prev) => [msg, ...prev])
   }, [])
 
@@ -155,7 +154,6 @@ export const Thread = ({
         }
         const newArray = responseData.slice(0, findMessage).reverse()
         let fullArrayMsg = [...messages]
-
         for (const message of newArray) {
           try {
             let messageRes = await qortalRequest({
@@ -177,9 +175,10 @@ export const Thread = ({
 
             const fullObject = {
               ...message,
-              ...(responseDataMessage || {})
+              ...(responseDataMessage || {}),
+              id: message.identifier
             }
-
+            dispatch(addToHashMapMail(fullObject))
             const index = messages.findIndex(
               (p) => p.identifier === fullObject.identifier
             )
@@ -217,10 +216,8 @@ export const Thread = ({
       }
     }
   }, [checkNewMessagesFunc])
-  console.log('sup')
 
   if (!currentThread) return null
-  console.log({ messages })
   return (
     <div
       style={{
@@ -276,12 +273,8 @@ export const Thread = ({
       </Box>
       {messages.map((message) => {
         let fullMessage = message
-        console.log(
-          { hashMapMailMessages, message },
-          hashMapMailMessages[message?.identifer]
-        )
+
         if (hashMapMailMessages[message?.identifier]) {
-          console.log('hello')
           fullMessage = hashMapMailMessages[message.identifier]
           return <ShowMessage key={message?.identifier} message={fullMessage} />
         }
