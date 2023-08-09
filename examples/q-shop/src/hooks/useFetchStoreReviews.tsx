@@ -17,7 +17,6 @@ export const useFetchStoreReviews = () => {
 
   // Get the review raw data from QDN
   const getReview = async (owner: string, reviewId: string, content: any) => {
-    console.log(owner, reviewId, content);
     const res = await fetchAndEvaluateStoreReviews({
       owner,
       reviewId,

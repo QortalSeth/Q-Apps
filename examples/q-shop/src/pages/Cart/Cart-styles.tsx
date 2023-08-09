@@ -74,6 +74,7 @@ export const ProductTitle = styled(Typography)(({ theme }) => ({
 }));
 
 export const ProductDescription = styled(Typography)(({ theme }) => ({
+  alignSelf: "center",
   margin: "0px",
   fontWeight: 300,
   lineHeight: 1.5,
@@ -160,11 +161,19 @@ export const GarbageIcon = styled(GarbageSVG)(({ theme }) => ({
 }));
 
 export const ProductPriceFont = styled(Typography)(({ theme }) => ({
+  display: "flex",
+  alignItems: "center",
+  gap: "5px",
   fontFamily: "Karla",
   fontSize: "18px",
   fontWeight: 300,
   color: theme.palette.text.primary,
-  userSelect: "none"
+  userSelect: "none",
+  "& span": {
+    display: "flex",
+    alignItems: "center",
+    gap: "3px"
+  }
 }));
 
 export const TotalSumContainer = styled(Grid)(({ theme }) => ({
@@ -176,7 +185,8 @@ export const TotalSumContainer = styled(Grid)(({ theme }) => ({
   alignItems: "center",
   backgroundColor: theme.palette.background.default,
   height: "100%",
-  flexGrow: 1
+  flexGrow: 1,
+  marginTop: "35px"
 }));
 
 export const TotalSumHeader = styled(Box)(({ theme }) => ({

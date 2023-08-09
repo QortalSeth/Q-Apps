@@ -70,6 +70,7 @@ export const MyOrders = () => {
             setIsOpen(true);
           }}
           data={myOrders}
+          from="MyOrders"
         />
         <LazyLoad onLoadMore={handleGetOrders}></LazyLoad>
       </Box>

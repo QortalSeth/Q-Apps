@@ -1,17 +1,14 @@
 import { FC, useEffect, useState } from "react";
 import { ReusableModal } from "../../../components/modals/ReusableModal";
-import {
-  Box,
-  Button,
-  MenuItem,
-  Select,
-  TextField,
-  useTheme
-} from "@mui/material";
+import { Box, CircularProgress, MenuItem, useTheme } from "@mui/material";
 import EmailIcon from "@mui/icons-material/Email";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../../state/store";
-import { objectToBase64 } from "../../../utils/toBase64";
+import {
+  base64ToUint8Array,
+  objectToBase64,
+  uint8ArrayToObject
+} from "../../../utils/toBase64";
 import {
   Divider,
   OrderDetailsCard,
@@ -44,15 +41,16 @@ import {
   CloseButtonRow,
   SellerOrderStatusRow,
   CustomSelect,
-  CustomTextField,
   UpdateStatusButton,
   TotalPriceRow
 } from "./ShowOrder-styles";
 import moment from "moment";
 import { DialogsSVG } from "../../../assets/svgs/DialogsSVG";
-import { Order } from "../../../state/features/orderSlice";
+import { Order, addToHashMap } from "../../../state/features/orderSlice";
 import { QortalSVG } from "../../../assets/svgs/QortalSVG";
 import { ExpandMoreSVG } from "../../../assets/svgs/ExpandMoreSVG";
+import { setNotification } from "../../../state/features/notificationsSlice";
+import { CustomInputField } from "../../../components/modals/CreateStoreModal-styles";
 
 interface ShowOrderProps {
   isOpen: boolean;
@@ -72,14 +70,22 @@ export const ShowOrder: FC<ShowOrderProps> = ({
   const usernamePublicKey = useSelector(
     (state: RootState) => state.auth.user?.publicKey
   );
+  const hashMapOrders = useSelector(
+    (state: RootState) => state.order.hashMapOrders
+  );
 
-  const [note, setNote] = useState("");
-  const [selectedStatus, setSelectedStatus] = useState("");
+  const dispatch = useDispatch();
+
+  const [note, setNote] = useState<string>("");
+  const [selectedStatus, setSelectedStatus] = useState<string>("Received");
   const [paymentInfo, setPaymentInfo] = useState(null);
+  const [statusLoader, setStatusLoader] = useState(false);
 
   const closeModal = () => {
     setIsOpen(false);
   };
+
+  console.log({ isOpen });
 
   const getPaymentInfo = async (signature: string) => {
     try {
@@ -97,13 +103,6 @@ export const ShowOrder: FC<ShowOrderProps> = ({
       }
     } catch (error) {}
   };
-
-  useEffect(() => {
-    if (from === "ProductManager" && order) {
-      setNote(order?.note || "");
-      setSelectedStatus(order?.status || "");
-    }
-  }, [order, from]);
 
   const updateStatus = async () => {
     try {
@@ -137,10 +136,94 @@ export const ShowOrder: FC<ShowOrderProps> = ({
         publicKeys: [resAddress.publicKey, usernamePublicKey]
       };
       await qortalRequest(productRequestBody);
+      dispatch(
+        setNotification({
+          alertType: "success",
+          msg: "Order status updated successfully!"
+        })
+      );
     } catch (error) {
       console.log({ error });
     }
   };
+
+  const verifyIfOrderStatusUpdated = async () => {
+    if (!order?.id) return;
+    // Find the index of "order-" in the string
+    const extractedOrderIdEnd = order?.id.slice(
+      order?.id.indexOf("order-") + "order-".length
+    );
+    console.log(extractedOrderIdEnd, "extractedOrderIdEnd");
+    try {
+      setStatusLoader(true);
+      const query = `q-store-status-order-${extractedOrderIdEnd}`;
+      // Check if resource exists
+      const url = `/arbitrary/resources/search?service=DOCUMENT_PRIVATE&query=${query}&limit=1&includemetadata=false&mode=LATEST&reverse=true`;
+      const response = await fetch(url, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json"
+        }
+      });
+      const responseData = await response.json();
+      console.log(responseData, "responseData for order status here");
+      if (responseData.length === 0) return;
+      // Get the raw data if the resource exists
+      else {
+        let orderRawData = await qortalRequest({
+          action: "FETCH_QDN_RESOURCE",
+          name: from === "ProductManager" ? username : order?.sellerName,
+          service: "DOCUMENT_PRIVATE",
+          identifier: query,
+          encoding: "base64"
+        });
+        const base64 = orderRawData;
+        let orderUserName = await qortalRequest({
+          action: "GET_NAME_DATA",
+          name: order?.user
+        });
+        const address = orderUserName.owner;
+        const resAddress = await qortalRequest({
+          action: "GET_ACCOUNT_DATA",
+          address: address
+        });
+        if (!resAddress?.publicKey) throw new Error("Cannot find order owner");
+        const recipientPublicKey = resAddress.publicKey;
+        // Decrypt the raw data since it was encrypted when the status was changed
+        let requestEncryptBody: any = {
+          action: "DECRYPT_DATA",
+          encryptedData: base64,
+          publicKey: recipientPublicKey
+        };
+        const resDecrypt = await qortalRequest(requestEncryptBody);
+
+        if (!resDecrypt) return;
+        const decryptToUnit8Array = base64ToUint8Array(resDecrypt);
+        const orderStatus = uint8ArrayToObject(decryptToUnit8Array);
+        setNote(orderStatus?.note || "");
+        setSelectedStatus(orderStatus?.status || "");
+        dispatch(
+          addToHashMap({
+            ...order,
+            status: orderStatus?.status,
+            note: orderStatus?.note
+          })
+        );
+        return;
+      }
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setStatusLoader(false);
+    }
+  };
+
+  // Check to see if product status has been updated when opening <ShowOrder /> from either ProductManager.tsx or from MyOrders.tsx
+  useEffect(() => {
+    if (isOpen && order?.id) {
+      verifyIfOrderStatusUpdated();
+    }
+  }, [isOpen, order?.id]);
 
   return (
     <Box
@@ -154,7 +237,7 @@ export const ShowOrder: FC<ShowOrderProps> = ({
         open={isOpen}
         customStyles={{
           width: "100%",
-          maxWidth: 700,
+          maxWidth: 800,
           height: "90%",
           wordBreak: "break-word",
           borderRadius: 8,
@@ -177,7 +260,11 @@ export const ShowOrder: FC<ShowOrderProps> = ({
           </ShowOrderImages>
           <ShowOrderCol>
             <ShowOrderTitle
-              href={`qortal://APP/Q-Mail/to/${order?.delivery?.customerName}`}
+              href={`qortal://APP/Q-Mail/to/${
+                from === "ProductManager"
+                  ? order?.delivery?.customerName
+                  : order?.sellerName
+              }`}
               className="qortal-link"
             >
               <EmailIcon
@@ -185,7 +272,9 @@ export const ShowOrder: FC<ShowOrderProps> = ({
                   color: "#50e3c2"
                 }}
               />
-              Message {order?.delivery?.customerName} on Q-Mail
+              {from === "ProductManager"
+                ? `Message ${order?.delivery?.customerName} on Q-Mail`
+                : `Message ${order?.sellerName} on Q-Mail`}
             </ShowOrderTitle>
             <ShowOrderDateCreated>
               {moment(order?.created).format("llll")}
@@ -193,54 +282,61 @@ export const ShowOrder: FC<ShowOrderProps> = ({
           </ShowOrderCol>
         </ShowOrderHeader>
         <ShowOrderContent>
-          {from === "ProductManager" ? (
-            <SellerOrderStatusRow>
-              <ShowOrderTitle>Order Status</ShowOrderTitle>
-              <CustomSelect
-                name="status"
-                value={selectedStatus}
-                onChange={(event) => {
-                  setSelectedStatus(event.target.value as string);
-                }}
-                variant="outlined"
-                required
-              >
-                <MenuItem value="Received">Received</MenuItem>
-                <MenuItem value="Shipped">Shipped</MenuItem>
-                <MenuItem value="Refunded">Refunded</MenuItem>
-              </CustomSelect>
-              <CustomTextField
-                name="note"
-                label="Note"
-                value={note}
-                variant="outlined"
-                onChange={(e) => setNote(e.target.value)}
-                size="small"
-                fullWidth
-              />
-              <UpdateStatusButton onClick={updateStatus} variant="contained">
-                Update Status
-              </UpdateStatusButton>
-            </SellerOrderStatusRow>
-          ) : (
-            <OrderStatusRow>
-              <OrderStatusCard
-                style={{
-                  backgroundColor:
-                    order?.status === "Received"
-                      ? "#e5e916"
-                      : order?.status === "Shipped"
-                      ? "#29b100"
-                      : order?.status === " Refunded"
-                      ? "#f33c3c"
-                      : "#e5e916"
-                }}
-              >
-                Order Status: {order?.status}
-              </OrderStatusCard>
-              {order?.note && <OrderStatusNote>{order?.note}</OrderStatusNote>}
-            </OrderStatusRow>
-          )}
+          <>
+            {statusLoader ? (
+              <CircularProgress />
+            ) : from === "ProductManager" ? (
+              <SellerOrderStatusRow>
+                <ShowOrderTitle>Order Status</ShowOrderTitle>
+                <CustomSelect
+                  name="status"
+                  value={selectedStatus}
+                  onChange={(event) => {
+                    setSelectedStatus(event.target.value as string);
+                  }}
+                  variant="filled"
+                  required
+                >
+                  <MenuItem value="Received">Received</MenuItem>
+                  <MenuItem value="Shipped">Shipped</MenuItem>
+                  <MenuItem value="Refunded">Refunded</MenuItem>
+                </CustomSelect>
+                <CustomInputField
+                  style={{ minWidth: "300px" }}
+                  name="note"
+                  label="Note"
+                  value={note}
+                  variant="filled"
+                  onChange={(e) => setNote(e.target.value)}
+                  size="small"
+                  fullWidth
+                />
+                <UpdateStatusButton onClick={updateStatus} variant="contained">
+                  Update Status
+                </UpdateStatusButton>
+              </SellerOrderStatusRow>
+            ) : (
+              <OrderStatusRow>
+                <OrderStatusCard
+                  style={{
+                    backgroundColor:
+                      hashMapOrders[order?.id]?.status === "Received"
+                        ? "#e5e916"
+                        : hashMapOrders[order?.id]?.status === "Shipped"
+                        ? "#29b100"
+                        : hashMapOrders[order?.id]?.status === " Refunded"
+                        ? "#f33c3c"
+                        : "#e5e916"
+                  }}
+                >
+                  Order Status: {hashMapOrders[order?.id]?.status}
+                </OrderStatusCard>
+                <OrderStatusNote>
+                  {hashMapOrders[order?.id]?.note}
+                </OrderStatusNote>
+              </OrderStatusRow>
+            )}
+          </>
           <>
             {order?.details && (
               <>
@@ -326,7 +422,10 @@ export const ShowOrder: FC<ShowOrderProps> = ({
                       {Object.keys(paymentInfo || {}).map((key) => {
                         return (
                           <>
-                            <span>{key}:</span> <span>{paymentInfo[key]}</span>
+                            <span>{key}:</span>{" "}
+                            <span style={{ fontWeight: 300 }}>
+                              {paymentInfo[key]}
+                            </span>
                           </>
                         );
                       })}
@@ -344,6 +443,12 @@ export const ShowOrder: FC<ShowOrderProps> = ({
           </>
           <DeliveryInfoCard>
             <ShowOrderTitle>Delivery Information</ShowOrderTitle>
+            <OrderTitle>
+              <span>Shop Name:</span> {order?.storeName}
+            </OrderTitle>
+            <OrderTitle>
+              <span>Seller Name:</span> {order?.sellerName}
+            </OrderTitle>
             <OrderTitle>
               <span>Customer name:</span> {order?.delivery?.customerName}
             </OrderTitle>

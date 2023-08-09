@@ -275,7 +275,6 @@ export const Store = () => {
         }
       });
       const responseData = await response.json();
-      console.log(responseData, "responseDataInStore here");
       if (responseData.length === 0) {
         setAverageStoreRating(null);
         return;
@@ -354,7 +353,7 @@ export const Store = () => {
             catalogueId: product?.catalogueId || ""
           };
         } else {
-          return products;
+          return product;
         }
       })
       .filter((product: any) => {

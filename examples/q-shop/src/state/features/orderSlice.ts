@@ -31,7 +31,8 @@ interface Delivery {
   shippingAddress: {
     streetAddress: string
     city: string
-    region: string
+    region?: string
+    state?: string
     country: string
     zipCode: string
   }
@@ -54,6 +55,8 @@ export interface Order {
   payment?: Payment
   communicationMethod?: CommunicationMethod[]
   user: string
+  sellerName?: string
+  storeName?: string
   id: string
   totalPrice?: number
   status?: string

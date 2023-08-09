@@ -37,6 +37,8 @@ const MyModal: React.FC<MyModalProps> = ({ open, onClose, onPublish }) => {
     (state: RootState) => state.global.currentStore
   );
 
+  const storeId = useSelector((state: RootState) => state.store.storeId);
+
   const [title, setTitle] = useState<string>("");
   const [description, setDescription] = useState<string>("");
   const [location, setLocation] = useState<string>("");
@@ -67,14 +69,14 @@ const MyModal: React.FC<MyModalProps> = ({ open, onClose, onPublish }) => {
   };
 
   useEffect(() => {
-    if (currentStore) {
+    if (currentStore && storeId === currentStore.id) {
       setTitle(currentStore?.title || "");
       setDescription(currentStore?.description || "");
       setLogo(currentStore?.logo || null);
       setLocation(currentStore?.location || "");
       setShipsTo(currentStore?.shipsTo || "");
     }
-  }, [currentStore]);
+  }, [currentStore, storeId]);
 
   const handleClose = (): void => {
     setTitle("");
@@ -84,7 +86,6 @@ const MyModal: React.FC<MyModalProps> = ({ open, onClose, onPublish }) => {
     onClose();
   };
 
-  console.log({ currentStore });
   return (
     <Modal
       open={open}

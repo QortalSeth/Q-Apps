@@ -451,7 +451,7 @@ export const ProductManager = () => {
   }, [dataContainerProducts]);
 
   useEffect(() => {
-    if (!dataContainer) {
+    if (!dataContainer && userName) {
       navigate(`/${userName}/${store}`);
     } else {
       return;
@@ -609,6 +609,7 @@ export const ProductManager = () => {
             setIsOpen(true);
           }}
           data={orders}
+          from="ProductManager"
         ></OrderTable>
         <LazyLoad onLoadMore={handleGetOrders}></LazyLoad>
       </TabPanel>

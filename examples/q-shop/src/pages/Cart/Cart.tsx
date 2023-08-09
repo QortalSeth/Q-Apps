@@ -45,7 +45,6 @@ import {
   TotalSumItemTitle,
   TotalSumItems
 } from "./Cart-styles";
-import { TimesIcon } from "../ProductManager/ProductManager-styles";
 import {
   BackToStorefrontButton as BackToCheckoutButton,
   BackToStorefrontButton as CheckoutButton
@@ -66,6 +65,7 @@ import countries from "../../constants/countries.json";
 import states from "../../constants/states.json";
 import moment from "moment";
 import { BackArrowSVG } from "../../assets/svgs/BackArrowSVG";
+import { CloseIconModal } from "../Store/StoreReviews/StoreReviews-styles";
 interface CountryProps {
   text: string;
   value: string;
@@ -92,6 +92,9 @@ export const Cart = () => {
   // Redux state to get the storeId
   const storeOwner = useSelector((state: RootState) => state.store.storeOwner);
   const storeId = useSelector((state: RootState) => state.store.storeId);
+  const hashMapStores = useSelector(
+    (state: RootState) => state.store.hashMapStores
+  );
   // Redux state to get the catalogue hashmap
   const catalogueHashMap = useSelector(
     (state: RootState) => state.global.catalogueHashMap
@@ -154,7 +157,16 @@ export const Cart = () => {
       dispatch(
         setNotification({
           alertType: "error",
-          msg: "Cannot find cart"
+          msg: "Cannot find a cart! Please try refreshing the page and trying again!"
+        })
+      );
+      return;
+    }
+    if (!storeId) {
+      dispatch(
+        setNotification({
+          alertType: "error",
+          msg: "Cannot find a store! Please try refreshing the page and trying again!"
         })
       );
       return;
@@ -263,10 +275,13 @@ export const Cart = () => {
 
     try {
       dispatch(setIsLoadingGlobal(true));
-      const orderObject: any = {
+      // Validate whether order is coming from the USA to put state instead of region
+      const orderObjectNotUSA: any = {
         created: Date.now(),
         version: 1,
         details,
+        storeName: hashMapStores[storeId]?.title,
+        sellerName: storeOwner,
         delivery: {
           customerName,
           shippingAddress: {
@@ -285,7 +300,33 @@ export const Cart = () => {
         },
         communicationMethod: ["Q-Mail"]
       };
-      const orderToBase64 = await objectToBase64(orderObject);
+      const orderObjectUSA: any = {
+        created: Date.now(),
+        version: 1,
+        details,
+        storeName: hashMapStores[storeId]?.title,
+        sellerName: storeOwner,
+        delivery: {
+          customerName,
+          shippingAddress: {
+            streetAddress,
+            city,
+            state,
+            country,
+            zipCode,
+            deliveryNote
+          }
+        },
+        payment: {
+          total: priceToPay,
+          currency: "QORT",
+          transactionSignature: signature
+        },
+        communicationMethod: ["Q-Mail"]
+      };
+      const orderToBase64 = await objectToBase64(
+        country === "United States" ? orderObjectUSA : orderObjectNotUSA
+      );
       const orderId = uid();
       if (!storeId) throw new Error("Cannot find store identifier");
       const parts = storeId.split("q-store-general-");
@@ -317,15 +358,25 @@ export const Cart = () => {
                 details[key];
               return `
                 <div style="display: flex; flex-direction: column; align-items: center; padding: 20px 40px; gap: 10px; background-color: white; border-radius: 5px; color: black;">
+                <div style="font-family: Karla; font-size: 21px; font-weight: 300; letter-spacing: 0; text-align: center;">Shop: ${
+                  hashMapStores[storeId]?.title
+                }</div>
                   <div style="display: flex; flex-direction: row; align-items: center; gap: 10px;">
-                    <div style="font-family: Karla; font-size: 21px; font-weight: 300; letter-spacing: 0; text-align: center;">Product: ${product.title}</div>
+                    <div style="font-family: Karla; font-size: 21px; font-weight: 300; letter-spacing: 0; text-align: center;">Product: ${
+                      product.title
+                    }</div>
                     <div style="font-family: Karla; font-size: 21px; font-weight: 300; letter-spacing: 0; text-align: center;">x ${quantity}</div>
                   </div>
                   <div style="display: flex; flex-direction: row; align-items: center;">
                     <div style="font-family: Karla; font-size: 21px; font-weight: 300; letter-spacing: 0; text-align: center;">Price: ${pricePerUnit}</div>
                   </div>
                   <div style="display: flex; flex-direction: row; align-items: center;">
-                    <div style="font-family: Karla; font-size: 21px; font-weight: 300; letter-spacing: 0; text-align: center;">Total Price: ${totalProductPrice} ${orderObject?.payment?.currency}</div>
+                    <div style="font-family: Karla; font-size: 21px; font-weight: 300; letter-spacing: 0; text-align: center;">Total Price: ${totalProductPrice} ${
+                country === "United States"
+                  ? orderObjectUSA?.payment?.currency
+                  : orderObjectNotUSA?.payment?.currency
+              }
+              </div>
                   </div>
                 </div>
               `;
@@ -375,7 +426,11 @@ export const Cart = () => {
           </div>
           <div style="display: flex; flex-direction: column; align-items: center; padding: 20px 40px; gap: 10px; background-color: white; border-radius: 5px; color: black;">
             <div style="font-family: Karla; font-size: 18px; font-weight: 300; letter-spacing: 0; text-align: center;">
-              Date: ${moment(orderObject?.created).format("llll")}
+              Date: ${moment(
+                country === "United States"
+                  ? orderObjectUSA?.created
+                  : orderObjectNotUSA?.created
+              ).format("llll")}
             </div>
           </div>
         </div>
@@ -489,7 +544,7 @@ export const Cart = () => {
         height: "96%",
         backgroundColor: theme.palette.mode === "light" ? "#e8e8e8" : "#32333c",
         position: "relative",
-        padding: "50px 10px 35px 10px",
+        padding: "15px 10px 35px 10px",
         borderRadius: "3px",
         overflowY: "auto",
         maxHeight: "90vh"
@@ -687,7 +742,12 @@ export const Cart = () => {
                       <>
                         <ColumnTitle>My Cart</ColumnTitle>
                         <ProductContainer container key={productId}>
-                          <ProductInfoCol item xs={12} sm={4}>
+                          <ProductInfoCol
+                            item
+                            xs={12}
+                            sm={4}
+                            style={{ textAlign: "center" }}
+                          >
                             <ProductTitle>{product.title}</ProductTitle>
                             <ProductImage
                               src={product?.images?.[0] || ""}
@@ -700,11 +760,27 @@ export const Cart = () => {
                             </ProductDescription>
                             <ProductDetailsRow>
                               <ProductPriceFont>
-                                Price per unit: {priceInQort}
+                                Price per unit:
+                                <span>
+                                  <QortalSVG
+                                    color={theme.palette.text.primary}
+                                    height={"20"}
+                                    width={"20"}
+                                  />
+                                  {priceInQort}
+                                </span>
                               </ProductPriceFont>
                               {priceInQort && (
                                 <ProductPriceFont>
-                                  Total Price: {priceInQort * quantity}
+                                  Total Price:
+                                  <span>
+                                    <QortalSVG
+                                      color={theme.palette.text.primary}
+                                      height={"20"}
+                                      width={"20"}
+                                    />
+                                    {priceInQort * quantity}
+                                  </span>
                                 </ProductPriceFont>
                               )}
                               <IconsRow>
@@ -828,7 +904,7 @@ export const Cart = () => {
           </Grid>
         )}
       </CartContainer>
-      <TimesIcon
+      <CloseIconModal
         onClickFunc={closeModal}
         color={theme.palette.text.primary}
         height={"30"}

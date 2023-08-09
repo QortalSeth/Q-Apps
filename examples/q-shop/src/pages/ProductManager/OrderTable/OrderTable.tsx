@@ -23,37 +23,19 @@ interface ColumnData {
   width?: number;
   status?: string;
 }
-
-const columns: ColumnData[] = [
-  {
-    label: "Customer",
-    dataKey: "user"
-  },
-  {
-    label: "Status",
-    dataKey: "status",
-    width: 120
-  },
-  {
-    label: "Total",
-    dataKey: "totalPrice",
-    width: 120
-  },
-  {
-    label: "Created",
-    dataKey: "created",
-    numeric: true,
-    width: 300
-  }
-];
-
 interface SimpleTableProps {
   openOrder: (product: Order) => void;
   data: Order[];
   children?: React.ReactNode;
+  from: string;
 }
 
-export const OrderTable = ({ openOrder, data, children }: SimpleTableProps) => {
+export const OrderTable = ({
+  openOrder,
+  data,
+  from,
+  children
+}: SimpleTableProps) => {
   const dispatch = useDispatch();
 
   const hashMapOrders = useSelector(
@@ -61,6 +43,29 @@ export const OrderTable = ({ openOrder, data, children }: SimpleTableProps) => {
   );
 
   const { isLoadingGlobal } = useSelector((state: RootState) => state.global);
+
+  const columns: ColumnData[] = [
+    {
+      label: from === "ProductManager" ? "Customer Name" : "Shop Name",
+      dataKey: from === "ProductManager" ? "user" : "storeName"
+    },
+    {
+      label: "Status",
+      dataKey: "status",
+      width: 120
+    },
+    {
+      label: "Total",
+      dataKey: "totalPrice",
+      width: 120
+    },
+    {
+      label: "Created",
+      dataKey: "created",
+      numeric: true,
+      width: 300
+    }
+  ];
 
   const processedOrders = data.map((row, index) => {
     let rowData = row;
