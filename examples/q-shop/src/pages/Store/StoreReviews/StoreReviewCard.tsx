@@ -21,7 +21,6 @@ interface StoreReviewCardProps {
 
 export const StoreReviewCard: FC<StoreReviewCardProps> = ({ review }) => {
   const [showCompleteReview, setShowCompleteReview] = useState<boolean>(false);
-
   const [fullStoreTitle, setFullStoreTitle] = useState<string>("");
   const [fullStoreDescription, setFullStoreDescription] = useState<string>("");
 
@@ -52,6 +51,7 @@ export const StoreReviewCard: FC<StoreReviewCardProps> = ({ review }) => {
   useEffect(() => {
     Object.keys(hashMapStoreReviews).find((key) => {
       if (key === review.id) {
+        setShowCompleteReview(true);
         setFullStoreTitle(hashMapStoreReviews[key].title);
         setFullStoreDescription(hashMapStoreReviews[key].description);
       }

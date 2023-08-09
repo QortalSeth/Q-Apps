@@ -78,7 +78,10 @@ export const StyledStoreCard = styled(Grid)<StoreListProps>(
     borderRadius: "8px",
     paddingBottom: "20px",
     justifyContent: "space-between",
-    border: "1px solid #e2e2e20d",
+    border:
+      theme.palette.mode === "dark"
+        ? "1px solid #e2e2e20d"
+        : "1px solid #1b1a1a14",
     transition: "all 0.3s ease-in-out 0s",
     "&:hover": {
       cursor: "pointer",
@@ -221,7 +224,7 @@ export const MyStoresCard = styled(Box)(({ theme }) => ({
   padding: "6px 10px",
   fontFamily: "Raleway",
   fontSize: "15px",
-  color: "rgb(255, 255, 255)",
+  color: theme.palette.text.primary,
   userSelect: "none",
   gap: "8px"
 }));

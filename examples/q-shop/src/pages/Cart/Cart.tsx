@@ -46,7 +46,10 @@ import {
   TotalSumItems
 } from "./Cart-styles";
 import { TimesIcon } from "../ProductManager/ProductManager-styles";
-import { BackToStorefrontButton as CheckoutButton } from "../Store/Store/Store-styles";
+import {
+  BackToStorefrontButton as BackToCheckoutButton,
+  BackToStorefrontButton as CheckoutButton
+} from "../Store/Store/Store-styles";
 import {
   Catalogue,
   setIsLoadingGlobal
@@ -62,6 +65,7 @@ import {
 import countries from "../../constants/countries.json";
 import states from "../../constants/states.json";
 import moment from "moment";
+import { BackArrowSVG } from "../../assets/svgs/BackArrowSVG";
 interface CountryProps {
   text: string;
   value: string;
@@ -128,6 +132,7 @@ export const Cart = () => {
 
   const closeModal = () => {
     dispatch(setIsOpen(false));
+    setCheckoutPage(false);
   };
 
   const handleSelectCountry = (event: SelectChangeEvent<string | null>) => {
@@ -311,7 +316,7 @@ export const Cart = () => {
               const { product, quantity, pricePerUnit, totalProductPrice } =
                 details[key];
               return `
-                <div style="display: flex; flex-direction: column; align-items: center; padding: 20px 40px; gap: 10px; background-color: white; border-radius: 5px;">
+                <div style="display: flex; flex-direction: column; align-items: center; padding: 20px 40px; gap: 10px; background-color: white; border-radius: 5px; color: black;">
                   <div style="display: flex; flex-direction: row; align-items: center; gap: 10px;">
                     <div style="font-family: Karla; font-size: 21px; font-weight: 300; letter-spacing: 0; text-align: center;">Product: ${product.title}</div>
                     <div style="font-family: Karla; font-size: 21px; font-weight: 300; letter-spacing: 0; text-align: center;">x ${quantity}</div>
@@ -331,7 +336,7 @@ export const Cart = () => {
           <div style="font-family: Merriweather Sans, sans-serif; font-size: 20px; letter-spacing: 0; text-align: center;">
             Delivery Information
           </div>
-          <div style="display: flex; flex-direction: column; align-items: center; padding: 20px 40px; gap: 10px; background-color: white; border-radius: 5px;>
+          <div style="display: flex; flex-direction: column; align-items: center; padding: 20px 40px; gap: 10px; background-color: white; border-radius: 5px; color: black;">
             <div style="font-family: Karla; font-size: 21px; font-weight: 300; letter-spacing: 0; text-align: center;">
               Qortal Username: ${username}
             </div>
@@ -368,7 +373,7 @@ export const Cart = () => {
           <div style="font-family: Merriweather Sans, sans-serif; font-size: 20px; letter-spacing: 0; text-align: center;">
             Date of purchase
           </div>
-          <div style="display: flex; flex-direction: column; align-items: center; padding: 20px 40px; gap: 10px; background-color: white; border-radius: 5px;>
+          <div style="display: flex; flex-direction: column; align-items: center; padding: 20px 40px; gap: 10px; background-color: white; border-radius: 5px; color: black;">
             <div style="font-family: Karla; font-size: 18px; font-weight: 300; letter-spacing: 0; text-align: center;">
               Date: ${moment(orderObject?.created).format("llll")}
             </div>
@@ -484,14 +489,16 @@ export const Cart = () => {
         height: "96%",
         backgroundColor: theme.palette.mode === "light" ? "#e8e8e8" : "#32333c",
         position: "relative",
-        padding: 0,
-        borderRadius: "3px"
+        padding: "50px 10px 35px 10px",
+        borderRadius: "3px",
+        overflowY: "auto",
+        maxHeight: "90vh"
       }}
     >
       <CartContainer
         container
         direction={isMobile ? "column" : "row"}
-        spacing={2}
+        spacing={1}
       >
         <Grid item xs={12} sm={9} sx={{ width: "100%" }}>
           {!localCart || cartOrders.length === 0 ? (
@@ -502,6 +509,15 @@ export const Cart = () => {
             <>
               {checkoutPage ? (
                 <>
+                  <BackToCheckoutButton
+                    onClick={() => {
+                      setCheckoutPage(false);
+                    }}
+                    style={{ marginBottom: "5px" }}
+                  >
+                    <BackArrowSVG color={"white"} height={"22"} width={"22"} />{" "}
+                    Checkout
+                  </BackToCheckoutButton>
                   <ColumnTitle>Delivery Information</ColumnTitle>
                   <Grid container spacing={2}>
                     <ProductInfoCol item xs={12} sm={6}>

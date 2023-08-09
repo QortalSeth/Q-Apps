@@ -247,8 +247,7 @@ export const ProductCardCol = styled(Grid)(({ theme }) => ({
 export const StoreTitleCol = styled(Box)({
   display: "flex",
   alignItems: "center",
-  flexDirection: "column",
-  gap: "15px"
+  flexDirection: "column"
 });
 
 export const RatingContainer = styled(Box)(({ theme }) => ({
@@ -265,7 +264,7 @@ export const RatingContainer = styled(Box)(({ theme }) => ({
 }));
 
 export const ReusableModalStyled = styled(ReusableModal)(({ theme }) => ({
-  "& #store-details": {
+  "&#store-details": {
     "&::-webkit-scrollbar-track": {
       backgroundColor: "transparent"
     },

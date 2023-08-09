@@ -87,7 +87,7 @@ export const StoreLogo = styled("img")(({ theme }) => ({
   width: "90px",
   height: "90px",
   borderRadius: "3px",
-  objectFit: "cover"
+  objectFit: "contain"
 }));
 
 export const StoreTitle = styled(Box)(({ theme }) => ({

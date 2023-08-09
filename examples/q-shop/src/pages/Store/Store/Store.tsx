@@ -15,7 +15,11 @@ import {
   setIsLoadingGlobal,
   updateRecentlyVisitedStoreId
 } from "../../../state/features/globalSlice";
-import { Product, StoreReview } from "../../../state/features/storeSlice";
+import {
+  Product,
+  StoreReview,
+  clearReviews
+} from "../../../state/features/storeSlice";
 import LazyLoad from "../../../components/common/LazyLoad";
 import ContextMenuResource from "../../../components/common/ContextMenu/ContextMenuResource";
 import { setStoreId, setStoreOwner } from "../../../state/features/storeSlice";
@@ -49,7 +53,7 @@ import {
   RatingContainer,
   ReusableModalStyled
 } from "./Store-styles";
-import { toggleEditBlogModal } from "../../../state/features/globalSlice";
+import { toggleEditStoreModal } from "../../../state/features/globalSlice";
 import { CartIcon } from "../../../components/layout/Navbar/Navbar-styles";
 import { setIsOpen } from "../../../state/features/cartSlice";
 import { Cart as CartInterface } from "../../../state/features/cartSlice";
@@ -117,6 +121,8 @@ export const Store = () => {
   const [averageStoreRating, setAverageStoreRating] = useState<number | null>(
     null
   );
+  const [averageRatingLoader, setAverageRatingLoader] =
+    useState<boolean>(false);
 
   const getProducts = useCallback(async () => {
     if (!store) return;
@@ -256,6 +262,7 @@ export const Store = () => {
   const getStoreAverageReview = async () => {
     if (!storeId) return;
     try {
+      setAverageRatingLoader(true);
       const parts = storeId.split("q-store-general-");
       const shortStoreId = parts[1];
       const query = `q-store-review-${shortStoreId}`;
@@ -268,6 +275,11 @@ export const Store = () => {
         }
       });
       const responseData = await response.json();
+      console.log(responseData, "responseDataInStore here");
+      if (responseData.length === 0) {
+        setAverageStoreRating(null);
+        return;
+      }
       // Modify resource into data that is more easily used on the front end
       const storeRatingsArray = responseData.map((review: any) => {
         const splitIdentifier = review.identifier.split("-");
@@ -286,16 +298,26 @@ export const Store = () => {
       setAverageStoreRating(averageRating);
     } catch (error) {
       console.error(error);
+    } finally {
+      setAverageRatingLoader(false);
     }
   };
 
-  // Get Store and set it in local state
+  // Get Store && Store Reviews and set it in local state
   useEffect(() => {
     setProducts([]);
     setUserStore(null);
+    dispatch(clearReviews());
     getStore();
-    getStoreAverageReview();
   }, [username, store]);
+
+  // Get average store rating when storeId is available
+
+  useEffect(() => {
+    if (storeId) {
+      getStoreAverageReview();
+    }
+  }, [storeId]);
 
   // Set cart notifications when cart changes
   useEffect(() => {
@@ -536,20 +558,32 @@ export const Store = () => {
               >
                 {userStore?.title}
               </StoreTitle>
-              <RatingContainer
-                onClick={() => {
-                  setOpenStoreReviews(true);
-                }}
-              >
-                <Rating precision={0.5} value={averageStoreRating} readOnly />
-              </RatingContainer>
+              {averageRatingLoader ? (
+                <CircularProgress />
+              ) : (
+                <RatingContainer
+                  onClick={() => {
+                    setOpenStoreReviews(true);
+                  }}
+                >
+                  {!averageStoreRating ? (
+                    "No reviews yet"
+                  ) : (
+                    <Rating
+                      precision={0.5}
+                      value={averageStoreRating}
+                      readOnly
+                    />
+                  )}
+                </RatingContainer>
+              )}
             </StoreTitleCol>
           </StoreTitleCard>
           {username === user?.name ? (
             <StoreControlsRow>
               <EditStoreButton
                 onClick={() => {
-                  dispatch(toggleEditBlogModal(true));
+                  dispatch(toggleEditStoreModal(true));
                 }}
               >
                 Edit Shop
