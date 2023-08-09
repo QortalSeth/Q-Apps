@@ -48,14 +48,6 @@ export const CustomSelect = styled(Select)(({ theme }) => ({
   }
 }));
 
-export const CustomTextField = styled(TextField)(({ theme }) => ({
-  fontFamily: "Karla",
-  fontSize: "18px",
-  fontWeight: 300,
-  letterSpacing: 0,
-  color: theme.palette.text.primary
-}));
-
 export const UpdateStatusButton = styled(Button)(({ theme }) => ({
   fontFamily: "Karla",
   fontSize: "16px",
@@ -121,7 +113,9 @@ export const OrderStatusRow = styled(Box)(({ theme }) => ({
   display: "flex",
   alignItems: "center",
   justifyContent: "space-between",
-  margin: "10px 0"
+  margin: "10px 0",
+  width: "100%",
+  padding: "0 10px"
 }));
 
 export const OrderStatusCard = styled(Box)(({ theme }) => ({

@@ -10,7 +10,6 @@ export const fetchAndEvaluateStoreReviews = async (data: any) => {
 
     if (!owner || !reviewId) return obj;
     // Fetch review rawdata from QDN based on resource's location (need name, service type and identifier)
-    console.log("passing here");
     try {
       const url = `/arbitrary/DOCUMENT/${owner}/${reviewId}`;
       const response = await fetch(url, {
