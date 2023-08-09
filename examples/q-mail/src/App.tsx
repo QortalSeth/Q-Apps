@@ -17,7 +17,7 @@ function App() {
 
   return (
     <Provider store={store}>
-      <ThemeProvider theme={themeColor === 'light' ? lightTheme : darkTheme}>
+      <ThemeProvider theme={darkTheme}>
         <Notification />
         <DownloadWrapper>
           <GlobalWrapper>

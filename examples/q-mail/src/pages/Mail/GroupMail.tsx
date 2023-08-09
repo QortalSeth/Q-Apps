@@ -43,6 +43,7 @@ import { delay } from '../../utils/helpers'
 import { setNotification } from '../../state/features/notificationsSlice'
 import { getNameInfo } from '../../utils/apiCalls'
 import BackupIcon from '@mui/icons-material/Backup'
+import { FlexLayout } from './FlexLayout'
 interface AliasMailProps {
   groupInfo: any
 }
@@ -347,17 +348,21 @@ export const GroupMail = ({ groupInfo }: AliasMailProps) => {
     }
   }
 
+  if (currentThread)
+    return (
+      <FlexLayout
+        currentThread={currentThread}
+        groupInfo={groupInfo}
+        closeThread={closeThread}
+      />
+    )
+
   return (
     <div
       style={{
         position: 'relative'
       }}
     >
-      <Thread
-        currentThread={currentThread}
-        groupInfo={groupInfo}
-        closeThread={closeThread}
-      />
       <NewThread groupInfo={groupInfo} refreshLatestThreads={getMessages} />
 
       <div>
