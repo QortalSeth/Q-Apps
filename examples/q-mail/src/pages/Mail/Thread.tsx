@@ -223,8 +223,10 @@ export const Thread = ({
       style={{
         backgroundColor: theme.palette.background.paper,
         width: '100%',
-        minHeight: '100%'
+        minHeight: '100%',
+        overflow: 'auto'
       }}
+      className="threadScroller"
     >
       <Box
         sx={{
