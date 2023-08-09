@@ -221,14 +221,9 @@ export const Thread = ({
   return (
     <div
       style={{
-        position: 'fixed',
-        bottom: '0px',
-        top: '0px',
-        left: '0px',
-        right: '0px',
-        overflowY: 'auto',
         backgroundColor: theme.palette.background.paper,
-        zIndex: 1100
+        width: '100%',
+        minHeight: '100%'
       }}
     >
       <Box
@@ -316,12 +311,20 @@ export const Thread = ({
         )
       })}
       {messages.length > 0 && (
-        <Button
-          variant="contained"
-          onClick={() => getMailMessages(currentThread)}
+        <Box
+          sx={{
+            display: 'flex',
+            justifyContent: 'center',
+            maxWidth: '100%'
+          }}
         >
-          Load older messages
-        </Button>
+          <Button
+            variant="contained"
+            onClick={() => getMailMessages(currentThread)}
+          >
+            Load older messages
+          </Button>
+        </Box>
       )}
     </div>
   )
