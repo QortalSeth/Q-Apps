@@ -59,7 +59,7 @@ export const ProductDetailsCol = styled(Grid)(({ theme }) => ({
   display: "grid",
   gridTemplateRows: "1fr auto",
   height: "100%",
-  rowGap: "5px"
+  rowGap: "8px"
 }));
 
 export const ProductTitle = styled(Typography)(({ theme }) => ({
@@ -73,8 +73,8 @@ export const ProductTitle = styled(Typography)(({ theme }) => ({
   width: "100%"
 }));
 
-export const ProductDescription = styled(Typography)(({ theme }) => ({
-  alignSelf: "center",
+export const ProductDescription = styled(Box)(({ theme }) => ({
+  display: "flex",
   margin: "0px",
   fontWeight: 300,
   lineHeight: 1.5,
@@ -177,16 +177,18 @@ export const ProductPriceFont = styled(Typography)(({ theme }) => ({
 }));
 
 export const TotalSumContainer = styled(Grid)(({ theme }) => ({
-  border: `1px solid ${theme.palette.background.paper}`,
-  borderRadius: "3px",
-  padding: "15px",
   display: "flex",
   flexDirection: "column",
   alignItems: "center",
+  justifyContent: "space-evenly",
+  border: `1px solid ${theme.palette.background.paper}`,
+  borderRadius: "3px",
+  padding: "15px",
   backgroundColor: theme.palette.background.default,
   height: "100%",
   flexGrow: 1,
-  marginTop: "35px"
+  marginTop: "35px",
+  marginRight: "10px"
 }));
 
 export const TotalSumHeader = styled(Box)(({ theme }) => ({

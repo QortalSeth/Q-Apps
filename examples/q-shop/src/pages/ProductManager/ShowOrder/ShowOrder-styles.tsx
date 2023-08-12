@@ -45,6 +45,9 @@ export const CustomSelect = styled(Select)(({ theme }) => ({
   letterSpacing: 0,
   "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
     borderColor: theme.palette.secondary.main
+  },
+  "&.MuiInputBase-input": {
+    padding: "15px 12px 8px"
   }
 }));
 

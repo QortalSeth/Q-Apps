@@ -167,7 +167,7 @@ export const StoreReviewsContainer = styled(Box)(({ theme }) => ({
 export const CloseIconModal = styled(TimesSVG)(({ theme }) => ({
   position: "absolute",
   top: "15px",
-  right: "10px",
+  right: "5px",
   transition: "all 0.2s ease-in-out",
   "&:hover": {
     cursor: "pointer",

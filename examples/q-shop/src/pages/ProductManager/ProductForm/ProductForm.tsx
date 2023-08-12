@@ -26,6 +26,7 @@ import {
   MaximumImagesRow
 } from "../NewProduct/NewProduct-styles";
 import { setNotification } from "../../../state/features/notificationsSlice";
+import { addProductsToSaveCategory } from "../../../state/features/globalSlice";
 interface ProductFormProps {
   onSubmit: (product: PublishProductParams) => void;
   onClose?: () => void;
@@ -49,6 +50,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
   const categories = useSelector(
     (state: RootState) => state.global.listProducts.categories
   );
+  const productsToSaveCategories = useSelector((state: RootState) => state.global.productsToSaveCategories);
 
   const [product, setProduct] = useState<ProductObj>({
     title: "",
@@ -62,18 +64,10 @@ export const ProductForm: React.FC<ProductFormProps> = ({
   const [selectedStatus, setSelectedStatus] = useState<string>("AVAILABLE");
   const [newCategory, setNewCategory] = useState<string>("");
   const [selectedCategory, setSelectedCategory] = useState<string | null>("");
+  
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.name === "price") {
       const price = parseInt(event.target.value);
-      if (isNaN(price)) {
-        dispatch(
-          setNotification({
-            alertType: "error",
-            msg: "Price must be a number!"
-          })
-        );
-        return;
-      }
       setProduct({ ...product, [event.target.name]: price });
       return;
     }
@@ -94,7 +88,24 @@ export const ProductForm: React.FC<ProductFormProps> = ({
   };
 
   const handleSubmit = () => {
-    if (!selectedType || !selectedCategory) return;
+    if (!selectedType || !selectedCategory) {
+      dispatch(
+        setNotification({
+          msg: "Please select type and category",
+          alertType: "error"
+        })
+      );
+      return;
+    };
+    if (isNaN(product.price)) {
+      dispatch(
+        setNotification({
+          msg: "Product price must be a number",
+          alertType: "error"
+        })
+      );
+      return;
+    }
     onSubmit({
       title: product.title,
       description: product.description,
@@ -117,13 +128,16 @@ export const ProductForm: React.FC<ProductFormProps> = ({
     setSelectedCategory(newCategory);
     setCategoryList((prev) => [...prev, newCategory]);
     setNewCategory("");
+    dispatch(addProductsToSaveCategory(newCategory))
   };
 
   useEffect(() => {
-    if (categories) {
-      setCategoryList(categories);
+    if (categories || productsToSaveCategories) {
+      const existingCategories = [...categories, ...productsToSaveCategories];
+      console.log({existingCategories});
+      setCategoryList(existingCategories);
     }
-  }, [categories]);
+  }, [categories, productsToSaveCategories]);
 
   useEffect(() => {
     if (editProduct) {

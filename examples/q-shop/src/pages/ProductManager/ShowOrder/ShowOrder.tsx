@@ -1,6 +1,6 @@
 import { FC, useEffect, useState } from "react";
 import { ReusableModal } from "../../../components/modals/ReusableModal";
-import { Box, CircularProgress, MenuItem, useTheme } from "@mui/material";
+import { Box, CircularProgress, useTheme } from "@mui/material";
 import EmailIcon from "@mui/icons-material/Email";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../../state/store";
@@ -51,6 +51,7 @@ import { QortalSVG } from "../../../assets/svgs/QortalSVG";
 import { ExpandMoreSVG } from "../../../assets/svgs/ExpandMoreSVG";
 import { setNotification } from "../../../state/features/notificationsSlice";
 import { CustomInputField } from "../../../components/modals/CreateStoreModal-styles";
+import { CustomMenuItem } from "../NewProduct/NewProduct-styles";
 
 interface ShowOrderProps {
   isOpen: boolean;
@@ -297,9 +298,9 @@ export const ShowOrder: FC<ShowOrderProps> = ({
                   variant="filled"
                   required
                 >
-                  <MenuItem value="Received">Received</MenuItem>
-                  <MenuItem value="Shipped">Shipped</MenuItem>
-                  <MenuItem value="Refunded">Refunded</MenuItem>
+                  <CustomMenuItem value="Received">Received</CustomMenuItem>
+                  <CustomMenuItem value="Shipped">Shipped</CustomMenuItem>
+                  <CustomMenuItem value="Refunded">Refunded</CustomMenuItem>
                 </CustomSelect>
                 <CustomInputField
                   style={{ minWidth: "300px" }}

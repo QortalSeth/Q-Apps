@@ -58,7 +58,9 @@ interface GlobalState {
   products: Product[];
   myOrders: Order[];
   recentlyVisitedStoreId: string;
+  productsToSaveCategories: string[];
 }
+
 const initialState: GlobalState = {
   isOpenCreateStoreModal: false,
   isLoadingCurrentBlog: true,
@@ -77,7 +79,8 @@ const initialState: GlobalState = {
   productsToSave: {},
   catalogueHashMap: {},
   myOrders: [],
-  recentlyVisitedStoreId: ""
+  recentlyVisitedStoreId: "",
+  productsToSaveCategories: []
 };
 
 export const globalSlice = createSlice({
@@ -187,6 +190,10 @@ export const globalSlice = createSlice({
     updateRecentlyVisitedStoreId: (state, action) => {
       state.recentlyVisitedStoreId = action.payload;
     },
+    addProductsToSaveCategory: (state, action) => {
+      const newCategory = action.payload;
+      state.productsToSaveCategories.push(newCategory);
+    },
     resetProducts: (state) => {
       state.products = [];
       state.productsToSave = {};
@@ -220,7 +227,8 @@ export const {
   resetProducts,
   clearAllProductsToSave,
   resetListProducts,
-  setProducts
+  setProducts,
+  addProductsToSaveCategory
 } = globalSlice.actions;
 
 export default globalSlice.reducer;

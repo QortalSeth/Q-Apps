@@ -1,5 +1,5 @@
 import { styled } from "@mui/system";
-import { Box, Typography, Button } from "@mui/material";
+import { Box, Typography, Button, Grid } from "@mui/material";
 import Tabs from "@mui/material/Tabs";
 import Tab from "@mui/material/Tab";
 import { TimesSVG } from "../../assets/svgs/TimesSVG";
@@ -45,6 +45,7 @@ export const ProductsToSaveCard = styled(Box)(({ theme }) => ({
   flexDirection: "column",
   width: "85vw",
   height: "auto",
+  minHeight: "500px",
   borderRadius: "8px",
   backgroundColor: theme.palette.mode === "light" ? "#e8e8e8" : "#32333c",
   position: "absolute",
@@ -75,14 +76,34 @@ export const ProductToSaveCard = styled(Box)(({ theme }) => ({
   flexGrow: 1
 }));
 
-export const ProductsCol = styled(Box)(({ theme }) => ({
+export const ProductsCol = styled(Grid)(({ theme }) => ({
   display: "flex",
-  flexDirection: "column",
-  maxHeight: "400px",
-  minHeight: "400px",
   flexWrap: "wrap",
   gap: "10px",
-  width: "fit-content"
+  width: "100%",
+  overflowY: "auto",
+  flexDirection: "row",
+  padding: "0 10px 10px 10px",
+  "&::-webkit-scrollbar-track": {
+    backgroundColor: theme.palette.background.paper
+  },
+  "&::-webkit-scrollbar-track:hover": {
+    backgroundColor: theme.palette.background.paper
+  },
+  "&::-webkit-scrollbar": {
+    width: "8px",
+    height: "5px",
+    backgroundColor: theme.palette.mode === "light" ? "#f6f8fa" : "#292d3e"
+  },
+  "&::-webkit-scrollbar-thumb": {
+    backgroundColor: theme.palette.mode === "light" ? "#d3d9e1" : "#575757",
+    borderRadius: "8px",
+    backgroundClip: "content-box",
+    border: "4px solid transparent"
+  },
+  "&::-webkit-scrollbar-thumb:hover": {
+    backgroundColor: theme.palette.mode === "light" ? "#b7bcc4" : "#474646"
+  }
 }));
 
 export const ProductToSaveImageRow = styled(Box)(({ theme }) => ({

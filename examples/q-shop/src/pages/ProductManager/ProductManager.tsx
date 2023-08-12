@@ -2,7 +2,7 @@ import React, { useMemo, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../state/store";
-import { Box, useTheme } from "@mui/material";
+import { Box, Grid, useTheme } from "@mui/material";
 import LazyLoad from "../../components/common/LazyLoad";
 import { NewProduct } from "./NewProduct/NewProduct";
 import { ShowOrder } from "./ShowOrder/ShowOrder";
@@ -194,7 +194,12 @@ export const ProductManager = () => {
             Object.keys(lastCatalogueInList?.products)?.length < 10
           ) {
             const copyLastCatalogue = { ...lastCatalogueInList };
-            copyLastCatalogue.products[key] = product;
+            console.log({ copyLastCatalogue });
+            // Add catalogueId to the product here (!important)
+            copyLastCatalogue.products[key] = {
+              ...product,
+              catalogueId: copyLastCatalogue.id
+            };
             dataContainerToPublish.products[key] = {
               created: product.created,
               priceQort: priceInQort,
@@ -228,10 +233,11 @@ export const ProductManager = () => {
             // Create new catalogue
             const uidGenerator = uid();
             const catalogueId = `q-store-catalogue-${shortStoreId}-${uidGenerator}`;
+            // Add catalogueId to the product here (!important)
             listOfCataloguesToPublish.push({
               id: catalogueId,
               products: {
-                [key]: product
+                [key]: { ...product, catalogueId: catalogueId }
               }
             });
             try {
@@ -281,7 +287,8 @@ export const ProductManager = () => {
         )?.value;
         if (!priceInQort)
           throw new Error("Cannot find price for one of your products");
-
+        if (priceInQort <= 0)
+          throw new Error("Price cannot be less than or equal to 0");
         dataContainerToPublish.products[product.id] = {
           created: product.created,
           priceQort: priceInQort,
@@ -316,6 +323,7 @@ export const ProductManager = () => {
 
       if (!currentStore) return;
       let publishMultipleCatalogues = [];
+      console.log({ listOfCataloguesToPublish });
       // Loop through listOfCataloguesToPublish and publish the base64 converted object to QDN
       for (const catalogue of listOfCataloguesToPublish) {
         const catalogueToBase64 = await objectToBase64(catalogue);
@@ -513,40 +521,52 @@ export const ProductManager = () => {
           open={Object.keys(productsToSave).length > 0}
         >
           <ProductsToSaveCard>
-            <ProductsCol>
+            <ProductsCol container spacing={1}>
               {Object.keys(productsToSave).map((key: string) => {
                 const product = productsToSave[key];
                 const { id } = product;
                 return (
-                  <ProductToSaveCard>
-                    <CardHeader>{product?.title}</CardHeader>
-                    <Bulletpoints>
-                      <QortalSVG color={"#000000"} height={"22"} width={"22"} />{" "}
-                      Price: {product?.price && product?.price[0].value} QORT
-                    </Bulletpoints>
-                    <Bulletpoints>
-                      <LoyaltySVG
+                  <Grid
+                    style={{ maxWidth: "100%", flexGrow: 1 }}
+                    item
+                    xs={12}
+                    sm={3}
+                    key={product?.id}
+                  >
+                    <ProductToSaveCard>
+                      <CardHeader>{product?.title}</CardHeader>
+                      <Bulletpoints>
+                        <QortalSVG
+                          color={"#000000"}
+                          height={"22"}
+                          width={"22"}
+                        />{" "}
+                        Price: {product?.price && product?.price[0].value} QORT
+                      </Bulletpoints>
+                      <Bulletpoints>
+                        <LoyaltySVG
+                          color={"#000000"}
+                          height={"22"}
+                          width={"22"}
+                        />
+                        Type: {product?.type}
+                      </Bulletpoints>
+                      <Bulletpoints>
+                        <CategorySVG
+                          color={"#000000"}
+                          height={"22"}
+                          width={"22"}
+                        />
+                        Category: {product?.category}
+                      </Bulletpoints>
+                      <TimesIcon
+                        onClickFunc={() => handleRemoveConfirmation(id)}
                         color={"#000000"}
                         height={"22"}
                         width={"22"}
                       />
-                      Type: {product?.type}
-                    </Bulletpoints>
-                    <Bulletpoints>
-                      <CategorySVG
-                        color={"#000000"}
-                        height={"22"}
-                        width={"22"}
-                      />
-                      Category: {product?.category}
-                    </Bulletpoints>
-                    <TimesIcon
-                      onClickFunc={() => handleRemoveConfirmation(id)}
-                      color={"#000000"}
-                      height={"22"}
-                      width={"22"}
-                    />
-                  </ProductToSaveCard>
+                    </ProductToSaveCard>
+                  </Grid>
                 );
               })}
             </ProductsCol>

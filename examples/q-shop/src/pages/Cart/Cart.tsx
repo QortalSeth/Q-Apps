@@ -544,9 +544,10 @@ export const Cart = () => {
         height: "96%",
         backgroundColor: theme.palette.mode === "light" ? "#e8e8e8" : "#32333c",
         position: "relative",
-        padding: "15px 10px 35px 10px",
+        padding: "15px 20px 35px 10px",
         borderRadius: "3px",
         overflowY: "auto",
+        overflowX: "hidden",
         maxHeight: "90vh"
       }}
     >
@@ -719,6 +720,7 @@ export const Cart = () => {
                 </>
               ) : (
                 <>
+                  <ColumnTitle>My Cart</ColumnTitle>
                   {(cartOrders || []).map((key) => {
                     const order = localCart?.orders[key];
                     const quantity = order?.quantity;
@@ -739,55 +741,67 @@ export const Cart = () => {
                         (priceItem: any) => priceItem?.currency === "qort"
                       )?.value || null;
                     return (
-                      <>
-                        <ColumnTitle>My Cart</ColumnTitle>
-                        <ProductContainer container key={productId}>
-                          <ProductInfoCol
-                            item
-                            xs={12}
-                            sm={4}
-                            style={{ textAlign: "center" }}
-                          >
-                            <ProductTitle>{product.title}</ProductTitle>
-                            <ProductImage
-                              src={product?.images?.[0] || ""}
-                              alt={`product-img-${productId}}`}
-                            />
-                          </ProductInfoCol>
-                          <ProductDetailsCol item xs={12} sm={8}>
-                            <ProductDescription>
-                              {product.description}
-                            </ProductDescription>
-                            <ProductDetailsRow>
+                      <ProductContainer container key={productId}>
+                        <ProductInfoCol
+                          item
+                          xs={12}
+                          sm={4}
+                          style={{ textAlign: "center" }}
+                        >
+                          <ProductTitle>{product.title}</ProductTitle>
+                          <ProductImage
+                            src={product?.images?.[0] || ""}
+                            alt={`product-img-${productId}}`}
+                          />
+                        </ProductInfoCol>
+                        <ProductDetailsCol item xs={12} sm={8}>
+                          <ProductDescription>
+                            {product.description}
+                          </ProductDescription>
+                          <ProductDetailsRow>
+                            <ProductPriceFont>
+                              Price per unit:
+                              <span>
+                                <QortalSVG
+                                  color={theme.palette.text.primary}
+                                  height={"20"}
+                                  width={"20"}
+                                />
+                                {priceInQort}
+                              </span>
+                            </ProductPriceFont>
+                            {priceInQort && (
                               <ProductPriceFont>
-                                Price per unit:
+                                Total Price:
                                 <span>
                                   <QortalSVG
                                     color={theme.palette.text.primary}
                                     height={"20"}
                                     width={"20"}
                                   />
-                                  {priceInQort}
+                                  {priceInQort * quantity}
                                 </span>
                               </ProductPriceFont>
-                              {priceInQort && (
-                                <ProductPriceFont>
-                                  Total Price:
-                                  <span>
-                                    <QortalSVG
-                                      color={theme.palette.text.primary}
-                                      height={"20"}
-                                      width={"20"}
-                                    />
-                                    {priceInQort * quantity}
-                                  </span>
-                                </ProductPriceFont>
-                              )}
-                              <IconsRow>
-                                <GarbageIcon
+                            )}
+                            <IconsRow>
+                              <GarbageIcon
+                                onClickFunc={() => {
+                                  dispatch(
+                                    removeProductFromCart({
+                                      storeId,
+                                      productId
+                                    })
+                                  );
+                                }}
+                                color={theme.palette.text.primary}
+                                height={"30"}
+                                width={"30"}
+                              />
+                              <QuantityRow>
+                                <RemoveQuantityButton
                                   onClickFunc={() => {
                                     dispatch(
-                                      removeProductFromCart({
+                                      subtractQuantityFromCart({
                                         storeId,
                                         productId
                                       })
@@ -797,40 +811,25 @@ export const Cart = () => {
                                   height={"30"}
                                   width={"30"}
                                 />
-                                <QuantityRow>
-                                  <RemoveQuantityButton
-                                    onClickFunc={() => {
-                                      dispatch(
-                                        subtractQuantityFromCart({
-                                          storeId,
-                                          productId
-                                        })
-                                      );
-                                    }}
-                                    color={theme.palette.text.primary}
-                                    height={"30"}
-                                    width={"30"}
-                                  />
-                                  {quantity}
-                                  <AddQuantityButton
-                                    onClickFunc={() =>
-                                      dispatch(
-                                        addQuantityToCart({
-                                          storeId,
-                                          productId
-                                        })
-                                      )
-                                    }
-                                    color={theme.palette.text.primary}
-                                    height={"30"}
-                                    width={"30"}
-                                  />
-                                </QuantityRow>
-                              </IconsRow>
-                            </ProductDetailsRow>
-                          </ProductDetailsCol>
-                        </ProductContainer>
-                      </>
+                                {quantity}
+                                <AddQuantityButton
+                                  onClickFunc={() =>
+                                    dispatch(
+                                      addQuantityToCart({
+                                        storeId,
+                                        productId
+                                      })
+                                    )
+                                  }
+                                  color={theme.palette.text.primary}
+                                  height={"30"}
+                                  width={"30"}
+                                />
+                              </QuantityRow>
+                            </IconsRow>
+                          </ProductDetailsRow>
+                        </ProductDetailsCol>
+                      </ProductContainer>
                     );
                   })}
                 </>
@@ -907,8 +906,8 @@ export const Cart = () => {
       <CloseIconModal
         onClickFunc={closeModal}
         color={theme.palette.text.primary}
-        height={"30"}
-        width={"30"}
+        height={"22"}
+        width={"22"}
       />
     </ReusableModal>
   );
