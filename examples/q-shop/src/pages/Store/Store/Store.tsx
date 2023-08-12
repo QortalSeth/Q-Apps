@@ -687,7 +687,8 @@ export const Store = () => {
           padding: "25px 40px",
           borderRadius: "5px",
           outline: "none",
-          overflowY: "auto"
+          overflowY: "auto",
+          overflowX: "hidden"
         }}
         open={openStoreReviews}
       >

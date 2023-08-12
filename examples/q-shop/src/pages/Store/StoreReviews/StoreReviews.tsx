@@ -164,8 +164,8 @@ export const StoreReviews: FC<StoreReviewsProps> = ({
         <CloseIconModal
           onClickFunc={() => setOpenStoreReviews(false)}
           color={theme.palette.text.primary}
-          height={"24"}
-          width={"24"}
+          height={"26"}
+          width={"26"}
         />
       </HeaderRow>
       <Divider />

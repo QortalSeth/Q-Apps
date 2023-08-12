@@ -225,7 +225,7 @@ export const AddReview: FC<AddReviewProps> = ({
           />
           <CustomInputField
             name="title"
-            label="Store Review Title"
+            label="Shop Review Title"
             variant="filled"
             value={reviewTitle}
             onChange={(e) => setReviewTitle(e.target.value as string)}
@@ -238,7 +238,7 @@ export const AddReview: FC<AddReviewProps> = ({
             draggable={false}
             minRows={3}
             maxRows={10}
-            placeholder="Write a store review..."
+            placeholder="Write a shop review..."
             value={reviewDescription}
             onChange={(e) => setReviewDescription(e.target.value as string)}
             required
