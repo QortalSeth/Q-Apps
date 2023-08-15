@@ -2,6 +2,7 @@ import { styled } from "@mui/system";
 import { Typography, Button, Box, TextField } from "@mui/material";
 import AddPhotoAlternateIcon from "@mui/icons-material/AddPhotoAlternate";
 import { TimesSVG } from "../../assets/svgs/TimesSVG";
+import NumericTextField from "../common/NumericTextField";
 
 export const ModalBody = styled(Box)(({ theme }) => ({
   position: "absolute",
@@ -107,7 +108,8 @@ export const TimesIcon = styled(TimesSVG)(({ theme }) => ({
   }
 }));
 
-export const CustomInputField = styled(TextField)(({ theme }) => ({
+const customInputStyle = (theme) => {
+  return {
   fontFamily: "Karla",
   fontSize: "18px",
   fontWeight: 300,
@@ -145,7 +147,11 @@ export const CustomInputField = styled(TextField)(({ theme }) => ({
   "& .MuiFilledInput-root:after": {
     borderBottomColor: theme.palette.secondary.main
   }
-}));
+}
+}
+
+export const CustomInputField = styled(TextField)(({ theme }) => (customInputStyle(theme)));
+export const CustomNumberField = styled(NumericTextField)(({ theme }) => (customInputStyle(theme)));
 
 export const ButtonRow = styled(Box)(({ theme }) => ({
   display: "flex",

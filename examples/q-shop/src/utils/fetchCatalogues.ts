@@ -10,18 +10,16 @@ export const fetchAndEvaluateCatalogues = async (data: any) => {
     if (!user || !catalogueId) return obj
 
     try {
-      const url = `/arbitrary/DOCUMENT/${user}/${catalogueId}`
-      const response = await fetch(url, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json'
-        }
+      const catalogueHashMap = await qortalRequest( {
+        action: "FETCH_QDN_RESOURCE",
+        name: user,
+        service: "DOCUMENT",
+        identifier: catalogueId
       })
 
-      const responseData = await response.json()
-      if (!responseData.error) {
+      if (catalogueHashMap) {
         obj = {
-          ...responseData,
+          ...catalogueHashMap,
           user,
           id: catalogueId,
           isValid: true
