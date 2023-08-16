@@ -13,7 +13,7 @@ export interface ProductDataContainer {
 }
 
 export interface CurrentStore {
-  createdAt: number;
+  created: number;
   id: string;
   title: string;
   description: string;

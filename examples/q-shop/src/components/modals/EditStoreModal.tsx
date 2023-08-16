@@ -69,19 +69,23 @@ const MyModal: React.FC<MyModalProps> = ({ open, onClose, onPublish }) => {
   };
 
   useEffect(() => {
-    if (currentStore && storeId === currentStore.id) {
+    if (open && currentStore && storeId === currentStore.id) {
       setTitle(currentStore?.title || "");
       setDescription(currentStore?.description || "");
       setLogo(currentStore?.logo || null);
       setLocation(currentStore?.location || "");
       setShipsTo(currentStore?.shipsTo || "");
     }
-  }, [currentStore, storeId]);
+  }, [currentStore, storeId, open]);
 
   const handleClose = (): void => {
     setTitle("");
     setDescription("");
     setErrorMessage("");
+    setDescription("");
+    setLogo(null);
+    setLocation("");
+    setShipsTo("");
     dispatch(toggleCreateStoreModal(false));
     onClose();
   };

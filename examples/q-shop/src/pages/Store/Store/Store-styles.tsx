@@ -11,6 +11,10 @@ import {
 } from "@mui/material";
 import { ReusableModal } from "../../../components/modals/ReusableModal";
 
+interface StoreProps {
+  fixedCartPosition: boolean;
+}
+
 export const FiltersCol = styled(Grid)(({ theme }) => ({
   display: "flex",
   flexDirection: "column",
@@ -209,27 +213,43 @@ export const NoProductsText = styled(Typography)(({ theme }) => ({
   userSelect: "none"
 }));
 
-export const CartIconContainer = styled(Box)(({ theme }) => ({
-  position: "relative"
-}));
+export const CartIconContainer = styled(Box)<StoreProps>(
+  ({ theme, fixedCartPosition }) => ({
+    position: fixedCartPosition ? "fixed" : "relative",
+    top: fixedCartPosition ? "90px" : 0,
+    right: fixedCartPosition ? "17px" : 0,
+    zIndex: fixedCartPosition ? "55" : 0,
+    padding: fixedCartPosition ? "20px" : 0,
+    backgroundColor: fixedCartPosition
+      ? `${theme.palette.background.paper}`
+      : "none",
+    borderRadius: fixedCartPosition ? "50%" : 0,
+    display: fixedCartPosition ? "flex" : "block",
+    alignItems: fixedCartPosition ? "center" : "center",
+    justifyContent: fixedCartPosition ? "center" : "center",
+    cursor: "pointer"
+  })
+);
 
-export const NotificationBadge = styled(Box)(({ theme }) => ({
-  position: "absolute",
-  top: "-7px",
-  right: "-7px",
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-  width: "22px",
-  height: "22px",
-  borderRadius: "50%",
-  backgroundColor: theme.palette.mode === "dark" ? "#bdba02" : "#e1dd04",
-  color: "#000000",
-  fontFamily: "Karla",
-  fontSize: "14px",
-  fontWeight: "bold",
-  userSelect: "none"
-}));
+export const NotificationBadge = styled(Box)<StoreProps>(
+  ({ theme, fixedCartPosition }) => ({
+    position: "absolute",
+    top: fixedCartPosition ? "6px" : "-7px",
+    right: fixedCartPosition ? "9px" : "-7px",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    width: "22px",
+    height: "22px",
+    borderRadius: "50%",
+    backgroundColor: theme.palette.mode === "dark" ? "#bdba02" : "#e1dd04",
+    color: "#000000",
+    fontFamily: "Karla",
+    fontSize: "14px",
+    fontWeight: "bold",
+    userSelect: "none"
+  })
+);
 
 export const ProductCardCol = styled(Grid)(({ theme }) => ({
   display: "flex",

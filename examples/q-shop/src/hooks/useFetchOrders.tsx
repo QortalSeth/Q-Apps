@@ -48,7 +48,6 @@ export const useFetchOrders = () => {
       orderId,
       content
     });
-    console.log(res, "getOrder response here");
     dispatch(addToHashMap(res));
   };
 

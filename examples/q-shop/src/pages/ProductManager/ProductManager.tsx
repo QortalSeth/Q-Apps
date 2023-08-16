@@ -194,7 +194,6 @@ export const ProductManager = () => {
             Object.keys(lastCatalogueInList?.products)?.length < 10
           ) {
             const copyLastCatalogue = { ...lastCatalogueInList };
-            console.log({ copyLastCatalogue });
             // Add catalogueId to the product here (!important)
             copyLastCatalogue.products[key] = {
               ...product,
@@ -249,7 +248,7 @@ export const ProductManager = () => {
                 status: AVAILABLE
               };
             } catch (error) {
-              console.log("my error", error);
+              console.error(error);
             }
 
             if (!dataContainerToPublish.catalogues)
@@ -323,7 +322,6 @@ export const ProductManager = () => {
 
       if (!currentStore) return;
       let publishMultipleCatalogues = [];
-      console.log({ listOfCataloguesToPublish });
       // Loop through listOfCataloguesToPublish and publish the base64 converted object to QDN
       for (const catalogue of listOfCataloguesToPublish) {
         const catalogueToBase64 = await objectToBase64(catalogue);
