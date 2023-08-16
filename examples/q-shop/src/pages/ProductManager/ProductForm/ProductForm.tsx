@@ -138,7 +138,6 @@ export const ProductForm: React.FC<ProductFormProps> = ({
   useEffect(() => {
     if (categories || productsToSaveCategories) {
       const existingCategories = [...categories, ...productsToSaveCategories];
-      console.log({existingCategories});
       setCategoryList(existingCategories);
     }
   }, [categories, productsToSaveCategories]);

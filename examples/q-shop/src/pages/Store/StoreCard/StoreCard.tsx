@@ -1,4 +1,4 @@
-import { FC, useEffect, useRef, useState } from "react";
+import { FC, useEffect, useState } from "react";
 import {
   ExpandDescriptionIcon,
   OpenStoreCard,
@@ -42,13 +42,9 @@ export const StoreCard: FC<StoreCardProps> = ({
   const [showCompleteStoreDescription, setShowCompleteStoreDescription] =
     useState<boolean>(false);
 
-  const expandIconRef = useRef(null);
-
   const handleStoreCardClick = (
     e: React.MouseEvent<HTMLDivElement, MouseEvent>
   ) => {
-    console.log(e.target);
-    console.log(document.getElementById(`expand-icon-${storeId}`));
     if ((e.target as HTMLElement)?.id === `expand-icon-${storeId}`) {
       return;
     }
@@ -99,7 +95,6 @@ export const StoreCard: FC<StoreCardProps> = ({
                 color={theme.palette.text.primary}
                 onClickFunc={(e: React.MouseEvent<any>) => {
                   e.stopPropagation();
-                  console.log("clicked");
                   setShowCompleteStoreDescription((prevState) => !prevState);
                 }}
                 showCompleteStoreDescription={

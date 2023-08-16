@@ -86,8 +86,6 @@ export const ShowOrder: FC<ShowOrderProps> = ({
     setIsOpen(false);
   };
 
-  console.log({ isOpen });
-
   const getPaymentInfo = async (signature: string) => {
     try {
       const url = `/transactions/signature/${signature}`;
@@ -154,7 +152,6 @@ export const ShowOrder: FC<ShowOrderProps> = ({
     const extractedOrderIdEnd = order?.id.slice(
       order?.id.indexOf("order-") + "order-".length
     );
-    console.log(extractedOrderIdEnd, "extractedOrderIdEnd");
     try {
       setStatusLoader(true);
       const query = `q-store-status-order-${extractedOrderIdEnd}`;
@@ -167,7 +164,6 @@ export const ShowOrder: FC<ShowOrderProps> = ({
         }
       });
       const responseData = await response.json();
-      console.log(responseData, "responseData for order status here");
       if (responseData.length === 0) return;
       // Get the raw data if the resource exists
       else {

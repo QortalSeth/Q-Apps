@@ -555,7 +555,9 @@ export const Store = () => {
                   setOpenStoreDetails(true);
                 }}
               >
-                {userStore?.title}
+                {username === user?.name
+                  ? currentStore?.title
+                  : userStore?.title}
               </StoreTitle>
               {averageRatingLoader ? (
                 <CircularProgress />
@@ -596,17 +598,23 @@ export const Store = () => {
               </ProductManagerButton>
             </StoreControlsRow>
           ) : user?.name ? (
-            <CartIconContainer>
+            <CartIconContainer
+              fixedCartPosition={totalCartQuantity > 0 ? true : false}
+              onClick={() => {
+                dispatch(setIsOpen(true));
+              }}
+            >
               <CartIcon
                 color={theme.palette.text.primary}
                 height={"32"}
                 width={"32"}
-                onClickFunc={() => {
-                  dispatch(setIsOpen(true));
-                }}
               />
               {totalCartQuantity > 0 && (
-                <NotificationBadge>{totalCartQuantity}</NotificationBadge>
+                <NotificationBadge
+                  fixedCartPosition={totalCartQuantity > 0 ? true : false}
+                >
+                  {totalCartQuantity}
+                </NotificationBadge>
               )}
             </CartIconContainer>
           ) : null}
@@ -668,11 +676,25 @@ export const Store = () => {
       >
         <StoreDetails
           setOpenStoreDetails={setOpenStoreDetails}
-          storeTitle={userStore?.title || ""}
-          storeImage={userStore?.logo || ""}
+          storeTitle={
+            username === user?.name
+              ? currentStore?.title
+              : userStore?.title || ""
+          }
+          storeImage={
+            username === user?.name ? currentStore?.logo : userStore?.logo || ""
+          }
           storeOwner={username || ""}
-          storeDescription={userStore?.description || ""}
-          dateCreated={userStore?.created || 0}
+          storeDescription={
+            username === user?.name
+              ? currentStore?.description
+              : userStore?.description || ""
+          }
+          dateCreated={
+            username === user?.name
+              ? currentStore?.created
+              : userStore?.created || 0
+          }
         />
       </ReusableModalStyled>
       <ReusableModalStyled

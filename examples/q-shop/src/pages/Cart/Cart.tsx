@@ -368,7 +368,11 @@ export const Cart = () => {
                     <div style="font-family: Karla; font-size: 21px; font-weight: 300; letter-spacing: 0; text-align: center;">x ${quantity}</div>
                   </div>
                   <div style="display: flex; flex-direction: row; align-items: center;">
-                    <div style="font-family: Karla; font-size: 21px; font-weight: 300; letter-spacing: 0; text-align: center;">Price: ${pricePerUnit}</div>
+                    <div style="font-family: Karla; font-size: 21px; font-weight: 300; letter-spacing: 0; text-align: center;">Price: ${pricePerUnit} ${
+                country === "United States"
+                  ? orderObjectUSA?.payment?.currency
+                  : orderObjectNotUSA?.payment?.currency
+              }</div>
                   </div>
                   <div style="display: flex; flex-direction: row; align-items: center;">
                     <div style="font-family: Karla; font-size: 21px; font-weight: 300; letter-spacing: 0; text-align: center;">Total Price: ${totalProductPrice} ${

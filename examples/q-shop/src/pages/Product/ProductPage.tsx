@@ -209,7 +209,7 @@ export const ProductPage = () => {
       </ProductDetailsContainer>
       {user?.name && user?.name !== storeOwner ? (
         <CartBox>
-          <CartIconContainer>
+          <CartIconContainer fixedCartPosition={false}>
             <CartIcon
               color={theme.palette.text.primary}
               height={"32"}
@@ -219,7 +219,9 @@ export const ProductPage = () => {
               }}
             />
             {cartAddAmount > 0 && (
-              <NotificationBadge>{cartAddAmount}</NotificationBadge>
+              <NotificationBadge fixedCartPosition={false}>
+                {cartAddAmount}
+              </NotificationBadge>
             )}
           </CartIconContainer>
         </CartBox>
