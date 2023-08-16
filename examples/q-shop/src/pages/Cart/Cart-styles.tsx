@@ -75,6 +75,8 @@ export const ProductTitle = styled(Typography)(({ theme }) => ({
 
 export const ProductDescription = styled(Box)(({ theme }) => ({
   display: "flex",
+  color: theme.palette.text.primary,
+  paddingRight: "5px",
   margin: "0px",
   fontWeight: 300,
   lineHeight: 1.5,
@@ -82,7 +84,6 @@ export const ProductDescription = styled(Box)(({ theme }) => ({
   fontFamily: "Karla",
   fontSize: "18px",
   userSelect: "none",
-  color: theme.palette.text.primary,
   overflowY: "auto",
   "&::-webkit-scrollbar-track": {
     backgroundColor: "transparent"
@@ -91,7 +92,7 @@ export const ProductDescription = styled(Box)(({ theme }) => ({
     backgroundColor: "transparent"
   },
   "&::-webkit-scrollbar": {
-    width: "8px",
+    width: "5px",
     height: "10px",
     backgroundColor: "transparent"
   },
@@ -99,7 +100,7 @@ export const ProductDescription = styled(Box)(({ theme }) => ({
     backgroundColor: theme.palette.mode === "light" ? "#d3d9e1" : "#414763",
     borderRadius: "8px",
     backgroundClip: "content-box",
-    border: "4px solid transparent"
+    border: `4px solid ${theme.palette.background.default}`
   },
   "&::-webkit-scrollbar-thumb:hover": {
     backgroundColor: theme.palette.mode === "light" ? "#b7bcc4" : "#40455f"

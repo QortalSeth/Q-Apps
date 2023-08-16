@@ -16,7 +16,7 @@ import { DoubleArrowDownSVG } from "../../assets/svgs/DoubleArrowDownSVG";
 
 export const StoresContainer = styled(Grid)(({ theme }) => ({
   position: "relative",
-  padding: "30px 55px",
+  padding: "10px 55px 30px 55px",
   flexDirection: "column"
 }));
 
@@ -101,7 +101,7 @@ export const StoreCardInfo = styled(Grid)(({ theme }) => ({
   display: "flex",
   flexDirection: "column",
   gap: "5px",
-  padding: "0 15px 10px 15px"
+  padding: "0 20px 10px 15px"
 }));
 
 export const StoreCardImageContainer = styled(Box)(({ theme }) => ({}));
@@ -181,9 +181,11 @@ export const StoreCardOwner = styled(Typography)(({ theme }) => ({
 }));
 
 export const StyledTooltip = styled(Tooltip)(({ theme }) => ({
-  "& .MuiTooltip-popper": {
+  "& .MuiTooltip-tooltip": {
     fontFamily: "Karla",
-    fontSize: "17px",
+    fontSize: "15px",
+    letterSpacing: "0px",
+    fontWeight: 300,
     color: theme.palette.text.primary,
     backgroundColor: theme.palette.background.paper
   }
