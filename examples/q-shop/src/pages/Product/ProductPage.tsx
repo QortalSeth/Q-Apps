@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, {useEffect, useMemo, useRef, useState} from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
   Cart as CartInterface,
@@ -8,13 +8,10 @@ import {
 import { RootState } from "../../state/store";
 import { useNavigate, useParams } from "react-router-dom";
 import {
-  Button,
   IconButton,
-  InputAdornment,
-  TextField,
+  InputAdornment, TextField,
   useTheme
 } from "@mui/material";
-
 import TabImageList from "../../components/common/TabImageList/TabImageList";
 import { Product } from "../../state/features/storeSlice";
 import AddIcon from "@mui/icons-material/Add";
@@ -41,12 +38,14 @@ import {
 import { QortalSVG } from "../../assets/svgs/QortalSVG";
 import { setNotification } from "../../state/features/notificationsSlice";
 import { BackArrowSVG } from "../../assets/svgs/BackArrowSVG";
+import NumericTextField, {NumericTextFieldRef} from "../../components/common/NumericTextField";
 
 export const ProductPage = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const params = useParams();
   const theme = useTheme();
+  const ref = useRef<NumericTextFieldRef>(null);
 
   // Get params for when user refreshes page or receives url link
   const storeOwner: string = params.user || "";
@@ -55,8 +54,7 @@ export const ProductPage = () => {
   const storeId: string = params.store || "";
 
   const [product, setProduct] = useState<Product | null>(null);
-  const [cartAddCount, setCartAddCount] = useState<string>("1");
-  const [totalCartQuantity, setTotalCartQuantity] = useState<number>(0);
+  const [cartAddAmount, setCartAddAmount] = useState<number>(0);
 
   const catalogueHashMap = useSelector(
     (state: RootState) => state.global.catalogueHashMap
@@ -65,6 +63,10 @@ export const ProductPage = () => {
   const user = useSelector((state: RootState) => state.auth.user);
 
   const { checkAndUpdateResourceCatalogue, getCatalogue } = useFetchOrders();
+
+    const minCart = 1;
+    const maxCart = Number.MAX_SAFE_INTEGER;
+
 
   // Set cart notifications when cart changes
   useEffect(() => {
@@ -78,7 +80,7 @@ export const ProductPage = () => {
         const { quantity } = order;
         totalQuantity += quantity;
       });
-      setTotalCartQuantity(totalQuantity);
+      setCartAddAmount(totalQuantity);
     }
   }, [carts, user, storeId]);
 
@@ -117,8 +119,8 @@ export const ProductPage = () => {
       );
       return;
     }
-    if (product) {
-      for (let i = 0; i < Number(cartAddCount); i++) {
+    if (product && ref?.current?.getTextFieldValue()!=='') {
+      for (let i = 0; i < Number(cartAddAmount); i++) {
         dispatch(
           setProductToCart({
             productId: product.id,
@@ -130,78 +132,22 @@ export const ProductPage = () => {
       }
     }
   };
-
-  const setMinMaxValueDec = (
-    value: string,
-    minValue: number,
-    maxValue: number
-  ): string => {
-    let valueNum = Number(`${value}`);
-
-    // Bounds checking on valueNum
-    valueNum = Math.min(valueNum, maxValue);
-    valueNum = Math.max(valueNum, minValue);
-
-    return valueNum.toString();
-  };
-
-  const numFilter = (
-    value: string,
-    minValue: number,
-    maxValue: number,
-    emptyReturn = ""
-  ) => {
-    if (value === "-1") {
-      return emptyReturn;
-    }
-    const isPositiveNum = /^[0-9]+$/.test(value);
-    const isNotNum = /[^0-9]/;
-
-    if (isPositiveNum) {
-      const minMaxCheck = setMinMaxValueDec(value, minValue, maxValue);
-      return minMaxCheck;
-    }
-
-    return value.replace(isNotNum, "");
-  };
-
-  const minCart = 1;
-  const maxCart = 10;
-  const changeValue = (value: string, change: number) => {
-    if (!value) value = "1";
-    const valueNum = Number(value);
-    setCartAddCount(
-      numFilter((valueNum + change).toString(), minCart, maxCart)
-    );
-  };
-
   const status = product?.status;
   const available = status === "AVAILABLE";
   const availableJSX = (
     <>
-      <TextField
-        InputProps={{
-          endAdornment: (
-            <InputAdornment position="end">
-              <IconButton onClick={(e) => changeValue(cartAddCount, 1)}>
-                <AddIcon />{" "}
-              </IconButton>
-              <IconButton onClick={(e) => changeValue(cartAddCount, -1)}>
-                <RemoveIcon />{" "}
-              </IconButton>
-            </InputAdornment>
-          )
-        }}
-        value={cartAddCount}
-        onChange={(e) => {
-          setCartAddCount(
-            numFilter(e.currentTarget.value || "-1", minCart, maxCart)
-          );
-        }}
-        autoComplete="off"
-        label="Quantity"
-        style={{ width: "34vw" }}
-      ></TextField>
+      <NumericTextField
+          MUIprops={{
+              label:"Quantity",
+              style:{ width: "300px" }
+      }}
+          initialValue={'1'}
+          addIconButtons
+          allowDecimals={false}
+          minValue={minCart}
+          maxValue={maxCart}
+        ref={ref}
+      />
       <AddToCartButton variant={"contained"} onClick={addToCart}>
         <CartIcon color={"#ffffff"} height={"25"} width={"25"} />
         <span style={{ marginLeft: "5px" }}>Add to Cart</span>
@@ -272,9 +218,9 @@ export const ProductPage = () => {
                 dispatch(setIsOpen(true));
               }}
             />
-            {totalCartQuantity > 0 && (
+            {cartAddAmount > 0 && (
               <NotificationBadge fixedCartPosition={false}>
-                {totalCartQuantity}
+                {cartAddAmount}
               </NotificationBadge>
             )}
           </CartIconContainer>

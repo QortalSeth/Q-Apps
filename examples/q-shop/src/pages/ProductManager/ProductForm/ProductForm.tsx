@@ -13,7 +13,7 @@ import {
   CustomInputField,
   ButtonRow,
   CancelButton,
-  CreateButton
+  CreateButton, CustomNumberField
 } from "../../../components/modals/CreateStoreModal-styles";
 import {
   CloseIcon,
@@ -64,10 +64,12 @@ export const ProductForm: React.FC<ProductFormProps> = ({
   const [selectedStatus, setSelectedStatus] = useState<string>("AVAILABLE");
   const [newCategory, setNewCategory] = useState<string>("");
   const [selectedCategory, setSelectedCategory] = useState<string | null>("");
-  
+
+  const editProductQortPrice = editProduct?.price?.find((item) => item?.currency === "qort")?.value || product.price
+
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.name === "price") {
-      const price = parseInt(event.target.value);
+      const price = Number(event.target.value);
       setProduct({ ...product, [event.target.name]: price });
       return;
     }
@@ -96,16 +98,18 @@ export const ProductForm: React.FC<ProductFormProps> = ({
         })
       );
       return;
-    };
-    if (isNaN(product.price)) {
-      dispatch(
-        setNotification({
-          msg: "Product price must be a number",
-          alertType: "error"
-        })
-      );
-      return;
     }
+
+      if (isNaN(product.price)) {
+        dispatch(
+            setNotification({
+              alertType: "error",
+              msg: "Price must be a number!"
+            })
+        )
+        return;
+      }
+
     onSubmit({
       title: product.title,
       description: product.description,
@@ -151,13 +155,12 @@ export const ProductForm: React.FC<ProductFormProps> = ({
           category,
           status
         } = editProduct;
-        const findPrice =
-          price?.find((item) => item?.currency === "qort")?.value || 0;
+
         setProduct({
           title,
           description,
           images: [],
-          price: findPrice
+          price: editProductQortPrice
         });
         if (images) {
           setImages(images);
@@ -233,12 +236,14 @@ export const ProductForm: React.FC<ProductFormProps> = ({
         onChange={handleInputChange}
         required
       />
-      <CustomInputField
+      <CustomNumberField
         name="price"
         label="Price (QORT)"
-        value={product.price}
+        initialValue={editProductQortPrice}
         variant="filled"
-        type="number"
+        addIconButtons={false}
+        minValue={0.000000001}
+        maxValue={Number.MAX_SAFE_INTEGER}
         onChange={handleInputChange}
         required
       />
