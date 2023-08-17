@@ -1,114 +1,160 @@
-import {BaseTextFieldProps, IconButton, InputAdornment, StandardTextFieldProps, TextField, TextFieldProps} from "@mui/material";
+import {
+  IconButton,
+  InputAdornment,
+  TextField
+} from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import RemoveIcon from "@mui/icons-material/Remove";
-import React, {useImperativeHandle, useState} from "react";
-import {FilledTextFieldProps, OutlinedTextFieldProps} from "@mui/material/TextField/TextField";
+import React, { useImperativeHandle, useState } from "react";
 
-interface TextFieldProps extends StandardTextFieldProps {
-    minValue: number;
-    maxValue: number;
-    addIconButtons?: boolean
-    allowDecimals?: boolean
-    onChange?: (e: React.ChangeEvent<HTMLInputElement>)=>{}
-    initialValue?: string
+export enum Variant {
+  filled = "filled",
+  standard = "standard",
+  outlined = "outlined"
+}
+interface TextFieldProps {
+  name: string;
+  label: string;
+  required: boolean;
+  minValue: number;
+  maxValue: number;
+  variant?: Variant;
+  addIconButtons?: boolean;
+  allowDecimals?: boolean;
+  onChange?: (e: string) => void;
+  initialValue?: string;
+  style?: object;
 }
 
 export type NumericTextFieldRef = {
-    getTextFieldValue: () => string;
+  getTextFieldValue: () => string;
 };
 
 const NumericTextField = React.forwardRef<NumericTextFieldRef, TextFieldProps>(
-    ({minValue, maxValue, addIconButtons= true, allowDecimals= true, onChange, initialValue, ...props}: TextFieldProps, ref) =>{
-    const [textFieldValue, setTextFieldValue] = useState<string>(initialValue || '');
+  (
+    {
+      name,
+      label,
+      variant,
+      required,
+      style,
+      minValue,
+      maxValue,
+      addIconButtons = true,
+      allowDecimals = true,
+      onChange,
+      initialValue,
+    }: TextFieldProps,
+    ref
+  ) => {
+    const [textFieldValue, setTextFieldValue] = useState<string>(
+      initialValue || ""
+    );
     const [isDecimalError, setIsDecimalError] = useState<boolean>(false);
-    const [helperText, setHelperText] = useState<string>('');
+    const [helperText, setHelperText] = useState<string>("");
 
-    const invalidNumberError = 'Entered value is not a number'
-        
-    useImperativeHandle(ref, ()=>({getTextFieldValue: ()=> {return textFieldValue;}}), [textFieldValue])
+    const invalidNumberError = "Entered value is not a number";
 
+    useImperativeHandle(
+      ref,
+      () => ({
+        getTextFieldValue: () => {
+          return textFieldValue;
+        }
+      }),
+      [textFieldValue]
+    );
 
-const checkDecimalErrors = (value: string) => {
-        let decCount=0;
-for(let i=0; i<value.length; i++){
-if(value.charAt(i) === '.') decCount++;
-}
-    const hasTrailingDecimal = value.charAt(value.length-1) === '.'
-if(decCount > 1 || hasTrailingDecimal)
-{
-    setIsDecimalError(true)
-    setHelperText(invalidNumberError)
-    return true
-}
-setIsDecimalError(false)
-    setHelperText('')
-    return false
-}
-
-
-    const setMinMaxValue = (
-        value: string): string => {
-        const lastIndexIsDecimal = value.charAt(value.length-1)==='.'
-        if(lastIndexIsDecimal) return value
-
-        let valueNum = Number(value);
-
-        // Bounds checking on valueNum
-        valueNum = Math.min(valueNum, maxValue);
-        valueNum = Math.max(valueNum, minValue);
-        return valueNum.toString();
+    const checkDecimalErrors = (value: string) => {
+      let decCount = 0;
+      for (let i = 0; i < value.length; i++) {
+        if (value.charAt(i) === ".") decCount++;
+      }
+      const hasTrailingDecimal = value.charAt(value.length - 1) === ".";
+      if (decCount > 1 || hasTrailingDecimal) {
+        setIsDecimalError(true);
+        setHelperText(invalidNumberError);
+        return true;
+      }
+      setIsDecimalError(false);
+      setHelperText("");
+      return false;
     };
 
-    const filterValue = (value: string, emptyReturn = "") =>
-    {
-        if (allowDecimals === false) value = value.replace('.','')
-        if (value === "-1") return emptyReturn;
+    const setMinMaxValue = (value: string): string => {
+      const lastIndexIsDecimal = value.charAt(value.length - 1) === ".";
+      if (lastIndexIsDecimal) return value;
 
-        const isPositiveNum = /[0-9.]+/
-        const isNotNum = /[^0-9.]/;
+      let valueNum = Number(value);
 
-        isPositiveNum.test(value);
+      // Bounds checking on valueNum
+      valueNum = Math.min(valueNum, maxValue);
+      valueNum = Math.max(valueNum, minValue);
+      return valueNum.toString();
+    };
 
-        const decimalError = checkDecimalErrors(value)
+    const filterValue = (value: string, emptyReturn = "") => {
+      if (allowDecimals === false) value = value.replace(".", "");
+      if (value === "-1") return emptyReturn;
 
-        if (isPositiveNum && !decimalError) {
-            const minMaxCheck = setMinMaxValue(value);
-            return minMaxCheck;
-        }
-        return value.replace(isNotNum, "");
+      const isPositiveNum = /[0-9.]+/;
+      const isNotNum = /[^0-9.]/;
+
+      isPositiveNum.test(value);
+
+      const decimalError = checkDecimalErrors(value);
+
+      if (isPositiveNum && !decimalError) {
+        const minMaxCheck = setMinMaxValue(value);
+        return minMaxCheck;
+      }
+      const newString: string = value.replace(isNotNum, "")
+      return newString
     };
 
     const changeValueWithButton = (changeAmount: number) => {
-        const valueNum = Number(textFieldValue);
-        const newValue = setMinMaxValue((valueNum + changeAmount).toString())
-        setTextFieldValue(newValue);
+      const valueNum = Number(textFieldValue);
+      const newValue = setMinMaxValue((valueNum + changeAmount).toString());
+      setTextFieldValue(newValue);
     };
 
-    const listeners = (e) => {
-        setTextFieldValue(filterValue(e.currentTarget.value || "-1"))
-        if (onChange) onChange(e);
+    const listeners = (e: React.ChangeEvent<HTMLInputElement>) => {
+      const newValue = filterValue(e.target.value || "-1");
+      setTextFieldValue(newValue);
+      if (onChange) onChange(newValue);
+    };
 
-    }
-return (      <TextField
-    {...props}
-    error={isDecimalError}
-    helperText={helperText}
-       InputProps={ addIconButtons ? {
-    endAdornment: (
-    <InputAdornment position="end">
-    <IconButton onClick={(e) => changeValueWithButton(1)}>
-    <AddIcon />{" "}
-    </IconButton>
-    <IconButton onClick={(e) => changeValueWithButton(-1)}>
-    <RemoveIcon />{" "}
-    </IconButton>
-    </InputAdornment>
-    )
-}:{}}
-    onChange={(e)=> listeners(e)}
-    autoComplete="off"
-    value={textFieldValue}
-/>)
-})
+    return (
+      <TextField
+        {...style}
+        name={name}
+        label={label}
+        required={required}
+        variant={variant}
+        error={isDecimalError}
+        helperText={helperText}
+        InputProps={
+          addIconButtons
+            ? {
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton onClick={(e) => changeValueWithButton(1)}>
+                      <AddIcon />{" "}
+                    </IconButton>
+                    <IconButton onClick={(e) => changeValueWithButton(-1)}>
+                      <RemoveIcon />{" "}
+                    </IconButton>
+                  </InputAdornment>
+                )
+              }
+            : {}
+        }
+        onChange={(e: React.ChangeEvent<HTMLInputElement>) => listeners(e)}
+        autoComplete="off"
+        value={textFieldValue}
+      />
+    );
+  }
+);
 
 export default NumericTextField;
