@@ -1,4 +1,4 @@
-import React, {useEffect, useMemo, useRef, useState} from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
   Cart as CartInterface,
@@ -7,11 +7,7 @@ import {
 } from "../../state/features/cartSlice";
 import { RootState } from "../../state/store";
 import { useNavigate, useParams } from "react-router-dom";
-import {
-  IconButton,
-  InputAdornment, TextField,
-  useTheme
-} from "@mui/material";
+import { IconButton, InputAdornment, TextField, useTheme } from "@mui/material";
 import TabImageList from "../../components/common/TabImageList/TabImageList";
 import { Product } from "../../state/features/storeSlice";
 import AddIcon from "@mui/icons-material/Add";
@@ -38,7 +34,9 @@ import {
 import { QortalSVG } from "../../assets/svgs/QortalSVG";
 import { setNotification } from "../../state/features/notificationsSlice";
 import { BackArrowSVG } from "../../assets/svgs/BackArrowSVG";
-import NumericTextField, {NumericTextFieldRef} from "../../components/common/NumericTextField";
+import NumericTextField, {
+  NumericTextFieldRef, Variant
+} from "../../components/common/NumericTextField";
 
 export const ProductPage = () => {
   const dispatch = useDispatch();
@@ -64,9 +62,8 @@ export const ProductPage = () => {
 
   const { checkAndUpdateResourceCatalogue, getCatalogue } = useFetchOrders();
 
-    const minCart = 1;
-    const maxCart = Number.MAX_SAFE_INTEGER;
-
+  const minCart = 1;
+  const maxCart = Number.MAX_SAFE_INTEGER;
 
   // Set cart notifications when cart changes
   useEffect(() => {
@@ -119,7 +116,7 @@ export const ProductPage = () => {
       );
       return;
     }
-    if (product && ref?.current?.getTextFieldValue()!=='') {
+    if (product && ref?.current?.getTextFieldValue() !== "") {
       for (let i = 0; i < Number(cartAddAmount); i++) {
         dispatch(
           setProductToCart({
@@ -137,15 +134,16 @@ export const ProductPage = () => {
   const availableJSX = (
     <>
       <NumericTextField
-          MUIprops={{
-              label:"Quantity",
-              style:{ width: "300px" }
-      }}
-          initialValue={'1'}
-          addIconButtons
-          allowDecimals={false}
-          minValue={minCart}
-          maxValue={maxCart}
+        name="Quantity"
+        label="Quantity"
+        variant={Variant.filled}
+        required={true}
+        style={{width: "300px" }}
+        initialValue={"1"}
+        addIconButtons
+        allowDecimals={false}
+        minValue={minCart}
+        maxValue={maxCart}
         ref={ref}
       />
       <AddToCartButton variant={"contained"} onClick={addToCart}>
