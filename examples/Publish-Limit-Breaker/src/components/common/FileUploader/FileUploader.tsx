@@ -1,4 +1,5 @@
 import {useState} from "react";
+import FileUpload from "./FileUpload";
 
 const FileUploader = () =>{
     const [files, setFiles] = useState([])
@@ -16,10 +17,11 @@ const mainDivStyle = {
     return (
 
         <div className="App">
-            <div style={mainDivStyle}>Upload file</div>
+            <div style={mainDivStyle}>Upload files</div>
             <FileUpload files={files} setFiles={setFiles}
                         removeFile={removeFile} />
             <FileList files={files} removeFile={removeFile} />
+            FileUploader
         </div>
 
     );

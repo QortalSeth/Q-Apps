@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { SelectChangeEvent, useTheme, Box, FormControl } from "@mui/material";
 import ImageUploader from "../../../components/common/ImageUploader";
 import { PublishProductParams } from "../NewProduct/NewProduct";
-import { Product } from "../../../state/features/storeSlice";
+import { Price, Product } from "../../../state/features/storeSlice";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../../state/store";
 import {
@@ -13,7 +13,8 @@ import {
   CustomInputField,
   ButtonRow,
   CancelButton,
-  CreateButton, CustomNumberField
+  CreateButton,
+  CustomNumberField
 } from "../../../components/modals/CreateStoreModal-styles";
 import {
   CloseIcon,
@@ -50,7 +51,9 @@ export const ProductForm: React.FC<ProductFormProps> = ({
   const categories = useSelector(
     (state: RootState) => state.global.listProducts.categories
   );
-  const productsToSaveCategories = useSelector((state: RootState) => state.global.productsToSaveCategories);
+  const productsToSaveCategories = useSelector(
+    (state: RootState) => state.global.productsToSaveCategories
+  );
 
   const [product, setProduct] = useState<ProductObj>({
     title: "",
@@ -65,7 +68,9 @@ export const ProductForm: React.FC<ProductFormProps> = ({
   const [newCategory, setNewCategory] = useState<string>("");
   const [selectedCategory, setSelectedCategory] = useState<string | null>("");
 
-  const editProductQortPrice = editProduct?.price?.find((item) => item?.currency === "qort")?.value || product.price
+  const editProductQortPrice =
+    editProduct?.price?.find((item: Price) => item?.currency === "qort")
+      ?.value || product.price;
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.name === "price") {
@@ -100,15 +105,15 @@ export const ProductForm: React.FC<ProductFormProps> = ({
       return;
     }
 
-      if (isNaN(product.price)) {
-        dispatch(
-            setNotification({
-              alertType: "error",
-              msg: "Price must be a number!"
-            })
-        )
-        return;
-      }
+    if (isNaN(product.price)) {
+      dispatch(
+        setNotification({
+          alertType: "error",
+          msg: "Price must be a number!"
+        })
+      );
+      return;
+    }
 
     onSubmit({
       title: product.title,
@@ -132,12 +137,13 @@ export const ProductForm: React.FC<ProductFormProps> = ({
     setSelectedCategory(newCategory);
     setCategoryList((prev) => [...prev, newCategory]);
     setNewCategory("");
-    dispatch(addProductsToSaveCategory(newCategory))
+    dispatch(addProductsToSaveCategory(newCategory));
   };
 
   useEffect(() => {
     if (categories || productsToSaveCategories) {
       const existingCategories = [...categories, ...productsToSaveCategories];
+      console.log({ existingCategories });
       setCategoryList(existingCategories);
     }
   }, [categories, productsToSaveCategories]);

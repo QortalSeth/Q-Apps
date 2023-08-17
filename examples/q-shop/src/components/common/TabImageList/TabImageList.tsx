@@ -37,6 +37,7 @@ const TabImageList = ({
             src={image}
             alt={`Image #${index}`}
             onClick={() => switchMainImage(index)}
+            key={image + index.toString()}
           />
         ))
       ) : (
@@ -48,7 +49,7 @@ const TabImageList = ({
       <TabImageListStyle>
         <Box style={{ ...defaultStyle, ...divStyle }}>
           <img
-            style={{ width: "100%",aspectRatio:'1', ...imgStyle }}
+            style={{ width: "100%", aspectRatio: "1", ...imgStyle }}
             src={mainImage}
             alt="No product image found"
           />
