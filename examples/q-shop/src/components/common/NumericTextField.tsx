@@ -1,8 +1,4 @@
-import {
-  IconButton,
-  InputAdornment,
-  TextField
-} from "@mui/material";
+import { IconButton, InputAdornment, TextField } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import RemoveIcon from "@mui/icons-material/Remove";
 import React, { useImperativeHandle, useState } from "react";
@@ -43,7 +39,7 @@ const NumericTextField = React.forwardRef<NumericTextFieldRef, TextFieldProps>(
       addIconButtons = true,
       allowDecimals = true,
       onChange,
-      initialValue,
+      initialValue
     }: TextFieldProps,
     ref
   ) => {
@@ -108,8 +104,8 @@ const NumericTextField = React.forwardRef<NumericTextFieldRef, TextFieldProps>(
         const minMaxCheck = setMinMaxValue(value);
         return minMaxCheck;
       }
-      const newString: string = value.replace(isNotNum, "")
-      return newString
+      const newString: string = value.replace(isNotNum, "");
+      return newString;
     };
 
     const changeValueWithButton = (changeAmount: number) => {
