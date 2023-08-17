@@ -27,6 +27,7 @@ import {
 } from "../NewProduct/NewProduct-styles";
 import { setNotification } from "../../../state/features/notificationsSlice";
 import { addProductsToSaveCategory } from "../../../state/features/globalSlice";
+import { Variant } from "../../../components/common/NumericTextField";
 interface ProductFormProps {
   onSubmit: (product: PublishProductParams) => void;
   onClose?: () => void;
@@ -68,16 +69,16 @@ export const ProductForm: React.FC<ProductFormProps> = ({
   const editProductQortPrice = editProduct?.price?.find((item) => item?.currency === "qort")?.value || product.price
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    if (event.target.name === "price") {
-      const price = Number(event.target.value);
-      setProduct({ ...product, [event.target.name]: price });
-      return;
-    }
     setProduct({
       ...product,
       [event.target.name]: event.target.value as string | number
     });
   };
+
+  const handleProductPriceChange = (value: string) => {
+      const price = Number(value);
+      setProduct({ ...product, price: price });
+  }
 
   const handleSelectChange = (event: SelectChangeEvent<string | null>) => {
     const optionId = event.target.value;
@@ -239,13 +240,13 @@ export const ProductForm: React.FC<ProductFormProps> = ({
       <CustomNumberField
         name="price"
         label="Price (QORT)"
-        initialValue={editProductQortPrice}
-        variant="filled"
+        variant={Variant.filled}
+        initialValue={editProductQortPrice.toString()}
         addIconButtons={false}
         minValue={0.000000001}
         maxValue={Number.MAX_SAFE_INTEGER}
-        onChange={handleInputChange}
-        required
+        onChange={handleProductPriceChange}
+        required={true}
       />
       <Box>
         <FormControl fullWidth>
@@ -300,7 +301,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
             label="New Category"
             variant="filled"
             value={newCategory}
-            onChange={handleNewCategory}
+            onChange={(handleNewCategory)}
           />
           <AddButton variant="contained" onClick={addNewCategoryToList}>
             Add
