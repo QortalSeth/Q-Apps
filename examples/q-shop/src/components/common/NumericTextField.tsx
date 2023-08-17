@@ -122,7 +122,7 @@ const NumericTextField = React.forwardRef<NumericTextFieldRef, TextFieldProps>(
 
     return (
       <TextField
-        {{...style}}
+        {...style}
         name={name}
         label={label}
         required={required}
