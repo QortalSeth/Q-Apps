@@ -93,18 +93,17 @@ const NumericTextField = React.forwardRef<NumericTextFieldRef, TextFieldProps>(
       if (allowDecimals === false) value = value.replace(".", "");
       if (value === "-1") return emptyReturn;
 
-      const isPositiveNum = /[0-9.]+/;
-      const isNotNum = /[^0-9.]/;
+      const isPositiveNumRegex = /^[0-9.]+$/;
+      const isNotNumRegex = /[^0-9.]/;
 
-      isPositiveNum.test(value);
-
+      const isPositiveNum = isPositiveNumRegex.test(value);
       const decimalError = checkDecimalErrors(value);
 
       if (isPositiveNum && !decimalError) {
         const minMaxCheck = setMinMaxValue(value);
         return minMaxCheck;
       }
-      const newString: string = value.replace(isNotNum, "");
+      const newString: string = value.replace(isNotNumRegex, "");
       return newString;
     };
 
