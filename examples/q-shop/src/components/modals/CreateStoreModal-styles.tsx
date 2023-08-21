@@ -2,7 +2,7 @@ import { styled } from "@mui/system";
 import { Typography, Button, Box, TextField, Theme } from "@mui/material";
 import AddPhotoAlternateIcon from "@mui/icons-material/AddPhotoAlternate";
 import { TimesSVG } from "../../assets/svgs/TimesSVG";
-import NumericTextField from "../common/NumericTextField";
+import { NumericTextField } from "../common/NumericTextField";
 
 export const ModalBody = styled(Box)(({ theme }) => ({
   position: "absolute",

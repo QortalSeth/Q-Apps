@@ -153,16 +153,8 @@ export const ProductForm: React.FC<ProductFormProps> = ({
   useEffect(() => {
     if (editProduct) {
       try {
-        const {
-          title,
-          description,
-          images,
-          mainImageIndex,
-          type,
-          price,
-          category,
-          status
-        } = editProduct;
+        const { title, description, images, type, category, status } =
+          editProduct;
 
         setProduct({
           title,
@@ -252,7 +244,8 @@ export const ProductForm: React.FC<ProductFormProps> = ({
         addIconButtons={false}
         minValue={0}
         maxValue={Number.MAX_SAFE_INTEGER}
-        onChange={handleProductPriceChange}
+        allowDecimals={true}
+        onChangeFunc={handleProductPriceChange}
         required={true}
       />
       <Box>
