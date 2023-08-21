@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from "react";
-import { SelectChangeEvent, useTheme, Box, FormControl } from "@mui/material";
+import React, { useEffect, useState } from "react";
+import { Box, FormControl, SelectChangeEvent, useTheme } from "@mui/material";
 import ImageUploader from "../../../components/common/ImageUploader";
 import { PublishProductParams } from "../NewProduct/NewProduct";
 import { Price, Product } from "../../../state/features/storeSlice";
@@ -8,27 +8,28 @@ import { RootState } from "../../../state/store";
 import {
   AddLogoButton,
   AddLogoIcon,
-  LogoPreviewRow,
-  StoreLogoPreview,
-  CustomInputField,
   ButtonRow,
   CancelButton,
   CreateButton,
-  CustomNumberField
+  CustomInputField,
+  CustomNumberField,
+  LogoPreviewRow,
+  StoreLogoPreview
 } from "../../../components/modals/CreateStoreModal-styles";
 import {
-  CloseIcon,
-  InputFieldCustomLabel,
-  ProductImagesRow,
-  CustomSelect,
-  CategoryRow,
-  CustomMenuItem,
   AddButton,
-  MaximumImagesRow
+  CategoryRow,
+  CloseIcon,
+  CustomMenuItem,
+  CustomSelect,
+  InputFieldCustomLabel,
+  MaximumImagesRow,
+  ProductImagesRow
 } from "../NewProduct/NewProduct-styles";
 import { setNotification } from "../../../state/features/notificationsSlice";
 import { addProductsToSaveCategory } from "../../../state/features/globalSlice";
 import { Variant } from "../../../components/common/NumericTextField";
+
 interface ProductFormProps {
   onSubmit: (product: PublishProductParams) => void;
   onClose?: () => void;
@@ -241,7 +242,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
         variant={Variant.filled}
         initialValue={editProductQortPrice.toString()}
         addIconButtons={false}
-        minValue={0.000000001}
+        minValue={0}
         maxValue={Number.MAX_SAFE_INTEGER}
         allowDecimals={true}
         onChangeFunc={handleProductPriceChange}
