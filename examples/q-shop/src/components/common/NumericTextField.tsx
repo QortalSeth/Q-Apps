@@ -66,9 +66,11 @@ export const NumericTextField = React.forwardRef<
       if (lastIndexIsDecimal) return value;
 
       const valueNum = Number(value);
+
       // Bounds checking on valueNum
-      let minMaxNum = Math.min(valueNum, maxValue);
-      minMaxNum = Math.max(valueNum, minValue);
+      let minMaxNum: number;
+      minMaxNum = Math.min(valueNum, maxValue);
+      minMaxNum = Math.max(minMaxNum, minValue);
 
       return minMaxNum === valueNum ? value : minMaxNum.toString();
     };
