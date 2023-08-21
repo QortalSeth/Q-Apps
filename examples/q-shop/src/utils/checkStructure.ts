@@ -24,9 +24,8 @@ export const checkStructureOrders = (content: any) => {
 
 export const checkStructureMailMessages = (content: any) => {
   let isValid = true;
-
-  // if (!content?.title) isValid = false
-  // if (!content?.description) isValid = false
+  if (!content?.title) isValid = false;
+  if (!content?.description) isValid = false;
   if (!content?.createdAt) isValid = false;
   if (!content?.version) isValid = false;
   if (!Array.isArray(content?.attachments)) isValid = false;
@@ -36,24 +35,24 @@ export const checkStructureMailMessages = (content: any) => {
   return isValid;
 };
 
+// check the structure of stores
 export const checkStructureStore = (content: any) => {
   let isValid = true;
-  // if (!content?.title) isValid = false
-  // if (!content?.created) isValid = false
-  // if (!content?.description) isValid = false
-  // if (!content?.type) isValid = false
-  // if (!Array.isArray(content?.images)) isValid = false
-  // if (!Array.isArray(content?.price)) isValid = false
-
+  if (!content?.title) isValid = false;
+  if (!content?.created) isValid = false;
+  if (!content?.description) isValid = false;
+  if (!content?.logo) isValid = false;
+  if (!content?.shipsTo) isValid = false;
+  if (!content?.shortStoreId) isValid = false;
   return isValid;
 };
 
 export const checkStructureStoreReviews = (content: any) => {
   let isValid = true;
-  // if (!content?.title) isValid = false
-  // if (!content?.created) isValid = false
-  // if (!content?.description) isValid = false
-  // if (!content?.rating) isValid = false
+  if (!content?.title) isValid = false;
+  if (!content?.created) isValid = false;
+  if (!content?.description) isValid = false;
+  if (!content?.rating) isValid = false;
 
   return isValid;
 };

@@ -32,7 +32,8 @@ import {
 import { QortalSVG } from "../../assets/svgs/QortalSVG";
 import { setNotification } from "../../state/features/notificationsSlice";
 import { BackArrowSVG } from "../../assets/svgs/BackArrowSVG";
-import NumericTextField, {
+import {
+  NumericTextField,
   NumericTextFieldRef,
   Variant
 } from "../../components/common/NumericTextField";

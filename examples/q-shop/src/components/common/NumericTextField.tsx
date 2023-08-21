@@ -17,16 +17,20 @@ interface TextFieldProps {
   variant?: Variant;
   addIconButtons?: boolean;
   allowDecimals?: boolean;
-  onChange?: (e: string) => void;
+  onChangeFunc?: (e: string) => void;
   initialValue?: string;
   style?: object;
+  className?: string;
 }
 
 export type NumericTextFieldRef = {
   getTextFieldValue: () => string;
 };
 
-const NumericTextField = React.forwardRef<NumericTextFieldRef, TextFieldProps>(
+export const NumericTextField = React.forwardRef<
+  NumericTextFieldRef,
+  TextFieldProps
+>(
   (
     {
       name,
@@ -38,8 +42,9 @@ const NumericTextField = React.forwardRef<NumericTextFieldRef, TextFieldProps>(
       maxValue,
       addIconButtons = true,
       allowDecimals = true,
-      onChange,
-      initialValue
+      onChangeFunc,
+      initialValue,
+      className
     }: TextFieldProps,
     ref
   ) => {
@@ -50,6 +55,8 @@ const NumericTextField = React.forwardRef<NumericTextFieldRef, TextFieldProps>(
     const [helperText, setHelperText] = useState<string>("");
 
     const invalidNumberError = "Entered value is not a number";
+
+    console.log("NumericTextField", textFieldValue);
 
     useImperativeHandle(
       ref,
@@ -90,21 +97,20 @@ const NumericTextField = React.forwardRef<NumericTextFieldRef, TextFieldProps>(
     };
 
     const filterValue = (value: string, emptyReturn = "") => {
+      console.log("filterValue", value);
       if (allowDecimals === false) value = value.replace(".", "");
       if (value === "-1") return emptyReturn;
 
-      const isPositiveNum = /[0-9.]+/;
-      const isNotNum = /[^0-9.]/;
-
-      isPositiveNum.test(value);
+      const isPositiveNumRegex = /^[0-9]*\.?[0-9]+$/;
+      const isNotNumRegex = /[^0-9.]/;
 
       const decimalError = checkDecimalErrors(value);
 
-      if (isPositiveNum && !decimalError) {
+      if (isPositiveNumRegex.test(value) && !decimalError) {
         const minMaxCheck = setMinMaxValue(value);
         return minMaxCheck;
       }
-      const newString: string = value.replace(isNotNum, "");
+      const newString: string = value.replace(isNotNumRegex, "");
       return newString;
     };
 
@@ -117,7 +123,7 @@ const NumericTextField = React.forwardRef<NumericTextFieldRef, TextFieldProps>(
     const listeners = (e: React.ChangeEvent<HTMLInputElement>) => {
       const newValue = filterValue(e.target.value || "-1");
       setTextFieldValue(newValue);
-      if (onChange) onChange(newValue);
+      if (onChangeFunc) onChangeFunc(newValue);
     };
 
     return (
@@ -148,9 +154,8 @@ const NumericTextField = React.forwardRef<NumericTextFieldRef, TextFieldProps>(
         onChange={(e: React.ChangeEvent<HTMLInputElement>) => listeners(e)}
         autoComplete="off"
         value={textFieldValue}
+        className={className}
       />
     );
   }
 );
-
-export default NumericTextField;

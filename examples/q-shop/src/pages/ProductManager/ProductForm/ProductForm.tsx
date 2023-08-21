@@ -81,9 +81,9 @@ export const ProductForm: React.FC<ProductFormProps> = ({
   };
 
   const handleProductPriceChange = (value: string) => {
-      const price = Number(value);
-      setProduct({ ...product, price: price });
-  }
+    const price = Number(value);
+    setProduct({ ...product, price: price });
+  };
 
   const handleSelectChange = (event: SelectChangeEvent<string | null>) => {
     const optionId = event.target.value;
@@ -152,16 +152,8 @@ export const ProductForm: React.FC<ProductFormProps> = ({
   useEffect(() => {
     if (editProduct) {
       try {
-        const {
-          title,
-          description,
-          images,
-          mainImageIndex,
-          type,
-          price,
-          category,
-          status
-        } = editProduct;
+        const { title, description, images, type, category, status } =
+          editProduct;
 
         setProduct({
           title,
@@ -251,7 +243,8 @@ export const ProductForm: React.FC<ProductFormProps> = ({
         addIconButtons={false}
         minValue={0.000000001}
         maxValue={Number.MAX_SAFE_INTEGER}
-        onChange={handleProductPriceChange}
+        allowDecimals={true}
+        onChangeFunc={handleProductPriceChange}
         required={true}
       />
       <Box>
@@ -307,7 +300,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
             label="New Category"
             variant="filled"
             value={newCategory}
-            onChange={(handleNewCategory)}
+            onChange={handleNewCategory}
           />
           <AddButton variant="contained" onClick={addNewCategoryToList}>
             Add
