@@ -46,11 +46,6 @@ const NumericTextField = React.forwardRef<NumericTextFieldRef, TextFieldProps>(
     const [textFieldValue, setTextFieldValue] = useState<string>(
       initialValue || ""
     );
-    const [isDecimalError, setIsDecimalError] = useState<boolean>(false);
-    const [helperText, setHelperText] = useState<string>("");
-
-    const invalidNumberError = "Entered value is not a number";
-
     useImperativeHandle(
       ref,
       () => ({
@@ -60,22 +55,6 @@ const NumericTextField = React.forwardRef<NumericTextFieldRef, TextFieldProps>(
       }),
       [textFieldValue]
     );
-
-    const checkDecimalErrors = (value: string) => {
-      let decCount = 0;
-      for (let i = 0; i < value.length; i++) {
-        if (value.charAt(i) === ".") decCount++;
-      }
-      const hasTrailingDecimal = value.charAt(value.length - 1) === ".";
-      if (decCount > 1 || hasTrailingDecimal) {
-        setIsDecimalError(true);
-        setHelperText(invalidNumberError);
-        return true;
-      }
-      setIsDecimalError(false);
-      setHelperText("");
-      return false;
-    };
 
     const setMinMaxValue = (value: string): string => {
       const lastIndexIsDecimal = value.charAt(value.length - 1) === ".";
@@ -93,19 +72,12 @@ const NumericTextField = React.forwardRef<NumericTextFieldRef, TextFieldProps>(
       if (allowDecimals === false) value = value.replace(".", "");
       if (value === "-1") return emptyReturn;
 
-      const isPositiveNum = /[0-9.]+/;
-      const isNotNum = /[^0-9.]/;
+      const isPositiveNum = /^[0-9]*\.?[0-9]*$/;
 
-      isPositiveNum.test(value);
-
-      const decimalError = checkDecimalErrors(value);
-
-      if (isPositiveNum && !decimalError) {
-        const minMaxCheck = setMinMaxValue(value);
-        return minMaxCheck;
+      if (isPositiveNum.test(value)) {
+        return setMinMaxValue(value);
       }
-      const newString: string = value.replace(isNotNum, "");
-      return newString;
+      return textFieldValue;
     };
 
     const changeValueWithButton = (changeAmount: number) => {
@@ -127,8 +99,6 @@ const NumericTextField = React.forwardRef<NumericTextFieldRef, TextFieldProps>(
         label={label}
         required={required}
         variant={variant}
-        error={isDecimalError}
-        helperText={helperText}
         InputProps={
           addIconButtons
             ? {
