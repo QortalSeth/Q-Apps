@@ -70,7 +70,7 @@ export const NumericTextField = React.forwardRef<
       let minMaxNum = Math.min(valueNum, maxValue);
       minMaxNum = Math.max(valueNum, minValue);
 
-      return minMaxNum === valueNum ? value : valueNum.toString();
+      return minMaxNum === valueNum ? value : minMaxNum.toString();
     };
 
     const filterValue = (value: string, emptyReturn = "") => {
