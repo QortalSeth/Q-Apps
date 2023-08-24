@@ -13,8 +13,8 @@ import { setIsLoadingGlobal } from '../../state/features/globalSlice';
 import { crowdfundBase } from '../../constants';
 import { addToHashMap } from '../../state/features/crowdfundSlice';
 import {
-  CrowdfundTitle,
   AuthorTextComment,
+  CrowdfundTitle,
   Spacer,
   StyledCardColComment,
   StyledCardHeaderComment,
@@ -92,6 +92,7 @@ export const Crowdfund = () => {
           }
         }
       } catch (error) {
+        console.log(error);
       } finally {
         dispatch(setIsLoadingGlobal(false));
       }
