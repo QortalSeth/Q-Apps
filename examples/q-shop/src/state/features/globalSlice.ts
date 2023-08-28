@@ -65,7 +65,7 @@ const initialState: GlobalState = {
   isOpenCreateStoreModal: false,
   isLoadingCurrentBlog: true,
   isLoadingGlobal: false,
-  currentStore: null,
+  currentStore: null, // user owns this shop
   isOpenEditStoreModal: false,
   downloads: {},
   userAvatarHash: {},
@@ -97,6 +97,7 @@ export const globalSlice = createSlice({
       state.currentStore = action.payload;
       state.isLoadingCurrentBlog = false;
     },
+
     setDataContainer: (state, action) => {
       let categories: any = {};
       state.dataContainer = action.payload;
@@ -160,7 +161,7 @@ export const globalSlice = createSlice({
     updateCatalogueHashMap: (state, action) => {
       const catalogue = action.payload;
       Object.keys(catalogue).forEach((key) => {
-        state.catalogueHashMap[key] = catalogue[key]
+        state.catalogueHashMap[key] = catalogue[key];
       });
     },
     setCatalogueHashMap: (state, action) => {

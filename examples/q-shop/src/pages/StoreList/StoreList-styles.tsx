@@ -73,7 +73,7 @@ export const StyledStoreCard = styled(Grid)<StoreListProps>(
     minWidth: "100%",
     maxWidth: "100%",
     height: "100%",
-    maxHeight: showCompleteStoreDescription ? "100%" : "420px",
+    maxHeight: showCompleteStoreDescription ? "100%" : "440px",
     backgroundColor: "transparent",
     borderRadius: "8px",
     paddingBottom: "20px",
@@ -242,7 +242,7 @@ export const MyStoresCheckbox = styled(Checkbox)(({ theme }) => ({
 export const ExpandDescriptionIcon = styled(DoubleArrowDownSVG)<StoreListProps>(
   ({ theme, showCompleteStoreDescription }) => ({
     position: "absolute",
-    bottom: "20px",
+    top: "30px",
     right: "5px",
     zIndex: 10,
     transition: "all 0.3s ease-in-out",

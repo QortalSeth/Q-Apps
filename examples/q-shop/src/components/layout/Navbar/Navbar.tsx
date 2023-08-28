@@ -30,11 +30,7 @@ import QShopLogo from "../../../assets/img/QShopLogo.webp";
 import QShopLogoLight from "../../../assets/img/QShopLogoLight.webp";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import PersonOffIcon from "@mui/icons-material/PersonOff";
-import {
-  addFilteredPosts,
-  setFilterValue,
-  setIsFiltering
-} from "../../../state/features/storeSlice";
+
 import { Store } from "../../../state/features/storeSlice";
 import { OrdersSVG } from "../../../assets/svgs/OrdersSVG";
 import { resetOrders } from "../../../state/features/orderSlice";
@@ -115,9 +111,6 @@ const NavBar: React.FC<Props> = ({
           alt="QShop Logo"
           onClick={() => {
             navigate(`/`);
-            dispatch(setIsFiltering(false));
-            dispatch(setFilterValue(""));
-            dispatch(addFilteredPosts([]));
             searchValRef.current = "";
             if (!inputRef.current) return;
             inputRef.current.value = "";

@@ -56,8 +56,9 @@ export const useFetchOrders = () => {
       user,
       catalogueId
     });
-    if (res?.isValid && !catalogueHashMap.hasOwnProperty(catalogueId)) {
+    if (res?.isValid) {
       dispatch(setCatalogueHashMap(res));
+      return res;
     }
   };
 

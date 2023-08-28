@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo } from "react";
-import { useNavigate } from "react-router-dom";
+import { redirect, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../../state/store";
 import { useParams } from "react-router-dom";
@@ -9,16 +9,20 @@ import {
   CircularProgress,
   Chip,
   FormControl,
-  Rating
+  Rating,
+  Typography
 } from "@mui/material";
 import {
+  Catalogue,
   setIsLoadingGlobal,
   updateRecentlyVisitedStoreId
 } from "../../../state/features/globalSlice";
 import {
   Product,
-  StoreReview,
-  clearReviews
+  clearReviews,
+  clearViewedStoreDataContainer,
+  setCurrentViewedStore,
+  setViewedStoreDataContainer
 } from "../../../state/features/storeSlice";
 import LazyLoad from "../../../components/common/LazyLoad";
 import ContextMenuResource from "../../../components/common/ContextMenu/ContextMenuResource";
@@ -60,6 +64,8 @@ import { Cart as CartInterface } from "../../../state/features/cartSlice";
 import { ExpandMoreSVG } from "../../../assets/svgs/ExpandMoreSVG";
 import { StoreDetails } from "../StoreDetails/StoreDetails";
 import { StoreReviews } from "../StoreReviews/StoreReviews";
+import { setNotification } from "../../../state/features/notificationsSlice";
+import { objectToBase64 } from "../../../utils/toBase64";
 
 interface IListProducts {
   sort: string;
@@ -95,6 +101,14 @@ export const Store = () => {
   const carts = useSelector((state: RootState) => state.cart.carts);
   // Get storeId from Redux
   const storeId = useSelector((state: RootState) => state.store.storeId);
+  // Get current viewed store from Redux
+  const currentViewedStore = useSelector(
+    (state: RootState) => state.store.currentViewedStore
+  );
+  // List products from store's data container
+  const viewedStoreListProducts = useSelector(
+    (state: RootState) => state.store.viewedStoreListProducts
+  );
 
   const { checkAndUpdateResourceCatalogue, getCatalogue } = useFetchOrders();
 
@@ -102,20 +116,13 @@ export const Store = () => {
 
   const dispatch = useDispatch();
 
-  const [userStore, setUserStore] = React.useState<any>(null);
-  const [dataContainer, setDataContainer] = useState(null);
   const [products, setProducts] = React.useState<Product[]>([]);
-  const [listProducts, setListProducts] = useState<IListProducts>({
-    sort: "created",
-    products: [],
-    categories: []
-  });
   const [totalCartQuantity, setTotalCartQuantity] = useState<number>(0);
   const [filterPrice, setFilterPrice] = useState<PriceFilter | null>(null);
   const [filterDate, setFilterDate] = useState<DateFilter | null>(
     DateFilter.newest
   );
-  const [categoryChips, setCategoryChips] = useState<{ label: string }[]>([]);
+  const [categoryChips, setCategoryChips] = useState<string[]>([]);
   const [openStoreDetails, setOpenStoreDetails] = useState<boolean>(false);
   const [openStoreReviews, setOpenStoreReviews] = useState<boolean>(false);
   const [averageStoreRating, setAverageStoreRating] = useState<number | null>(
@@ -127,9 +134,8 @@ export const Store = () => {
   const getProducts = useCallback(async () => {
     if (!store) return;
     try {
-      dispatch(setIsLoadingGlobal(true));
       const offset = products.length;
-      const productList = listProducts.products;
+      const productList = viewedStoreListProducts.products;
       const responseData = productList.slice(offset, offset + 20);
       const structureData = responseData.map(
         (product: ProductDataContainer): Product => {
@@ -152,21 +158,39 @@ export const Store = () => {
         }
       });
       setProducts(copiedProducts);
+      // First check in catalogueHashMap if the product raw data is available. If it is, don't do anything as that data will already be available to use in the filterProducts useMemo() function.
+      // If it isn't in catalogueHashMap, loop through the products and add the catalogue found so that you don't fetch other catalogues that you don't need, as each one contains 10 products. This goes too fast on first mount, therefore you can't rely on redux to verify if the catalogue is available or not.
+      let localCatalogue: Record<string, Catalogue> = {};
       for (const content of structureData) {
+        if (
+          (catalogueHashMap[content.catalogueId] &&
+            catalogueHashMap[content.catalogueId].products[content.id]) ||
+          localCatalogue[content.catalogueId]
+        ) {
+          continue;
+        }
         if (content.user && content.id) {
           const res = checkAndUpdateResourceCatalogue({
             id: content.catalogueId
           });
           if (res) {
-            getCatalogue(content.user, content.catalogueId);
+            const fetchedCatalogue: Catalogue = await getCatalogue(
+              content.user,
+              content.catalogueId
+            );
+            if (fetchedCatalogue) {
+              localCatalogue = {
+                ...localCatalogue,
+                [content.catalogueId]: fetchedCatalogue
+              };
+            }
           }
         }
       }
     } catch (error) {
-    } finally {
-      dispatch(setIsLoadingGlobal(false));
+      console.error(error);
     }
-  }, [products, listProducts]);
+  }, [products, viewedStoreListProducts]);
 
   // Get store on mount & setCurrentStore when it's your own store
   const getStore = useCallback(async () => {
@@ -176,87 +200,130 @@ export const Store = () => {
 
     try {
       dispatch(setIsLoadingGlobal(true));
-      let myStore;
-      const url = `/arbitrary/resources/search?service=STORE&identifier=${store}&exactmatchnames=true&mode=ALL&name=${name}&includemetadata=true`;
-      const info = await fetch(url, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json"
-        }
-      });
-
-      const responseDataStore = await info.json();
-      const filterOut = responseDataStore.filter((store: any) =>
-        store.identifier.startsWith("q-store-general-")
-      );
-      if (filterOut.length === 0) return;
-      if (filterOut.length !== 0) {
-        // Get first element since it returns an array of stores
-        myStore = filterOut[0];
-      }
-
-      const urlStore = `/arbitrary/STORE/${name}/${store}`;
-      const resource = await fetch(urlStore, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json"
-        }
-      });
-      const responseData = await resource.json();
-      // Set userStore to local state now that you have the info/metadata & resource
-      setUserStore({
-        created: responseData?.created || "",
-        id: myStore.identifier,
-        title: responseData?.title || "",
-        location: responseData?.location,
-        shipsTo: responseData?.shipsTo,
-        description: responseData?.description || "",
-        category: myStore.metadata?.category,
-        tags: myStore.metadata?.tags || [],
-        logo: responseData?.logo || ""
-      });
-      const urlDatacontainer = `/arbitrary/DOCUMENT/${name}/${store}-datacontainer`;
-      const responseContainer = await fetch(urlDatacontainer, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json"
-        }
-      });
-      // Set dataContainer locally to do filtering in the future since it cannot be done on QDN at the moment
-      const responseDataContainer = await responseContainer.json();
-      setDataContainer({
-        ...responseDataContainer,
-        id: `${store}-datacontainer`
-      });
-      let categories: any = {};
-      const mappedProducts = Object.keys(responseDataContainer.products)
-        .map((key) => {
-          const category = responseDataContainer?.products[key]?.category;
-          if (category) {
-            categories[category] = true;
+      // Check if store data is not already inside redux, and that if it does, that it's not from another store. This is to avoid unnecessary QDN calls. getProducts() will get data from the existing data container if the store hasn't changed, hence why we clear the products array here as well as the datacontainer only if the currentViewedStore is not the same as the store in the url.
+      if (!currentViewedStore || currentViewedStore.id !== store) {
+        setProducts([]);
+        dispatch(clearReviews());
+        dispatch(clearViewedStoreDataContainer());
+        let myStore;
+        const url = `/arbitrary/resources/search?service=STORE&identifier=${store}&exactmatchnames=true&mode=ALL&name=${name}&includemetadata=true`;
+        const info = await fetch(url, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json"
           }
-          return {
-            ...responseDataContainer.products[key],
-            productId: key,
-            user: responseDataContainer.owner
+        });
+
+        const responseDataStore = await info.json();
+        const filterOut = responseDataStore.filter((store: any) =>
+          store.identifier.startsWith("q-store-general-")
+        );
+        if (filterOut.length === 0) return;
+        if (filterOut.length !== 0) {
+          // Get first element since it returns an array of stores
+          myStore = filterOut[0];
+        }
+
+        const urlStore = `/arbitrary/STORE/${name}/${store}`;
+        const resource = await fetch(urlStore, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json"
+          }
+        });
+        const responseData = await resource.json();
+        // Set shop data to redux now that you have the info/metadata & resource
+        dispatch(
+          setCurrentViewedStore({
+            created: responseData?.created || "",
+            id: myStore.identifier,
+            title: responseData?.title || "",
+            location: responseData?.location,
+            shipsTo: responseData?.shipsTo,
+            description: responseData?.description || "",
+            category: myStore.metadata?.category,
+            tags: myStore.metadata?.tags || [],
+            logo: responseData?.logo || ""
+          })
+        );
+        // Have access to the storeId in global state for when you are in cart for example
+        dispatch(setStoreId(store));
+        dispatch(updateRecentlyVisitedStoreId(store));
+        dispatch(setStoreOwner(name));
+
+        const urlDatacontainer = `/arbitrary/DOCUMENT/${name}/${store}-datacontainer`;
+        const responseContainer = await fetch(urlDatacontainer, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json"
+          }
+        });
+        // Set dataContainer in redux if the response is 200 status. This is to do filtering in the future since it cannot be done on QDN at the moment
+        if (responseContainer.ok) {
+          const responseDataContainer = await responseContainer.json();
+          dispatch(
+            setViewedStoreDataContainer({
+              ...responseDataContainer,
+              id: `${store}-datacontainer`
+            })
+          );
+          // If you can't find the data container, aka response code of 404, and it's not your own store, redirect to home page
+        } else if (
+          responseContainer.status === 404 &&
+          username !== user?.name
+        ) {
+          navigate("/");
+          dispatch(
+            setNotification({
+              msg: "Error getting store data container.",
+              alertType: "error"
+            })
+          );
+          // If you can't find the data container, aka response code of 404, and it's your own store, prompt to create the data container
+        } else if (
+          responseContainer.status === 404 &&
+          username === user?.name
+        ) {
+          // Publish Data Container to QDN
+          let formatStoreIdentifier = store;
+          if (formatStoreIdentifier.endsWith("-")) {
+            formatStoreIdentifier = formatStoreIdentifier.slice(0, -1);
+          }
+          if (formatStoreIdentifier.startsWith("-")) {
+            formatStoreIdentifier = formatStoreIdentifier.slice(1);
+          }
+          const dataContainer = {
+            storeId: store,
+            shortStoreId: formatStoreIdentifier,
+            owner: username,
+            products: {}
           };
-        })
-        .sort((a, b) => b.created - a.created);
-      // Setting list products locally
-      setListProducts({
-        sort: "created",
-        products: mappedProducts,
-        categories: Object.keys(categories).map((cat) => ({ label: cat }))
-      });
-      // Have access to the storeId in global state for when you are in cart for example
-      dispatch(setStoreId(store));
-      dispatch(updateRecentlyVisitedStoreId(store));
-      dispatch(setStoreOwner(name));
+          const dataContainerToBase64 = await objectToBase64(dataContainer);
+          await qortalRequest({
+            action: "PUBLISH_QDN_RESOURCE",
+            name: name,
+            service: "DOCUMENT",
+            data64: dataContainerToBase64,
+            identifier: `${storeId}-datacontainer`,
+            filename: "datacontainer.json"
+          });
+          // If you can't find the data container, but it's a response of 500, throw general error and redirect to home page
+        } else if (!responseContainer.ok && responseContainer.status !== 404) {
+          navigate("/");
+          dispatch(
+            setNotification({
+              msg: "Server Error",
+              alertType: "error"
+            })
+          );
+        }
+      }
     } catch (error) {
+      console.error(error);
     } finally {
       dispatch(setIsLoadingGlobal(false));
     }
-  }, [username, store, dataContainer]);
+  }, [username, store, currentViewedStore]);
 
   // Get 100 store reviews from QDN and calculate the average review
   const getStoreAverageReview = async () => {
@@ -302,21 +369,17 @@ export const Store = () => {
     }
   };
 
-  // Get Store && Store Reviews and set it in local state
+  // Get Store and set it in local state
   useEffect(() => {
-    setProducts([]);
-    setUserStore(null);
-    dispatch(clearReviews());
     getStore();
   }, [username, store]);
 
   // Get average store rating when storeId is available
-
   useEffect(() => {
-    if (storeId) {
+    if (storeId && currentViewedStore?.id !== storeId) {
       getStoreAverageReview();
     }
-  }, [storeId]);
+  }, [storeId, currentViewedStore]);
 
   // Set cart notifications when cart changes
   useEffect(() => {
@@ -339,7 +402,6 @@ export const Store = () => {
   }, [getProducts]);
 
   // Filter products
-
   const filteredProducts = useMemo(() => {
     const newArray: any = products
       .map((product: Product, index) => {
@@ -384,7 +446,7 @@ export const Store = () => {
       const condition =
         categoryChips.length > 0
           ? product?.category &&
-            categoryChips.some((chip) => chip.label === product.category)
+            categoryChips.some((chip) => chip === product.category)
           : true;
       return condition;
     });
@@ -402,18 +464,28 @@ export const Store = () => {
 
   // Filtering by categories
 
-  const handleChipSelect = (value: { label: string }[]) => {
+  const handleChipSelect = (value: string[]) => {
     setCategoryChips(value);
   };
 
-  const handleChipRemove = (chip: { label: string }) => {
-    setCategoryChips((prevChips) =>
-      prevChips.filter((c) => c.label !== chip.label)
-    );
+  const handleChipRemove = (chip: string) => {
+    setCategoryChips((prevChips) => prevChips.filter((c) => c !== chip));
   };
 
-  if (!userStore) return null;
-  if (isLoadingGlobal) return <CircularProgress />;
+  if (isLoadingGlobal) return;
+
+  if (!currentViewedStore && !isLoadingGlobal)
+    return (
+      <Typography
+        marginTop={"20px"}
+        fontFamily={"Karla"}
+        fontSize={"25px"}
+        fontWeight={"500"}
+        textAlign={"center"}
+      >
+        Store Not Found!
+      </Typography>
+    );
 
   return (
     <Grid container sx={{ width: "100%" }}>
@@ -441,19 +513,19 @@ export const Store = () => {
                 multiple
                 id="categories-select"
                 value={categoryChips}
-                options={listProducts?.categories}
+                options={viewedStoreListProducts?.categories}
                 disableCloseOnSelect
                 onChange={(e: any, value) =>
-                  handleChipSelect(value as { label: string }[])
+                  handleChipSelect(value as string[])
                 }
                 renderTags={(values: any) =>
-                  values.map((value: { label: string }) => {
+                  values.map((value: string) => {
                     return (
                       <Chip
-                        key={value?.label}
-                        label={value?.label}
+                        key={value}
+                        label={value}
                         onDelete={() => {
-                          handleChipRemove(value as { label: string });
+                          handleChipRemove(value);
                         }}
                       />
                     );
@@ -462,11 +534,9 @@ export const Store = () => {
                 renderOption={(props, option: any) => (
                   <li {...props}>
                     <FiltersCheckbox
-                      checked={categoryChips.some(
-                        (chip) => chip.label === option?.label
-                      )}
+                      checked={categoryChips.some((chip) => chip === option)}
                     />
-                    {option?.label}
+                    {option}
                   </li>
                 )}
                 renderInput={(params) => (
@@ -548,7 +618,18 @@ export const Store = () => {
       <Grid item xs={12} sm={9}>
         <ProductManagerRow>
           <StoreTitleCard>
-            <StoreLogo src={userStore?.logo} alt={userStore?.id} />
+            <StoreLogo
+              src={
+                username === user?.name
+                  ? currentStore?.logo
+                  : currentViewedStore?.logo
+              }
+              alt={
+                username === user?.name
+                  ? currentStore?.id
+                  : currentViewedStore?.id
+              }
+            />
             <StoreTitleCol>
               <StoreTitle
                 onClick={() => {
@@ -557,7 +638,7 @@ export const Store = () => {
               >
                 {username === user?.name
                   ? currentStore?.title
-                  : userStore?.title}
+                  : currentViewedStore?.title}
               </StoreTitle>
               {averageRatingLoader ? (
                 <CircularProgress />
@@ -643,7 +724,7 @@ export const Store = () => {
                 </ProductCardCol>
               );
             })
-          ) : products.length === 0 && username === user?.name ? (
+          ) : filteredProducts.length === 0 && username === user?.name ? (
             <NoProductsContainer>
               <NoProductsText>
                 You currently have no products! Add some in the Product Manager.
@@ -670,7 +751,8 @@ export const Store = () => {
           position: "relative",
           padding: "25px 40px",
           borderRadius: "5px",
-          outline: "none"
+          outline: "none",
+          overflowY: "auto"
         }}
         open={openStoreDetails}
       >
@@ -678,22 +760,34 @@ export const Store = () => {
           setOpenStoreDetails={setOpenStoreDetails}
           storeTitle={
             username === user?.name
-              ? currentStore?.title
-              : userStore?.title || ""
+              ? currentStore?.title || ""
+              : currentViewedStore?.title || ""
           }
           storeImage={
-            username === user?.name ? currentStore?.logo : userStore?.logo || ""
+            username === user?.name
+              ? currentStore?.logo || ""
+              : currentViewedStore?.logo || ""
           }
           storeOwner={username || ""}
           storeDescription={
             username === user?.name
-              ? currentStore?.description
-              : userStore?.description || ""
+              ? currentStore?.description || ""
+              : currentViewedStore?.description || ""
           }
           dateCreated={
             username === user?.name
-              ? currentStore?.created
-              : userStore?.created || 0
+              ? currentStore?.created || 0
+              : currentViewedStore?.created || 0
+          }
+          location={
+            username === user?.name
+              ? currentStore?.location || ""
+              : currentViewedStore?.location || ""
+          }
+          shipsTo={
+            username === user?.name
+              ? currentStore?.shipsTo || ""
+              : currentViewedStore?.shipsTo || ""
           }
         />
       </ReusableModalStyled>
@@ -716,9 +810,9 @@ export const Store = () => {
       >
         <StoreReviews
           averageStoreRating={averageStoreRating}
-          storeTitle={userStore?.title || ""}
-          storeImage={userStore?.logo || ""}
-          storeId={userStore?.id || ""}
+          storeTitle={currentViewedStore?.title || ""}
+          storeImage={currentViewedStore?.logo || ""}
+          storeId={currentViewedStore?.id || ""}
           setOpenStoreReviews={setOpenStoreReviews}
         />
       </ReusableModalStyled>

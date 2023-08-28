@@ -68,6 +68,7 @@ export const IconsRow = styled(Box)({
   gap: "5px",
   opacity: 0.9,
   fontSize: "22px",
+  fontWeight: "bold",
   whiteSpace: "nowrap"
 });
 

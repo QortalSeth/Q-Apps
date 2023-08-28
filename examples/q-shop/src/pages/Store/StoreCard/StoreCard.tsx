@@ -48,6 +48,7 @@ export const StoreCard: FC<StoreCardProps> = ({
     if ((e.target as HTMLElement)?.id === `expand-icon-${storeId}`) {
       return;
     }
+    // Setting storeOwner and storeId into the url params which can then be used in the Store component
     navigate(`/${storeOwner}/${storeId}`);
   };
 
@@ -62,7 +63,7 @@ export const StoreCard: FC<StoreCardProps> = ({
   }, [storeDescription]);
 
   return (
-    <StoresRow item xs={12} sm={6} md={3} key={storeId}>
+    <StoresRow item xs={12} sm={6} md={6} lg={3} key={storeId}>
       <ContextMenuResource
         name={storeOwner}
         service="STORE"

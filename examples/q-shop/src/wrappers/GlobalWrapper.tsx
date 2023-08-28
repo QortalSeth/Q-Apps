@@ -164,7 +164,8 @@ const GlobalWrapper: React.FC<Props> = ({ children, setTheme }) => {
         shipsTo: responseData?.shipsTo,
         description: responseData?.description || "",
         category: blog.metadata?.category,
-        tags: blog.metadata?.tags || []
+        tags: blog.metadata?.tags || [],
+        logo: responseData?.logo || ""
       })
     );
     // Set listProducts in the Redux global state
@@ -566,6 +567,8 @@ const GlobalWrapper: React.FC<Props> = ({ children, setTheme }) => {
       }
     }
   }, [recentlyVisitedStoreId, myStores]);
+
+  console.log({ isLoadingGlobal });
 
   return (
     <>

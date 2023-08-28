@@ -26,6 +26,8 @@ import {
   AddQuantityButton,
   CartContainer,
   ColumnTitle,
+  ConfirmPurchaseContainer,
+  ConfirmPurchaseRow,
   GarbageIcon,
   IconsRow,
   OrderTotalRow,
@@ -55,7 +57,11 @@ import {
 } from "../../state/features/globalSlice";
 import { QortalSVG } from "../../assets/svgs/QortalSVG";
 import { setNotification } from "../../state/features/notificationsSlice";
-import { CustomInputField } from "../../components/modals/CreateStoreModal-styles";
+import {
+  CreateButton as ConfirmPurchaseButton,
+  CancelButton,
+  CustomInputField
+} from "../../components/modals/CreateStoreModal-styles";
 import {
   CustomMenuItem,
   CustomSelect,
@@ -115,6 +121,8 @@ export const Cart = () => {
   const [region, setRegion] = useState<string>("");
   const [zipCode, setZipCode] = useState<string>("");
   const [deliveryNote, setDeliveryNote] = useState<string>("");
+  const [confirmPurchaseModalOpen, setConfirmPurchaseModalOpen] =
+    useState<boolean>(false);
 
   // Set cart & orders to local state
   useEffect(() => {
@@ -151,6 +159,22 @@ export const Cart = () => {
     const selectedOption = states.find((state) => state.text === optionId);
     setState(selectedOption?.text || null);
   };
+
+  //  Check to see if any of the products in the cart are digital and that there are none which are physical
+  const isDigitalOrder = useMemo(() => {
+    if (!localCart) return false;
+    return Object.keys(localCart.orders).every((key) => {
+      const order = localCart.orders[key];
+      const productId = order?.productId;
+      const catalogueId = order?.catalogueId;
+      let product = null;
+      if (productId && catalogueId && catalogueHashMap[catalogueId]) {
+        product = catalogueHashMap[catalogueId]?.products[productId];
+      }
+      if (!product) return false;
+      return product.type === "digital";
+    });
+  }, [localCart]);
 
   const handlePurchase = async () => {
     if (!localCart) {
@@ -537,194 +561,321 @@ export const Cart = () => {
     [cartOrders, localCart, catalogueHashMap]
   );
 
-  if (isLoadingGlobal) return <CircularProgress />;
-
   return (
-    <ReusableModal
-      open={isOpen}
-      customStyles={{
-        width: "96%",
-        maxWidth: 1500,
-        height: "96%",
-        backgroundColor: theme.palette.mode === "light" ? "#e8e8e8" : "#32333c",
-        position: "relative",
-        padding: "15px 20px 35px 10px",
-        borderRadius: "3px",
-        overflowY: "auto",
-        overflowX: "hidden",
-        maxHeight: "90vh"
-      }}
-    >
-      <CartContainer
-        container
-        direction={isMobile ? "column" : "row"}
-        spacing={1}
+    <>
+      <ReusableModal
+        open={isOpen}
+        customStyles={{
+          width: "96%",
+          maxWidth: 1500,
+          height: "96%",
+          backgroundColor:
+            theme.palette.mode === "light" ? "#e8e8e8" : "#32333c",
+          position: "relative",
+          padding: "15px 20px 35px 10px",
+          borderRadius: "3px",
+          overflowY: "auto",
+          overflowX: "hidden",
+          maxHeight: "90vh"
+        }}
       >
-        <Grid item xs={12} sm={9} sx={{ width: "100%" }}>
-          {!localCart || cartOrders.length === 0 ? (
-            <ProductTitle style={{ textAlign: "center" }}>
-              No items in cart
-            </ProductTitle>
-          ) : (
-            <>
-              {checkoutPage ? (
-                <>
-                  <BackToCheckoutButton
-                    onClick={() => {
-                      setCheckoutPage(false);
-                    }}
-                    style={{ marginBottom: "5px" }}
-                  >
-                    <BackArrowSVG color={"white"} height={"22"} width={"22"} />{" "}
-                    Checkout
-                  </BackToCheckoutButton>
-                  <ColumnTitle>Delivery Information</ColumnTitle>
-                  <Grid container spacing={2}>
-                    <ProductInfoCol item xs={12} sm={6}>
-                      {/* Customer Name */}
-                      <FormControl fullWidth>
-                        <CustomInputField
-                          style={{ flexGrow: 1 }}
-                          name="customer-name"
-                          label="Customer Name"
-                          variant="filled"
-                          value={customerName}
-                          required
-                          onChange={(e) =>
-                            setCustomerName(e.target.value as string)
-                          }
-                        />
-                      </FormControl>
-                      {/* Street Address */}
-                      <FormControl fullWidth>
-                        <CustomInputField
-                          style={{ flexGrow: 1 }}
-                          name="street-address"
-                          label="Street Address"
-                          variant="filled"
-                          value={streetAddress}
-                          required
-                          onChange={(e) =>
-                            setStreetAddress(e.target.value as string)
-                          }
-                        />
-                      </FormControl>
-                      {/* City */}
-                      <FormControl fullWidth>
-                        <CustomInputField
-                          style={{ flexGrow: 1 }}
-                          name="city"
-                          label="City"
-                          variant="filled"
-                          value={city}
-                          required
-                          onChange={(e) => setCity(e.target.value as string)}
-                        />
-                      </FormControl>
-                      {/* Country */}
-                      <FormControl fullWidth>
-                        <InputFieldCustomLabel id="country-label">
-                          Country
-                        </InputFieldCustomLabel>
-                        <CustomSelect
-                          labelId="country-label"
-                          label="Country"
-                          variant="filled"
-                          value={country}
-                          onChange={(event) => {
-                            handleSelectCountry(
-                              event as SelectChangeEvent<string | null>
-                            );
-                          }}
-                          required
-                          fullWidth
-                        >
-                          {countries.map((country: CountryProps) => {
-                            return (
-                              <CustomMenuItem value={country.text}>
-                                {country.text}
-                              </CustomMenuItem>
-                            );
-                          })}
-                        </CustomSelect>
-                      </FormControl>
-                    </ProductInfoCol>
-                    <ProductInfoCol item xs={12} sm={6}>
-                      {/* State or region */}
-                      {country === "United States" ? (
+        <CartContainer
+          container
+          direction={isMobile ? "column" : "row"}
+          spacing={1}
+        >
+          <Grid item xs={12} sm={9} sx={{ width: "100%" }}>
+            {!localCart || cartOrders.length === 0 ? (
+              <ProductTitle style={{ textAlign: "center" }}>
+                No items in cart
+              </ProductTitle>
+            ) : (
+              <>
+                {checkoutPage && !isDigitalOrder ? (
+                  <>
+                    <BackToCheckoutButton
+                      onClick={() => {
+                        setCheckoutPage(false);
+                      }}
+                      style={{ marginBottom: "5px" }}
+                    >
+                      <BackArrowSVG
+                        color={"white"}
+                        height={"22"}
+                        width={"22"}
+                      />{" "}
+                      Checkout
+                    </BackToCheckoutButton>
+                    <ColumnTitle>Delivery Information</ColumnTitle>
+                    <Grid container spacing={2}>
+                      <ProductInfoCol item xs={12} sm={6}>
+                        {/* Customer Name */}
                         <FormControl fullWidth>
-                          <InputFieldCustomLabel id="state-label">
-                            State
+                          <CustomInputField
+                            style={{ flexGrow: 1 }}
+                            name="customer-name"
+                            label="Customer Name"
+                            variant="filled"
+                            value={customerName}
+                            required
+                            onChange={(e) =>
+                              setCustomerName(e.target.value as string)
+                            }
+                          />
+                        </FormControl>
+                        {/* Street Address */}
+                        <FormControl fullWidth>
+                          <CustomInputField
+                            style={{ flexGrow: 1 }}
+                            name="street-address"
+                            label="Street Address"
+                            variant="filled"
+                            value={streetAddress}
+                            required
+                            onChange={(e) =>
+                              setStreetAddress(e.target.value as string)
+                            }
+                          />
+                        </FormControl>
+                        {/* City */}
+                        <FormControl fullWidth>
+                          <CustomInputField
+                            style={{ flexGrow: 1 }}
+                            name="city"
+                            label="City"
+                            variant="filled"
+                            value={city}
+                            required
+                            onChange={(e) => setCity(e.target.value as string)}
+                          />
+                        </FormControl>
+                        {/* Country */}
+                        <FormControl fullWidth>
+                          <InputFieldCustomLabel id="country-label">
+                            Country
                           </InputFieldCustomLabel>
                           <CustomSelect
-                            labelId="state-label"
-                            label="State"
+                            labelId="country-label"
+                            label="Country"
                             variant="filled"
-                            value={state}
+                            value={country}
                             onChange={(event) => {
-                              handleSelectState(
+                              handleSelectCountry(
                                 event as SelectChangeEvent<string | null>
                               );
                             }}
                             required
                             fullWidth
                           >
-                            {states.map((state: CountryProps) => {
+                            {countries.map((country: CountryProps) => {
                               return (
-                                <CustomMenuItem value={state.text}>
-                                  {state.text}
+                                <CustomMenuItem value={country.text}>
+                                  {country.text}
                                 </CustomMenuItem>
                               );
                             })}
                           </CustomSelect>
                         </FormControl>
-                      ) : (
+                      </ProductInfoCol>
+                      <ProductInfoCol item xs={12} sm={6}>
+                        {/* State or region */}
+                        {country === "United States" ? (
+                          <FormControl fullWidth>
+                            <InputFieldCustomLabel id="state-label">
+                              State
+                            </InputFieldCustomLabel>
+                            <CustomSelect
+                              labelId="state-label"
+                              label="State"
+                              variant="filled"
+                              value={state}
+                              onChange={(event) => {
+                                handleSelectState(
+                                  event as SelectChangeEvent<string | null>
+                                );
+                              }}
+                              required
+                              fullWidth
+                            >
+                              {states.map((state: CountryProps) => {
+                                return (
+                                  <CustomMenuItem value={state.text}>
+                                    {state.text}
+                                  </CustomMenuItem>
+                                );
+                              })}
+                            </CustomSelect>
+                          </FormControl>
+                        ) : (
+                          <FormControl fullWidth>
+                            <CustomInputField
+                              style={{ flexGrow: 1 }}
+                              name="region"
+                              label="Region"
+                              variant="filled"
+                              value={region}
+                              required
+                              onChange={(e) =>
+                                setRegion(e.target.value as string)
+                              }
+                            />
+                          </FormControl>
+                        )}
+                        {/* Zip Code */}
                         <FormControl fullWidth>
                           <CustomInputField
                             style={{ flexGrow: 1 }}
-                            name="region"
-                            label="Region"
+                            name="zip-code"
+                            label="Zip Code"
                             variant="filled"
-                            value={region}
+                            value={zipCode}
                             required
                             onChange={(e) =>
-                              setRegion(e.target.value as string)
+                              setZipCode(e.target.value as string)
                             }
                           />
                         </FormControl>
-                      )}
-                      {/* Zip Code */}
-                      <FormControl fullWidth>
-                        <CustomInputField
-                          style={{ flexGrow: 1 }}
-                          name="zip-code"
-                          label="Zip Code"
-                          variant="filled"
-                          value={zipCode}
-                          required
-                          onChange={(e) => setZipCode(e.target.value as string)}
-                        />
-                      </FormControl>
-                      {/* Delivery Note */}
-                      <FormControl fullWidth>
-                        <CustomInputField
-                          style={{ flexGrow: 1 }}
-                          name="delivery-note"
-                          label="Delivery Note"
-                          variant="filled"
-                          value={deliveryNote}
-                          required
-                          onChange={(e) =>
-                            setDeliveryNote(e.target.value as string)
-                          }
-                        />
-                      </FormControl>
-                    </ProductInfoCol>
-                  </Grid>
-                </>
-              ) : (
-                <>
-                  <ColumnTitle>My Cart</ColumnTitle>
+                        {/* Delivery Note */}
+                        <FormControl fullWidth>
+                          <CustomInputField
+                            style={{ flexGrow: 1 }}
+                            name="delivery-note"
+                            label="Delivery Note"
+                            variant="filled"
+                            value={deliveryNote}
+                            required
+                            onChange={(e) =>
+                              setDeliveryNote(e.target.value as string)
+                            }
+                          />
+                        </FormControl>
+                      </ProductInfoCol>
+                    </Grid>
+                  </>
+                ) : (
+                  <>
+                    <ColumnTitle>My Cart</ColumnTitle>
+                    {(cartOrders || []).map((key) => {
+                      const order = localCart?.orders[key];
+                      const quantity = order?.quantity;
+                      const productId = order?.productId;
+                      const catalogueId = order?.catalogueId;
+                      let product = null;
+                      if (
+                        productId &&
+                        catalogueId &&
+                        catalogueHashMap[catalogueId]
+                      ) {
+                        product =
+                          catalogueHashMap[catalogueId]?.products[productId];
+                      }
+                      if (!product) return null;
+                      const priceInQort: number | null =
+                        product.price?.find(
+                          (priceItem: any) => priceItem?.currency === "qort"
+                        )?.value || null;
+                      return (
+                        <ProductContainer container key={productId}>
+                          <ProductInfoCol
+                            item
+                            xs={12}
+                            sm={4}
+                            style={{ textAlign: "center" }}
+                          >
+                            <ProductTitle>{product.title}</ProductTitle>
+                            <ProductImage
+                              src={product?.images?.[0] || ""}
+                              alt={`product-img-${productId}}`}
+                            />
+                          </ProductInfoCol>
+                          <ProductDetailsCol item xs={12} sm={8}>
+                            <ProductDescription>
+                              {product.description}
+                            </ProductDescription>
+                            <ProductDetailsRow>
+                              <ProductPriceFont>
+                                Price per unit:
+                                <span>
+                                  <QortalSVG
+                                    color={theme.palette.text.primary}
+                                    height={"20"}
+                                    width={"20"}
+                                  />
+                                  {priceInQort}
+                                </span>
+                              </ProductPriceFont>
+                              {priceInQort && (
+                                <ProductPriceFont>
+                                  Total Price:
+                                  <span>
+                                    <QortalSVG
+                                      color={theme.palette.text.primary}
+                                      height={"20"}
+                                      width={"20"}
+                                    />
+                                    {priceInQort * quantity}
+                                  </span>
+                                </ProductPriceFont>
+                              )}
+                              <IconsRow>
+                                <GarbageIcon
+                                  onClickFunc={() => {
+                                    dispatch(
+                                      removeProductFromCart({
+                                        storeId,
+                                        productId
+                                      })
+                                    );
+                                  }}
+                                  color={theme.palette.text.primary}
+                                  height={"30"}
+                                  width={"30"}
+                                />
+                                <QuantityRow>
+                                  <RemoveQuantityButton
+                                    onClickFunc={() => {
+                                      dispatch(
+                                        subtractQuantityFromCart({
+                                          storeId,
+                                          productId
+                                        })
+                                      );
+                                    }}
+                                    color={theme.palette.text.primary}
+                                    height={"30"}
+                                    width={"30"}
+                                  />
+                                  {quantity}
+                                  <AddQuantityButton
+                                    onClickFunc={() =>
+                                      dispatch(
+                                        addQuantityToCart({
+                                          storeId,
+                                          productId
+                                        })
+                                      )
+                                    }
+                                    color={theme.palette.text.primary}
+                                    height={"30"}
+                                    width={"30"}
+                                  />
+                                </QuantityRow>
+                              </IconsRow>
+                            </ProductDetailsRow>
+                          </ProductDetailsCol>
+                        </ProductContainer>
+                      );
+                    })}
+                  </>
+                )}
+              </>
+            )}
+          </Grid>
+          {localCart && cartOrders.length > 0 && (
+            <Grid item xs={12} sm={3} sx={{ width: "100%" }}>
+              <TotalSumContainer>
+                <TotalSumHeader>Order Summary</TotalSumHeader>
+                <TotalSumItems>
                   {(cartOrders || []).map((key) => {
                     const order = localCart?.orders[key];
                     const quantity = order?.quantity;
@@ -745,174 +896,96 @@ export const Cart = () => {
                         (priceItem: any) => priceItem?.currency === "qort"
                       )?.value || null;
                     return (
-                      <ProductContainer container key={productId}>
-                        <ProductInfoCol
-                          item
-                          xs={12}
-                          sm={4}
-                          style={{ textAlign: "center" }}
-                        >
-                          <ProductTitle>{product.title}</ProductTitle>
-                          <ProductImage
-                            src={product?.images?.[0] || ""}
-                            alt={`product-img-${productId}}`}
+                      <TotalSumItem>
+                        <TotalSumItemTitle>
+                          x{quantity} {product.title}
+                        </TotalSumItemTitle>
+                        <TotalSumItemTitle>
+                          <QortalSVG
+                            color={theme.palette.text.primary}
+                            height={"18"}
+                            width={"18"}
                           />
-                        </ProductInfoCol>
-                        <ProductDetailsCol item xs={12} sm={8}>
-                          <ProductDescription>
-                            {product.description}
-                          </ProductDescription>
-                          <ProductDetailsRow>
-                            <ProductPriceFont>
-                              Price per unit:
-                              <span>
-                                <QortalSVG
-                                  color={theme.palette.text.primary}
-                                  height={"20"}
-                                  width={"20"}
-                                />
-                                {priceInQort}
-                              </span>
-                            </ProductPriceFont>
-                            {priceInQort && (
-                              <ProductPriceFont>
-                                Total Price:
-                                <span>
-                                  <QortalSVG
-                                    color={theme.palette.text.primary}
-                                    height={"20"}
-                                    width={"20"}
-                                  />
-                                  {priceInQort * quantity}
-                                </span>
-                              </ProductPriceFont>
-                            )}
-                            <IconsRow>
-                              <GarbageIcon
-                                onClickFunc={() => {
-                                  dispatch(
-                                    removeProductFromCart({
-                                      storeId,
-                                      productId
-                                    })
-                                  );
-                                }}
-                                color={theme.palette.text.primary}
-                                height={"30"}
-                                width={"30"}
-                              />
-                              <QuantityRow>
-                                <RemoveQuantityButton
-                                  onClickFunc={() => {
-                                    dispatch(
-                                      subtractQuantityFromCart({
-                                        storeId,
-                                        productId
-                                      })
-                                    );
-                                  }}
-                                  color={theme.palette.text.primary}
-                                  height={"30"}
-                                  width={"30"}
-                                />
-                                {quantity}
-                                <AddQuantityButton
-                                  onClickFunc={() =>
-                                    dispatch(
-                                      addQuantityToCart({
-                                        storeId,
-                                        productId
-                                      })
-                                    )
-                                  }
-                                  color={theme.palette.text.primary}
-                                  height={"30"}
-                                  width={"30"}
-                                />
-                              </QuantityRow>
-                            </IconsRow>
-                          </ProductDetailsRow>
-                        </ProductDetailsCol>
-                      </ProductContainer>
+                          {priceInQort}
+                        </TotalSumItemTitle>
+                      </TotalSumItem>
                     );
                   })}
-                </>
-              )}
-            </>
+                </TotalSumItems>
+                <OrderTotalRow>
+                  <span>Total:</span>
+                  <QortalSVG
+                    color={theme.palette.text.primary}
+                    height={"22"}
+                    width={"22"}
+                  />
+                  {totalSum}
+                </OrderTotalRow>
+                <CheckoutButton
+                  style={{ marginTop: "15px" }}
+                  onClick={() => {
+                    if (checkoutPage) {
+                      handlePurchase();
+                    } else if (!checkoutPage && !isDigitalOrder) {
+                      setCheckoutPage(true);
+                    } else if (!checkoutPage && isDigitalOrder) {
+                      setConfirmPurchaseModalOpen(true);
+                    } else {
+                      setCheckoutPage(true);
+                    }
+                  }}
+                >
+                  {checkoutPage || (!checkoutPage && isDigitalOrder)
+                    ? "Purchase"
+                    : "Checkout"}
+                </CheckoutButton>
+              </TotalSumContainer>
+            </Grid>
           )}
-        </Grid>
-        {localCart && cartOrders.length > 0 && (
-          <Grid item xs={12} sm={3} sx={{ width: "100%" }}>
-            <TotalSumContainer>
-              <TotalSumHeader>Order Summary</TotalSumHeader>
-              <TotalSumItems>
-                {(cartOrders || []).map((key) => {
-                  const order = localCart?.orders[key];
-                  const quantity = order?.quantity;
-                  const productId = order?.productId;
-                  const catalogueId = order?.catalogueId;
-                  let product = null;
-                  if (
-                    productId &&
-                    catalogueId &&
-                    catalogueHashMap[catalogueId]
-                  ) {
-                    product =
-                      catalogueHashMap[catalogueId]?.products[productId];
-                  }
-                  if (!product) return null;
-                  const priceInQort: number | null =
-                    product.price?.find(
-                      (priceItem: any) => priceItem?.currency === "qort"
-                    )?.value || null;
-                  return (
-                    <TotalSumItem>
-                      <TotalSumItemTitle>
-                        x{quantity} {product.title}
-                      </TotalSumItemTitle>
-                      <TotalSumItemTitle>
-                        <QortalSVG
-                          color={theme.palette.text.primary}
-                          height={"18"}
-                          width={"18"}
-                        />
-                        {priceInQort}
-                      </TotalSumItemTitle>
-                    </TotalSumItem>
-                  );
-                })}
-              </TotalSumItems>
-              <OrderTotalRow>
-                <span>Total:</span>
-                <QortalSVG
-                  color={theme.palette.text.primary}
-                  height={"22"}
-                  width={"22"}
-                />
-                {totalSum}
-              </OrderTotalRow>
-              <CheckoutButton
-                style={{ marginTop: "15px" }}
-                onClick={() => {
-                  if (checkoutPage) {
-                    handlePurchase();
-                  } else {
-                    setCheckoutPage(true);
-                  }
-                }}
-              >
-                {checkoutPage ? "Purchase" : "Checkout"}
-              </CheckoutButton>
-            </TotalSumContainer>
-          </Grid>
-        )}
-      </CartContainer>
-      <CloseIconModal
-        onClickFunc={closeModal}
-        color={theme.palette.text.primary}
-        height={"22"}
-        width={"22"}
-      />
-    </ReusableModal>
+        </CartContainer>
+        <CloseIconModal
+          onClickFunc={closeModal}
+          color={theme.palette.text.primary}
+          height={"22"}
+          width={"22"}
+        />
+      </ReusableModal>
+      <ReusableModal
+        open={confirmPurchaseModalOpen}
+        customStyles={{
+          width: "96%",
+          maxWidth: 700,
+          height: "auto",
+          backgroundColor:
+            theme.palette.mode === "light" ? "#e8e8e8" : "#32333c",
+          position: "relative",
+          padding: "15px 20px 35px 10px",
+          borderRadius: "3px",
+          overflowY: "auto",
+          overflowX: "hidden",
+          maxHeight: "90vh"
+        }}
+      >
+        <ConfirmPurchaseContainer>
+          <ConfirmPurchaseRow>
+            Are you sure you wish to complete this purchase?
+          </ConfirmPurchaseRow>
+          <ConfirmPurchaseRow style={{ gap: "15px" }}>
+            <CancelButton
+              variant="outlined"
+              color="error"
+              onClick={() => {
+                setConfirmPurchaseModalOpen(false);
+              }}
+            >
+              Cancel
+            </CancelButton>
+            <ConfirmPurchaseButton variant="contained" onClick={handlePurchase}>
+              Confirm
+            </ConfirmPurchaseButton>
+          </ConfirmPurchaseRow>
+        </ConfirmPurchaseContainer>
+      </ReusableModal>
+    </>
   );
 };

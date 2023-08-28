@@ -249,3 +249,23 @@ export const OrderTotalRow = styled(Box)(({ theme }) => ({
     marginRight: "5px"
   }
 }));
+
+export const ConfirmPurchaseContainer = styled(Box)(({ theme }) => ({
+  display: "flex",
+  flexDirection: "column",
+  alignItems: "center",
+  justifyContent: "center",
+  gap: "15px",
+  padding: "25px"
+}));
+
+export const ConfirmPurchaseRow = styled(Box)(({ theme }) => ({
+  display: "flex",
+  flexDirection: "row",
+  alignItems: "center",
+  fontFamily: "Karla",
+  fontSize: "21px",
+  fontWeight: 300,
+  letterSpacing: 0,
+  userSelect: "none"
+}));
