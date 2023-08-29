@@ -3,7 +3,6 @@ import CreateIcon from "@mui/icons-material/Create";
 import {
   AddCrowdFundButton,
   AddLogoIcon,
-  CATCard,
   CATContainer,
   CoverImagePreview,
   CreateContainer,
@@ -11,10 +10,12 @@ import {
   CustomInputField,
   LogoPreviewRow,
   ModalBody,
+  NewCrowdfundSubtitle,
+  NewCrowdfundTimeDescription,
   NewCrowdfundTitle,
   TimesIcon,
 } from "./Crowdfund-styles";
-import { Box, Button, Modal, useTheme } from "@mui/material";
+import { Box, Button, Modal, TextField, useTheme } from "@mui/material";
 import ReactQuill, { Quill } from "react-quill";
 import ImageResize from "quill-image-resize-module-react";
 import ShortUniqueId from "short-unique-id";
@@ -27,6 +28,14 @@ import { setNotification } from "../../state/features/notificationsSlice";
 import { objectToBase64 } from "../../utils/toBase64";
 import { RootState } from "../../state/store";
 import { attachmentBase, crowdfundBase } from "../../constants";
+import dayjs, { Dayjs } from "dayjs";
+import isBetween from "dayjs/plugin/isBetween"; // Import the plugin
+import { DemoContainer } from "@mui/x-date-pickers/internals/demo";
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import { DateTimePicker } from "@mui/x-date-pickers/DateTimePicker";
+import duration from "dayjs/plugin/duration";
+import bs58 from "bs58";
 import {
   addCrowdfundToBeginning,
   addToHashMap,
@@ -34,7 +43,9 @@ import {
 } from "../../state/features/crowdfundSlice";
 import ImageUploader from "../ImageUploader";
 import { ChannelCard, CrowdfundContainer } from "../../pages/Home/Home-styles";
-
+import { DesktopDateTimePicker } from "@mui/x-date-pickers";
+dayjs.extend(isBetween);
+dayjs.extend(duration);
 Quill.register("modules/imageResize", ImageResize);
 
 const uid = new ShortUniqueId();
@@ -74,12 +85,17 @@ interface NewCrowdfundProps {
 }
 export const NewCrowdfund = ({ editId, editContent }: NewCrowdfundProps) => {
   const theme = useTheme();
-
+  const [value, setValue] = React.useState<Dayjs | null>(dayjs().add(5, "day"));
+  const [goalValue, setGoalValue] = useState<number | string>("");
   const dispatch = useDispatch();
   const username = useSelector((state: RootState) => state.auth?.user?.name);
+  const userAddress = useSelector(
+    (state: RootState) => state.auth?.user?.address
+  );
 
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [title, setTitle] = useState<string>("");
+  const [description, setDescription] = useState<string>("");
   const [inlineContent, setInlineContent] = useState("");
   const [attachments, setAttachments] = useState<any[]>([]);
   const [coverImage, setCoverImage] = useState<string | null>(null);
@@ -96,42 +112,226 @@ export const NewCrowdfund = ({ editId, editContent }: NewCrowdfundProps) => {
   const onClose = () => {
     setIsOpen(false);
   };
+
+  const diffInMins = React.useMemo(() => {
+    const differenceInMinutes = dayjs().diff(value, "minute");
+    return differenceInMinutes * -1;
+  }, [value]);
   console.log({ editContent });
 
-  async function publishQDNResource() {
-    let errorMsg = "";
-    let name: string = "";
-    if (username) {
-      name = username;
-    }
-    if (!name) {
-      errorMsg =
-        "Cannot publish without access to your name. Please authenticate.";
-    }
-    if (editId && editContent?.user !== name) {
-      errorMsg = "Cannot publish another user's resource";
-    }
+  // Define the type for your POST request body
+  interface PostRequestBody {
+    ciyamAtVersion: number;
+    codeBytesBase64: string | undefined;
+    dataBytesBase64: string | undefined;
+    numCallStackPages: number;
+    numUserStackPages: number;
+    minActivationAmount: number;
+  }
 
-    if (errorMsg) {
-      dispatch(
-        setNotification({
-          msg: errorMsg,
-          alertType: "error",
-        })
-      );
-      return;
-    }
-
-    const crowdfundObject: any = {
-      title,
-      createdAt: Date.now(),
-      version: 1,
-      attachments: [],
-      inlineContent,
-      coverImage,
-    };
-
+  // Define the function to make the POST request
+  async function fetchPostRequest(
+    url: string,
+    body: PostRequestBody
+  ): Promise<string> {
     try {
+      const response = await fetch(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(body),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Error: ${response.statusText}`);
+      }
+
+      const text = await response.text();
+      return text;
+    } catch (error: any) {
+      console.error(
+        "There was an error with the fetch operation:",
+        error.message
+      );
+      throw error;
+    }
+  }
+
+  const dataBytePlaceholder = [
+    0, 0, 0, 0, 0, 0, 0, 60, 0, 0, 0, 0, 61, -3, 36, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 58, -72, -68, -80, 127, 99, 68, -76, 42, -80, 66, 80, -56,
+    106, 110, -117, 117, -45, -3, -69, -58, 86, -107, -110, 93, 0, 0, 0, 0, 0,
+    0, 0,
+  ];
+
+  // Function to replace a value at a given position in the original array with an integer
+  function replaceValue(array, position, value) {
+    const buffer = new ArrayBuffer(8);
+    const view = new DataView(buffer);
+    view.setBigInt64(0, BigInt(value));
+    for (let i = 0; i < 8; i++) {
+      array[position + i] = view.getInt8(i);
+    }
+  }
+
+  function replaceValueWithFloat(array, position, value) {
+    const buffer = new ArrayBuffer(8);
+    const view = new DataView(buffer);
+    view.setFloat64(0, value);
+    for (let i = 0; i < 8; i++) {
+      array[position + i] = view.getInt8(i);
+    }
+  }
+
+  // Function to replace a value at a given position in the original array with an array
+  function replaceArraySlice(originalArray, position, newArray) {
+    for (let i = 0; i < newArray.length; i++) {
+      originalArray[position + i] = newArray[i];
+    }
+  }
+
+  function uint8ArrayToBase64(byteArray: Uint8Array): string {
+    const chars: string[] = Array.from(byteArray).map(byte =>
+      String.fromCharCode(byte)
+    );
+    return btoa(chars.join(""));
+  }
+
+  function base64ToUint8Array(base64) {
+    var binary_string = atob(base64);
+    var len = binary_string.length;
+    var bytes = new Uint8Array(len);
+
+    for (var i = 0; i < len; i++) {
+      bytes[i] = binary_string.charCodeAt(i);
+    }
+
+    return bytes;
+  }
+
+  const codeBytes =
+    "NQMBAAAABTUDAAAAAAI3BAYAAAACAAAAAgAAAAACAAAAAwAAAAJLAAAAAwAAAAAAAAAgJQAAAAM1BAAAAAAEIAAAAAQAAAABGTgBHwAAAAAAAAAKMgQDKDAzAwQAAAAFNQElAAAABhsAAAAGByg1AwcAAAAFIAAAAAUAAAACCyg1AwUAAAAHJAAAAAcAAAAI0jUDBgAAAAkyAwozBAIAAAAJGgAAAFk=";
+
+  const createBytes = (goalAmount: number, blocks: number, address: string) => {
+    try {
+      var uint8Array = base64ToUint8Array(codeBytes);
+      console.log(uint8Array);
+      const newArray = [...dataBytePlaceholder];
+      // Replacing the values for addrSleepMinutes and addrGoalAmount
+      replaceValue(newArray, 0, blocks);
+      replaceValue(newArray, 8, goalAmount);
+
+      // Decoding the awardee address and replacing its value in the array
+      const decodedAwardeeAddress = bs58.decode(address);
+      replaceArraySlice(newArray, 80, decodedAwardeeAddress);
+      console.log({ newArray });
+      const byteArray: Uint8Array = new Uint8Array(newArray);
+      console.log({ byteArray });
+      const encodedString: string = uint8ArrayToBase64(byteArray);
+      return encodedString;
+    } catch (error) {}
+  };
+
+  function toSignedByte(value) {
+    if (value > 127) {
+      return value - 256;
+    }
+    return value;
+  }
+
+  async function publishQDNResource() {
+    try {
+      if (!userAddress) throw new Error("Unable to locate user address");
+      let errorMsg = "";
+      let name: string = "";
+      if (username) {
+        name = username;
+      }
+      if (!name) {
+        errorMsg =
+          "Cannot publish without access to your name. Please authenticate.";
+      }
+      if (!title) {
+        errorMsg = "Cannot publish without a title";
+      }
+      if (editId && editContent?.user !== name) {
+        errorMsg = "Cannot publish another user's resource";
+      }
+
+      if (errorMsg) {
+        dispatch(
+          setNotification({
+            msg: errorMsg,
+            alertType: "error",
+          })
+        );
+        return;
+      }
+
+      const sanitizeTitle = title
+        .replace(/[^a-zA-Z0-9\s-]/g, "")
+        .replace(/\s+/g, "-")
+        .replace(/-+/g, "-")
+        .trim()
+        .toLowerCase();
+
+      const requestBody: PostRequestBody = {
+        ciyamAtVersion: 2,
+        codeBytesBase64: undefined,
+        dataBytesBase64: undefined,
+        numCallStackPages: 0,
+        numUserStackPages: 0,
+        minActivationAmount: 0,
+      };
+      const differenceInMinutes = dayjs().diff(value, "minute");
+      const blocksToGoal = differenceInMinutes * -1;
+      if (blocksToGoal < 2880 || blocksToGoal > 43200)
+        throw new Error("end of crowdfund needs to be between 2880 and 43200");
+      requestBody.dataBytesBase64 = createBytes(
+        +goalValue,
+        blocksToGoal,
+        userAddress
+      );
+      requestBody.codeBytesBase64 = codeBytes;
+      const creationBytes = await fetchPostRequest("/at/create", requestBody);
+      const decodedBuffer = bs58.decode(creationBytes);
+
+      // Convert Buffer to Uint8Array
+      const uint8Array = Uint8Array.from(decodedBuffer);
+      const signedBytes = Array.from(uint8Array).map(toSignedByte);
+      console.log(signedBytes);
+      console.log({ creationBytes });
+
+      const response = await qortalRequest({
+        action: "DEPLOY_AT",
+        creationBytes,
+        name: "q-fund crowdfund",
+        description: sanitizeTitle.slice(0, 30),
+        type: "crowdfund",
+        tags: "q-fund",
+        amount: 0.01,
+        assetId: 0,
+      });
+      console.log({ response });
+
+      const crowdfundObject: any = {
+        title,
+        createdAt: Date.now(),
+        version: 1,
+        attachments: [],
+        inlineContent,
+        coverImage,
+        deployedAT: {
+          ...response,
+          blocksToGoal,
+          goalValue: +goalValue,
+          userAddress,
+        },
+      };
+
       const id = uid();
 
       const attachmentArray: any[] = [];
@@ -180,17 +380,11 @@ export const NewCrowdfund = ({ editId, editContent }: NewCrowdfundProps) => {
         await qortalRequest(multiplePublish);
       }
 
-      const sanitizeTitle = title
-        .replace(/[^a-zA-Z0-9\s-]/g, "")
-        .replace(/\s+/g, "-")
-        .replace(/-+/g, "-")
-        .trim()
-        .toLowerCase();
       const identifier = editId
         ? editId
         : `${crowdfundBase}${sanitizeTitle.slice(0, 30)}_${id}`;
       const crowdfundObjectToBase64 = await objectToBase64(crowdfundObject);
-      let requestBody: any = {
+      let requestBody2: any = {
         action: "PUBLISH_QDN_RESOURCE",
         name: name,
         service: "DOCUMENT",
@@ -200,10 +394,10 @@ export const NewCrowdfund = ({ editId, editContent }: NewCrowdfundProps) => {
         identifier,
       };
 
-      await qortalRequest(requestBody);
+      await qortalRequest(requestBody2);
       dispatch(
         setNotification({
-          msg: "Alert published",
+          msg: "Crowdfund deployed and published",
           alertType: "success",
         })
       );
@@ -229,30 +423,58 @@ export const NewCrowdfund = ({ editId, editContent }: NewCrowdfundProps) => {
       setAttachments([]);
       setCoverImage(null);
       setIsOpen(false);
+      setGoalValue("");
+      setValue(dayjs().add(5, "day"));
     } catch (error: any) {
       let notificationObj: any = null;
       if (typeof error === "string") {
         notificationObj = {
-          msg: error || "Failed to publish alert",
+          msg: error || "Failed to publish crowdfund",
           alertType: "error",
         };
       } else if (typeof error?.error === "string") {
         notificationObj = {
-          msg: error?.error || "Failed to publish alert",
+          msg: error?.error || "Failed to publish crowdfund",
           alertType: "error",
         };
       } else {
         notificationObj = {
-          msg: error?.message || "Failed to publish alert",
+          msg: error?.message || "Failed to publish crowdfund",
           alertType: "error",
         };
       }
       if (!notificationObj) return;
       dispatch(setNotification(notificationObj));
 
-      throw new Error("Failed to publish alert");
+      throw new Error("Failed to publish crowdfund");
     }
   }
+
+  const formatDuration = (totalMinutes: number) => {
+    const durationObj = dayjs.duration(totalMinutes, "minutes");
+
+    const days = durationObj.days();
+    const hours = durationObj.hours();
+    const minutes = durationObj.minutes();
+
+    return `${days > 0 ? days + " days, " : ""}${
+      hours > 0 ? hours + " hours, " : ""
+    }${minutes} minutes`;
+  };
+
+  const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const newValue = event.target.valueAsNumber;
+
+    if (newValue >= 1 && newValue <= 1_000_000) {
+      setGoalValue(newValue);
+    } else if (!event.target.value) {
+      setGoalValue("");
+    }
+  };
+
+  const minDateTime = dayjs().add(2, "day");
+  const maxDateTime = dayjs().add(30, "day");
+
   return (
     <>
       {username && (
@@ -320,7 +542,7 @@ export const NewCrowdfund = ({ editId, editContent }: NewCrowdfundProps) => {
 
           <CustomInputField
             name="title"
-            label="Title"
+            label="Title of crowdfund"
             variant="filled"
             value={title}
             onChange={e => setTitle(e.target.value)}
@@ -329,12 +551,52 @@ export const NewCrowdfund = ({ editId, editContent }: NewCrowdfundProps) => {
             maxRows={3}
             required
           />
-
+          <CustomInputField
+            name="description"
+            label="Describe your crowdfund in a few words"
+            variant="filled"
+            value={description}
+            onChange={e => setDescription(e.target.value)}
+            inputProps={{ maxLength: 180 }}
+            multiline
+            maxRows={3}
+            required
+          />
+          <LocalizationProvider dateAdapter={AdapterDayjs}>
+            <DesktopDateTimePicker
+              label="End date of crowdfund. Min 5 days Max 30 days"
+              value={value}
+              onChange={newValue => setValue(newValue)}
+              minDateTime={minDateTime}
+              maxDateTime={maxDateTime}
+            />
+          </LocalizationProvider>
+          <NewCrowdfundTimeDescription>
+            Length of crowdfund: {diffInMins} blocks ~{" "}
+            {formatDuration(diffInMins)}
+          </NewCrowdfundTimeDescription>
+          <TextField
+            label="Goal amount"
+            type="number"
+            variant="outlined"
+            value={goalValue}
+            onChange={handleInputChange}
+            inputProps={{
+              min: 1,
+              max: 1_000_000,
+              step: 1,
+            }}
+          />
+          <NewCrowdfundSubtitle>
+            Add necessary files - optional
+          </NewCrowdfundSubtitle>
           <FileAttachment
             setAttachments={setAttachments}
             attachments={attachments}
           />
-
+          <NewCrowdfundSubtitle>
+            Describe your objective in depth
+          </NewCrowdfundSubtitle>
           <ReactQuill
             theme="snow"
             value={inlineContent}

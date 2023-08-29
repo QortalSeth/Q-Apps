@@ -7,7 +7,7 @@ interface QortalRequestOptions {
   title?: string
   description?: string
   category?: string
-  tags?: string[]
+  tags?: string[] | string
   identifier?: string
   address?: string
   metaData?: string
@@ -38,6 +38,9 @@ interface QortalRequestOptions {
   query?: string
   excludeBlocked?: boolean
   exactMatchNames?: boolean
+  creationBytes?: string
+  type?: string
+  assetId?: number
 }
 
 declare function qortalRequest(options: QortalRequestOptions): Promise<any>
