@@ -21,6 +21,7 @@ import {
 } from '../../components/Crowdfund/Crowdfund-styles';
 import AudioPlayer, { PlayerBox } from '../../components/common/AudioPlayer';
 import { NewCrowdfund } from '../../components/Crowdfund/NewCrowdfund';
+import { CommentSection } from '../../components/common/Comments/CommentSection';
 
 export const Crowdfund = () => {
   const theme = useTheme();
@@ -124,7 +125,7 @@ export const Crowdfund = () => {
     return content;
   }, [crowdfundData]);
 
-  if (!crowdfundData) return null;
+  // if (!crowdfundData) return null;
   return (
     <>
       <NewCrowdfund editId={id} editContent={editContent} />
@@ -278,6 +279,18 @@ export const Crowdfund = () => {
           })}
         </Box>
       </Box>
+      <Spacer height="15px" />
+      <CrowdfundTitle
+        variant="h1"
+        color="textPrimary"
+        sx={{
+          textAlign: 'center',
+          textDecoration: 'underline',
+        }}
+      >
+        Comments
+      </CrowdfundTitle>
+      <CommentSection postId={id || ''} postName={name || ''} />
     </>
   );
 };
