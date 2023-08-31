@@ -30,6 +30,8 @@ import { NewCrowdfund } from '../../components/Crowdfund/NewCrowdfund';
 import { CommentSection } from '../../components/common/Comments/CommentSection';
 import { Donate } from '../../components/common/Donate/Donate';
 import { CrowdfundProgress } from '../../components/common/Progress/Progress';
+import { Countdown } from '../../components/common/Countdown/Countdown';
+import moment from 'moment';
 
 export const Crowdfund = () => {
   const theme = useTheme();
@@ -56,12 +58,31 @@ export const Crowdfund = () => {
   const intervalBalance = useRef<any>(null);
   const atAddress = useMemo(() => {
     return crowdfundData?.deployedAT?.aTAddress || null;
-  }, crowdfundData);
+  }, [crowdfundData]);
   const hashMapCrowdfunds = useSelector(
     (state: RootState) => state.crowdfund.hashMapCrowdfunds
   );
 
+  const endDateRef = useRef<any>(null);
+
+  const endDate = useMemo(() => {
+    if (!currentAtInfo?.sleepUntilHeight || !nodeInfo?.height) return null;
+    if (endDateRef.current) return endDateRef.current;
+
+    const diff = +currentAtInfo?.sleepUntilHeight - +nodeInfo.height;
+    const end = moment().add(diff, 'minutes');
+    endDateRef.current = end;
+    return end;
+  }, [currentAtInfo, nodeInfo]);
+  const blocksRemaning = useMemo(() => {
+    if (!currentAtInfo?.sleepUntilHeight || !nodeInfo?.height) return null;
+    const diff = +currentAtInfo?.sleepUntilHeight - +nodeInfo.height;
+
+    return diff;
+  }, [currentAtInfo, nodeInfo]);
+  console.log({ currentAtInfo, nodeInfo, endDate });
   const getCurrentAtInfo = React.useCallback(async atAddress => {
+    console.log({ atAddress });
     try {
       const url = `/at/${atAddress}`;
       const response = await fetch(url, {
@@ -80,15 +101,16 @@ export const Crowdfund = () => {
   }, []);
   const getNodeInfo = React.useCallback(async () => {
     try {
-      const url = `/admin/status`;
+      const url = `/blocks/height`;
       const response = await fetch(url, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
         },
       });
+      console.log({ response });
       const responseDataSearch = await response.json();
-      setNodeInfo(responseDataSearch);
+      setNodeInfo({ height: responseDataSearch });
     } catch (error) {
       console.log(error);
     } finally {
@@ -157,6 +179,7 @@ export const Crowdfund = () => {
 
             setCrowdfundData(combinedData);
             dispatch(addToHashMap(combinedData));
+            console.log({ combinedData });
             if (combinedData?.deployedAT?.aTAddress) {
               getCurrentAtInfo(combinedData?.deployedAT?.aTAddress);
               getAtAddressInfo(combinedData?.deployedAT?.aTAddress);
@@ -178,9 +201,12 @@ export const Crowdfund = () => {
 
       if (existingCrowdfund) {
         setCrowdfundData(existingCrowdfund);
+        getCurrentAtInfo(existingCrowdfund?.deployedAT?.aTAddress);
+        getAtAddressInfo(existingCrowdfund?.deployedAT?.aTAddress);
       } else {
         getCrowdfundData(name, id);
       }
+      getNodeInfo();
     }
   }, [id, name, hashMapCrowdfunds]);
 
@@ -294,6 +320,9 @@ export const Crowdfund = () => {
               raised={atAddressBalance}
               goal={crowdfundData?.deployedAT?.goalValue}
             />
+          )}
+          {endDate && (
+            <Countdown endDate={endDate} blocksRemaning={blocksRemaning} />
           )}
 
           <Box
