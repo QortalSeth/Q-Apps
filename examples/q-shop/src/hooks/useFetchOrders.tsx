@@ -49,6 +49,7 @@ export const useFetchOrders = () => {
       content
     });
     dispatch(addToHashMap(res));
+    return res;
   };
 
   const getCatalogue = async (user: string, catalogueId: string) => {
@@ -128,11 +129,26 @@ export const useFetchOrders = () => {
       });
 
       dispatch(upsertOrders(structureData));
+      // Get the order raw data from getOrder API Call only if the hashMapOrders doesn't have the order or if the order is more recently updated than the existing order
+      let localOrderHashMap: Record<string, Order> = {};
       for (const content of structureData) {
+        if (hashMapOrders[content.id] || localOrderHashMap[content.id]) {
+          continue;
+        }
         if (content.user && content.id) {
           const res = checkAndUpdateResource(content);
           if (res) {
-            getOrder(content.user, content.id, content);
+            const fetchedOrder: Order = await getOrder(
+              content.user,
+              content.id,
+              content
+            );
+            if (fetchedOrder) {
+              localOrderHashMap = {
+                ...localOrderHashMap,
+                [fetchedOrder.id]: fetchedOrder
+              };
+            }
           }
         }
       }
@@ -169,11 +185,26 @@ export const useFetchOrders = () => {
         });
 
         dispatch(upsertMyOrders(structureData));
+        // Get the order raw data from getOrder API Call only if the hashMapOrders doesn't have the order or if the order is more recently updated than the existing order
+        let localOrderHashMap: Record<string, Order> = {};
         for (const content of structureData) {
+          if (hashMapOrders[content.id] || localOrderHashMap[content.id]) {
+            continue;
+          }
           if (content.user && content.id) {
             const res = checkAndUpdateResource(content);
             if (res) {
-              getOrder(content.user, content.id, content);
+              const fetchedOrder: Order = await getOrder(
+                content.user,
+                content.id,
+                content
+              );
+              if (fetchedOrder) {
+                localOrderHashMap = {
+                  ...localOrderHashMap,
+                  [fetchedOrder.id]: fetchedOrder
+                };
+              }
             }
           }
         }

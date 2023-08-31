@@ -101,6 +101,8 @@ export const Store = () => {
   const carts = useSelector((state: RootState) => state.cart.carts);
   // Get storeId from Redux
   const storeId = useSelector((state: RootState) => state.store.storeId);
+  // Get storeOwner from Redux
+  const storeOwner = useSelector((state: RootState) => state.store.storeOwner);
   // Get current viewed store from Redux
   const currentViewedStore = useSelector(
     (state: RootState) => state.store.currentViewedStore
@@ -108,6 +110,10 @@ export const Store = () => {
   // List products from store's data container
   const viewedStoreListProducts = useSelector(
     (state: RootState) => state.store.viewedStoreListProducts
+  );
+  // List products from store's data container when you own the store
+  const ownStoreListProducts = useSelector(
+    (state: RootState) => state.global.listProducts
   );
 
   const { checkAndUpdateResourceCatalogue, getCatalogue } = useFetchOrders();
@@ -135,7 +141,11 @@ export const Store = () => {
     if (!store) return;
     try {
       const offset = products.length;
-      const productList = viewedStoreListProducts.products;
+      // Get products from store's data container, with ternary depending on whether you own the store or not
+      const productList =
+        username !== user?.name
+          ? viewedStoreListProducts.products
+          : ownStoreListProducts.products;
       const responseData = productList.slice(offset, offset + 20);
       const structureData = responseData.map(
         (product: ProductDataContainer): Product => {
@@ -190,9 +200,9 @@ export const Store = () => {
     } catch (error) {
       console.error(error);
     }
-  }, [products, viewedStoreListProducts]);
+  }, [products, viewedStoreListProducts, ownStoreListProducts]);
 
-  // Get store on mount & setCurrentStore when it's your own store
+  // Get store on mount & dipatch setCurrentViewedStore to redux when it's not your store. If it is your store, this is handled already in the global wrapper, so we do nothing as well.
   const getStore = useCallback(async () => {
     let name = username;
     if (!name) return;
@@ -200,8 +210,15 @@ export const Store = () => {
 
     try {
       dispatch(setIsLoadingGlobal(true));
-      // Check if store data is not already inside redux, and that if it does, that it's not from another store. This is to avoid unnecessary QDN calls. getProducts() will get data from the existing data container if the store hasn't changed, hence why we clear the products array here as well as the datacontainer only if the currentViewedStore is not the same as the store in the url.
-      if (!currentViewedStore || currentViewedStore.id !== store) {
+      // Have access to the storeId, store owner and recently viewed store id in global state for when you are in cart for example
+      dispatch(setStoreId(store));
+      dispatch(updateRecentlyVisitedStoreId(store));
+      dispatch(setStoreOwner(name));
+      // Check if store data is not already inside redux, and that if it is, that it's not from another store. This is to avoid unnecessary QDN calls. getProducts() will get its data from the existing data container in Redux if the store hasn't changed, hence why we clear the products array here as well as the datacontainer only if the currentViewedStore is not the same as the store in the url.
+      if (
+        (!currentViewedStore && name !== user?.name) ||
+        (currentViewedStore?.id !== store && name !== user?.name)
+      ) {
         setProducts([]);
         dispatch(clearReviews());
         dispatch(clearViewedStoreDataContainer());
@@ -246,10 +263,6 @@ export const Store = () => {
             logo: responseData?.logo || ""
           })
         );
-        // Have access to the storeId in global state for when you are in cart for example
-        dispatch(setStoreId(store));
-        dispatch(updateRecentlyVisitedStoreId(store));
-        dispatch(setStoreOwner(name));
 
         const urlDatacontainer = `/arbitrary/DOCUMENT/${name}/${store}-datacontainer`;
         const responseContainer = await fetch(urlDatacontainer, {
@@ -258,7 +271,7 @@ export const Store = () => {
             "Content-Type": "application/json"
           }
         });
-        // Set dataContainer in redux if the response is 200 status. This is to do filtering in the future since it cannot be done on QDN at the moment
+        // Set dataContainer in redux if the response is 200 status. This is to do filtering in the future since it cannot be done on QDN at the moment.
         if (responseContainer.ok) {
           const responseDataContainer = await responseContainer.json();
           dispatch(
@@ -267,7 +280,7 @@ export const Store = () => {
               id: `${store}-datacontainer`
             })
           );
-          // If you can't find the data container, aka response code of 404, and it's not your own store, redirect to home page
+          // If you can't find the data container, aka response code of 404, and it's not your own store, redirect to home page.
         } else if (
           responseContainer.status === 404 &&
           username !== user?.name
@@ -279,7 +292,7 @@ export const Store = () => {
               alertType: "error"
             })
           );
-          // If you can't find the data container, aka response code of 404, and it's your own store, prompt to create the data container
+          // If you can't find the data container, aka response code of 404, and it's your own store, prompt to create the data container.
         } else if (
           responseContainer.status === 404 &&
           username === user?.name
@@ -307,7 +320,7 @@ export const Store = () => {
             identifier: `${storeId}-datacontainer`,
             filename: "datacontainer.json"
           });
-          // If you can't find the data container, but it's a response of 500, throw general error and redirect to home page
+          // If you can't find the data container, but it's a response of 500, throw general error and redirect to home page.
         } else if (!responseContainer.ok && responseContainer.status !== 404) {
           navigate("/");
           dispatch(
@@ -325,7 +338,7 @@ export const Store = () => {
     }
   }, [username, store, currentViewedStore]);
 
-  // Get 100 store reviews from QDN and calculate the average review
+  // Get 100 store reviews from QDN and calculate the average review.
   const getStoreAverageReview = async () => {
     if (!storeId) return;
     try {
@@ -369,17 +382,23 @@ export const Store = () => {
     }
   };
 
-  // Get Store and set it in local state
+  // Get Store and set it in redux global state
   useEffect(() => {
     getStore();
   }, [username, store]);
 
-  // Get average store rating when storeId is available
+  // Get average store rating when storeId is available, and only if the storeId is different from the currentViewedStore when it's not your store, or if storeId is different from currentStore when it is your store. Do this to avoid unnecessary QDN calls.
   useEffect(() => {
-    if (storeId && currentViewedStore?.id !== storeId) {
+    if (
+      storeId &&
+      ((currentViewedStore?.id !== storeId &&
+        username !== user?.name &&
+        storeOwner !== user?.name) ||
+        (currentStore?.id !== storeId && username === user?.name))
+    ) {
       getStoreAverageReview();
     }
-  }, [storeId, currentViewedStore]);
+  }, [storeId, currentViewedStore, currentStore, username, storeOwner, user]);
 
   // Set cart notifications when cart changes
   useEffect(() => {
@@ -474,7 +493,7 @@ export const Store = () => {
 
   if (isLoadingGlobal) return;
 
-  if (!currentViewedStore && !isLoadingGlobal)
+  if (!currentViewedStore && username !== user?.name && !isLoadingGlobal)
     return (
       <Typography
         marginTop={"20px"}
@@ -513,7 +532,11 @@ export const Store = () => {
                 multiple
                 id="categories-select"
                 value={categoryChips}
-                options={viewedStoreListProducts?.categories}
+                options={
+                  username !== user?.name
+                    ? viewedStoreListProducts?.categories
+                    : ownStoreListProducts?.categories
+                }
                 disableCloseOnSelect
                 onChange={(e: any, value) =>
                   handleChipSelect(value as string[])
@@ -810,9 +833,21 @@ export const Store = () => {
       >
         <StoreReviews
           averageStoreRating={averageStoreRating}
-          storeTitle={currentViewedStore?.title || ""}
-          storeImage={currentViewedStore?.logo || ""}
-          storeId={currentViewedStore?.id || ""}
+          storeTitle={
+            username === user?.name
+              ? currentStore?.title || ""
+              : currentViewedStore?.title || ""
+          }
+          storeImage={
+            username === user?.name
+              ? currentStore?.logo || ""
+              : currentViewedStore?.logo || ""
+          }
+          storeId={
+            username === user?.name
+              ? currentStore?.id || ""
+              : currentViewedStore?.id || ""
+          }
           setOpenStoreReviews={setOpenStoreReviews}
         />
       </ReusableModalStyled>

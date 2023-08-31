@@ -150,7 +150,7 @@ export const StoreReviews: FC<StoreReviewsProps> = ({
         <StoreLogo src={storeImage} alt={`${storeTitle}-logo`} />
         <StoreTitleCol style={{ gap: "10px" }}>
           <StoreTitle>{storeTitle}</StoreTitle>
-          {userHasStoreOrder && (
+          {userHasStoreOrder ? (
             <AddReviewButton onClick={() => setOpenLeaveReview(true)}>
               <StarSVG
                 color={theme.palette.mode === "dark" ? "#000000" : "#ffffff"}
@@ -159,6 +159,8 @@ export const StoreReviews: FC<StoreReviewsProps> = ({
               />{" "}
               Add Review
             </AddReviewButton>
+          ) : (
+            <ReviewsFont>You must have an order with this shop before being able to leave a review</ReviewsFont>
           )}
         </StoreTitleCol>
         <CloseIconModal

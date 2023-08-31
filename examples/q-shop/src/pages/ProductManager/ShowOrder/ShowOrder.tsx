@@ -1,4 +1,4 @@
-import { FC, useEffect, useState } from "react";
+import { FC, useEffect, useState, useMemo } from "react";
 import { ReusableModal } from "../../../components/modals/ReusableModal";
 import { Box, CircularProgress, useTheme } from "@mui/material";
 import EmailIcon from "@mui/icons-material/Email";
@@ -214,6 +214,22 @@ export const ShowOrder: FC<ShowOrderProps> = ({
       setStatusLoader(false);
     }
   };
+
+  //  Check to see if any of the products in the order are digital and that there are none which are physical. Hide delivery details in the order if that's the case.
+  const isDigitalOrder = useMemo(() => {
+    if (order && order?.details) {
+      if (!order) return false;
+      return Object.keys(order?.details || {})
+        .filter((key) => key !== "totalPrice")
+        .every((key) => {
+          const product = order?.details?.[key]?.product;
+          if (!product) return false;
+          return product?.type === "digital";
+        });
+    } else {
+      return false;
+    }
+  }, [order]);
 
   // Check to see if product status has been updated when opening <ShowOrder /> from either ProductManager.tsx or from MyOrders.tsx
   useEffect(() => {
@@ -438,29 +454,31 @@ export const ShowOrder: FC<ShowOrderProps> = ({
               </>
             )}
           </>
-          <DeliveryInfoCard>
-            <ShowOrderTitle>Delivery Information</ShowOrderTitle>
-            <OrderTitle>
-              <span>Shop Name:</span> {order?.storeName}
-            </OrderTitle>
-            <OrderTitle>
-              <span>Seller Name:</span> {order?.sellerName}
-            </OrderTitle>
-            <OrderTitle>
-              <span>Customer name:</span> {order?.delivery?.customerName}
-            </OrderTitle>
-            {order?.delivery?.shippingAddress && (
-              <>
-                {Object.entries(order?.delivery?.shippingAddress).map(
-                  ([key, value]) => (
-                    <OrderTitle key={key}>
-                      <span>{key}:</span> {value}
-                    </OrderTitle>
-                  )
-                )}
-              </>
-            )}
-          </DeliveryInfoCard>
+          {!isDigitalOrder && (
+            <DeliveryInfoCard>
+              <ShowOrderTitle>Delivery Information</ShowOrderTitle>
+              <OrderTitle>
+                <span>Shop Name:</span> {order?.storeName}
+              </OrderTitle>
+              <OrderTitle>
+                <span>Seller Name:</span> {order?.sellerName}
+              </OrderTitle>
+              <OrderTitle>
+                <span>Customer name:</span> {order?.delivery?.customerName}
+              </OrderTitle>
+              {order?.delivery?.shippingAddress && (
+                <>
+                  {Object.entries(order?.delivery?.shippingAddress).map(
+                    ([key, value]) => (
+                      <OrderTitle key={key}>
+                        <span>{key}:</span> {value}
+                      </OrderTitle>
+                    )
+                  )}
+                </>
+              )}
+            </DeliveryInfoCard>
+          )}
         </ShowOrderContent>
         <CloseButtonRow>
           <CloseButton variant="outlined" color="error" onClick={closeModal}>

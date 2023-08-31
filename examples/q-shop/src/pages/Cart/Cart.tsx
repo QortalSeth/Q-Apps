@@ -205,13 +205,14 @@ export const Cart = () => {
       return;
     }
     if (
-      !customerName ||
-      !streetAddress ||
-      !country ||
-      !city ||
-      (country === "United States" && !state) ||
-      (country !== "United States" && !region) ||
-      !zipCode
+      !isDigitalOrder &&
+      (!customerName ||
+        !streetAddress ||
+        !country ||
+        !city ||
+        (country === "United States" && !state) ||
+        (country !== "United States" && !region) ||
+        !zipCode)
     ) {
       dispatch(
         setNotification({
@@ -411,6 +412,9 @@ export const Cart = () => {
             })
             .join("")}
         </div>
+        ${
+          !isDigitalOrder
+            ? `
         <div>
           <div style="font-family: Merriweather Sans, sans-serif; font-size: 20px; letter-spacing: 0; text-align: center;">
             Delivery Information
@@ -448,6 +452,9 @@ export const Cart = () => {
             </div>
           </div>
         </div>
+        `
+            : `<div></div>`
+        }
         <div>
           <div style="font-family: Merriweather Sans, sans-serif; font-size: 20px; letter-spacing: 0; text-align: center;">
             Date of purchase
@@ -507,6 +514,7 @@ export const Cart = () => {
       setRegion("");
       setZipCode("");
       setDeliveryNote("");
+      setConfirmPurchaseModalOpen(false);
       // Close the modal and set notification message
       closeModal();
       dispatch(
