@@ -84,7 +84,14 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
         <ProductDescription>
           {addEllipsis(product?.description || "", 58)}
         </ProductDescription>
-        <ProductDescription style={{ marginTop: "auto", fontWeight: "bold" }}>
+        <ProductDescription
+          style={{
+            display: "flex",
+            gap: "5px",
+            marginTop: "auto",
+            fontWeight: "bold"
+          }}
+        >
           <QortalSVG
             color={theme.palette.text.primary}
             height={"22"}

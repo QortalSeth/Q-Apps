@@ -273,8 +273,12 @@ export const StoreTitleCol = styled(Box)({
 export const RatingContainer = styled(Box)(({ theme }) => ({
   display: "flex",
   alignItems: "center",
-  padding: "5px",
+  padding: "1px 5px",
   borderRadius: "5px",
+  fontFamily: "Karla",
+  letterSpacing: 0,
+  fontWeight: 300,
+  fontSize: "21px",
   backgroundColor: "transparent",
   transition: "all 0.3s ease-in-out",
   "&:hover": {

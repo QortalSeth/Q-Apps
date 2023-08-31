@@ -1,19 +1,27 @@
-import { createSlice } from '@reduxjs/toolkit'
-import { RootState } from '../store'
+import { createSlice } from "@reduxjs/toolkit";
+import { RootState } from "../store";
+import { CurrentStore, DataContainer, ProductDataContainer } from "./globalSlice";
 
 interface GlobalState {
-  products: Product[]
-  filteredProducts: Product[]
-  myStores: Store[]
-  hashMapProducts: Record<string, Product>
-  isFiltering: boolean
-  filterValue: string
-  hashMapStores: Record<string, Store>,
-  storeId: string | null
-  storeOwner: string | null
-  stores: Store[]
-  storeReviews: StoreReview[]
-  hashMapStoreReviews: Record<string, StoreReview>
+  products: Product[];
+  filteredProducts: Product[];
+  myStores: Store[];
+  hashMapProducts: Record<string, Product>;
+  isFiltering: boolean;
+  filterValue: string;
+  hashMapStores: Record<string, Store>;
+  storeId: string | null;
+  storeOwner: string | null;
+  stores: Store[];
+  storeReviews: StoreReview[];
+  hashMapStoreReviews: Record<string, StoreReview>;
+  currentViewedStore: CurrentStore | null;
+  viewedStoreDataContainer: DataContainer | null;
+  viewedStoreListProducts: {
+    sort: string;
+    products: ProductDataContainer[];
+    categories: string[];
+  };
 }
 
 const initialState: GlobalState = {
@@ -22,53 +30,61 @@ const initialState: GlobalState = {
   myStores: [],
   hashMapProducts: {},
   isFiltering: false,
-  filterValue: '',
+  filterValue: "",
   hashMapStores: {},
   storeId: null,
   storeOwner: null,
   stores: [],
   storeReviews: [],
   hashMapStoreReviews: {},
-}
+  // user is viewing this shop, doesn't own it
+  currentViewedStore: null, 
+  viewedStoreDataContainer: null,
+  viewedStoreListProducts: {
+    sort: "created",
+    products: [],
+    categories: []
+  },
+};
 
 export interface Price {
-  currency: string
-  value: number
+  currency: string;
+  value: number;
 }
 export interface Product {
-  title?: string
-  description?: string
-  created: number
-  user: string
-  id: string
-  category?: string
-  categoryName?: string
-  tags?: string[]
-  updated?: number
-  isValid?: boolean
-  price?: Price[]
-  images?: string[]
-  type?: string
-  catalogueId: string
-  status?: string
-  mainImageIndex?: number
-  isUpdate?: boolean
+  title?: string;
+  description?: string;
+  created: number;
+  user: string;
+  id: string;
+  category?: string;
+  categoryName?: string;
+  tags?: string[];
+  updated?: number;
+  isValid?: boolean;
+  price?: Price[];
+  images?: string[];
+  type?: string;
+  catalogueId: string;
+  status?: string;
+  mainImageIndex?: number;
+  isUpdate?: boolean;
 }
 
 export interface Store {
-  title: string
-  description: string
-  created: number
-  owner: string
-  id: string
-  category?: string
-  categoryName?: string
-  tags?: string[]
-  updated?: number
-  isValid?: boolean
-  logo?: string
-  location?: string
-  shipsTo?: string
+  title: string;
+  description: string;
+  created: number;
+  owner: string;
+  id: string;
+  category?: string;
+  categoryName?: string;
+  tags?: string[];
+  updated?: number;
+  isValid?: boolean;
+  logo?: string;
+  location?: string;
+  shipsTo?: string;
 }
 
 export interface StoreReview {
@@ -82,115 +98,112 @@ export interface StoreReview {
 }
 
 export const storeSlice = createSlice({
-  name: 'store',
+  name: "store",
   initialState,
   reducers: {
-    setIsFiltering: (state, action) => {
-      state.isFiltering = action.payload
-    },
-    setFilterValue: (state, action) => {
-      state.filterValue = action.payload
-    },
     setAllMyStores: (state, action) => {
-      state.myStores = action.payload
+      state.myStores = action.payload;
     },
     addToAllMyStores: (state, action) => {
-      state.myStores.push(action.payload)
+      state.myStores.push(action.payload);
     },
-    addPosts: (state, action) => {
-      state.products = action.payload
+    setViewedStoreDataContainer: (state, action) => {
+      let categories: any = {};
+      state.viewedStoreDataContainer = action.payload;
+      const mappedProducts = Object.keys(action.payload.products)
+        .map((key) => {
+          const category = action.payload?.products[key]?.category;
+          if (category) {
+            categories[category] = true;
+          }
+          return {
+            ...action.payload.products[key],
+            productId: key,
+            user: action.payload.owner
+          };
+        })
+        .sort((a, b) => b.created - a.created);
+      state.viewedStoreListProducts.sort = "created";
+      state.viewedStoreListProducts.products = mappedProducts;
+      state.viewedStoreListProducts.categories = Object.keys(categories).map((cat) => cat);
     },
-    addFilteredPosts: (state, action) => {
-      state.filteredProducts = action.payload
-    },
-    removePost: (state, action) => {
-      const idToDelete = action.payload
-      state.products = state.products.filter((item) => item.id !== idToDelete)
-      state.filteredProducts = state.filteredProducts.filter(
-        (item) => item.id !== idToDelete
-      )
-    },
-    addPostToBeginning: (state, action) => {
-      state.products.unshift(action.payload)
-    },
-    updatePost: (state, action) => {
-      const { id } = action.payload
-      const index = state.products.findIndex((post) => post.id === id)
-      if (index !== -1) {
-        state.products[index] = { ...action.payload }
-      }
-      const index2 = state.filteredProducts.findIndex((post) => post.id === id)
-      if (index2 !== -1) {
-        state.filteredProducts[index2] = { ...action.payload }
-      }
+    clearViewedStoreDataContainer: (state) => {
+      state.viewedStoreDataContainer = null;
+      state.viewedStoreListProducts = {
+        sort: "created",
+        products: [],
+        categories: []
+      };
     },
     addToHashMap: (state, action) => {
-      const post = action.payload
-      state.hashMapProducts[post.id] = post
+      const post = action.payload;
+      state.hashMapProducts[post.id] = post;
     },
     addToHashMapStores: (state, action) => {
-      const store = action.payload
-      state.hashMapStores[store.id] = store
+      const store = action.payload;
+      state.hashMapStores[store.id] = store;
     },
     addToHashMapStoreReviews: (state, action) => {
-      const review = action.payload
-      state.hashMapStoreReviews[review.id] = review
+      const review = action.payload;
+      state.hashMapStoreReviews[review.id] = review;
     },
     updateInHashMap: (state, action) => {
-      const { id } = action.payload
-      const post = action.payload
-      state.hashMapProducts[id] = { ...post }
+      const { id } = action.payload;
+      const post = action.payload;
+      state.hashMapProducts[id] = { ...post };
     },
     removeFromHashMap: (state, action) => {
-      const idToDelete = action.payload
-      delete state.hashMapProducts[idToDelete]
+      const idToDelete = action.payload;
+      delete state.hashMapProducts[idToDelete];
     },
     addArrayToHashMap: (state, action) => {
-      const products = action.payload
+      const products = action.payload;
       products.forEach((post: Product) => {
-        state.hashMapProducts[post.id] = post
-      })
+        state.hashMapProducts[post.id] = post;
+      });
     },
     setStoreId: (state, action) => {
-      state.storeId = action.payload
+      state.storeId = action.payload;
     },
     setStoreOwner: (state, action) => {
-      state.storeOwner = action.payload
+      state.storeOwner = action.payload;
+    },
+    setCurrentViewedStore: (state, action) => {
+      state.currentViewedStore = action.payload;
     },
     upsertPosts: (state, action) => {
       action.payload.forEach((post: Product) => {
-        const index = state.products.findIndex((p) => p.id === post.id)
+        const index = state.products.findIndex((p) => p.id === post.id);
         if (index !== -1) {
-          state.products[index] = post
+          state.products[index] = post;
         } else {
-          state.products.push(post)
+          state.products.push(post);
         }
-      })
+      });
     },
     upsertStores: (state, action) => {
       action.payload.forEach((store: Store) => {
-        const index = state.stores.findIndex((p) => p.id === store.id)
+        const index = state.stores.findIndex((p) => p.id === store.id);
         if (index !== -1) {
-          state.stores[index] = store
+          state.stores[index] = store;
         } else {
-          state.stores.push(store)
+          state.stores.push(store);
         }
-      })
+      });
     },
     upsertReviews: (state, action) => {
       action.payload.forEach((review: StoreReview) => {
-        const index = state.storeReviews.findIndex((p) => p.id === review.id)
+        const index = state.storeReviews.findIndex((p) => p.id === review.id);
         if (index !== -1) {
-          state.storeReviews[index] = review
+          state.storeReviews[index] = review;
         } else {
-          state.storeReviews.push(review)
+          state.storeReviews.push(review);
         }
-      })
+      });
     },
     addToStores: (state, action) => {
       const newStore = action.payload;
       state.stores.unshift(newStore);
-
     },
     addToReviews: (state, action) => {
       const newReview = action.payload;
@@ -198,56 +211,52 @@ export const storeSlice = createSlice({
     },
     upsertFilteredPosts: (state, action) => {
       action.payload.forEach((post: Product) => {
-        const index = state.filteredProducts.findIndex((p) => p.id === post.id)
+        const index = state.filteredProducts.findIndex((p) => p.id === post.id);
         if (index !== -1) {
-          state.filteredProducts[index] = post
+          state.filteredProducts[index] = post;
         } else {
-          state.filteredProducts.push(post)
+          state.filteredProducts.push(post);
         }
-      })
+      });
     },
     upsertPostsBeginning: (state, action) => {
       action.payload.reverse().forEach((post: Product) => {
-        const index = state.products.findIndex((p) => p.id === post.id)
+        const index = state.products.findIndex((p) => p.id === post.id);
         if (index !== -1) {
-          state.products[index] = post
+          state.products[index] = post;
         } else {
-          state.products.unshift(post)
+          state.products.unshift(post);
         }
-      })
+      });
     },
     clearReviews: (state) => {
-      state.storeReviews = []
+      state.storeReviews = [];
     },
     blockUser: (state, action) => {
-      const username = action.payload
-      state.products = state.products.filter((item) => item.user !== username)
+      const username = action.payload;
+      state.products = state.products.filter((item) => item.user !== username);
       state.filteredProducts = state.filteredProducts.filter(
         (item) => item.user !== username
-      )
+      );
     }
   }
-})
+});
 
 export const {
-  addPosts,
   addToAllMyStores,
   setAllMyStores,
-  updatePost,
-  removePost,
+  setCurrentViewedStore,
+  setViewedStoreDataContainer,
+  clearViewedStoreDataContainer,
   addToHashMap,
   updateInHashMap,
   removeFromHashMap,
   upsertPosts,
   blockUser,
-  addPostToBeginning,
   upsertPostsBeginning,
   upsertFilteredPosts,
-  addFilteredPosts,
-  setIsFiltering,
-  setFilterValue,
   addToHashMapStores,
-  setStoreId, 
+  setStoreId,
   setStoreOwner,
   upsertStores,
   upsertReviews,
@@ -255,6 +264,6 @@ export const {
   addToStores,
   addToHashMapStoreReviews,
   addToReviews
-} = storeSlice.actions
+} = storeSlice.actions;
 
-export default storeSlice.reducer
+export default storeSlice.reducer;

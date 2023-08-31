@@ -15,8 +15,10 @@ import {
 import { OwnerSVG } from "../../../assets/svgs/OwnerSVG";
 import { useTheme } from "@mui/material";
 import { CalendarSVG } from "../../../assets/svgs/CalendarSVG";
-import { DescriptionSVG } from "../../../assets/svgs/DescriptionSVG";
 import { CloseIconModal } from "../StoreReviews/StoreReviews-styles";
+import { DescriptionSVG } from "../../../assets/svgs/DescriptionSVG";
+import { LocationSVG } from "../../../assets/svgs/LocationSVG";
+import { ShippingSVG } from "../../../assets/svgs/ShippingSVG";
 
 interface StoreDetailsProps {
   storeTitle: string;
@@ -24,6 +26,8 @@ interface StoreDetailsProps {
   storeOwner: string;
   storeDescription: string;
   dateCreated: number;
+  location: string;
+  shipsTo: string;
   setOpenStoreDetails: (open: boolean) => void;
 }
 
@@ -33,6 +37,8 @@ export const StoreDetails: FC<StoreDetailsProps> = ({
   storeDescription,
   storeOwner,
   dateCreated,
+  location,
+  shipsTo,
   setOpenStoreDetails
 }) => {
   const theme = useTheme();
@@ -83,6 +89,28 @@ export const StoreDetails: FC<StoreDetailsProps> = ({
               Date Created
             </IconsRow>
             {moment(dateCreated).format("llll")}
+          </CardRow>
+          <CardRow>
+            <IconsRow>
+              <LocationSVG
+                color={theme.palette.text.primary}
+                width={"22px"}
+                height={"22px"}
+              />
+              Shop Location
+            </IconsRow>
+            {location}
+          </CardRow>
+          <CardRow>
+            <IconsRow>
+              <ShippingSVG
+                color={theme.palette.text.primary}
+                width={"22px"}
+                height={"22px"}
+              />
+              Ships To
+            </IconsRow>
+            {shipsTo}
           </CardRow>
           <CardRow>
             <IconsRow>
