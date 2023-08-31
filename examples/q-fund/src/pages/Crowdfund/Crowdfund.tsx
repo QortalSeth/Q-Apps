@@ -1,4 +1,10 @@
-import React, { useMemo, useState } from 'react';
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import { useParams } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../../state/store';
@@ -22,6 +28,8 @@ import {
 import AudioPlayer, { PlayerBox } from '../../components/common/AudioPlayer';
 import { NewCrowdfund } from '../../components/Crowdfund/NewCrowdfund';
 import { CommentSection } from '../../components/common/Comments/CommentSection';
+import { Donate } from '../../components/common/Donate/Donate';
+import { CrowdfundProgress } from '../../components/common/Progress/Progress';
 
 export const Crowdfund = () => {
   const theme = useTheme();
@@ -41,10 +49,69 @@ export const Crowdfund = () => {
     return url;
   }, [userAvatarHash, name]);
   const [crowdfundData, setCrowdfundData] = useState<any>(null);
-
+  const [currentAtInfo, setCurrentAtInfo] = useState<any>(null);
+  const [atAddressBalance, setAtAddressBalance] = useState<any>(null);
+  const [nodeInfo, setNodeInfo] = useState<any>(null);
+  const interval = useRef<any>(null);
+  const intervalBalance = useRef<any>(null);
+  const atAddress = useMemo(() => {
+    return crowdfundData?.deployedAT?.aTAddress || null;
+  }, crowdfundData);
   const hashMapCrowdfunds = useSelector(
     (state: RootState) => state.crowdfund.hashMapCrowdfunds
   );
+
+  const getCurrentAtInfo = React.useCallback(async atAddress => {
+    try {
+      const url = `/at/${atAddress}`;
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      const responseDataSearch = await response.json();
+      setCurrentAtInfo(responseDataSearch);
+    } catch (error) {
+      console.log(error);
+    } finally {
+      dispatch(setIsLoadingGlobal(false));
+    }
+  }, []);
+  const getNodeInfo = React.useCallback(async () => {
+    try {
+      const url = `/admin/status`;
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      const responseDataSearch = await response.json();
+      setNodeInfo(responseDataSearch);
+    } catch (error) {
+      console.log(error);
+    } finally {
+      dispatch(setIsLoadingGlobal(false));
+    }
+  }, []);
+  const getAtAddressInfo = React.useCallback(async atAddress => {
+    try {
+      const url = `/addresses/balance/${atAddress}`;
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      const responseDataSearch = await response.json();
+      setAtAddressBalance(responseDataSearch);
+    } catch (error) {
+      console.log(error);
+    } finally {
+      dispatch(setIsLoadingGlobal(false));
+    }
+  }, []);
 
   const getCrowdfundData = React.useCallback(
     async (name: string, id: string) => {
@@ -90,6 +157,10 @@ export const Crowdfund = () => {
 
             setCrowdfundData(combinedData);
             dispatch(addToHashMap(combinedData));
+            if (combinedData?.deployedAT?.aTAddress) {
+              getCurrentAtInfo(combinedData?.deployedAT?.aTAddress);
+              getAtAddressInfo(combinedData?.deployedAT?.aTAddress);
+            }
           }
         }
       } catch (error) {
@@ -125,7 +196,50 @@ export const Crowdfund = () => {
     return content;
   }, [crowdfundData]);
 
-  // if (!crowdfundData) return null;
+  const checkNodeInfo = useCallback(() => {
+    let isCalling = false;
+    interval.current = setInterval(async () => {
+      if (isCalling) return;
+      isCalling = true;
+      const res = await getNodeInfo();
+      isCalling = false;
+    }, 30000);
+  }, [getNodeInfo]);
+
+  useEffect(() => {
+    checkNodeInfo();
+
+    return () => {
+      if (interval?.current) {
+        clearInterval(interval.current);
+      }
+    };
+  }, [checkNodeInfo]);
+  const checkBalance = useCallback(
+    atAddress => {
+      let isCalling = false;
+      intervalBalance.current = setInterval(async () => {
+        if (isCalling) return;
+        isCalling = true;
+        const res = await getAtAddressInfo(atAddress);
+        isCalling = false;
+      }, 30000);
+    },
+    [getAtAddressInfo]
+  );
+
+  useEffect(() => {
+    if (!atAddress) return;
+    checkBalance(atAddress);
+
+    return () => {
+      if (intervalBalance?.current) {
+        clearInterval(intervalBalance.current);
+      }
+    };
+  }, [checkBalance, atAddress]);
+
+  if (!crowdfundData) return null;
   return (
     <>
       <NewCrowdfund editId={id} editContent={editContent} />
@@ -168,6 +282,20 @@ export const Crowdfund = () => {
             </Typography>
           )}
           <Spacer height="15px" />
+          {crowdfundData?.deployedAT?.aTAddress && (
+            <Donate
+              atAddress={crowdfundData?.deployedAT?.aTAddress}
+              onSubmit={() => {}}
+              onClose={() => {}}
+            />
+          )}
+          {crowdfundData?.deployedAT?.goalValue && !isNaN(atAddressBalance) && (
+            <CrowdfundProgress
+              raised={atAddressBalance}
+              goal={crowdfundData?.deployedAT?.goalValue}
+            />
+          )}
+
           <Box
             sx={{
               width: '95%',
