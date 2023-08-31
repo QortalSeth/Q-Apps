@@ -17,17 +17,20 @@ export const Countdown: React.FC<CountdownProps> = ({
   useEffect(() => {
     const updateCountdown = () => {
       const now = moment();
+      console.log({ endDate });
       const duration = moment.duration(endDate.diff(now));
-
+      console.log({ duration });
       if (duration.asSeconds() <= 0) {
         setTimeRemaining('Crowdfunding has ended.');
         return;
       }
 
-      const hours = String(duration.hours()).padStart(2, '0');
-      const minutes = String(duration.minutes()).padStart(2, '0');
-      const seconds = String(duration.seconds()).padStart(2, '0');
-      setTimeRemaining(`${hours}:${minutes}:${seconds}`);
+      const totalMinutes = duration.asMinutes();
+      const days = Math.floor(totalMinutes / (60 * 24));
+      const hours = Math.floor((totalMinutes % (60 * 24)) / 60);
+      const minutes = Math.floor(totalMinutes % 60);
+
+      setTimeRemaining(`${days} days, ${hours} hours, ${minutes} minutes`);
     };
 
     updateCountdown();

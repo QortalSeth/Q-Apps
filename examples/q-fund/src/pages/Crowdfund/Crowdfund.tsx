@@ -71,6 +71,7 @@ export const Crowdfund = () => {
 
     const diff = +currentAtInfo?.sleepUntilHeight - +nodeInfo.height;
     const end = moment().add(diff, 'minutes');
+    console.log({ end });
     endDateRef.current = end;
     return end;
   }, [currentAtInfo, nodeInfo]);
@@ -321,7 +322,7 @@ export const Crowdfund = () => {
               goal={crowdfundData?.deployedAT?.goalValue}
             />
           )}
-          {endDate && (
+          {endDate && blocksRemaning && (
             <Countdown endDate={endDate} blocksRemaning={blocksRemaning} />
           )}
 
