@@ -104,6 +104,7 @@ export const CrowdfundList = () => {
               onClick={() => {
                 navigate(`/crowdfund/${crowdfundObj.user}/${crowdfundObj.id}`);
               }}
+              key={crowdfundObj.id}
             >
               <CrowdfundCardTitle>{crowdfundObj?.title}</CrowdfundCardTitle>
               {crowdfundObj?.coverImage && (

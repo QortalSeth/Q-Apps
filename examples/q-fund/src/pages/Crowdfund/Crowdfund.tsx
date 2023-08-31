@@ -1,4 +1,10 @@
-import React, { useMemo, useState } from 'react';
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import { useParams } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../../state/store';
@@ -21,6 +27,11 @@ import {
 } from '../../components/Crowdfund/Crowdfund-styles';
 import AudioPlayer, { PlayerBox } from '../../components/common/AudioPlayer';
 import { NewCrowdfund } from '../../components/Crowdfund/NewCrowdfund';
+import { CommentSection } from '../../components/common/Comments/CommentSection';
+import { Donate } from '../../components/common/Donate/Donate';
+import { CrowdfundProgress } from '../../components/common/Progress/Progress';
+import { Countdown } from '../../components/common/Countdown/Countdown';
+import moment from 'moment';
 
 export const Crowdfund = () => {
   const theme = useTheme();
@@ -40,10 +51,90 @@ export const Crowdfund = () => {
     return url;
   }, [userAvatarHash, name]);
   const [crowdfundData, setCrowdfundData] = useState<any>(null);
-
+  const [currentAtInfo, setCurrentAtInfo] = useState<any>(null);
+  const [atAddressBalance, setAtAddressBalance] = useState<any>(null);
+  const [nodeInfo, setNodeInfo] = useState<any>(null);
+  const interval = useRef<any>(null);
+  const intervalBalance = useRef<any>(null);
+  const atAddress = useMemo(() => {
+    return crowdfundData?.deployedAT?.aTAddress || null;
+  }, [crowdfundData]);
   const hashMapCrowdfunds = useSelector(
     (state: RootState) => state.crowdfund.hashMapCrowdfunds
   );
+
+  const endDateRef = useRef<any>(null);
+
+  const endDate = useMemo(() => {
+    if (!currentAtInfo?.sleepUntilHeight || !nodeInfo?.height) return null;
+    if (endDateRef.current) return endDateRef.current;
+
+    const diff = +currentAtInfo?.sleepUntilHeight - +nodeInfo.height;
+    const end = moment().add(diff, 'minutes');
+    console.log({ end });
+    endDateRef.current = end;
+    return end;
+  }, [currentAtInfo, nodeInfo]);
+  const blocksRemaning = useMemo(() => {
+    if (!currentAtInfo?.sleepUntilHeight || !nodeInfo?.height) return null;
+    const diff = +currentAtInfo?.sleepUntilHeight - +nodeInfo.height;
+
+    return diff;
+  }, [currentAtInfo, nodeInfo]);
+  console.log({ currentAtInfo, nodeInfo, endDate });
+  const getCurrentAtInfo = React.useCallback(async atAddress => {
+    console.log({ atAddress });
+    try {
+      const url = `/at/${atAddress}`;
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      const responseDataSearch = await response.json();
+      setCurrentAtInfo(responseDataSearch);
+    } catch (error) {
+      console.log(error);
+    } finally {
+      dispatch(setIsLoadingGlobal(false));
+    }
+  }, []);
+  const getNodeInfo = React.useCallback(async () => {
+    try {
+      const url = `/blocks/height`;
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      console.log({ response });
+      const responseDataSearch = await response.json();
+      setNodeInfo({ height: responseDataSearch });
+    } catch (error) {
+      console.log(error);
+    } finally {
+      dispatch(setIsLoadingGlobal(false));
+    }
+  }, []);
+  const getAtAddressInfo = React.useCallback(async atAddress => {
+    try {
+      const url = `/addresses/balance/${atAddress}`;
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      const responseDataSearch = await response.json();
+      setAtAddressBalance(responseDataSearch);
+    } catch (error) {
+      console.log(error);
+    } finally {
+      dispatch(setIsLoadingGlobal(false));
+    }
+  }, []);
 
   const getCrowdfundData = React.useCallback(
     async (name: string, id: string) => {
@@ -89,6 +180,11 @@ export const Crowdfund = () => {
 
             setCrowdfundData(combinedData);
             dispatch(addToHashMap(combinedData));
+            console.log({ combinedData });
+            if (combinedData?.deployedAT?.aTAddress) {
+              getCurrentAtInfo(combinedData?.deployedAT?.aTAddress);
+              getAtAddressInfo(combinedData?.deployedAT?.aTAddress);
+            }
           }
         }
       } catch (error) {
@@ -106,9 +202,12 @@ export const Crowdfund = () => {
 
       if (existingCrowdfund) {
         setCrowdfundData(existingCrowdfund);
+        getCurrentAtInfo(existingCrowdfund?.deployedAT?.aTAddress);
+        getAtAddressInfo(existingCrowdfund?.deployedAT?.aTAddress);
       } else {
         getCrowdfundData(name, id);
       }
+      getNodeInfo();
     }
   }, [id, name, hashMapCrowdfunds]);
 
@@ -123,6 +222,49 @@ export const Crowdfund = () => {
     };
     return content;
   }, [crowdfundData]);
+
+  const checkNodeInfo = useCallback(() => {
+    let isCalling = false;
+    interval.current = setInterval(async () => {
+      if (isCalling) return;
+      isCalling = true;
+      const res = await getNodeInfo();
+      isCalling = false;
+    }, 30000);
+  }, [getNodeInfo]);
+
+  useEffect(() => {
+    checkNodeInfo();
+
+    return () => {
+      if (interval?.current) {
+        clearInterval(interval.current);
+      }
+    };
+  }, [checkNodeInfo]);
+  const checkBalance = useCallback(
+    atAddress => {
+      let isCalling = false;
+      intervalBalance.current = setInterval(async () => {
+        if (isCalling) return;
+        isCalling = true;
+        const res = await getAtAddressInfo(atAddress);
+        isCalling = false;
+      }, 30000);
+    },
+    [getAtAddressInfo]
+  );
+
+  useEffect(() => {
+    if (!atAddress) return;
+    checkBalance(atAddress);
+
+    return () => {
+      if (intervalBalance?.current) {
+        clearInterval(intervalBalance.current);
+      }
+    };
+  }, [checkBalance, atAddress]);
 
   if (!crowdfundData) return null;
   return (
@@ -167,6 +309,23 @@ export const Crowdfund = () => {
             </Typography>
           )}
           <Spacer height="15px" />
+          {crowdfundData?.deployedAT?.aTAddress && (
+            <Donate
+              atAddress={crowdfundData?.deployedAT?.aTAddress}
+              onSubmit={() => {}}
+              onClose={() => {}}
+            />
+          )}
+          {crowdfundData?.deployedAT?.goalValue && !isNaN(atAddressBalance) && (
+            <CrowdfundProgress
+              raised={atAddressBalance}
+              goal={crowdfundData?.deployedAT?.goalValue}
+            />
+          )}
+          {endDate && blocksRemaning && (
+            <Countdown endDate={endDate} blocksRemaning={blocksRemaning} />
+          )}
+
           <Box
             sx={{
               width: '95%',
@@ -278,6 +437,18 @@ export const Crowdfund = () => {
           })}
         </Box>
       </Box>
+      <Spacer height="15px" />
+      <CrowdfundTitle
+        variant="h1"
+        color="textPrimary"
+        sx={{
+          textAlign: 'center',
+          textDecoration: 'underline',
+        }}
+      >
+        Comments
+      </CrowdfundTitle>
+      <CommentSection postId={id || ''} postName={name || ''} />
     </>
   );
 };

@@ -78,6 +78,20 @@ export const NewCrowdfundTitle = styled(Typography)(({ theme }) => ({
   fontSize: "25px",
   userSelect: "none",
 }));
+export const NewCrowdfundSubtitle = styled(Typography)(({ theme }) => ({
+  fontWeight: 400,
+  fontFamily: "Raleway",
+  fontSize: "18px",
+  userSelect: "none",
+}));
+export const NewCrowdfundTimeDescription = styled(Typography)(({ theme }) => ({
+  fontWeight: 400,
+  fontFamily: "Raleway",
+  fontSize: "18px",
+  userSelect: "none",
+  fontStyle: "italic",
+  textDecoration: "underline",
+}));
 
 export const CustomInputField = styled(TextField)(({ theme }) => ({
   fontFamily: "Karla",
@@ -261,35 +275,6 @@ export const CATContainer = styled(Box)(({ theme }) => ({
   alignItems: "center",
 }));
 
-// export const CATCard = styled(Box)(({ theme }) => ({
-//   position: 'relative',
-//   display: 'flex',
-//   flexDirection: 'column',
-//   height: 'auto',
-//   width: '600px',
-//   maxWidth: '90%',
-//   minHeight: '130px',
-//   backgroundColor: theme.palette.background.paper,
-//   borderRadius: '8px',
-//   padding: '10px 15px',
-//   gap: '20px',
-//   border:
-//     theme.palette.mode === 'dark'
-//       ? 'none'
-//       : `1px solid ${theme.palette.primary.light}`,
-//   boxShadow:
-//     theme.palette.mode === 'dark'
-//       ? '0px 4px 5px 0px hsla(0,0%,0%,0.14),  0px 1px 10px 0px hsla(0,0%,0%,0.12),  0px 2px 4px -1px hsla(0,0%,0%,0.2)'
-//       : 'rgba(99, 99, 99, 0.2) 0px 2px 8px 0px',
-//   transition: 'all 0.3s ease-in-out',
-//   '&:hover': {
-//     cursor: 'pointer',
-//     boxShadow:
-//       theme.palette.mode === 'dark'
-//         ? '0px 8px 10px 1px hsla(0,0%,0%,0.14), 0px 3px 14px 2px hsla(0,0%,0%,0.12), 0px 5px 5px -3px hsla(0,0%,0%,0.2)'
-//         : 'rgba(0, 0, 0, 0.1) 0px 4px 6px -1px, rgba(0, 0, 0, 0.06) 0px 2px 4px -1px;',
-//   },
-// }));
 
 export const AddCrowdFundButton = styled(Button)(({ theme }) => ({
   display: "flex",
