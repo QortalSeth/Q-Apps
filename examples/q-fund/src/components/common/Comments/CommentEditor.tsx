@@ -196,12 +196,15 @@ export const CommentEditor = ({
     try {
       const id = uid();
 
-      let identifier = `${commentBase}${postId.slice(-12)}_${id}`;
+      let identifier = `${commentBase}${postId.slice(-12)}_base_${id}`;
       let idForNotification = identifier;
+
       if (isReply && commentId) {
+        let removeBaseCommentId = commentId;
+        removeBaseCommentId.replace('_base_', '');
         identifier = `${commentBase}${postId.slice(
           -12
-        )}_reply_${commentId.slice(-6)}_${id}`;
+        )}_reply_${removeBaseCommentId.slice(-6)}_${id}`;
         idForNotification = commentId;
       }
       if (isEdit && commentId) {

@@ -8,15 +8,23 @@ import React, {
 import { useParams } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../../state/store';
-import { Avatar, Box, Typography, useTheme } from '@mui/material';
+import {
+  Accordion,
+  AccordionDetails,
+  AccordionSummary,
+  Avatar,
+  Box,
+  Typography,
+  useTheme,
+} from '@mui/material';
 import AttachFileIcon from '@mui/icons-material/AttachFile';
 import DownloadIcon from '@mui/icons-material/Download';
-
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { formatDate } from '../../utils/time';
 import { DisplayHtml } from '../../components/common/DisplayHtml';
 import FileElement from '../../components/common/FileElement';
 import { setIsLoadingGlobal } from '../../state/features/globalSlice';
-import { crowdfundBase } from '../../constants';
+import { crowdfundBase, updateBase } from '../../constants';
 import { addToHashMap } from '../../state/features/crowdfundSlice';
 import {
   AuthorTextComment,
@@ -32,6 +40,8 @@ import { Donate } from '../../components/common/Donate/Donate';
 import { CrowdfundProgress } from '../../components/common/Progress/Progress';
 import { Countdown } from '../../components/common/Countdown/Countdown';
 import moment from 'moment';
+import { NewUpdate } from '../../components/Crowdfund/NewUpdate';
+import { Update } from './Update';
 
 export const Crowdfund = () => {
   const theme = useTheme();
@@ -52,6 +62,8 @@ export const Crowdfund = () => {
   }, [userAvatarHash, name]);
   const [crowdfundData, setCrowdfundData] = useState<any>(null);
   const [currentAtInfo, setCurrentAtInfo] = useState<any>(null);
+  const username = useSelector((state: RootState) => state.auth?.user?.name);
+  const [updatesList, setUpdatesList] = useState<any[]>([]);
   const [atAddressBalance, setAtAddressBalance] = useState<any>(null);
   const [nodeInfo, setNodeInfo] = useState<any>(null);
   const interval = useRef<any>(null);
@@ -196,6 +208,29 @@ export const Crowdfund = () => {
     []
   );
 
+  const getUpdates = React.useCallback(async (name: string, id: string) => {
+    try {
+      if (!name || !id) return;
+      // dispatch(setIsLoadingGlobal(true));
+
+      const url = `/arbitrary/resources/search?mode=ALL&service=DOCUMENT&query=${updateBase}${id.slice(
+        -12
+      )}&limit=0&includemetadata=false&reverse=true&excludeblocked=true&name=${name}&exactmatchnames=true&offset=0`;
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      const responseDataSearch = await response.json();
+      setUpdatesList(responseDataSearch);
+    } catch (error) {
+      console.log(error);
+    } finally {
+      // dispatch(setIsLoadingGlobal(false));
+    }
+  }, []);
+
   React.useEffect(() => {
     if (name && id) {
       const existingCrowdfund = hashMapCrowdfunds[id];
@@ -207,6 +242,7 @@ export const Crowdfund = () => {
       } else {
         getCrowdfundData(name, id);
       }
+      getUpdates(name, id);
       getNodeInfo();
     }
   }, [id, name, hashMapCrowdfunds]);
@@ -325,7 +361,29 @@ export const Crowdfund = () => {
           {endDate && blocksRemaning && (
             <Countdown endDate={endDate} blocksRemaning={blocksRemaning} />
           )}
-
+          {name === username && (
+            <NewUpdate crowdfundId={id} crowdfundName={name || ''} />
+          )}
+          <div style={{ width: '90%' }}>
+            {updatesList.map(update => {
+              return (
+                <Accordion key={update.identifier}>
+                  <AccordionSummary
+                    expandIcon={<ExpandMoreIcon />}
+                    aria-controls="panel1a-content"
+                    id="panel1a-header"
+                  >
+                    <Typography>
+                      {moment(update.created).format('LLL')} update
+                    </Typography>
+                  </AccordionSummary>
+                  <AccordionDetails>
+                    <Update updateObj={update} />
+                  </AccordionDetails>
+                </Accordion>
+              );
+            })}
+          </div>
           <Box
             sx={{
               width: '95%',

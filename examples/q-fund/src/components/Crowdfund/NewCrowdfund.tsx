@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from "react";
-import CreateIcon from "@mui/icons-material/Create";
+import React, { useEffect, useState } from 'react';
+import CreateIcon from '@mui/icons-material/Create';
 import {
   AddCrowdFundButton,
   AddLogoIcon,
@@ -14,62 +14,62 @@ import {
   NewCrowdfundTimeDescription,
   NewCrowdfundTitle,
   TimesIcon,
-} from "./Crowdfund-styles";
-import { Box, Button, Modal, TextField, useTheme } from "@mui/material";
-import ReactQuill, { Quill } from "react-quill";
-import ImageResize from "quill-image-resize-module-react";
-import ShortUniqueId from "short-unique-id";
-import AddCircleIcon from "@mui/icons-material/AddCircle";
-import AddIcon from "@mui/icons-material/Add";
-import "react-quill/dist/quill.snow.css";
-import { FileAttachment } from "./FileAttachment";
-import { useDispatch, useSelector } from "react-redux";
-import { setNotification } from "../../state/features/notificationsSlice";
-import { objectToBase64 } from "../../utils/toBase64";
-import { RootState } from "../../state/store";
-import { attachmentBase, crowdfundBase } from "../../constants";
-import dayjs, { Dayjs } from "dayjs";
-import isBetween from "dayjs/plugin/isBetween"; // Import the plugin
-import { DemoContainer } from "@mui/x-date-pickers/internals/demo";
-import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
-import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
-import { DateTimePicker } from "@mui/x-date-pickers/DateTimePicker";
-import duration from "dayjs/plugin/duration";
-import bs58 from "bs58";
+} from './Crowdfund-styles';
+import { Box, Button, Modal, TextField, useTheme } from '@mui/material';
+import ReactQuill, { Quill } from 'react-quill';
+import ImageResize from 'quill-image-resize-module-react';
+import ShortUniqueId from 'short-unique-id';
+import AddCircleIcon from '@mui/icons-material/AddCircle';
+import AddIcon from '@mui/icons-material/Add';
+import 'react-quill/dist/quill.snow.css';
+import { FileAttachment } from './FileAttachment';
+import { useDispatch, useSelector } from 'react-redux';
+import { setNotification } from '../../state/features/notificationsSlice';
+import { objectToBase64 } from '../../utils/toBase64';
+import { RootState } from '../../state/store';
+import { attachmentBase, crowdfundBase } from '../../constants';
+import dayjs, { Dayjs } from 'dayjs';
+import isBetween from 'dayjs/plugin/isBetween'; // Import the plugin
+import { DemoContainer } from '@mui/x-date-pickers/internals/demo';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
+import duration from 'dayjs/plugin/duration';
+import bs58 from 'bs58';
 import {
   addCrowdfundToBeginning,
   addToHashMap,
   upsertCrowdfunds,
-} from "../../state/features/crowdfundSlice";
-import ImageUploader from "../ImageUploader";
-import { ChannelCard, CrowdfundContainer } from "../../pages/Home/Home-styles";
-import { DesktopDateTimePicker } from "@mui/x-date-pickers";
+} from '../../state/features/crowdfundSlice';
+import ImageUploader from '../ImageUploader';
+import { ChannelCard, CrowdfundContainer } from '../../pages/Home/Home-styles';
+import { DesktopDateTimePicker } from '@mui/x-date-pickers';
 dayjs.extend(isBetween);
 dayjs.extend(duration);
-Quill.register("modules/imageResize", ImageResize);
+Quill.register('modules/imageResize', ImageResize);
 
 const uid = new ShortUniqueId();
 
 const modules = {
   imageResize: {
-    parchment: Quill.import("parchment"),
-    modules: ["Resize", "DisplaySize"],
+    parchment: Quill.import('parchment'),
+    modules: ['Resize', 'DisplaySize'],
   },
   toolbar: [
-    ["bold", "italic", "underline", "strike"], // styled text
-    ["blockquote", "code-block"], // blocks
+    ['bold', 'italic', 'underline', 'strike'], // styled text
+    ['blockquote', 'code-block'], // blocks
     [{ header: 1 }, { header: 2 }], // custom button values
-    [{ list: "ordered" }, { list: "bullet" }], // lists
-    [{ script: "sub" }, { script: "super" }], // superscript/subscript
-    [{ indent: "-1" }, { indent: "+1" }], // outdent/indent
-    [{ direction: "rtl" }], // text direction
-    [{ size: ["small", false, "large", "huge"] }], // custom dropdown
+    [{ list: 'ordered' }, { list: 'bullet' }], // lists
+    [{ script: 'sub' }, { script: 'super' }], // superscript/subscript
+    [{ indent: '-1' }, { indent: '+1' }], // outdent/indent
+    [{ direction: 'rtl' }], // text direction
+    [{ size: ['small', false, 'large', 'huge'] }], // custom dropdown
     [{ header: [1, 2, 3, 4, 5, 6, false] }], // custom button values
     [{ color: [] }, { background: [] }], // dropdown with defaults
     [{ font: [] }], // font family
     [{ align: [] }], // text align
-    ["clean"], // remove formatting
-    ["image"], // image
+    ['clean'], // remove formatting
+    ['image'], // image
   ],
 };
 
@@ -85,8 +85,8 @@ interface NewCrowdfundProps {
 }
 export const NewCrowdfund = ({ editId, editContent }: NewCrowdfundProps) => {
   const theme = useTheme();
-  const [value, setValue] = React.useState<Dayjs | null>(dayjs().add(5, "day"));
-  const [goalValue, setGoalValue] = useState<number | string>("");
+  const [value, setValue] = React.useState<Dayjs | null>(dayjs().add(5, 'day'));
+  const [goalValue, setGoalValue] = useState<number | string>('');
   const dispatch = useDispatch();
   const username = useSelector((state: RootState) => state.auth?.user?.name);
   const userAddress = useSelector(
@@ -94,9 +94,9 @@ export const NewCrowdfund = ({ editId, editContent }: NewCrowdfundProps) => {
   );
 
   const [isOpen, setIsOpen] = useState<boolean>(false);
-  const [title, setTitle] = useState<string>("");
-  const [description, setDescription] = useState<string>("");
-  const [inlineContent, setInlineContent] = useState("");
+  const [title, setTitle] = useState<string>('');
+  const [description, setDescription] = useState<string>('');
+  const [inlineContent, setInlineContent] = useState('');
   const [attachments, setAttachments] = useState<any[]>([]);
   const [coverImage, setCoverImage] = useState<string | null>(null);
 
@@ -114,7 +114,7 @@ export const NewCrowdfund = ({ editId, editContent }: NewCrowdfundProps) => {
   };
 
   const diffInMins = React.useMemo(() => {
-    const differenceInMinutes = dayjs().diff(value, "minute");
+    const differenceInMinutes = dayjs().diff(value, 'minute');
     return differenceInMinutes * -1;
   }, [value]);
   console.log({ editContent });
@@ -136,9 +136,9 @@ export const NewCrowdfund = ({ editId, editContent }: NewCrowdfundProps) => {
   ): Promise<string> {
     try {
       const response = await fetch(url, {
-        method: "POST",
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify(body),
       });
@@ -151,7 +151,7 @@ export const NewCrowdfund = ({ editId, editContent }: NewCrowdfundProps) => {
       return text;
     } catch (error: any) {
       console.error(
-        "There was an error with the fetch operation:",
+        'There was an error with the fetch operation:',
         error.message
       );
       throw error;
@@ -197,7 +197,7 @@ export const NewCrowdfund = ({ editId, editContent }: NewCrowdfundProps) => {
     const chars: string[] = Array.from(byteArray).map(byte =>
       String.fromCharCode(byte)
     );
-    return btoa(chars.join(""));
+    return btoa(chars.join(''));
   }
 
   function base64ToUint8Array(base64) {
@@ -213,7 +213,7 @@ export const NewCrowdfund = ({ editId, editContent }: NewCrowdfundProps) => {
   }
 
   const codeBytes =
-    "NQMBAAAABTUDAAAAAAI3BAYAAAACAAAAAgAAAAACAAAAAwAAAAJLAAAAAwAAAAAAAAAgJQAAAAM1BAAAAAAEIAAAAAQAAAABGTgBHwAAAAAAAAAKMgQDKDAzAwQAAAAFNQElAAAABhsAAAAGByg1AwcAAAAFIAAAAAUAAAACCyg1AwUAAAAHJAAAAAcAAAAI0jUDBgAAAAkyAwozBAIAAAAJGgAAAFk=";
+    'NQMBAAAABTUDAAAAAAI3BAYAAAACAAAAAgAAAAACAAAAAwAAAAJLAAAAAwAAAAAAAAAgJQAAAAM1BAAAAAAEIAAAAAQAAAABGTgBHwAAAAAAAAAKMgQDKDAzAwQAAAAFNQElAAAABhsAAAAGByg1AwcAAAAFIAAAAAUAAAACCyg1AwUAAAAHJAAAAAcAAAAI0jUDBgAAAAkyAwozBAIAAAAJGgAAAFk=';
 
   const createBytes = (goalAmount: number, blocks: number, address: string) => {
     try {
@@ -244,18 +244,18 @@ export const NewCrowdfund = ({ editId, editContent }: NewCrowdfundProps) => {
 
   async function publishQDNResource() {
     try {
-      if (!userAddress) throw new Error("Unable to locate user address");
-      let errorMsg = "";
-      let name: string = "";
+      if (!userAddress) throw new Error('Unable to locate user address');
+      let errorMsg = '';
+      let name: string = '';
       if (username) {
         name = username;
       }
       if (!name) {
         errorMsg =
-          "Cannot publish without access to your name. Please authenticate.";
+          'Cannot publish without access to your name. Please authenticate.';
       }
       if (!title) {
-        errorMsg = "Cannot publish without a title";
+        errorMsg = 'Cannot publish without a title';
       }
       if (editId && editContent?.user !== name) {
         errorMsg = "Cannot publish another user's resource";
@@ -265,16 +265,16 @@ export const NewCrowdfund = ({ editId, editContent }: NewCrowdfundProps) => {
         dispatch(
           setNotification({
             msg: errorMsg,
-            alertType: "error",
+            alertType: 'error',
           })
         );
         return;
       }
 
       const sanitizeTitle = title
-        .replace(/[^a-zA-Z0-9\s-]/g, "")
-        .replace(/\s+/g, "-")
-        .replace(/-+/g, "-")
+        .replace(/[^a-zA-Z0-9\s-]/g, '')
+        .replace(/\s+/g, '-')
+        .replace(/-+/g, '-')
         .trim()
         .toLowerCase();
 
@@ -286,17 +286,17 @@ export const NewCrowdfund = ({ editId, editContent }: NewCrowdfundProps) => {
         numUserStackPages: 0,
         minActivationAmount: 0,
       };
-      const differenceInMinutes = dayjs().diff(value, "minute");
+      const differenceInMinutes = dayjs().diff(value, 'minute');
       const blocksToGoal = differenceInMinutes * -1;
       if (blocksToGoal < 2880 || blocksToGoal > 43200)
-        throw new Error("end of crowdfund needs to be between 2880 and 43200");
+        throw new Error('end of crowdfund needs to be between 2880 and 43200');
       requestBody.dataBytesBase64 = createBytes(
         +goalValue,
         blocksToGoal,
         userAddress
       );
       requestBody.codeBytesBase64 = codeBytes;
-      const creationBytes = await fetchPostRequest("/at/create", requestBody);
+      const creationBytes = await fetchPostRequest('/at/create', requestBody);
       const decodedBuffer = bs58.decode(creationBytes);
 
       // Convert Buffer to Uint8Array
@@ -306,12 +306,12 @@ export const NewCrowdfund = ({ editId, editContent }: NewCrowdfundProps) => {
       console.log({ creationBytes });
 
       const response = await qortalRequest({
-        action: "DEPLOY_AT",
+        action: 'DEPLOY_AT',
         creationBytes,
-        name: "q-fund crowdfund",
+        name: 'q-fund crowdfund',
         description: sanitizeTitle.slice(0, 30),
-        type: "crowdfund",
-        tags: "q-fund",
+        type: 'crowdfund',
+        tags: 'q-fund',
         amount: 0.01,
         assetId: 0,
       });
@@ -346,17 +346,17 @@ export const NewCrowdfund = ({ editId, editContent }: NewCrowdfundProps) => {
         const id = uid();
         const id2 = uid();
         const identifier = `${attachmentBase}${id}_${id2}`;
-        const fileExtension = attachment?.name?.split(".")?.pop();
+        const fileExtension = attachment?.name?.split('.')?.pop();
         if (!fileExtension) {
-          throw new Error("One of your attachments does not have an extension");
+          throw new Error('One of your attachments does not have an extension');
         }
-        let service = "FILE";
+        let service = 'FILE';
         const type = attachment?.type;
-        if (type.startsWith("audio/")) {
-          service = "AUDIO";
+        if (type.startsWith('audio/')) {
+          service = 'AUDIO';
         }
-        if (type.startsWith("video/")) {
-          service = "VIDEO";
+        if (type.startsWith('video/')) {
+          service = 'VIDEO';
         }
         const obj: any = {
           name,
@@ -374,7 +374,7 @@ export const NewCrowdfund = ({ editId, editContent }: NewCrowdfundProps) => {
       crowdfundObject.attachments = attachmentArray;
       if (attachmentArrayToSave.length > 0) {
         const multiplePublish = {
-          action: "PUBLISH_MULTIPLE_QDN_RESOURCES",
+          action: 'PUBLISH_MULTIPLE_QDN_RESOURCES',
           resources: [...attachmentArrayToSave],
         };
         await qortalRequest(multiplePublish);
@@ -385,9 +385,9 @@ export const NewCrowdfund = ({ editId, editContent }: NewCrowdfundProps) => {
         : `${crowdfundBase}${sanitizeTitle.slice(0, 30)}_${id}`;
       const crowdfundObjectToBase64 = await objectToBase64(crowdfundObject);
       let requestBody2: any = {
-        action: "PUBLISH_QDN_RESOURCE",
+        action: 'PUBLISH_QDN_RESOURCE',
         name: name,
-        service: "DOCUMENT",
+        service: 'DOCUMENT',
         data64: crowdfundObjectToBase64,
         title: title.slice(0, 50),
         // description: description,
@@ -397,8 +397,8 @@ export const NewCrowdfund = ({ editId, editContent }: NewCrowdfundProps) => {
       await qortalRequest(requestBody2);
       dispatch(
         setNotification({
-          msg: "Crowdfund deployed and published",
-          alertType: "success",
+          msg: 'Crowdfund deployed and published',
+          alertType: 'success',
         })
       );
       const objToStore: any = {
@@ -418,47 +418,47 @@ export const NewCrowdfund = ({ editId, editContent }: NewCrowdfundProps) => {
 
       dispatch(addToHashMap(objToStore));
 
-      setTitle("");
-      setInlineContent("");
+      setTitle('');
+      setInlineContent('');
       setAttachments([]);
       setCoverImage(null);
       setIsOpen(false);
-      setGoalValue("");
-      setValue(dayjs().add(5, "day"));
+      setGoalValue('');
+      setValue(dayjs().add(5, 'day'));
     } catch (error: any) {
       let notificationObj: any = null;
-      if (typeof error === "string") {
+      if (typeof error === 'string') {
         notificationObj = {
-          msg: error || "Failed to publish crowdfund",
-          alertType: "error",
+          msg: error || 'Failed to publish crowdfund',
+          alertType: 'error',
         };
-      } else if (typeof error?.error === "string") {
+      } else if (typeof error?.error === 'string') {
         notificationObj = {
-          msg: error?.error || "Failed to publish crowdfund",
-          alertType: "error",
+          msg: error?.error || 'Failed to publish crowdfund',
+          alertType: 'error',
         };
       } else {
         notificationObj = {
-          msg: error?.message || "Failed to publish crowdfund",
-          alertType: "error",
+          msg: error?.message || 'Failed to publish crowdfund',
+          alertType: 'error',
         };
       }
       if (!notificationObj) return;
       dispatch(setNotification(notificationObj));
 
-      throw new Error("Failed to publish crowdfund");
+      throw new Error('Failed to publish crowdfund');
     }
   }
 
   const formatDuration = (totalMinutes: number) => {
-    const durationObj = dayjs.duration(totalMinutes, "minutes");
+    const durationObj = dayjs.duration(totalMinutes, 'minutes');
 
     const days = durationObj.days();
     const hours = durationObj.hours();
     const minutes = durationObj.minutes();
 
-    return `${days > 0 ? days + " days, " : ""}${
-      hours > 0 ? hours + " hours, " : ""
+    return `${days > 0 ? days + ' days, ' : ''}${
+      hours > 0 ? hours + ' hours, ' : ''
     }${minutes} minutes`;
   };
 
@@ -468,27 +468,26 @@ export const NewCrowdfund = ({ editId, editContent }: NewCrowdfundProps) => {
     if (newValue >= 1 && newValue <= 1_000_000) {
       setGoalValue(newValue);
     } else if (!event.target.value) {
-      setGoalValue("");
+      setGoalValue('');
     }
   };
 
-  const minDateTime = dayjs().add(2, "day");
-  const maxDateTime = dayjs().add(30, "day");
+  const minDateTime = dayjs().add(2, 'day');
+  const maxDateTime = dayjs().add(30, 'day');
 
   return (
     <>
       {username && (
         <>
-          {editId ? (
-            editContent?.user === username ? (
-              <CreateContainer onClick={() => setIsOpen(true)}>
-                <CreateIcon />
-              </CreateContainer>
-            ) : null
-          ) : (
+          {editId ? // editContent?.user === username ? (
+          //   <CreateContainer onClick={() => setIsOpen(true)}>
+          //     <CreateIcon />
+          //   </CreateContainer>
+          // ) : null
+          null : (
             <CATContainer>
               <AddCrowdFundButton onClick={() => setIsOpen(true)}>
-                <AddIcon />{" "}
+                <AddIcon />{' '}
                 <CrowdfundCardTitle>Start a crowdfund</CrowdfundCardTitle>
               </AddCrowdFundButton>
             </CATContainer>
@@ -505,9 +504,9 @@ export const NewCrowdfund = ({ editId, editContent }: NewCrowdfundProps) => {
         <ModalBody>
           <Box
             sx={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
             }}
           >
             {editId ? (
@@ -521,8 +520,8 @@ export const NewCrowdfund = ({ editId, editContent }: NewCrowdfundProps) => {
                   Add Cover Image
                   <AddLogoIcon
                     sx={{
-                      height: "25px",
-                      width: "auto",
+                      height: '25px',
+                      width: 'auto',
                     }}
                   ></AddLogoIcon>
                 </Button>
@@ -533,8 +532,8 @@ export const NewCrowdfund = ({ editId, editContent }: NewCrowdfundProps) => {
                 <TimesIcon
                   color={theme.palette.text.primary}
                   onClickFunc={() => setCoverImage(null)}
-                  height={"32"}
-                  width={"32"}
+                  height={'32'}
+                  width={'32'}
                 ></TimesIcon>
               </LogoPreviewRow>
             )}
@@ -572,7 +571,7 @@ export const NewCrowdfund = ({ editId, editContent }: NewCrowdfundProps) => {
             />
           </LocalizationProvider>
           <NewCrowdfundTimeDescription>
-            Length of crowdfund: {diffInMins} blocks ~{" "}
+            Length of crowdfund: {diffInMins} blocks ~{' '}
             {formatDuration(diffInMins)}
           </NewCrowdfundTimeDescription>
           <TextField
@@ -607,7 +606,7 @@ export const NewCrowdfund = ({ editId, editContent }: NewCrowdfundProps) => {
             sx={{
               backgroundColor: theme.palette.primary.light,
               color: theme.palette.text.primary,
-              fontFamily: "Arial",
+              fontFamily: 'Arial',
             }}
             onClick={() => {
               publishQDNResource();

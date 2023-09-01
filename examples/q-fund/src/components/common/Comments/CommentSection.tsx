@@ -110,15 +110,16 @@ export const CommentSection = ({ postId, postName }: CommentSectionProps) => {
     }
   }, [navigate, location, listComments]);
 
-  const getComments = useCallback(
-    async (isNewMessages?: boolean, numberOfComments?: number) => {
+  const getReplies = useCallback(
+    async (commentId, postId) => {
       let offset: number = 0;
-      if (isNewMessages && numberOfComments) {
-        offset = numberOfComments;
-      }
+
+      const removeBaseCommentId = commentId.replace('_base_', '');
       const url = `/arbitrary/resources/search?mode=ALL&service=BLOG_COMMENT&query=${commentBase}${postId.slice(
         -12
-      )}&limit=20&includemetadata=false&offset=${offset}&reverse=false&excludeblocked=true`;
+      )}_reply_${removeBaseCommentId.slice(
+        -6
+      )}&limit=0&includemetadata=false&offset=${offset}&reverse=false&excludeblocked=true`;
       const response = await fetch(url, {
         method: 'GET',
         headers: {
@@ -144,6 +145,49 @@ export const CommentSection = ({ postId, postName }: CommentSectionProps) => {
               ...comment,
             });
           }
+        }
+      }
+      return comments;
+    },
+    [postId]
+  );
+
+  const getComments = useCallback(
+    async (isNewMessages?: boolean, numberOfComments?: number) => {
+      let offset: number = 0;
+      if (isNewMessages && numberOfComments) {
+        offset = numberOfComments;
+      }
+      const url = `/arbitrary/resources/search?mode=ALL&service=BLOG_COMMENT&query=${commentBase}${postId.slice(
+        -12
+      )}_base_&limit=20&includemetadata=false&offset=${offset}&reverse=false&excludeblocked=true`;
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      const responseData = await response.json();
+      let comments: any[] = [];
+      for (const comment of responseData) {
+        if (comment.identifier && comment.name) {
+          const url = `/arbitrary/BLOG_COMMENT/${comment.name}/${comment.identifier}`;
+          const response = await fetch(url, {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+          });
+
+          const responseData2 = await response.text();
+          if (responseData) {
+            comments.push({
+              message: responseData2,
+              ...comment,
+            });
+          }
+          const res = await getReplies(comment.identifier, postId);
+          comments = [...comments, ...res];
         }
       }
       if (isNewMessages) {
@@ -202,48 +246,50 @@ export const CommentSection = ({ postId, postName }: CommentSectionProps) => {
 
   const interval = useRef<any>(null);
 
-  const checkNewComments = useCallback(async () => {
-    try {
-      const offset = listComments.length;
-      const url = `/arbitrary/resources/search?mode=ALL&service=BLOG_COMMENT&query=${commentBase}${postId.slice(
-        -12
-      )}&limit=20&includemetadata=true&offset=${offset}&reverse=false&excludeblocked=true`;
-      const response = await fetch(url, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-      const responseData = await response.json();
-      setNewMessages(responseData.length);
-    } catch (error) {}
-  }, [listComments, postId]);
+  // const checkNewComments = useCallback(async () => {
+  //   try {
+  //     const offset = listComments.filter(
+  //       item => !item.identifier.includes('_reply_')
+  //     ).length;
+  //     const url = `/arbitrary/resources/search?mode=ALL&service=BLOG_COMMENT&query=${commentBase}${postId.slice(
+  //       -12
+  //     )}_base_&limit=20&includemetadata=false&offset=${offset}&reverse=false&excludeblocked=true`;
+  //     const response = await fetch(url, {
+  //       method: 'GET',
+  //       headers: {
+  //         'Content-Type': 'application/json',
+  //       },
+  //     });
+  //     const responseData = await response.json();
+  //     setNewMessages(responseData.length);
+  //   } catch (error) {}
+  // }, [listComments, postId]);
 
-  const checkNewMessagesFunc = useCallback(() => {
-    let isCalling = false;
-    interval.current = setInterval(async () => {
-      if (isCalling) return;
-      isCalling = true;
-      const res = await checkNewComments();
-      isCalling = false;
-    }, 15000);
-  }, [checkNewComments]);
+  // const checkNewMessagesFunc = useCallback(() => {
+  //   let isCalling = false;
+  //   interval.current = setInterval(async () => {
+  //     if (isCalling) return;
+  //     isCalling = true;
+  //     const res = await checkNewComments();
+  //     isCalling = false;
+  //   }, 15000);
+  // }, [checkNewComments]);
 
-  useEffect(() => {
-    checkNewMessagesFunc();
+  // useEffect(() => {
+  //   checkNewMessagesFunc();
 
-    return () => {
-      if (interval?.current) {
-        clearInterval(interval.current);
-      }
-    };
-  }, [checkNewMessagesFunc]);
+  //   return () => {
+  //     if (interval?.current) {
+  //       clearInterval(interval.current);
+  //     }
+  //   };
+  // }, [checkNewMessagesFunc]);
   console.log('hello');
 
   return (
     <>
       <Panel>
-        {newMessages > 0 && (
+        {/* {newMessages > 0 && (
           <Box
             sx={{
               display: 'flex',
@@ -262,17 +308,12 @@ export const CommentSection = ({ postId, postName }: CommentSectionProps) => {
             >
               <Button
                 onClick={() => {
-                  // addItem({
-                  //   id: notification.identifier,
-                  //   lastSeen: Date.now(),
-                  //   postId
-                  // })
-                  updateItemDate({
-                    id: '',
-                    lastSeen: Date.now(),
-                    postId,
-                  });
-                  getComments(true, listComments.length);
+                  getComments(
+                    true,
+                    listComments.filter(
+                      item => !item.identifier.includes('_reply_')
+                    ).length
+                  );
                 }}
                 variant="contained"
                 size="small"
@@ -282,7 +323,7 @@ export const CommentSection = ({ postId, postName }: CommentSectionProps) => {
               </Button>
             </Box>
           </Box>
-        )}
+        )} */}
         <Box
           sx={{
             width: '90%',
@@ -315,6 +356,26 @@ export const CommentSection = ({ postId, postName }: CommentSectionProps) => {
                 />
               );
             })}
+          </Box>
+          <Box
+            sx={{
+              display: 'flex',
+            }}
+          >
+            <Button
+              onClick={() => {
+                getComments(
+                  true,
+                  listComments.filter(
+                    item => !item.identifier.includes('_reply_')
+                  ).length
+                );
+              }}
+              variant="contained"
+              size="small"
+            >
+              Load More comments
+            </Button>
           </Box>
         </Box>
         <Box

@@ -22,6 +22,7 @@ export interface Video {
   tags?: string[]
   updated?: number | string
   isValid?: boolean
+  deployedAT?: any
 }
 export interface Crowdfund {
   title: string
