@@ -150,11 +150,25 @@ export const OrderTable = ({
         <Table>
           <TableHead>{fixedHeaderContent()}</TableHead>
           <TableBody>
-            {processedOrders.map(({ index, rowData }) => (
-              <StyledTableRow key={index}>
-                {rowContent(index, rowData, openOrder)}
+            {processedOrders.length > 0 ? (
+              processedOrders.map(({ index, rowData }) => (
+                <StyledTableRow key={index}>
+                  {rowContent(index, rowData, openOrder)}
+                </StyledTableRow>
+              ))
+            ) : (
+              <StyledTableRow>
+                <TableCell
+                  colSpan={columns.length}
+                  sx={{
+                    fontSize: tableCellFontSize,
+                    padding: "7px"
+                  }}
+                >
+                  You currently have no orders!
+                </TableCell>
               </StyledTableRow>
-            ))}
+            )}
           </TableBody>
         </Table>
       </TableContainer>

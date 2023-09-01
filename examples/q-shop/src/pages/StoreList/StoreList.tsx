@@ -167,32 +167,35 @@ export const StoreList = () => {
         <Grid item xs={12}>
           <Grid container spacing={3}>
             {filteredStores.length > 0 &&
-              filteredStores.map((store: Store) => {
-                let storeItem = store;
-                const existingStore = hashMapStores[store.id];
-                // Check in case hashmap data isn't there yet due to async API calls.
-                // If it's not there, component will rerender once it receives the metadata
-                if (existingStore) {
-                  storeItem = existingStore;
-                }
-                const storeId = storeItem?.id || "";
-                const storeOwner = storeItem?.owner || "";
-                const storeTitle = storeItem?.title || "missing metadata";
-                const storeLogo = storeItem?.logo || DefaultStoreImage;
-                const storeDescription =
-                  storeItem?.description || "missing metadata";
-                return (
-                  <StoreCard
-                    storeTitle={storeTitle || ""}
-                    storeLogo={storeLogo || ""}
-                    storeDescription={storeDescription || ""}
-                    storeId={storeId || ""}
-                    storeOwner={storeOwner || ""}
-                    key={storeId}
-                    userName={user?.name || ""}
-                  />
-                );
-              })}
+              filteredStores
+                // Get rid of the Bester shop (test shop)
+                .filter((store: Store) => store.owner !== "Bester")
+                .map((store: Store) => {
+                  let storeItem = store;
+                  const existingStore = hashMapStores[store.id];
+                  // Check in case hashmap data isn't there yet due to async API calls.
+                  // If it's not there, component will rerender once it receives the metadata
+                  if (existingStore) {
+                    storeItem = existingStore;
+                  }
+                  const storeId = storeItem?.id || "";
+                  const storeOwner = storeItem?.owner || "";
+                  const storeTitle = storeItem?.title || "missing metadata";
+                  const storeLogo = storeItem?.logo || DefaultStoreImage;
+                  const storeDescription =
+                    storeItem?.description || "missing metadata";
+                  return (
+                    <StoreCard
+                      storeTitle={storeTitle || ""}
+                      storeLogo={storeLogo || ""}
+                      storeDescription={storeDescription || ""}
+                      storeId={storeId || ""}
+                      storeOwner={storeOwner || ""}
+                      key={storeId}
+                      userName={user?.name || ""}
+                    />
+                  );
+                })}
             <LazyLoad onLoadMore={getStores}></LazyLoad>
           </Grid>
         </Grid>
