@@ -1,7 +1,6 @@
 import { useMemo, useState, useCallback, useEffect } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "../../state/store";
-import { CircularProgress, Typography } from "@mui/material";
 import { Box } from "@mui/material";
 import LazyLoad from "../../components/common/LazyLoad";
 import { ShowOrder } from "../ProductManager/ShowOrder/ShowOrder";

@@ -164,7 +164,8 @@ const GlobalWrapper: React.FC<Props> = ({ children, setTheme }) => {
         shipsTo: responseData?.shipsTo,
         description: responseData?.description || "",
         category: blog.metadata?.category,
-        tags: blog.metadata?.tags || []
+        tags: blog.metadata?.tags || [],
+        logo: responseData?.logo || ""
       })
     );
     // Set listProducts in the Redux global state
@@ -502,13 +503,14 @@ const GlobalWrapper: React.FC<Props> = ({ children, setTheme }) => {
   // Listener useEffect to fetch dataContainer and store data if store?.id changes and it is ours
   // Make sure myStores is not empty before executing
   // Will only run if storeId changes and is ours within our list of stores
+  // If currentStore.id is equal to recentlyVisitedStoreId, it means we already have the datacontainer and store data in redux, so we don't need to fetch it again
   // If no datacontainer is found, make sure to set it empty in global state
   useEffect(() => {
     if (recentlyVisitedStoreId && myStores) {
       const myStoreFound = myStores.find(
         (store: Store) => store.id === recentlyVisitedStoreId
       );
-      if (myStoreFound) {
+      if (myStoreFound && recentlyVisitedStoreId !== currentStore?.id) {
         try {
           dispatch(setIsLoadingGlobal(true));
           const getStoreAndDataContainer = async () => {
