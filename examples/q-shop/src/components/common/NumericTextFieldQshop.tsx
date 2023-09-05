@@ -27,7 +27,7 @@ export type NumericTextFieldRef = {
   getTextFieldValue: () => string;
 };
 
-export const NumericTextField = React.forwardRef<
+export const NumericTextFieldQshop = React.forwardRef<
   NumericTextFieldRef,
   TextFieldProps
 >(

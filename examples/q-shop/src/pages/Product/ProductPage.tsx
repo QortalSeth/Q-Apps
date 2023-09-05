@@ -33,10 +33,10 @@ import { QortalSVG } from "../../assets/svgs/QortalSVG";
 import { setNotification } from "../../state/features/notificationsSlice";
 import { BackArrowSVG } from "../../assets/svgs/BackArrowSVG";
 import {
-  NumericTextField,
+  NumericTextFieldQshop,
   NumericTextFieldRef,
   Variant
-} from "../../components/common/NumericTextField";
+} from "../../components/common/NumericTextFieldQshop";
 
 export const ProductPage = () => {
   const dispatch = useDispatch();
@@ -102,9 +102,8 @@ export const ProductPage = () => {
     awaitProductData();
   }, [catalogueHashMap]);
 
-  const price = product?.price?.find(
-    (item) => item?.currency === "qort"
-  )?.value;
+  const price = product?.price?.find((item) => item?.currency === "qort")
+    ?.value;
 
   const addToCart = () => {
     if (user?.name === storeOwner) {
@@ -133,7 +132,7 @@ export const ProductPage = () => {
   const available = status === "AVAILABLE";
   const availableJSX = (
     <>
-      <NumericTextField
+      <NumericTextFieldQshop
         name="Quantity"
         label="Quantity"
         variant={Variant.filled}
