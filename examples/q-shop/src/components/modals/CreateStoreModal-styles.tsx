@@ -1,8 +1,8 @@
 import { styled } from "@mui/system";
-import { Typography, Button, Box, TextField, Theme } from "@mui/material";
+import { Box, Button, TextField, Theme, Typography } from "@mui/material";
 import AddPhotoAlternateIcon from "@mui/icons-material/AddPhotoAlternate";
 import { TimesSVG } from "../../assets/svgs/TimesSVG";
-import { NumericTextField } from "../common/NumericTextField";
+import { NumericTextFieldQshop } from "../common/NumericTextFieldQshop";
 
 export const ModalBody = styled(Box)(({ theme }) => ({
   position: "absolute",
@@ -154,7 +154,7 @@ export const CustomInputField = styled(TextField)(({ theme }) =>
   customInputStyle(theme as Theme)
 );
 
-export const CustomNumberField = styled(NumericTextField)(({ theme }) =>
+export const CustomNumberField = styled(NumericTextFieldQshop)(({ theme }) =>
   customInputStyle(theme as Theme)
 );
 
