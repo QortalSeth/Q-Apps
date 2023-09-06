@@ -70,7 +70,8 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
         sx={{
           "&.MuiCardMedia-root": {
             padding: "10px",
-            borderRadius: "12px"
+            borderRadius: "12px",
+            objectFit: "contain"
           }
         }}
         component="img"

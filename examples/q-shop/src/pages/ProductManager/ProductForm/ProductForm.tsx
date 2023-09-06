@@ -28,7 +28,7 @@ import {
 } from "../NewProduct/NewProduct-styles";
 import { setNotification } from "../../../state/features/notificationsSlice";
 import { addProductsToSaveCategory } from "../../../state/features/globalSlice";
-import { Variant } from "../../../components/common/NumericTextField";
+import { Variant } from "../../../components/common/NumericTextFieldQshop";
 
 interface ProductFormProps {
   onSubmit: (product: PublishProductParams) => void;

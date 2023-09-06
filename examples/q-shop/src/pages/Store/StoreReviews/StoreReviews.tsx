@@ -160,7 +160,10 @@ export const StoreReviews: FC<StoreReviewsProps> = ({
               Add Review
             </AddReviewButton>
           ) : (
-            <ReviewsFont>You must have an order with this shop before being able to leave a review</ReviewsFont>
+            <ReviewsFont>
+              You must have an order with this shop before being able to leave a
+              review
+            </ReviewsFont>
           )}
         </StoreTitleCol>
         <CloseIconModal
@@ -172,7 +175,13 @@ export const StoreReviews: FC<StoreReviewsProps> = ({
       </HeaderRow>
       <Divider />
       <CardDetailsContainer>
-        <Grid container direction={"row"} flexWrap={"nowrap"} rowGap={2}>
+        <Grid
+          container
+          direction={"row"}
+          flexWrap={"nowrap"}
+          rowGap={2}
+          style={{ columnGap: "30px" }}
+        >
           {averageStoreRating && (
             <Grid item xs={12} sm={2} justifyContent={"center"}>
               <AverageReviewContainer>
