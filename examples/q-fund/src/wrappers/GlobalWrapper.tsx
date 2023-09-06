@@ -1,11 +1,11 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-
 import { addUser } from '../state/features/authSlice';
 import NavBar from '../components/layout/Navbar/Navbar';
 import PageLoader from '../components/common/PageLoader';
 import { RootState } from '../state/store';
 import { setUserAvatarHash } from '../state/features/globalSlice';
+import { useLocation } from 'react-router-dom';
 
 interface Props {
   children: React.ReactNode;
@@ -14,8 +14,8 @@ interface Props {
 
 const GlobalWrapper: React.FC<Props> = ({ children, setTheme }) => {
   const dispatch = useDispatch();
-  const [userAvatar, setUserAvatar] = useState<string>('');
   const user = useSelector((state: RootState) => state.auth.user);
+  const location = useLocation();
 
   useEffect(() => {
     if (!user?.name) return;
@@ -73,19 +73,22 @@ const GlobalWrapper: React.FC<Props> = ({ children, setTheme }) => {
   }, []);
 
   useEffect(() => {
+    if (location.pathname === '/' || user?.name) return;
     askForAccountInformation();
   }, []);
 
   return (
     <>
       {isLoadingGlobal && <PageLoader />}
-      <NavBar
-        setTheme={(val: string) => setTheme(val)}
-        isAuthenticated={!!user?.name}
-        userName={user?.name || ''}
-        userAvatar={userAvatar}
-        authenticate={askForAccountInformation}
-      />
+      {/* Hide navbar on homepage for styling purposes */}
+      {location.pathname !== '/' && (
+        <NavBar
+          setTheme={(val: string) => setTheme(val)}
+          isAuthenticated={!!user?.name}
+          authenticate={askForAccountInformation}
+          fixed={true}
+        />
+      )}
       {children}
     </>
   );

@@ -1,14 +1,14 @@
-import React, { useState, useEffect, CSSProperties } from 'react'
-import Skeleton from '@mui/material/Skeleton'
-import { Box } from '@mui/material'
+import React, { useState, useEffect, CSSProperties } from 'react';
+import Skeleton from '@mui/material/Skeleton';
+import { Box } from '@mui/material';
 
 interface ResponsiveImageProps {
-  src: string
-  width: number
-  height: number
-  alt?: string
-  className?: string
-  styles?: CSSProperties
+  src: string;
+  width: number;
+  height: number;
+  alt?: string;
+  className?: string;
+  styles?: CSSProperties;
 }
 
 const ResponsiveImage: React.FC<ResponsiveImageProps> = ({
@@ -17,22 +17,12 @@ const ResponsiveImage: React.FC<ResponsiveImageProps> = ({
   height,
   alt,
   className,
-  styles
+  styles,
 }) => {
-  const [loading, setLoading] = useState(true)
-
-  
-
-  
- 
+  const [loading, setLoading] = useState(true);
 
   return (
-    <Box
-      sx={{
-        padding: '2px'
-      }}
-    >
-   
+    <>
       {loading && (
         <Skeleton
           variant="rectangular"
@@ -40,9 +30,9 @@ const ResponsiveImage: React.FC<ResponsiveImageProps> = ({
             width: '100%',
             height: 0,
             paddingBottom: `${(height / width) * 100}%`,
-            objectFit: 'contain',
+            objectFit: 'cover',
             visibility: loading ? 'visible' : 'hidden',
-            borderRadius: '8px'
+            borderRadius: '8px 8px 0px 0px',
           }}
         />
       )}
@@ -53,15 +43,14 @@ const ResponsiveImage: React.FC<ResponsiveImageProps> = ({
         style={{
           width: '100%',
           height: 'auto',
-          borderRadius: '8px',
+          borderRadius: '8px 8px 0px 0px',
           visibility: loading ? 'hidden' : 'visible',
           position: loading ? 'absolute' : 'unset',
-          ...(styles || {})
+          ...(styles || {}),
         }}
       />
-    </Box>
-  )
+    </>
+  );
+};
 
-}
-
-export default ResponsiveImage
+export default ResponsiveImage;

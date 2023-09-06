@@ -29,6 +29,8 @@ import { addToHashMap } from '../../state/features/crowdfundSlice';
 import {
   AuthorTextComment,
   CrowdfundTitle,
+  MainCol,
+  MainContainer,
   Spacer,
   StyledCardColComment,
   StyledCardHeaderComment,
@@ -211,8 +213,6 @@ export const Crowdfund = () => {
   const getUpdates = React.useCallback(async (name: string, id: string) => {
     try {
       if (!name || !id) return;
-      // dispatch(setIsLoadingGlobal(true));
-
       const url = `/arbitrary/resources/search?mode=ALL&service=DOCUMENT&query=${updateBase}${id.slice(
         -12
       )}&limit=0&includemetadata=false&reverse=true&excludeblocked=true&name=${name}&exactmatchnames=true&offset=0`;
@@ -226,8 +226,6 @@ export const Crowdfund = () => {
       setUpdatesList(responseDataSearch);
     } catch (error) {
       console.log(error);
-    } finally {
-      // dispatch(setIsLoadingGlobal(false));
     }
   }, []);
 
@@ -306,24 +304,8 @@ export const Crowdfund = () => {
   return (
     <>
       <NewCrowdfund editId={id} editContent={editContent} />
-      <Box
-        sx={{
-          width: '100%',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-        }}
-      >
-        <Box
-          sx={{
-            width: '100%',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            marginTop: '30px',
-            maxWidth: '1400px',
-          }}
-        >
+      <MainContainer container spacing={2} direction={'row'}>
+        <MainCol item xs={12} sm={6}>
           <CrowdfundTitle
             variant="h1"
             color="textPrimary"
@@ -348,10 +330,16 @@ export const Crowdfund = () => {
           {crowdfundData?.deployedAT?.aTAddress && (
             <Donate
               atAddress={crowdfundData?.deployedAT?.aTAddress}
-              onSubmit={() => {}}
-              onClose={() => {}}
+              onSubmit={() => {
+                return;
+              }}
+              onClose={() => {
+                return;
+              }}
             />
           )}
+        </MainCol>
+        <MainCol item xs={12} sm={6}>
           {crowdfundData?.deployedAT?.goalValue && !isNaN(atAddressBalance) && (
             <CrowdfundProgress
               raised={atAddressBalance}
@@ -493,8 +481,8 @@ export const Crowdfund = () => {
               </>
             );
           })}
-        </Box>
-      </Box>
+        </MainCol>
+      </MainContainer>
       <Spacer height="15px" />
       <CrowdfundTitle
         variant="h1"

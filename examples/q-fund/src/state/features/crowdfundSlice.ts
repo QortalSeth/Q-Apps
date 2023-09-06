@@ -1,44 +1,46 @@
 import { createSlice } from '@reduxjs/toolkit';
 import { RootState } from '../store'
-
-
 interface GlobalState {
-  hashMapCrowdfunds: Record<string, Video>
+  hashMapCrowdfunds: Record<string, Crowdfund>
   crowdfunds: Crowdfund[]
 }
+
 const initialState: GlobalState = {
   hashMapCrowdfunds: {},
   crowdfunds: []
 }
 
-export interface Video {
-  title: string
-  description: string
-  created: number | string
-  user: string
-  id: string
-  category?: string
-  categoryName?: string
-  tags?: string[]
-  updated?: number | string
-  isValid?: boolean
-  deployedAT?: any
-}
 export interface Crowdfund {
   title: string
   description: string
-  created: number | string
+  created: number 
   user: string
   attachments?: any[]
   id: string
   category?: string
   categoryName?: string
   tags?: string[]
+  inlineContent?: string
   updated?: number | string
   isValid?: boolean
-  inlineContent?: string
+  coverImage?: string
+  deployedAT?: any
 }
-
+// export interface Crowdfund {
+//   title: string
+//   description: string
+//   created: number
+//   user: string
+//   attachments?: any[]
+//   id: string
+//   category?: string
+//   categoryName?: string
+//   tags?: string[]
+//   updated?: number | string
+//   isValid?: boolean
+//   inlineContent?: string
+//   coverImage?: string
+// }
 
 export const crowdfundSlice = createSlice({
   name: 'crowdfund',
@@ -62,7 +64,7 @@ export const crowdfundSlice = createSlice({
     },
     addArrayToHashMap: (state, action) => {
       const crowdfunds = action.payload
-      crowdfunds.forEach((video: Video) => {
+      crowdfunds.forEach((video: Crowdfund) => {
         state.hashMapCrowdfunds[video.id] = video
       })
     },

@@ -1,77 +1,71 @@
-import React from 'react'
-import { useDispatch, useSelector } from 'react-redux'
+import React from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import {
   addToHashMap,
   upsertCrowdfunds,
-  Video,
-  Crowdfund
-} from '../state/features/crowdfundSlice'
+  Crowdfund,
+} from '../state/features/crowdfundSlice';
 
-import { RootState } from '../state/store'
-import { fetchAndEvaluateCrowdfunds } from '../utils/fetchCrowdfunds'
-import { crowdfundBase } from '../constants'
+import { RootState } from '../state/store';
+import { fetchAndEvaluateCrowdfunds } from '../utils/fetchCrowdfunds';
+import { crowdfundBase } from '../constants';
 
 export const useFetchCrowdfunds = () => {
-  const dispatch = useDispatch()
+  const dispatch = useDispatch();
   const hashMapCrowdfund = useSelector(
     (state: RootState) => state.crowdfund.hashMapCrowdfunds
-  )
-  const crowdfunds = useSelector((state: RootState) => state.crowdfund.crowdfunds)
- 
+  );
+  const crowdfunds = useSelector(
+    (state: RootState) => state.crowdfund.crowdfunds
+  );
 
   const checkAndUpdateResource = React.useCallback(
     (crowdfund: Crowdfund) => {
-      const existingCrowdfund = hashMapCrowdfund[crowdfund.id]
+      const existingCrowdfund = hashMapCrowdfund[crowdfund.id];
       if (!existingCrowdfund) {
-        return true
+        return true;
       } else if (
         crowdfund?.updated &&
         existingCrowdfund?.updated &&
-        (!existingCrowdfund?.updated || crowdfund?.updated) > existingCrowdfund?.updated
+        (!existingCrowdfund?.updated || crowdfund?.updated) >
+          existingCrowdfund?.updated
       ) {
-        return true
+        return true;
       } else {
-        return false
+        return false;
       }
     },
     [hashMapCrowdfund]
-  )
+  );
 
-
-
-  const getCrowdfund = async (user: string, identifier: string, content: any) => {
+  const getCrowdfund = async (
+    user: string,
+    identifier: string,
+    content: any
+  ) => {
     const res = await fetchAndEvaluateCrowdfunds({
       user,
       identifier,
-      content
-    })
+      content,
+    });
 
-    dispatch(addToHashMap(res))
-    // const existingAvatar = userAvatarHash[user]
-
-    //   if (!existingAvatar) {
-    //     getAvatar(user)
-    //   } 
-  }
-
-
-
+    dispatch(addToHashMap(res));
+  };
 
   const getCrowdfunds = React.useCallback(async () => {
     try {
-      
-      const offset = crowdfunds.length
-      const listLimit = 20
-      const url = `/arbitrary/resources/search?mode=ALL&service=DOCUMENT&query=${crowdfundBase}&limit=${listLimit}&includemetadata=false&reverse=true&excludeblocked=true&exactmatchnames=true&offset=${offset}`
+      const offset = crowdfunds.length;
+      const listLimit = 20;
+      const url = `/arbitrary/resources/search?mode=ALL&service=DOCUMENT&query=${crowdfundBase}&limit=${listLimit}&includemetadata=false&reverse=true&excludeblocked=true&exactmatchnames=true&offset=${offset}`;
       const response = await fetch(url, {
         method: 'GET',
         headers: {
-          'Content-Type': 'application/json'
-        }
-      })
-      const responseData = await response.json()
-   
-      const structureData = responseData.map((resource: any): Video => {
+          'Content-Type': 'application/json',
+        },
+      });
+      const responseData = await response.json();
+
+      const structureData = responseData.map((resource: any): Crowdfund => {
         return {
           title: resource?.metadata?.title,
           category: resource?.metadata?.category,
@@ -81,34 +75,28 @@ export const useFetchCrowdfunds = () => {
           created: resource?.created,
           updated: resource?.updated,
           user: resource.name,
-          id: resource.identifier
-        }
-      })
-      dispatch(upsertCrowdfunds(structureData))
+          id: resource.identifier,
+        };
+      });
+      dispatch(upsertCrowdfunds(structureData));
 
       for (const content of structureData) {
         if (content.user && content.id) {
-          const res = checkAndUpdateResource(content)
+          const res = checkAndUpdateResource(content);
           if (res) {
-            getCrowdfund(content.user, content.id, content)
+            getCrowdfund(content.user, content.id, content);
           }
         }
       }
     } catch (error) {
-    } finally {
-     
+      console.error(error);
     }
-  }, [crowdfunds, hashMapCrowdfund])
-
-
-
-
-
+  }, [crowdfunds, hashMapCrowdfund]);
 
   return {
     getCrowdfunds,
     checkAndUpdateResource,
     getCrowdfund,
-    hashMapCrowdfund
-  }
-}
+    hashMapCrowdfund,
+  };
+};

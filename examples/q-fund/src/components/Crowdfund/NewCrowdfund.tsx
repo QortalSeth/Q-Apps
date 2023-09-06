@@ -15,10 +15,11 @@ import {
   NewCrowdfundTitle,
   TimesIcon,
 } from "./Crowdfund-styles";
-import { Box, Button, Modal, useTheme } from "@mui/material";
+import { Box, Button, Modal, TextField, useTheme } from "@mui/material";
 import ReactQuill, { Quill } from "react-quill";
 import ImageResize from "quill-image-resize-module-react";
 import ShortUniqueId from "short-unique-id";
+import AddCircleIcon from "@mui/icons-material/AddCircle";
 import AddIcon from "@mui/icons-material/Add";
 import "react-quill/dist/quill.snow.css";
 import { FileAttachment } from "./FileAttachment";
@@ -29,8 +30,10 @@ import { RootState } from "../../state/store";
 import { attachmentBase, crowdfundBase } from "../../constants";
 import dayjs, { Dayjs } from "dayjs";
 import isBetween from "dayjs/plugin/isBetween"; // Import the plugin
+import { DemoContainer } from "@mui/x-date-pickers/internals/demo";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import { DateTimePicker } from "@mui/x-date-pickers/DateTimePicker";
 import duration from "dayjs/plugin/duration";
 import bs58 from "bs58";
 import {
@@ -39,7 +42,9 @@ import {
   upsertCrowdfunds,
 } from "../../state/features/crowdfundSlice";
 import ImageUploader from "../ImageUploader";
+import { ChannelCard, CrowdfundContainer } from "../../pages/Home/Home-styles";
 import { DesktopDateTimePicker } from "@mui/x-date-pickers";
+import { PiggybankSVG } from "../../assets/svgs/PiggybankSVG";
 import NumericTextField from "../../../../../Library/Components/NumericTextField";
 
 dayjs.extend(isBetween);
@@ -199,11 +204,11 @@ export const NewCrowdfund = ({ editId, editContent }: NewCrowdfundProps) => {
   }
 
   function base64ToUint8Array(base64) {
-    var binary_string = atob(base64);
-    var len = binary_string.length;
-    var bytes = new Uint8Array(len);
+    const binary_string = atob(base64);
+    const len = binary_string.length;
+    const bytes = new Uint8Array(len);
 
-    for (var i = 0; i < len; i++) {
+    for (let i = 0; i < len; i++) {
       bytes[i] = binary_string.charCodeAt(i);
     }
 
@@ -215,7 +220,7 @@ export const NewCrowdfund = ({ editId, editContent }: NewCrowdfundProps) => {
 
   const createBytes = (goalAmount: number, blocks: number, address: string) => {
     try {
-      var uint8Array = base64ToUint8Array(codeBytes);
+      const uint8Array = base64ToUint8Array(codeBytes);
       console.log(uint8Array);
       const newArray = [...dataBytePlaceholder];
       // Replacing the values for addrSleepMinutes and addrGoalAmount
@@ -230,7 +235,9 @@ export const NewCrowdfund = ({ editId, editContent }: NewCrowdfundProps) => {
       console.log({ byteArray });
       const encodedString: string = uint8ArrayToBase64(byteArray);
       return encodedString;
-    } catch (error) {}
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   function toSignedByte(value) {
@@ -244,7 +251,7 @@ export const NewCrowdfund = ({ editId, editContent }: NewCrowdfundProps) => {
     try {
       if (!userAddress) throw new Error("Unable to locate user address");
       let errorMsg = "";
-      let name: string = "";
+      let name = "";
       if (username) {
         name = username;
       }
@@ -313,13 +320,13 @@ export const NewCrowdfund = ({ editId, editContent }: NewCrowdfundProps) => {
         amount: 0.01,
         assetId: 0,
       });
-      console.log({ response });
 
       const crowdfundObject: any = {
         title,
         createdAt: Date.now(),
         version: 1,
         attachments: [],
+        description,
         inlineContent,
         coverImage,
         deployedAT: {
@@ -335,7 +342,7 @@ export const NewCrowdfund = ({ editId, editContent }: NewCrowdfundProps) => {
       const attachmentArray: any[] = [];
       const attachmentArrayToSave: any[] = [];
       for (const attachment of attachments) {
-        let alreadyExits = !!attachment?.identifier;
+        const alreadyExits = !!attachment?.identifier;
 
         if (alreadyExits) {
           attachmentArray.push(attachment);
@@ -382,7 +389,7 @@ export const NewCrowdfund = ({ editId, editContent }: NewCrowdfundProps) => {
         ? editId
         : `${crowdfundBase}${sanitizeTitle.slice(0, 30)}_${id}`;
       const crowdfundObjectToBase64 = await objectToBase64(crowdfundObject);
-      let requestBody2: any = {
+      const requestBody2: any = {
         action: "PUBLISH_QDN_RESOURCE",
         name: name,
         service: "DOCUMENT",
@@ -477,17 +484,11 @@ export const NewCrowdfund = ({ editId, editContent }: NewCrowdfundProps) => {
     <>
       {username && (
         <>
-          {editId ? (
-            editContent?.user === username ? (
-              <CreateContainer onClick={() => setIsOpen(true)}>
-                <CreateIcon />
-              </CreateContainer>
-            ) : null
-          ) : (
+          {editId ? null : (
             <CATContainer>
               <AddCrowdFundButton onClick={() => setIsOpen(true)}>
-                <AddIcon />{" "}
-                <CrowdfundCardTitle>Start a crowdfund</CrowdfundCardTitle>
+                <PiggybankSVG height={"24"} width={"24"} color={"#ffffff"} />
+                <CrowdfundCardTitle>Start a Q-Fund</CrowdfundCardTitle>
               </AddCrowdFundButton>
             </CATContainer>
           )}
