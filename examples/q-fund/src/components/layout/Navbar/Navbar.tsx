@@ -7,44 +7,61 @@ import {
   LightModeIcon,
   DarkModeIcon,
   AuthenticateButton,
+  NavbarName,
+  AvatarContainer,
 } from './Navbar-styles';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import ExitToAppIcon from '@mui/icons-material/ExitToApp';
 import QFundLogo from '../../../assets/images/QFundDarkLogo.png';
 import QFundLogoLight from '../../../assets/images/QFundLightLogo.png';
+import { RootState } from '../../../state/store';
+import { AccountCircleSVG } from '../../../assets/svgs/AccountCircleSVG';
 interface Props {
   isAuthenticated: boolean;
-  userName: string | null;
-  userAvatar: string;
   authenticate: () => void;
   setTheme: (val: string) => void;
+  fixed?: boolean;
 }
 
 const NavBar: React.FC<Props> = ({
   isAuthenticated,
-  userName,
-  userAvatar,
   authenticate,
   setTheme,
+  fixed,
 }) => {
   const theme = useTheme();
   const dispatch = useDispatch();
   const navigate = useNavigate();
+
+  const username = useSelector((state: RootState) => state.auth.user?.name);
+
+  const userAvatarHash = useSelector(
+    (state: RootState) => state.global.userAvatarHash
+  );
+
   return (
-    <CustomAppBar position="sticky" elevation={2}>
+    <CustomAppBar
+      position={fixed ? 'sticky' : 'relative'}
+      elevation={2}
+      style={{
+        backgroundColor: !fixed
+          ? 'transparent'
+          : theme.palette.background.default,
+      }}
+    >
       <ThemeSelectRow>
         {theme.palette.mode === 'dark' ? (
           <LightModeIcon
             onClickFunc={() => setTheme('light')}
-            color="white"
+            color={!fixed ? 'white' : theme.palette.text.primary}
             height="22"
             width="22"
           />
         ) : (
           <DarkModeIcon
             onClickFunc={() => setTheme('dark')}
-            color="black"
+            color={!fixed ? 'white' : theme.palette.text.primary}
             height="22"
             width="22"
           />
@@ -69,6 +86,35 @@ const NavBar: React.FC<Props> = ({
             <ExitToAppIcon />
             Authenticate
           </AuthenticateButton>
+        )}
+        {isAuthenticated && username && (
+          <>
+            <AvatarContainer>
+              <NavbarName
+                style={{ color: !fixed ? 'white' : theme.palette.text.primary }}
+              >
+                {username}
+              </NavbarName>
+              {!userAvatarHash[username] ? (
+                <AccountCircleSVG
+                  color={!fixed ? 'white' : theme.palette.text.primary}
+                  width="32"
+                  height="32"
+                />
+              ) : (
+                <img
+                  src={userAvatarHash[username]}
+                  alt="User Avatar"
+                  width="32"
+                  height="32"
+                  style={{
+                    borderRadius: '50%',
+                    color: !fixed ? 'white' : theme.palette.text.primary,
+                  }}
+                />
+              )}
+            </AvatarContainer>
+          </>
         )}
       </Box>
     </CustomAppBar>

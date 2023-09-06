@@ -9,8 +9,7 @@ export const CustomAppBar = styled(AppBar)(({ theme }) => ({
   justifyContent: 'space-between',
   alignItems: 'center',
   width: '100%',
-  padding: '8px 16px',
-  backgroundColor: 'transparent',
+  padding: '40px 25px',
   backgroundImage: 'none',
   boxShadow: 'none',
   [theme.breakpoints.only('xs')]: {
@@ -21,7 +20,7 @@ export const CustomAppBar = styled(AppBar)(({ theme }) => ({
 
 export const LogoContainer = styled('img')({
   width: '12%',
-  minWidth: '50px',
+  minWidth: '52px',
   height: 'auto',
   padding: '2px 0',
   userSelect: 'none',
@@ -57,13 +56,7 @@ export const AuthenticateButton = styled(Button)(({ theme }) => ({
 export const AvatarContainer = styled(Box)({
   display: 'flex',
   alignItems: 'center',
-  '&:hover': {
-    cursor: 'pointer',
-    '& #expand-icon': {
-      transition: 'all 0.3s ease-in-out',
-      filter: 'brightness(0.7)',
-    },
-  },
+  gap: '5px',
 });
 
 export const DropdownContainer = styled(Box)(({ theme }) => ({
@@ -90,14 +83,13 @@ export const DropdownText = styled(Typography)(({ theme }) => ({
 export const NavbarName = styled(Typography)(({ theme }) => ({
   fontFamily: 'Raleway',
   fontSize: '18px',
-  color: theme.palette.text.primary,
-  margin: '0 10px',
+  userSelect: 'none',
 }));
 
 export const ThemeSelectRow = styled(Box)({
   display: 'flex',
   alignItems: 'center',
-  gap: '5px',
+  gap: '10px',
   flexBasis: 0,
   height: '100%',
 });

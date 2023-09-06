@@ -1,27 +1,37 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../state/store';
-import { Avatar, Box, useTheme } from '@mui/material';
+import { Avatar, Grid, useTheme, Box } from '@mui/material';
 import { useFetchCrowdfunds } from '../../hooks/useFetchCrowdfunds';
 import LazyLoad from '../../components/common/LazyLoad';
-
 import ResponsiveImage from '../../components/ResponsiveImage';
 import { formatDate } from '../../utils/time';
 import {
   BottomWrapper,
   CrowdfundContainer,
   ChannelCard,
-  Subtitle,
-  SubtitleContainer,
-} from './Home-styles';
-
-import {
-  CrowdfundCardTitle,
+  CrowdfundListHeader,
+  CrowdfundListTitle,
+  CardContainer,
+  CrowdfundTitleCard,
+  CrowdfundTitle,
+  CrowdfundOwner,
   NameContainer,
-  CrowdfundCardName,
+  CrowdfundImageContainer,
+  CrowdfundDescription,
+  DonateButton,
+  CrowdfundGoal,
+  CrowdfundGoalRow,
+  CrowdfundText,
+} from './Home-styles';
+import {
   CrowdfundUploadDate,
+  CrowdfundListWrapper,
 } from '../../components/Crowdfund/Crowdfund-styles';
+import CoverImageDefault from '../../assets/images/CoverImageDefault.webp';
+import { Crowdfund } from '../../state/features/crowdfundSlice';
+import { QortalSVG } from '../../assets/svgs/QortalSVG';
 
 export const CrowdfundList = () => {
   const theme = useTheme();
@@ -62,7 +72,7 @@ export const CrowdfundList = () => {
     setIsLoading(false);
   }, [getCrowdfunds]);
 
-  let crowdfunds = globalCrowdfunds;
+  const crowdfunds = globalCrowdfunds;
 
   useEffect(() => {
     if (!firstFetch.current && globalCrowdfunds.length === 0) {
@@ -75,17 +85,12 @@ export const CrowdfundList = () => {
   }, [getCrowdfundHandlerMount, globalCrowdfunds]);
 
   return (
-    <Box
-      sx={{
-        width: '100%',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        marginTop: '0px',
-      }}
-    >
-      <CrowdfundContainer>
-        {crowdfunds.map((crowdfund: any, index: number) => {
+    <CrowdfundListWrapper>
+      <CrowdfundListHeader>
+        <CrowdfundListTitle>Most Recent Q-Funds</CrowdfundListTitle>
+      </CrowdfundListHeader>
+      <CrowdfundContainer container spacing={3} direction={'row'}>
+        {crowdfunds.map((crowdfund: Crowdfund) => {
           const existingCrowdfund = hashMapCrowdfunds[crowdfund.id];
           let hasHash = false;
           let crowdfundObj = crowdfund;
@@ -100,41 +105,63 @@ export const CrowdfundList = () => {
           }
 
           return (
-            <ChannelCard
-              onClick={() => {
-                navigate(`/crowdfund/${crowdfundObj.user}/${crowdfundObj.id}`);
-              }}
-              key={crowdfundObj.id}
-            >
-              <CrowdfundCardTitle>{crowdfundObj?.title}</CrowdfundCardTitle>
-              {crowdfundObj?.coverImage && (
-                <ResponsiveImage
-                  src={crowdfundObj?.coverImage}
-                  width={266}
-                  height={150}
-                  styles={{
-                    maxHeight: 'calc(40vh)',
-                    objectFit: 'contain',
-                  }}
-                />
-              )}
-
-              <BottomWrapper>
-                <NameContainer>
-                  <Avatar
-                    sx={{ height: 24, width: 24 }}
-                    src={avatarUrl}
-                    alt={`${crowdfundObj.user}'s avatar`}
+            <Grid item xs={12} sm={6} md={4} lg={3} xl={3}>
+              <CardContainer
+                onClick={() => {
+                  navigate(
+                    `/crowdfund/${crowdfundObj.user}/${crowdfundObj.id}`
+                  );
+                }}
+              >
+                <CrowdfundImageContainer>
+                  <ResponsiveImage
+                    src={crowdfundObj?.coverImage || CoverImageDefault}
+                    width={100}
+                    height={150}
+                    styles={{
+                      maxHeight: '250px',
+                      minHeight: '250px',
+                      objectFit: 'cover',
+                    }}
                   />
-                  <CrowdfundCardName>{crowdfundObj.user}</CrowdfundCardName>
-                </NameContainer>
-                {crowdfundObj?.created && (
-                  <CrowdfundUploadDate>
-                    {formatDate(crowdfundObj.created)}
-                  </CrowdfundUploadDate>
-                )}
-              </BottomWrapper>
-            </ChannelCard>
+                  <CrowdfundTitleCard>
+                    <CrowdfundTitle>{crowdfundObj?.title}</CrowdfundTitle>
+                    <NameContainer>
+                      <Avatar
+                        sx={{ height: 30, width: 30 }}
+                        src={avatarUrl}
+                        alt={`${crowdfundObj.user}'s avatar`}
+                      />
+                      <CrowdfundOwner>by {crowdfundObj?.user}</CrowdfundOwner>
+                    </NameContainer>
+                  </CrowdfundTitleCard>
+                </CrowdfundImageContainer>
+                <ChannelCard key={crowdfundObj.id}>
+                  <CrowdfundDescription>
+                    {crowdfundObj?.description}
+                  </CrowdfundDescription>
+                  <CrowdfundGoalRow>
+                    <CrowdfundText>Campaign Goal:</CrowdfundText>
+                    <CrowdfundGoal>
+                      <QortalSVG
+                        height={'22'}
+                        width={'22'}
+                        color={theme.palette.text.primary}
+                      />
+                      {crowdfundObj?.deployedAT?.goalValue}
+                    </CrowdfundGoal>
+                  </CrowdfundGoalRow>
+                  <BottomWrapper>
+                    {crowdfundObj?.created && (
+                      <CrowdfundUploadDate>
+                        {formatDate(crowdfundObj.created)}
+                      </CrowdfundUploadDate>
+                    )}
+                    <DonateButton>Back this project</DonateButton>
+                  </BottomWrapper>
+                </ChannelCard>
+              </CardContainer>
+            </Grid>
           );
         })}
       </CrowdfundContainer>
@@ -143,6 +170,6 @@ export const CrowdfundList = () => {
         onLoadMore={getCrowdfundsHandler}
         isLoading={isLoading}
       ></LazyLoad>
-    </Box>
+    </CrowdfundListWrapper>
   );
 };

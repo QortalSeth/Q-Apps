@@ -24,7 +24,10 @@ function App() {
           <GlobalWrapper setTheme={(val: string) => setTheme(val)}>
             <CssBaseline />
             <Routes>
-              <Route path="/" element={<Home />} />
+              <Route
+                path="/"
+                element={<Home setTheme={(val: string) => setTheme(val)} />}
+              />
               <Route path="/crowdfund/:name/:id" element={<Crowdfund />} />
             </Routes>
           </GlobalWrapper>
