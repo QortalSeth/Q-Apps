@@ -58,7 +58,7 @@ export const BoundedNumericTextField = forwardRef(
     );
 
     const isEmpty = (value: string) => {
-      return value === "";
+      return value === "" || value == Number.isNaN(Number(value));
     };
 
     const skipMinMaxCheck = (value: string) => {
@@ -133,7 +133,7 @@ export const BoundedNumericTextField = forwardRef(
         return;
       }
 
-      value = setMinMaxValue(value || minValue.toString());
+      value = setMinMaxValue(value);
       value = removeTrailingZeros(value);
       if (isAllZerosNum.test(value)) value = minValue.toString();
       setTextFieldValue(value);
