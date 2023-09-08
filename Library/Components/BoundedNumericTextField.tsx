@@ -102,8 +102,8 @@ export const BoundedNumericTextField = forwardRef(
       }
       return value;
     };
-    const filterValue = (value: string, emptyReturn = "") => {
-      if (isEmpty(value)) return emptyReturn;
+    const filterValue = (value: string) => {
+      if (isEmpty(value)) return value;
       value = filterTypes(value);
       if (isFloatNum.test(value)) {
         return setMinMaxValue(value);
