@@ -71,8 +71,8 @@ export const BoundedNumericTextField = forwardRef(
     };
 
     const setValueInBounds = (num: number) => {
-      num = Math.min(num, maxValue);
-      num = Math.max(num, minValue);
+      if (num > maxValue) return maxValue;
+      if (num < minValue) return minValue;
       return num;
     };
 
