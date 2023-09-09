@@ -1,11 +1,9 @@
 import React, { useEffect, useState } from "react";
-import CreateIcon from "@mui/icons-material/Create";
 import {
   AddCrowdFundButton,
   AddLogoIcon,
   CATContainer,
   CoverImagePreview,
-  CreateContainer,
   CrowdfundCardTitle,
   CustomInputField,
   LogoPreviewRow,
@@ -15,12 +13,10 @@ import {
   NewCrowdfundTitle,
   TimesIcon,
 } from "./Crowdfund-styles";
-import { Box, Button, Modal, TextField, useTheme } from "@mui/material";
+import { Box, Button, Modal, useTheme } from "@mui/material";
 import ReactQuill, { Quill } from "react-quill";
 import ImageResize from "quill-image-resize-module-react";
 import ShortUniqueId from "short-unique-id";
-import AddCircleIcon from "@mui/icons-material/AddCircle";
-import AddIcon from "@mui/icons-material/Add";
 import "react-quill/dist/quill.snow.css";
 import { FileAttachment } from "./FileAttachment";
 import { useDispatch, useSelector } from "react-redux";
@@ -30,10 +26,8 @@ import { RootState } from "../../state/store";
 import { attachmentBase, crowdfundBase } from "../../constants";
 import dayjs, { Dayjs } from "dayjs";
 import isBetween from "dayjs/plugin/isBetween"; // Import the plugin
-import { DemoContainer } from "@mui/x-date-pickers/internals/demo";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
-import { DateTimePicker } from "@mui/x-date-pickers/DateTimePicker";
 import duration from "dayjs/plugin/duration";
 import bs58 from "bs58";
 import {
@@ -42,10 +36,9 @@ import {
   upsertCrowdfunds,
 } from "../../state/features/crowdfundSlice";
 import ImageUploader from "../ImageUploader";
-import { ChannelCard, CrowdfundContainer } from "../../pages/Home/Home-styles";
 import { DesktopDateTimePicker } from "@mui/x-date-pickers";
 import { PiggybankSVG } from "../../assets/svgs/PiggybankSVG";
-import NumericTextField from "../../../../../Library/Components/NumericTextField";
+import BoundedNumericTextField from "../../../../../Library/Components/BoundedNumericTextField";
 
 dayjs.extend(isBetween);
 dayjs.extend(duration);
@@ -574,7 +567,7 @@ export const NewCrowdfund = ({ editId, editContent }: NewCrowdfundProps) => {
             Length of crowdfund: {diffInMins} blocks ~{" "}
             {formatDuration(diffInMins)}
           </NewCrowdfundTimeDescription>
-          <NumericTextField
+          <BoundedNumericTextField
             label="Goal amount (QORT)"
             variant="outlined"
             value={goalValue}
@@ -582,6 +575,7 @@ export const NewCrowdfund = ({ editId, editContent }: NewCrowdfundProps) => {
             minValue={0.01}
             maxValue={1_000_000}
             addIconButtons={false}
+            sigDigits={6}
           />
           <NewCrowdfundSubtitle>
             Add necessary files - optional
