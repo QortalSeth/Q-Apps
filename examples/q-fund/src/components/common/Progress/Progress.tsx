@@ -1,8 +1,5 @@
-import React from 'react';
-import LinearProgress from '@mui/material/LinearProgress';
-import Box from '@mui/material/Box';
-import Typography from '@mui/material/Typography';
-
+import { Typography } from "@mui/material";
+import { CustomCircularProgress, ProgressRow } from "./Progress-styles";
 interface CrowdfundProgressProps {
   raised: number;
   goal: number;
@@ -15,11 +12,16 @@ export const CrowdfundProgress: React.FC<CrowdfundProgressProps> = ({
   const progress = (+raised / +goal) * 100;
 
   return (
-    <Box>
+    <ProgressRow>
       <Typography variant="h6">
         Raised: ${+raised} / ${+goal}
       </Typography>
-      <LinearProgress variant="determinate" value={progress} />
-    </Box>
+      <CustomCircularProgress
+        size={115}
+        thickness={13}
+        variant="determinate"
+        value={50}
+      />
+    </ProgressRow>
   );
 };

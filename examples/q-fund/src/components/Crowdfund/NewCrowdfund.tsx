@@ -389,13 +389,13 @@ export const NewCrowdfund = ({ editId, editContent }: NewCrowdfundProps) => {
         ? editId
         : `${crowdfundBase}${sanitizeTitle.slice(0, 30)}_${id}`;
       const crowdfundObjectToBase64 = await objectToBase64(crowdfundObject);
+      // Description is obtained from raw data
       const requestBody2: any = {
         action: "PUBLISH_QDN_RESOURCE",
         name: name,
         service: "DOCUMENT",
         data64: crowdfundObjectToBase64,
         title: title.slice(0, 50),
-        // description: description,
         identifier,
       };
 
@@ -409,7 +409,6 @@ export const NewCrowdfund = ({ editId, editContent }: NewCrowdfundProps) => {
       const objToStore: any = {
         ...crowdfundObject,
         title: title,
-        // description: description,
         id: identifier,
         user: name,
         created: Date.now(),
@@ -575,7 +574,7 @@ export const NewCrowdfund = ({ editId, editContent }: NewCrowdfundProps) => {
             {formatDuration(diffInMins)}
           </NewCrowdfundTimeDescription>
           <NumericTextField
-            label="Goal amount (QORT)"
+            // label="Goal amount (QORT)"
             variant="outlined"
             value={goalValue}
             onChange={handleInputChange}

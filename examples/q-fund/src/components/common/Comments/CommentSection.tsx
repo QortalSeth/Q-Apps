@@ -4,24 +4,24 @@ import React, {
   useMemo,
   useRef,
   useState,
-} from 'react';
-import { CommentEditor, addItem, updateItemDate } from './CommentEditor';
-import { Comment } from './Comment';
-import { Box, Button, Drawer, Typography, useTheme } from '@mui/material';
-import { styled } from '@mui/system';
-import CloseIcon from '@mui/icons-material/Close';
-import { useSelector } from 'react-redux';
-import { RootState } from '../../../state/store';
-import CommentIcon from '@mui/icons-material/Comment';
-import { useNavigate, useLocation } from 'react-router-dom';
-import { commentBase } from '../../../constants';
+} from "react";
+import { CommentEditor, addItem, updateItemDate } from "./CommentEditor";
+import { Comment } from "./Comment";
+import { Box, Button, Drawer, Typography, useTheme } from "@mui/material";
+import { styled } from "@mui/system";
+import CloseIcon from "@mui/icons-material/Close";
+import { useSelector } from "react-redux";
+import { RootState } from "../../../state/store";
+import CommentIcon from "@mui/icons-material/Comment";
+import { useNavigate, useLocation } from "react-router-dom";
+import { commentBase } from "../../../constants";
 
 interface CommentSectionProps {
   postId: string;
   postName: string;
 }
 
-const Panel = styled('div')`
+const Panel = styled("div")`
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -90,9 +90,9 @@ export const CommentSection = ({ postId, postName }: CommentSectionProps) => {
 
   useEffect(() => {
     const query = new URLSearchParams(location.search);
-    let commentVar = query?.get('comment');
+    let commentVar = query?.get("comment");
     if (commentVar) {
-      if (commentVar && commentVar.endsWith('/')) {
+      if (commentVar && commentVar.endsWith("/")) {
         commentVar = commentVar.slice(0, -1);
       }
       setIsOpen(true);
@@ -100,9 +100,9 @@ export const CommentSection = ({ postId, postName }: CommentSectionProps) => {
         const el = document.getElementById(commentVar);
         if (el) {
           el.scrollIntoView();
-          el.classList.add('glow');
+          el.classList.add("glow");
           setTimeout(() => {
-            el.classList.remove('glow');
+            el.classList.remove("glow");
           }, 2000);
         }
         navigate(location.pathname, { replace: true });
@@ -112,29 +112,29 @@ export const CommentSection = ({ postId, postName }: CommentSectionProps) => {
 
   const getReplies = useCallback(
     async (commentId, postId) => {
-      let offset: number = 0;
+      const offset = 0;
 
-      const removeBaseCommentId = commentId.replace('_base_', '');
+      const removeBaseCommentId = commentId.replace("_base_", "");
       const url = `/arbitrary/resources/search?mode=ALL&service=BLOG_COMMENT&query=${commentBase}${postId.slice(
         -12
       )}_reply_${removeBaseCommentId.slice(
         -6
       )}&limit=0&includemetadata=false&offset=${offset}&reverse=false&excludeblocked=true`;
       const response = await fetch(url, {
-        method: 'GET',
+        method: "GET",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
       });
       const responseData = await response.json();
-      let comments: any[] = [];
+      const comments: any[] = [];
       for (const comment of responseData) {
         if (comment.identifier && comment.name) {
           const url = `/arbitrary/BLOG_COMMENT/${comment.name}/${comment.identifier}`;
           const response = await fetch(url, {
-            method: 'GET',
+            method: "GET",
             headers: {
-              'Content-Type': 'application/json',
+              "Content-Type": "application/json",
             },
           });
 
@@ -154,7 +154,7 @@ export const CommentSection = ({ postId, postName }: CommentSectionProps) => {
 
   const getComments = useCallback(
     async (isNewMessages?: boolean, numberOfComments?: number) => {
-      let offset: number = 0;
+      let offset = 0;
       if (isNewMessages && numberOfComments) {
         offset = numberOfComments;
       }
@@ -162,9 +162,9 @@ export const CommentSection = ({ postId, postName }: CommentSectionProps) => {
         -12
       )}_base_&limit=20&includemetadata=false&offset=${offset}&reverse=false&excludeblocked=true`;
       const response = await fetch(url, {
-        method: 'GET',
+        method: "GET",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
       });
       const responseData = await response.json();
@@ -173,9 +173,9 @@ export const CommentSection = ({ postId, postName }: CommentSectionProps) => {
         if (comment.identifier && comment.name) {
           const url = `/arbitrary/BLOG_COMMENT/${comment.name}/${comment.identifier}`;
           const response = await fetch(url, {
-            method: 'GET',
+            method: "GET",
             headers: {
-              'Content-Type': 'application/json',
+              "Content-Type": "application/json",
             },
           });
 
@@ -196,9 +196,6 @@ export const CommentSection = ({ postId, postName }: CommentSectionProps) => {
       } else {
         setListComments(comments);
       }
-
-      try {
-      } catch (error) {}
     },
     [postId]
   );
@@ -231,7 +228,7 @@ export const CommentSection = ({ postId, postName }: CommentSectionProps) => {
 
   const structuredCommentList = useMemo(() => {
     return listComments.reduce((acc, curr, index, array) => {
-      if (curr?.identifier?.includes('_reply_')) {
+      if (curr?.identifier?.includes("_reply_")) {
         return acc;
       }
       acc.push({
@@ -284,7 +281,6 @@ export const CommentSection = ({ postId, postName }: CommentSectionProps) => {
   //     }
   //   };
   // }, [checkNewMessagesFunc]);
-  console.log('hello');
 
   return (
     <>
@@ -326,23 +322,23 @@ export const CommentSection = ({ postId, postName }: CommentSectionProps) => {
         )} */}
         <Box
           sx={{
-            width: '90%',
-            maxWidth: '1000px',
-            display: 'flex',
-            flexDirection: 'column',
-            flex: '1',
-            overflow: 'auto',
+            width: "90%",
+            maxWidth: "1000px",
+            display: "flex",
+            flexDirection: "column",
+            flex: "1",
+            overflow: "auto",
           }}
         >
           <Box
             sx={{
-              display: 'flex',
-              flexDirection: 'column',
-              margin: '25px 0px 50px 0px',
-              maxWidth: '100%',
-              width: '100%',
-              gap: '10px',
-              padding: '0px 5px',
+              display: "flex",
+              flexDirection: "column",
+              margin: "25px 0px 50px 0px",
+              maxWidth: "100%",
+              width: "100%",
+              gap: "10px",
+              padding: "0px 5px",
             }}
           >
             {structuredCommentList.map((comment: any) => {
@@ -359,7 +355,7 @@ export const CommentSection = ({ postId, postName }: CommentSectionProps) => {
           </Box>
           <Box
             sx={{
-              display: 'flex',
+              display: "flex",
             }}
           >
             <Button
@@ -367,7 +363,7 @@ export const CommentSection = ({ postId, postName }: CommentSectionProps) => {
                 getComments(
                   true,
                   listComments.filter(
-                    item => !item.identifier.includes('_reply_')
+                    item => !item.identifier.includes("_reply_")
                   ).length
                 );
               }}
@@ -380,10 +376,10 @@ export const CommentSection = ({ postId, postName }: CommentSectionProps) => {
         </Box>
         <Box
           sx={{
-            width: '100%',
-            display: 'flex',
-            justifyContent: 'center',
-            flex: '0 0 100px',
+            width: "100%",
+            display: "flex",
+            justifyContent: "center",
+            flex: "0 0 100px",
           }}
         >
           <CommentEditor
