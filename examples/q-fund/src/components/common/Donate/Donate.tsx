@@ -1,5 +1,5 @@
+import { useCallback, useState } from "react";
 import {
-  Avatar,
   Box,
   Button,
   Dialog,
@@ -10,24 +10,18 @@ import {
   InputAdornment,
   InputLabel,
   Tooltip,
-  Typography,
-  useTheme,
-} from '@mui/material';
-import React, { useCallback, useState } from 'react';
-
-import MenuItem from '@mui/material/MenuItem';
-import Select, { SelectChangeEvent } from '@mui/material/Select';
-import { useDispatch, useSelector } from 'react-redux';
-import { RootState } from '../../../state/store';
-import Portal from '../Portal';
-import MonetizationOnIcon from '@mui/icons-material/MonetizationOn';
+} from "@mui/material";
+import { useDispatch } from "react-redux";
+import Select, { SelectChangeEvent } from "@mui/material/Select";
+import Portal from "../Portal";
+import QORT from "../../../assets/img/qort.png";
+import { setNotification } from "../../../state/features/notificationsSlice";
+import { CrowdfundPageDonateButton } from "./Donate-styles";
 interface DonateProps {
   atAddress: string;
   onSubmit: () => void;
   onClose: () => void;
 }
-import QORT from '../../../assets/img/qort.png';
-import { setNotification } from '../../../state/features/notificationsSlice';
 
 export const Donate = ({ onSubmit, onClose, atAddress }: DonateProps) => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
@@ -46,35 +40,35 @@ export const Donate = ({ onSubmit, onClose, atAddress }: DonateProps) => {
 
       if (isNaN(amount)) return;
       await qortalRequest({
-        action: 'SEND_COIN',
-        coin: 'QORT',
+        action: "SEND_COIN",
+        coin: "QORT",
         destinationAddress: atAddress,
         amount: amount,
       });
       dispatch(
         setNotification({
-          msg: 'Donation successfully sent',
-          alertType: 'success',
+          msg: "Donation successfully sent",
+          alertType: "success",
         })
       );
       resetValues();
       onSubmit();
     } catch (error: any) {
       let notificationObj: any = null;
-      if (typeof error === 'string') {
+      if (typeof error === "string") {
         notificationObj = {
-          msg: error || 'Failed to send coin',
-          alertType: 'error',
+          msg: error || "Failed to send coin",
+          alertType: "error",
         };
-      } else if (typeof error?.error === 'string') {
+      } else if (typeof error?.error === "string") {
         notificationObj = {
-          msg: error?.error || 'Failed to send coin',
-          alertType: 'error',
+          msg: error?.error || "Failed to send coin",
+          alertType: "error",
         };
       } else {
         notificationObj = {
-          msg: error?.message || 'Failed to send coin',
-          alertType: 'error',
+          msg: error?.message || "Failed to send coin",
+          alertType: "error",
         };
       }
       if (!notificationObj) return;
@@ -84,10 +78,10 @@ export const Donate = ({ onSubmit, onClose, atAddress }: DonateProps) => {
 
   const getLogo = (coin: string) => {
     switch (coin) {
-      case 'QORT':
+      case "QORT":
         return QORT;
       default:
-        '';
+        "";
       // code block
     }
   };
@@ -95,24 +89,26 @@ export const Donate = ({ onSubmit, onClose, atAddress }: DonateProps) => {
   return (
     <Box
       sx={{
-        position: 'relative',
-        display: 'flex',
-        alignItems: 'center',
+        position: "relative",
+        display: "flex",
+        alignItems: "center",
         gap: 1,
       }}
     >
       <Tooltip title={`Support this crowdfund`} arrow>
         <Box
           sx={{
-            position: 'relative',
-            display: 'flex',
-            alignItems: 'center',
+            position: "relative",
+            display: "flex",
+            alignItems: "center",
             gap: 1,
-            cursor: 'pointer',
+            cursor: "pointer",
           }}
           onClick={() => setIsOpen(prev => !prev)}
         >
-          <Button variant="contained">Donate Now</Button>
+          <CrowdfundPageDonateButton variant="contained">
+            Donate Now
+          </CrowdfundPageDonateButton>
         </Box>
       </Tooltip>
       {isOpen && (
@@ -127,9 +123,9 @@ export const Donate = ({ onSubmit, onClose, atAddress }: DonateProps) => {
             <DialogContent>
               <Box
                 sx={{
-                  width: '300px',
-                  display: 'flex',
-                  justifyContent: 'center',
+                  width: "300px",
+                  display: "flex",
+                  justifyContent: "center",
                 }}
               >
                 <Box>
@@ -145,10 +141,10 @@ export const Donate = ({ onSubmit, onClose, atAddress }: DonateProps) => {
                       <InputAdornment position="start">
                         <img
                           style={{
-                            height: '15px',
-                            width: '15px',
+                            height: "15px",
+                            width: "15px",
                           }}
-                          src={getLogo('QORT')}
+                          src={getLogo("QORT")}
                         />
                       </InputAdornment>
                     }

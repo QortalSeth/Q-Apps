@@ -4,10 +4,10 @@ import React, {
   useMemo,
   useRef,
   useState,
-} from 'react';
-import { useParams } from 'react-router-dom';
-import { useDispatch, useSelector } from 'react-redux';
-import { RootState } from '../../state/store';
+} from "react";
+import { useParams } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { RootState } from "../../state/store";
 import {
   Accordion,
   AccordionDetails,
@@ -16,34 +16,40 @@ import {
   Box,
   Typography,
   useTheme,
-} from '@mui/material';
-import AttachFileIcon from '@mui/icons-material/AttachFile';
-import DownloadIcon from '@mui/icons-material/Download';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import { formatDate } from '../../utils/time';
-import { DisplayHtml } from '../../components/common/DisplayHtml';
-import FileElement from '../../components/common/FileElement';
-import { setIsLoadingGlobal } from '../../state/features/globalSlice';
-import { crowdfundBase, updateBase } from '../../constants';
-import { addToHashMap } from '../../state/features/crowdfundSlice';
+} from "@mui/material";
+import AttachFileIcon from "@mui/icons-material/AttachFile";
+import DownloadIcon from "@mui/icons-material/Download";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import { formatDate } from "../../utils/time";
+import { DisplayHtml } from "../../components/common/DisplayHtml";
+import FileElement from "../../components/common/FileElement";
+import { setIsLoadingGlobal } from "../../state/features/globalSlice";
+import { crowdfundBase, updateBase } from "../../constants";
+import { addToHashMap } from "../../state/features/crowdfundSlice";
 import {
   AuthorTextComment,
+  CrowdfundDescriptionRow,
   CrowdfundTitle,
+  CrowdfundPageTitle,
+  CrowdfundTitleRow,
   MainCol,
   MainContainer,
   Spacer,
   StyledCardColComment,
   StyledCardHeaderComment,
-} from '../../components/Crowdfund/Crowdfund-styles';
-import AudioPlayer, { PlayerBox } from '../../components/common/AudioPlayer';
-import { NewCrowdfund } from '../../components/Crowdfund/NewCrowdfund';
-import { CommentSection } from '../../components/common/Comments/CommentSection';
-import { Donate } from '../../components/common/Donate/Donate';
-import { CrowdfundProgress } from '../../components/common/Progress/Progress';
-import { Countdown } from '../../components/common/Countdown/Countdown';
-import moment from 'moment';
-import { NewUpdate } from '../../components/Crowdfund/NewUpdate';
-import { Update } from './Update';
+  AboutMyCrowdfund,
+  CrowdfundInlineContentRow,
+} from "../../components/Crowdfund/Crowdfund-styles";
+import AudioPlayer, { PlayerBox } from "../../components/common/AudioPlayer";
+import { NewCrowdfund } from "../../components/Crowdfund/NewCrowdfund";
+import { CommentSection } from "../../components/common/Comments/CommentSection";
+import { Donate } from "../../components/common/Donate/Donate";
+import { CrowdfundProgress } from "../../components/common/Progress/Progress";
+import { Countdown } from "../../components/common/Countdown/Countdown";
+import moment from "moment";
+import { NewUpdate } from "../../components/Crowdfund/NewUpdate";
+import { Update } from "./Update";
+import { AccountCircleSVG } from "../../assets/svgs/AccountCircleSVG";
 
 export const Crowdfund = () => {
   const theme = useTheme();
@@ -55,7 +61,7 @@ export const Crowdfund = () => {
   );
 
   const avatarUrl = useMemo(() => {
-    let url = '';
+    let url = "";
     if (name && userAvatarHash[name]) {
       url = userAvatarHash[name];
     }
@@ -84,8 +90,7 @@ export const Crowdfund = () => {
     if (endDateRef.current) return endDateRef.current;
 
     const diff = +currentAtInfo?.sleepUntilHeight - +nodeInfo.height;
-    const end = moment().add(diff, 'minutes');
-    console.log({ end });
+    const end = moment().add(diff, "minutes");
     endDateRef.current = end;
     return end;
   }, [currentAtInfo, nodeInfo]);
@@ -95,15 +100,15 @@ export const Crowdfund = () => {
 
     return diff;
   }, [currentAtInfo, nodeInfo]);
-  console.log({ currentAtInfo, nodeInfo, endDate });
+
   const getCurrentAtInfo = React.useCallback(async atAddress => {
     console.log({ atAddress });
     try {
       const url = `/at/${atAddress}`;
       const response = await fetch(url, {
-        method: 'GET',
+        method: "GET",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
       });
       const responseDataSearch = await response.json();
@@ -114,16 +119,16 @@ export const Crowdfund = () => {
       dispatch(setIsLoadingGlobal(false));
     }
   }, []);
+
   const getNodeInfo = React.useCallback(async () => {
     try {
       const url = `/blocks/height`;
       const response = await fetch(url, {
-        method: 'GET',
+        method: "GET",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
       });
-      console.log({ response });
       const responseDataSearch = await response.json();
       setNodeInfo({ height: responseDataSearch });
     } catch (error) {
@@ -132,13 +137,14 @@ export const Crowdfund = () => {
       dispatch(setIsLoadingGlobal(false));
     }
   }, []);
+
   const getAtAddressInfo = React.useCallback(async atAddress => {
     try {
       const url = `/addresses/balance/${atAddress}`;
       const response = await fetch(url, {
-        method: 'GET',
+        method: "GET",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
       });
       const responseDataSearch = await response.json();
@@ -156,15 +162,17 @@ export const Crowdfund = () => {
         if (!name || !id) return;
         dispatch(setIsLoadingGlobal(true));
 
+        // Get the resource location here
         const url = `/arbitrary/resources/search?mode=ALL&service=DOCUMENT&query=${crowdfundBase}&limit=1&includemetadata=true&reverse=true&excludeblocked=true&name=${name}&exactmatchnames=true&offset=0&identifier=${id}`;
         const response = await fetch(url, {
-          method: 'GET',
+          method: "GET",
           headers: {
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
           },
         });
         const responseDataSearch = await response.json();
 
+        // Always comes back as an array, so you must find the correct one using array bracket notation
         if (responseDataSearch?.length > 0) {
           let resourceData = responseDataSearch[0];
           resourceData = {
@@ -179,10 +187,11 @@ export const Crowdfund = () => {
             id: resourceData.identifier,
           };
 
+          // Get raw data of the resource here
           const responseData = await qortalRequest({
-            action: 'FETCH_QDN_RESOURCE',
+            action: "FETCH_QDN_RESOURCE",
             name: name,
-            service: 'DOCUMENT',
+            service: "DOCUMENT",
             identifier: id,
           });
 
@@ -217,9 +226,9 @@ export const Crowdfund = () => {
         -12
       )}&limit=0&includemetadata=false&reverse=true&excludeblocked=true&name=${name}&exactmatchnames=true&offset=0`;
       const response = await fetch(url, {
-        method: 'GET',
+        method: "GET",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
       });
       const responseDataSearch = await response.json();
@@ -304,29 +313,36 @@ export const Crowdfund = () => {
   return (
     <>
       <NewCrowdfund editId={id} editContent={editContent} />
-      <MainContainer container spacing={2} direction={'row'}>
+      <MainContainer container spacing={2} direction={"row"}>
         <MainCol item xs={12} sm={6}>
-          <CrowdfundTitle
-            variant="h1"
-            color="textPrimary"
-            sx={{
-              textAlign: 'center',
-            }}
-          >
-            {crowdfundData?.title}
-          </CrowdfundTitle>
-          {crowdfundData?.created && (
-            <Typography
-              variant="h6"
-              sx={{
-                fontSize: '12px',
-              }}
-              color={theme.palette.text.primary}
-            >
-              {formatDate(crowdfundData.created)}
-            </Typography>
-          )}
-          <Spacer height="15px" />
+          <CrowdfundTitleRow>
+            {!avatarUrl ? (
+              <AccountCircleSVG
+                color={theme.palette.text.primary}
+                width="80"
+                height="80"
+              />
+            ) : (
+              <img
+                src={avatarUrl}
+                alt="User Avatar"
+                width="80"
+                height="80"
+                style={{
+                  borderRadius: "50%",
+                  color: theme.palette.text.primary,
+                }}
+              />
+            )}
+            <CrowdfundPageTitle>{crowdfundData?.title}</CrowdfundPageTitle>
+          </CrowdfundTitleRow>
+          <CrowdfundDescriptionRow>
+            {crowdfundData?.description}
+          </CrowdfundDescriptionRow>
+          <AboutMyCrowdfund>About my Q-Fund</AboutMyCrowdfund>
+          <CrowdfundInlineContentRow>
+            <DisplayHtml html={crowdfundData?.inlineContent} />
+          </CrowdfundInlineContentRow>
           {crowdfundData?.deployedAT?.aTAddress && (
             <Donate
               atAddress={crowdfundData?.deployedAT?.aTAddress}
@@ -350,9 +366,9 @@ export const Crowdfund = () => {
             <Countdown endDate={endDate} blocksRemaning={blocksRemaning} />
           )}
           {name === username && (
-            <NewUpdate crowdfundId={id} crowdfundName={name || ''} />
+            <NewUpdate crowdfundId={id} crowdfundName={name || ""} />
           )}
-          <div style={{ width: '90%' }}>
+          <div style={{ width: "90%" }}>
             {updatesList.map(update => {
               return (
                 <Accordion key={update.identifier}>
@@ -362,7 +378,7 @@ export const Crowdfund = () => {
                     id="panel1a-header"
                   >
                     <Typography>
-                      {moment(update.created).format('LLL')} update
+                      {moment(update.created).format("LLL")} update
                     </Typography>
                   </AccordionSummary>
                   <AccordionDetails>
@@ -374,13 +390,13 @@ export const Crowdfund = () => {
           </div>
           <Box
             sx={{
-              width: '95%',
+              width: "95%",
             }}
           >
             <StyledCardHeaderComment
               sx={{
-                '& .MuiCardHeader-content': {
-                  overflow: 'hidden',
+                "& .MuiCardHeader-content": {
+                  overflow: "hidden",
                 },
               }}
             >
@@ -390,9 +406,9 @@ export const Crowdfund = () => {
               <StyledCardColComment>
                 <AuthorTextComment
                   color={
-                    theme.palette.mode === 'light'
+                    theme.palette.mode === "light"
                       ? theme.palette.text.secondary
-                      : '#d6e8ff'
+                      : "#d6e8ff"
                   }
                 >
                   {name}
@@ -400,15 +416,14 @@ export const Crowdfund = () => {
               </StyledCardColComment>
             </StyledCardHeaderComment>
             <Spacer height="25px" />
-            <DisplayHtml html={crowdfundData?.inlineContent} />
             <Spacer height="25px" />
             {crowdfundData?.attachments?.length > 0 && (
               <CrowdfundTitle
                 variant="h1"
                 color="textPrimary"
                 sx={{
-                  textAlign: 'center',
-                  textDecoration: 'underline',
+                  textAlign: "center",
+                  textDecoration: "underline",
                 }}
               >
                 Attachments
@@ -418,7 +433,7 @@ export const Crowdfund = () => {
             <Spacer height="15px" />
           </Box>
           {crowdfundData?.attachments?.map(attachment => {
-            if (attachment?.service === 'AUDIO')
+            if (attachment?.service === "AUDIO")
               return (
                 <>
                   <AudioPlayer
@@ -438,38 +453,38 @@ export const Crowdfund = () => {
               <>
                 <PlayerBox
                   sx={{
-                    minHeight: '55px',
+                    minHeight: "55px",
                   }}
                 >
                   <Box
-                    sx={{ display: 'flex', alignItems: 'center', pl: 1, pr: 1 }}
+                    sx={{ display: "flex", alignItems: "center", pl: 1, pr: 1 }}
                   >
                     <AttachFileIcon
                       sx={{
-                        height: '16px',
-                        width: 'auto',
+                        height: "16px",
+                        width: "auto",
                       }}
                     ></AttachFileIcon>
                     <Typography
                       sx={{
-                        fontSize: '14px',
-                        wordBreak: 'break-word',
-                        marginBottom: '5px',
+                        fontSize: "14px",
+                        wordBreak: "break-word",
+                        marginBottom: "5px",
                       }}
                     >
                       {attachment?.filename}
                     </Typography>
                   </Box>
                   <Box
-                    sx={{ display: 'flex', alignItems: 'center', pl: 1, pr: 1 }}
+                    sx={{ display: "flex", alignItems: "center", pl: 1, pr: 1 }}
                   >
                     <FileElement
                       fileInfo={attachment}
                       title={attachment?.filename}
                       customStyles={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'flex-end',
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "flex-end",
                       }}
                     >
                       <DownloadIcon />
@@ -488,13 +503,13 @@ export const Crowdfund = () => {
         variant="h1"
         color="textPrimary"
         sx={{
-          textAlign: 'center',
-          textDecoration: 'underline',
+          textAlign: "center",
+          textDecoration: "underline",
         }}
       >
         Comments
       </CrowdfundTitle>
-      <CommentSection postId={id || ''} postName={name || ''} />
+      <CommentSection postId={id || ""} postName={name || ""} />
     </>
   );
 };
