@@ -458,11 +458,12 @@ export const NewCrowdfund = ({ editId, editContent }: NewCrowdfundProps) => {
       hours > 0 ? hours + " hours, " : ""
     }${minutes} minutes`;
   };
-
+  const minGoal = 1;
+  const maxGoal = 1_000_000;
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = event.target.valueAsNumber;
 
-    if (newValue >= 1 && newValue <= 1_000_000) {
+    if (newValue >= minGoal && newValue <= maxGoal) {
       setGoalValue(newValue);
     } else if (!event.target.value) {
       setGoalValue("");
@@ -571,8 +572,8 @@ export const NewCrowdfund = ({ editId, editContent }: NewCrowdfundProps) => {
             variant="outlined"
             value={goalValue}
             onChange={handleInputChange}
-            minValue={0.01}
-            maxValue={1_000_000}
+            minValue={minGoal}
+            maxValue={maxGoal}
             addIconButtons={false}
             sigDigits={6}
           />
