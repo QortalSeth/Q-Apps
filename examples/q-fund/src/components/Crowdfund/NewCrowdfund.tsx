@@ -95,6 +95,8 @@ export const NewCrowdfund = ({ editId, editContent }: NewCrowdfundProps) => {
   const [inlineContent, setInlineContent] = useState("");
   const [attachments, setAttachments] = useState<any[]>([]);
   const [coverImage, setCoverImage] = useState<string | null>(null);
+  const minGoal = 1;
+  const maxGoal = 1_000_000;
 
   useEffect(() => {
     if (editContent) {
@@ -458,16 +460,11 @@ export const NewCrowdfund = ({ editId, editContent }: NewCrowdfundProps) => {
       hours > 0 ? hours + " hours, " : ""
     }${minutes} minutes`;
   };
-  const minGoal = 1;
-  const maxGoal = 1_000_000;
-  const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const newValue = event.target.valueAsNumber;
 
-    if (newValue >= minGoal && newValue <= maxGoal) {
-      setGoalValue(newValue);
-    } else if (!event.target.value) {
-      setGoalValue("");
-    }
+  const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    event.target.value
+      ? setGoalValue(Number(event.target.value))
+      : setGoalValue("");
   };
 
   const minDateTime = dayjs().add(2, "day");

@@ -114,6 +114,7 @@ export const BoundedNumericTextField = forwardRef(
     const listeners = (e: eventType) => {
       const newValue = filterValue(e.target.value);
       setTextFieldValue(newValue);
+      e.target.value = newValue;
       if (onChange) onChange(e);
     };
     const removeTrailingZeros = (s: string) => {
