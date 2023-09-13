@@ -565,14 +565,14 @@ export const NewCrowdfund = ({ editId, editContent }: NewCrowdfundProps) => {
             {formatDuration(diffInMins)}
           </NewCrowdfundTimeDescription>
           <BoundedNumericTextField
-            label="Goal amount (QORT)"
+            label="Goal Amount (QORT)"
             variant="outlined"
             value={goalValue}
             onChange={handleInputChange}
             minValue={minGoal}
             maxValue={maxGoal}
             addIconButtons={false}
-            sigDigits={6}
+            allowDecimals={false}
           />
           <NewCrowdfundSubtitle>
             Add necessary files - optional
