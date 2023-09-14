@@ -95,6 +95,8 @@ export const NewCrowdfund = ({ editId, editContent }: NewCrowdfundProps) => {
   const [inlineContent, setInlineContent] = useState("");
   const [attachments, setAttachments] = useState<any[]>([]);
   const [coverImage, setCoverImage] = useState<string | null>(null);
+  const minGoal = 1;
+  const maxGoal = 1_000_000;
 
   useEffect(() => {
     if (editContent) {
@@ -460,13 +462,9 @@ export const NewCrowdfund = ({ editId, editContent }: NewCrowdfundProps) => {
   };
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const newValue = event.target.valueAsNumber;
-
-    if (newValue >= 1 && newValue <= 1_000_000) {
-      setGoalValue(newValue);
-    } else if (!event.target.value) {
-      setGoalValue("");
-    }
+    event.target.value
+      ? setGoalValue(Number(event.target.value))
+      : setGoalValue("");
   };
 
   const minDateTime = dayjs().add(2, "day");
@@ -567,14 +565,14 @@ export const NewCrowdfund = ({ editId, editContent }: NewCrowdfundProps) => {
             {formatDuration(diffInMins)}
           </NewCrowdfundTimeDescription>
           <BoundedNumericTextField
-            label="Goal amount (QORT)"
+            label="Goal Amount (QORT)"
             variant="outlined"
             value={goalValue}
             onChange={handleInputChange}
-            minValue={0.01}
-            maxValue={1_000_000}
+            minValue={minGoal}
+            maxValue={maxGoal}
             addIconButtons={false}
-            sigDigits={6}
+            allowDecimals={false}
           />
           <NewCrowdfundSubtitle>
             Add necessary files - optional
