@@ -16,7 +16,7 @@ import {
   CrowdfundActionButton,
   TimesIcon,
 } from "./Crowdfund-styles";
-import { Box, Button, Modal, TextField, useTheme } from "@mui/material";
+import { Box, Modal, useTheme } from "@mui/material";
 import ReactQuill, { Quill } from "react-quill";
 import ImageResize from "quill-image-resize-module-react";
 import ShortUniqueId from "short-unique-id";
@@ -41,7 +41,7 @@ import {
 import ImageUploader from "../ImageUploader";
 import { DesktopDateTimePicker } from "@mui/x-date-pickers";
 import { PiggybankSVG } from "../../assets/svgs/PiggybankSVG";
-// import BoundedNumericTextField from "../../../../../Library/Components/BoundedNumericTextField";
+import BoundedNumericTextField from "../../../../../Library/Components/BoundedNumericTextField";
 
 dayjs.extend(isBetween);
 dayjs.extend(duration);
@@ -98,6 +98,8 @@ export const NewCrowdfund = ({ editId, editContent }: NewCrowdfundProps) => {
   const [inlineContent, setInlineContent] = useState("");
   const [attachments, setAttachments] = useState<any[]>([]);
   const [coverImage, setCoverImage] = useState<string | null>(null);
+  const minGoal = 1;
+  const maxGoal = 1_000_000;
 
   useEffect(() => {
     if (editContent) {
@@ -465,13 +467,9 @@ export const NewCrowdfund = ({ editId, editContent }: NewCrowdfundProps) => {
   };
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const newValue = event.target.valueAsNumber;
-    console.log({ newValue });
-    if (newValue >= 1 && newValue <= 1_000_000) {
-      setGoalValue(newValue);
-    } else if (!event.target.value) {
-      setGoalValue("");
-    }
+    event.target.value
+      ? setGoalValue(Number(event.target.value))
+      : setGoalValue("");
   };
 
   const minDateTime = dayjs().add(2, "day");
@@ -571,17 +569,15 @@ export const NewCrowdfund = ({ editId, editContent }: NewCrowdfundProps) => {
             Length of crowdfund: {diffInMins} blocks ~{" "}
             {formatDuration(diffInMins)}
           </NewCrowdfundTimeDescription>
-          <TextField
-            label="Goal amount"
-            type="number"
+          <BoundedNumericTextField
+            label="Goal Amount (QORT)"
             variant="outlined"
             value={goalValue}
             onChange={handleInputChange}
-            inputProps={{
-              min: 1,
-              max: 1_000_000,
-              step: 1,
-            }}
+            minValue={minGoal}
+            maxValue={maxGoal}
+            addIconButtons={false}
+            allowDecimals={false}
           />
           <NewCrowdFundFont>Add necessary files - optional</NewCrowdFundFont>
           <FileAttachment

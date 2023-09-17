@@ -1,37 +1,37 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useSelector } from 'react-redux';
-import { RootState } from '../../state/store';
-import { Avatar, Grid, useTheme, Box } from '@mui/material';
-import { useFetchCrowdfunds } from '../../hooks/useFetchCrowdfunds';
-import LazyLoad from '../../components/common/LazyLoad';
-import ResponsiveImage from '../../components/ResponsiveImage';
-import { formatDate } from '../../utils/time';
+import React, { useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
+import { RootState } from "../../state/store";
+import { Avatar, Grid, useTheme } from "@mui/material";
+import { useFetchCrowdfunds } from "../../hooks/useFetchCrowdfunds";
+import LazyLoad from "../../components/common/LazyLoad";
+import ResponsiveImage from "../../components/ResponsiveImage";
+import { formatDate } from "../../utils/time";
 import {
   BottomWrapper,
-  CrowdfundContainer,
-  ChannelCard,
-  CrowdfundListHeader,
-  CrowdfundListTitle,
   CardContainer,
-  CrowdfundTitleCard,
-  CrowdfundTitle,
-  CrowdfundOwner,
-  NameContainer,
-  CrowdfundImageContainer,
+  ChannelCard,
+  CrowdfundContainer,
   CrowdfundDescription,
-  DonateButton,
   CrowdfundGoal,
   CrowdfundGoalRow,
+  CrowdfundImageContainer,
+  CrowdfundListHeader,
+  CrowdfundListTitle,
+  CrowdfundOwner,
   CrowdfundText,
-} from './Home-styles';
+  CrowdfundTitle,
+  CrowdfundTitleCard,
+  DonateButton,
+  NameContainer,
+} from "./Home-styles";
 import {
-  CrowdfundUploadDate,
   CrowdfundListWrapper,
-} from '../../components/Crowdfund/Crowdfund-styles';
-import CoverImageDefault from '../../assets/images/CoverImageDefault.webp';
-import { Crowdfund } from '../../state/features/crowdfundSlice';
-import { QortalSVG } from '../../assets/svgs/QortalSVG';
+  CrowdfundUploadDate,
+} from "../../components/Crowdfund/Crowdfund-styles";
+import CoverImageDefault from "../../assets/images/CoverImageDefault.webp";
+import { Crowdfund } from "../../state/features/crowdfundSlice";
+import { QortalSVG } from "../../assets/svgs/QortalSVG";
 
 export const CrowdfundList = () => {
   const theme = useTheme();
@@ -89,7 +89,7 @@ export const CrowdfundList = () => {
       <CrowdfundListHeader>
         <CrowdfundListTitle>Most Recent Q-Funds</CrowdfundListTitle>
       </CrowdfundListHeader>
-      <CrowdfundContainer container spacing={3} direction={'row'}>
+      <CrowdfundContainer container spacing={3} direction={"row"}>
         {crowdfunds.map((crowdfund: Crowdfund) => {
           const existingCrowdfund = hashMapCrowdfunds[crowdfund.id];
           let hasHash = false;
@@ -99,13 +99,13 @@ export const CrowdfundList = () => {
             hasHash = true;
           }
 
-          let avatarUrl = '';
+          let avatarUrl = "";
           if (userAvatarHash[crowdfundObj?.user]) {
             avatarUrl = userAvatarHash[crowdfundObj?.user];
           }
 
           return (
-            <Grid item xs={12} sm={6} md={4} lg={3} xl={3}>
+            <Grid item xs={12} sm={6} md={4} lg={3} xl={3} key={crowdfund.id}>
               <CardContainer
                 onClick={() => {
                   navigate(
@@ -119,9 +119,9 @@ export const CrowdfundList = () => {
                     width={100}
                     height={150}
                     styles={{
-                      maxHeight: '250px',
-                      minHeight: '250px',
-                      objectFit: 'cover',
+                      maxHeight: "250px",
+                      minHeight: "250px",
+                      objectFit: "cover",
                     }}
                   />
                   <CrowdfundTitleCard>
@@ -144,8 +144,8 @@ export const CrowdfundList = () => {
                     <CrowdfundText>Campaign Goal:</CrowdfundText>
                     <CrowdfundGoal>
                       <QortalSVG
-                        height={'22'}
-                        width={'22'}
+                        height={"22"}
+                        width={"22"}
                         color={theme.palette.text.primary}
                       />
                       {crowdfundObj?.deployedAT?.goalValue}
