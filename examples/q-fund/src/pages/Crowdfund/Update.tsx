@@ -1,33 +1,34 @@
-import React, {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react';
-import { useParams } from 'react-router-dom';
-import { useDispatch, useSelector } from 'react-redux';
-import { RootState } from '../../state/store';
-import { Avatar, Box, Typography, useTheme } from '@mui/material';
-import AttachFileIcon from '@mui/icons-material/AttachFile';
-import DownloadIcon from '@mui/icons-material/Download';
-import CircularProgress from '@mui/material/CircularProgress';
-
-import { formatDate } from '../../utils/time';
-import { DisplayHtml } from '../../components/common/DisplayHtml';
-import FileElement from '../../components/common/FileElement';
-import { setIsLoadingGlobal } from '../../state/features/globalSlice';
-import { crowdfundBase } from '../../constants';
-import { addToHashMap } from '../../state/features/crowdfundSlice';
+import React, { useEffect, useMemo, useState } from "react";
+import { useParams } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { RootState } from "../../state/store";
+import { Avatar, Box, useTheme } from "@mui/material";
+import AttachFileIcon from "@mui/icons-material/AttachFile";
+import DownloadIcon from "@mui/icons-material/Download";
+import CircularProgress from "@mui/material/CircularProgress";
+import { formatDate } from "../../utils/time";
+import { DisplayHtml } from "../../components/common/DisplayHtml";
+import FileElement from "../../components/common/FileElement";
+import { setIsLoadingGlobal } from "../../state/features/globalSlice";
+import { addToHashMap } from "../../state/features/crowdfundSlice";
 import {
-  AuthorTextComment,
+  CrowdfundSubTitle,
   CrowdfundTitle,
-  Spacer,
-  StyledCardColComment,
-  StyledCardHeaderComment,
-} from '../../components/Crowdfund/Crowdfund-styles';
-import AudioPlayer, { PlayerBox } from '../../components/common/AudioPlayer';
-import { NewUpdate } from '../../components/Crowdfund/NewUpdate';
+} from "../../components/Crowdfund/Crowdfund-styles";
+import AudioPlayer from "../../components/common/AudioPlayer";
+import { NewUpdate } from "../../components/Crowdfund/NewUpdate";
+import {
+  AttachmentCol,
+  CrowdfundUpdateDate,
+  FileAttachmentContainer,
+  FileAttachmentFont,
+  UpdateCol,
+  UpdateContainer,
+  UpdateLoadingBox,
+  UpdateNameRow,
+  UpdateRow,
+  PlayerBox,
+} from "./Update-styles";
 
 export const Update = ({ updateObj }) => {
   const theme = useTheme();
@@ -39,7 +40,7 @@ export const Update = ({ updateObj }) => {
   );
 
   const avatarUrl = useMemo(() => {
-    let url = '';
+    let url = "";
     if (name && userAvatarHash[name]) {
       url = userAvatarHash[name];
     }
@@ -79,9 +80,9 @@ export const Update = ({ updateObj }) => {
       };
 
       const responseData = await qortalRequest({
-        action: 'FETCH_QDN_RESOURCE',
+        action: "FETCH_QDN_RESOURCE",
         name: updateObj.name,
-        service: 'DOCUMENT',
+        service: "DOCUMENT",
         identifier: updateObj.identifier,
       });
 
@@ -101,7 +102,7 @@ export const Update = ({ updateObj }) => {
     }
   }, []);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (updateObj) {
       const existingCrowdfund = hashMapCrowdfunds[updateObj.identifier];
 
@@ -115,16 +116,9 @@ export const Update = ({ updateObj }) => {
 
   if (!crowdfundData)
     return (
-      <Box
-        sx={{
-          width: '100%',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-        }}
-      >
+      <UpdateLoadingBox>
         <CircularProgress />
-      </Box>
+      </UpdateLoadingBox>
     );
   return (
     <>
@@ -134,158 +128,89 @@ export const Update = ({ updateObj }) => {
         onSubmit={content => {
           setCrowdfundData(content);
         }}
-        crowdfundName={name || ''}
+        crowdfundName={name || ""}
       />
-      <Box
-        sx={{
-          width: '100%',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-        }}
-      >
-        <Box
-          sx={{
-            width: '100%',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            marginTop: '30px',
-            maxWidth: '1400px',
-          }}
-        >
-          <CrowdfundTitle
-            variant="h1"
-            color="textPrimary"
-            sx={{
-              textAlign: 'center',
-            }}
-          >
-            {crowdfundData?.title}
-          </CrowdfundTitle>
-          {crowdfundData?.created && (
-            <Typography
-              variant="h6"
-              sx={{
-                fontSize: '12px',
-              }}
-              color={theme.palette.text.primary}
-            >
-              {formatDate(crowdfundData.created)}
-            </Typography>
-          )}
-          <Spacer height="15px" />
-          <Box
-            sx={{
-              width: '95%',
-            }}
-          >
-            <StyledCardHeaderComment
-              sx={{
-                '& .MuiCardHeader-content': {
-                  overflow: 'hidden',
-                },
-              }}
-            >
-              <Box>
-                <Avatar src={avatarUrl} alt={`${name}'s avatar`} />
-              </Box>
-              <StyledCardColComment>
-                <AuthorTextComment
-                  color={
-                    theme.palette.mode === 'light'
-                      ? theme.palette.text.secondary
-                      : '#d6e8ff'
-                  }
-                >
-                  {name}
-                </AuthorTextComment>
-              </StyledCardColComment>
-            </StyledCardHeaderComment>
-            <Spacer height="25px" />
-            <DisplayHtml html={crowdfundData?.inlineContent} />
-            <Spacer height="25px" />
-            {crowdfundData?.attachments?.length > 0 && (
+      <UpdateContainer>
+        <UpdateCol>
+          <UpdateRow>
+            <UpdateNameRow>
+              <Avatar src={avatarUrl} alt={`${name}'s avatar`} />
+              {name}
+            </UpdateNameRow>
+            <UpdateCol style={{ gap: 0 }}>
               <CrowdfundTitle
-                variant="h1"
-                color="textPrimary"
                 sx={{
-                  textAlign: 'center',
-                  textDecoration: 'underline',
+                  textAlign: "center",
                 }}
               >
-                Attachments
+                {crowdfundData?.title}
               </CrowdfundTitle>
-            )}
-
-            <Spacer height="15px" />
+              {crowdfundData?.created && (
+                <CrowdfundUpdateDate>
+                  {formatDate(crowdfundData.created)}
+                </CrowdfundUpdateDate>
+              )}
+            </UpdateCol>
+          </UpdateRow>
+          <Box sx={{ padding: "10px 5px" }}>
+            <DisplayHtml html={crowdfundData?.inlineContent} />
           </Box>
-          {crowdfundData?.attachments?.map(attachment => {
-            if (attachment?.service === 'AUDIO')
-              return (
-                <>
-                  <AudioPlayer
-                    fullFile={attachment}
-                    filename={attachment.filename}
-                    name={attachment.name}
-                    identifier={attachment.identifier}
-                    service="AUDIO"
-                    jsonId={crowdfundData?.id}
-                    user={crowdfundData?.user}
-                  />
-                  <Spacer height="15px" />
-                </>
-              );
-
-            return (
+          <AttachmentCol>
+            {crowdfundData?.attachments?.length > 0 && (
               <>
+                <CrowdfundSubTitle>Attachments</CrowdfundSubTitle>
+              </>
+            )}
+            {crowdfundData?.attachments?.map(attachment => {
+              if (attachment?.service === "AUDIO")
+                return (
+                  <>
+                    <AudioPlayer
+                      fullFile={attachment}
+                      filename={attachment.filename}
+                      name={attachment.name}
+                      identifier={attachment.identifier}
+                      service="AUDIO"
+                      jsonId={crowdfundData?.id}
+                      user={crowdfundData?.user}
+                    />
+                  </>
+                );
+
+              return (
                 <PlayerBox
                   sx={{
-                    minHeight: '55px',
+                    minHeight: "55px",
                   }}
                 >
-                  <Box
-                    sx={{ display: 'flex', alignItems: 'center', pl: 1, pr: 1 }}
-                  >
+                  <FileAttachmentContainer>
                     <AttachFileIcon
                       sx={{
-                        height: '16px',
-                        width: 'auto',
+                        height: "16px",
+                        width: "auto",
                       }}
                     ></AttachFileIcon>
-                    <Typography
-                      sx={{
-                        fontSize: '14px',
-                        wordBreak: 'break-word',
-                        marginBottom: '5px',
-                      }}
-                    >
+                    <FileAttachmentFont>
                       {attachment?.filename}
-                    </Typography>
-                  </Box>
-                  <Box
-                    sx={{ display: 'flex', alignItems: 'center', pl: 1, pr: 1 }}
-                  >
+                    </FileAttachmentFont>
                     <FileElement
                       fileInfo={attachment}
                       title={attachment?.filename}
                       customStyles={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'flex-end',
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "flex-end",
                       }}
                     >
                       <DownloadIcon />
                     </FileElement>
-                  </Box>
+                  </FileAttachmentContainer>
                 </PlayerBox>
-
-                <Spacer height="15px" />
-              </>
-            );
-          })}
-        </Box>
-      </Box>
+              );
+            })}
+          </AttachmentCol>
+        </UpdateCol>
+      </UpdateContainer>
     </>
   );
 };

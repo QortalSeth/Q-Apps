@@ -1,70 +1,62 @@
-import React, { useEffect, useState } from 'react';
-import CreateIcon from '@mui/icons-material/Create';
+import { useEffect, useState } from "react";
+import CreateIcon from "@mui/icons-material/Create";
 import {
   AddCrowdFundButton,
-  AddLogoIcon,
   CATContainer,
-  CoverImagePreview,
-  CreateContainer,
   CrowdfundCardTitle,
   CustomInputField,
-  LogoPreviewRow,
+  EditCrowdFundButton,
   ModalBody,
-  NewCrowdfundSubtitle,
-  NewCrowdfundTimeDescription,
+  NewCrowdFundFont,
   NewCrowdfundTitle,
-  TimesIcon,
-} from './Crowdfund-styles';
+  CrowdfundActionButton,
+  CrowdfundActionButtonRow,
+} from "./Crowdfund-styles";
 
-import { Box, Button, Modal, TextField, useTheme } from '@mui/material';
-import ReactQuill, { Quill } from 'react-quill';
-import ImageResize from 'quill-image-resize-module-react';
-import ShortUniqueId from 'short-unique-id';
-import AddIcon from '@mui/icons-material/Add';
-import 'react-quill/dist/quill.snow.css';
-import { FileAttachment } from './FileAttachment';
-import { useDispatch, useSelector } from 'react-redux';
-import { setNotification } from '../../state/features/notificationsSlice';
-import { objectToBase64 } from '../../utils/toBase64';
-import { RootState } from '../../state/store';
-import { attachmentBase, crowdfundBase, updateBase } from '../../constants';
-import dayjs, { Dayjs } from 'dayjs';
-import isBetween from 'dayjs/plugin/isBetween'; // Import the plugin
-
-import duration from 'dayjs/plugin/duration';
-import bs58 from 'bs58';
-import {
-  addCrowdfundToBeginning,
-  addToHashMap,
-  upsertCrowdfunds,
-} from '../../state/features/crowdfundSlice';
+import { Box, Button, Modal, useTheme } from "@mui/material";
+import ReactQuill, { Quill } from "react-quill";
+import ImageResize from "quill-image-resize-module-react";
+import ShortUniqueId from "short-unique-id";
+import AddIcon from "@mui/icons-material/Add";
+import "react-quill/dist/quill.snow.css";
+import { FileAttachment } from "./FileAttachment";
+import { useDispatch, useSelector } from "react-redux";
+import { setNotification } from "../../state/features/notificationsSlice";
+import { objectToBase64 } from "../../utils/toBase64";
+import { RootState } from "../../state/store";
+import { attachmentBase, updateBase } from "../../constants";
+import dayjs from "dayjs";
+import isBetween from "dayjs/plugin/isBetween"; // Import the plugin
+import duration from "dayjs/plugin/duration";
+import { addToHashMap } from "../../state/features/crowdfundSlice";
+import { CloseNewUpdateModal } from "../../pages/Crowdfund/Update-styles";
 
 dayjs.extend(isBetween);
 dayjs.extend(duration);
-Quill.register('modules/imageResize', ImageResize);
+Quill.register("modules/imageResize", ImageResize);
 
 const uid = new ShortUniqueId();
 
 const modules = {
   imageResize: {
-    parchment: Quill.import('parchment'),
-    modules: ['Resize', 'DisplaySize'],
+    parchment: Quill.import("parchment"),
+    modules: ["Resize", "DisplaySize"],
   },
   toolbar: [
-    ['bold', 'italic', 'underline', 'strike'], // styled text
-    ['blockquote', 'code-block'], // blocks
+    ["bold", "italic", "underline", "strike"], // styled text
+    ["blockquote", "code-block"], // blocks
     [{ header: 1 }, { header: 2 }], // custom button values
-    [{ list: 'ordered' }, { list: 'bullet' }], // lists
-    [{ script: 'sub' }, { script: 'super' }], // superscript/subscript
-    [{ indent: '-1' }, { indent: '+1' }], // outdent/indent
-    [{ direction: 'rtl' }], // text direction
-    [{ size: ['small', false, 'large', 'huge'] }], // custom dropdown
+    [{ list: "ordered" }, { list: "bullet" }], // lists
+    [{ script: "sub" }, { script: "super" }], // superscript/subscript
+    [{ indent: "-1" }, { indent: "+1" }], // outdent/indent
+    [{ direction: "rtl" }], // text direction
+    [{ size: ["small", false, "large", "huge"] }], // custom dropdown
     [{ header: [1, 2, 3, 4, 5, 6, false] }], // custom button values
     [{ color: [] }, { background: [] }], // dropdown with defaults
     [{ font: [] }], // font family
     [{ align: [] }], // text align
-    ['clean'], // remove formatting
-    ['image'], // image
+    ["clean"], // remove formatting
+    ["image"], // image
   ],
 };
 
@@ -95,8 +87,8 @@ export const NewUpdate = ({
   );
 
   const [isOpen, setIsOpen] = useState<boolean>(false);
-  const [title, setTitle] = useState<string>('');
-  const [inlineContent, setInlineContent] = useState('');
+  const [title, setTitle] = useState<string>("");
+  const [inlineContent, setInlineContent] = useState("");
   const [attachments, setAttachments] = useState<any[]>([]);
 
   useEffect(() => {
@@ -114,19 +106,19 @@ export const NewUpdate = ({
   async function publishQDNResource() {
     try {
       if (!crowdfundId && !editId)
-        throw new Error('unable to locate crowdfund id');
-      if (!userAddress) throw new Error('Unable to locate user address');
-      let errorMsg = '';
-      let name: string = '';
+        throw new Error("unable to locate crowdfund id");
+      if (!userAddress) throw new Error("Unable to locate user address");
+      let errorMsg = "";
+      let name = "";
       if (username) {
         name = username;
       }
       if (!name) {
         errorMsg =
-          'Cannot publish without access to your name. Please authenticate.';
+          "Cannot publish without access to your name. Please authenticate.";
       }
       if (!title) {
-        errorMsg = 'Cannot publish without a title';
+        errorMsg = "Cannot publish without a title";
       }
       if (editId && editContent?.user !== name) {
         errorMsg = "Cannot publish another user's resource";
@@ -136,7 +128,7 @@ export const NewUpdate = ({
         dispatch(
           setNotification({
             msg: errorMsg,
-            alertType: 'error',
+            alertType: "error",
           })
         );
         return;
@@ -155,7 +147,7 @@ export const NewUpdate = ({
       const attachmentArray: any[] = [];
       const attachmentArrayToSave: any[] = [];
       for (const attachment of attachments) {
-        let alreadyExits = !!attachment?.identifier;
+        const alreadyExits = !!attachment?.identifier;
 
         if (alreadyExits) {
           attachmentArray.push(attachment);
@@ -164,17 +156,17 @@ export const NewUpdate = ({
         const id = uid();
         const id2 = uid();
         const identifier = `${attachmentBase}${id}_${id2}`;
-        const fileExtension = attachment?.name?.split('.')?.pop();
+        const fileExtension = attachment?.name?.split(".")?.pop();
         if (!fileExtension) {
-          throw new Error('One of your attachments does not have an extension');
+          throw new Error("One of your attachments does not have an extension");
         }
-        let service = 'FILE';
+        let service = "FILE";
         const type = attachment?.type;
-        if (type.startsWith('audio/')) {
-          service = 'AUDIO';
+        if (type.startsWith("audio/")) {
+          service = "AUDIO";
         }
-        if (type.startsWith('video/')) {
-          service = 'VIDEO';
+        if (type.startsWith("video/")) {
+          service = "VIDEO";
         }
         const obj: any = {
           name,
@@ -192,7 +184,7 @@ export const NewUpdate = ({
       crowdfundObject.attachments = attachmentArray;
       if (attachmentArrayToSave.length > 0) {
         const multiplePublish = {
-          action: 'PUBLISH_MULTIPLE_QDN_RESOURCES',
+          action: "PUBLISH_MULTIPLE_QDN_RESOURCES",
           resources: [...attachmentArrayToSave],
         };
         await qortalRequest(multiplePublish);
@@ -202,10 +194,10 @@ export const NewUpdate = ({
         ? editId
         : `${updateBase}${crowdfundId?.slice(-12)}_${id}`;
       const crowdfundObjectToBase64 = await objectToBase64(crowdfundObject);
-      let requestBody2: any = {
-        action: 'PUBLISH_QDN_RESOURCE',
+      const requestBody2: any = {
+        action: "PUBLISH_QDN_RESOURCE",
         name: name,
-        service: 'DOCUMENT',
+        service: "DOCUMENT",
         data64: crowdfundObjectToBase64,
         title: title.slice(0, 50),
         // description: description,
@@ -215,8 +207,8 @@ export const NewUpdate = ({
       await qortalRequest(requestBody2);
       dispatch(
         setNotification({
-          msg: 'Crowdfund deployed and published',
-          alertType: 'success',
+          msg: "Update published",
+          alertType: "success",
         })
       );
       const objToStore: any = {
@@ -228,40 +220,39 @@ export const NewUpdate = ({
         created: Date.now(),
         updated: Date.now(),
       };
-      if (!editId) {
-        dispatch(addCrowdfundToBeginning(objToStore));
-      } else if (onSubmit) {
+
+      if (editId && onSubmit) {
         onSubmit(objToStore);
       }
 
       dispatch(addToHashMap(objToStore));
 
-      setTitle('');
-      setInlineContent('');
+      setTitle("");
+      setInlineContent("");
       setAttachments([]);
       setIsOpen(false);
     } catch (error: any) {
       let notificationObj: any = null;
-      if (typeof error === 'string') {
+      if (typeof error === "string") {
         notificationObj = {
-          msg: error || 'Failed to publish crowdfund',
-          alertType: 'error',
+          msg: error || "Failed to publish crowdfund",
+          alertType: "error",
         };
-      } else if (typeof error?.error === 'string') {
+      } else if (typeof error?.error === "string") {
         notificationObj = {
-          msg: error?.error || 'Failed to publish crowdfund',
-          alertType: 'error',
+          msg: error?.error || "Failed to publish crowdfund",
+          alertType: "error",
         };
       } else {
         notificationObj = {
-          msg: error?.message || 'Failed to publish crowdfund',
-          alertType: 'error',
+          msg: error?.message || "Failed to publish crowdfund",
+          alertType: "error",
         };
       }
       if (!notificationObj) return;
       dispatch(setNotification(notificationObj));
 
-      throw new Error('Failed to publish crowdfund');
+      throw new Error("Failed to publish crowdfund");
     }
   }
 
@@ -269,20 +260,33 @@ export const NewUpdate = ({
     <>
       {username && username === crowdfundName && (
         <>
-          <CATContainer>
-            <AddCrowdFundButton onClick={() => setIsOpen(true)}>
-              {editId && editContent?.user === username ? (
+          <CATContainer
+            style={{
+              alignItems:
+                editId && editContent?.user === username
+                  ? "flex-start"
+                  : "center",
+            }}
+          >
+            {editId && editContent?.user === username ? (
+              <EditCrowdFundButton onClick={() => setIsOpen(true)}>
                 <>
-                  <CreateIcon />{' '}
-                  <CrowdfundCardTitle>Edit update</CrowdfundCardTitle>
+                  <CreateIcon fontSize="small" />{" "}
+                  <CrowdfundCardTitle
+                    style={{ marginBottom: 0, fontSize: "17px" }}
+                  >
+                    Edit update
+                  </CrowdfundCardTitle>
                 </>
-              ) : (
+              </EditCrowdFundButton>
+            ) : (
+              <AddCrowdFundButton onClick={() => setIsOpen(true)}>
                 <>
-                  <AddIcon />{' '}
+                  <AddIcon fontSize="large" />{" "}
                   <CrowdfundCardTitle>Add an update</CrowdfundCardTitle>
                 </>
-              )}
-            </AddCrowdFundButton>
+              </AddCrowdFundButton>
+            )}
           </CATContainer>
         </>
       )}
@@ -296,9 +300,9 @@ export const NewUpdate = ({
         <ModalBody>
           <Box
             sx={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
             }}
           >
             {editId ? (
@@ -306,6 +310,12 @@ export const NewUpdate = ({
             ) : (
               <NewCrowdfundTitle>Add an update</NewCrowdfundTitle>
             )}
+            <CloseNewUpdateModal
+              height="25px"
+              width="25px"
+              color={theme.palette.text.primary}
+              onClickFunc={onClose}
+            />
           </Box>
 
           <CustomInputField
@@ -320,32 +330,38 @@ export const NewUpdate = ({
             required
           />
 
-          <NewCrowdfundSubtitle>
-            Add necessary files - optional
-          </NewCrowdfundSubtitle>
+          <NewCrowdFundFont>Add necessary files - optional</NewCrowdFundFont>
           <FileAttachment
             setAttachments={setAttachments}
             attachments={attachments}
           />
-          <NewCrowdfundSubtitle>Write out your update</NewCrowdfundSubtitle>
+          <NewCrowdFundFont>Write out your update</NewCrowdFundFont>
           <ReactQuill
             theme="snow"
             value={inlineContent}
             onChange={setInlineContent}
             modules={modules}
           />
-          <Button
-            sx={{
-              backgroundColor: theme.palette.primary.light,
-              color: theme.palette.text.primary,
-              fontFamily: 'Arial',
-            }}
-            onClick={() => {
-              publishQDNResource();
-            }}
-          >
-            Publish
-          </Button>
+          <CrowdfundActionButtonRow>
+            <CrowdfundActionButton
+              onClick={() => {
+                onClose();
+              }}
+              variant="outlined"
+              color="error"
+              style={{ color: "#c92727ff" }}
+            >
+              Cancel
+            </CrowdfundActionButton>
+            <CrowdfundActionButton
+              variant="contained"
+              onClick={() => {
+                publishQDNResource();
+              }}
+            >
+              Publish
+            </CrowdfundActionButton>
+          </CrowdfundActionButtonRow>
         </ModalBody>
       </Modal>
     </>

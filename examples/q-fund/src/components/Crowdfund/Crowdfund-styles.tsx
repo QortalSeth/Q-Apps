@@ -6,6 +6,9 @@ import {
   Checkbox,
   TextField,
   Button,
+  Accordion,
+  AccordionSummary,
+  AccordionDetails,
 } from "@mui/material";
 import AddPhotoAlternateIcon from "@mui/icons-material/AddPhotoAlternate";
 import { TimesSVG } from "../../assets/svgs/TimesSVG";
@@ -17,18 +20,20 @@ export const DoubleLine = styled(Typography)`
   overflow: hidden;
 `;
 
-export const MainContainer = styled(Grid)(({ theme }) => ({
+export const MainContainer = styled(Grid)({
   width: "100%",
   display: "flex",
   alignItems: "flex-start",
   justifyContent: "center",
-}));
+  margin: 0,
+});
 
 export const MainCol = styled(Grid)(({ theme }) => ({
   display: "flex",
   flexDirection: "column",
   alignItems: "center",
   width: "100%",
+  padding: "20px",
 }));
 
 export const CreateContainer = styled(Box)(({ theme }) => ({
@@ -92,7 +97,7 @@ export const NewCrowdfundTitle = styled(Typography)(({ theme }) => ({
   fontSize: "25px",
   userSelect: "none",
 }));
-export const NewCrowdfundSubtitle = styled(Typography)(({ theme }) => ({
+export const NewCrowdFundFont = styled(Typography)(({ theme }) => ({
   fontWeight: 400,
   fontFamily: "Raleway",
   fontSize: "18px",
@@ -108,16 +113,19 @@ export const NewCrowdfundTimeDescription = styled(Typography)(({ theme }) => ({
 }));
 
 export const CustomInputField = styled(TextField)(({ theme }) => ({
-  fontFamily: "Karla",
-  fontSize: "17.5px",
+  fontFamily: "Mulish",
+  fontSize: "19px",
+  letterSpacing: "0px",
+  fontWeight: 400,
   color: theme.palette.text.primary,
   backgroundColor: theme.palette.background.default,
   borderColor: theme.palette.background.paper,
   "& label": {
     color: theme.palette.mode === "light" ? "#808183" : "#edeef0",
-    fontFamily: "Karla",
-    fontSize: "17.5px",
+    fontFamily: "Mulish",
+    fontSize: "19px",
     letterSpacing: "0px",
+    fontWeight: 400,
   },
   "& label.Mui-focused": {
     color: theme.palette.mode === "light" ? "#A0AAB4" : "#d7d8da",
@@ -137,9 +145,13 @@ export const CustomInputField = styled(TextField)(({ theme }) => ({
     },
   },
   "& .MuiInputBase-root": {
-    fontFamily: "Karla",
-    fontSize: "18px",
+    fontFamily: "Mulish",
+    fontSize: "19px",
     letterSpacing: "0px",
+    fontWeight: 400,
+  },
+  "& [class$='-MuiFilledInput-root']": {
+    padding: "30px 12px 8px",
   },
   "& .MuiFilledInput-root:after": {
     borderBottomColor: theme.palette.secondary.main,
@@ -154,6 +166,28 @@ export const CrowdfundTitle = styled(Typography)(({ theme }) => ({
   color: theme.palette.text.primary,
   userSelect: "none",
   wordBreak: "break-word",
+}));
+
+export const CrowdfundSubTitleRow = styled(Box)({
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  width: "100%",
+  flexDirection: "row",
+});
+
+export const CrowdfundSubTitle = styled(Typography)(({ theme }) => ({
+  fontFamily: "Copse",
+  letterSpacing: "1px",
+  fontWeight: 400,
+  fontSize: "17px",
+  color: theme.palette.text.primary,
+  userSelect: "none",
+  wordBreak: "break-word",
+  borderBottom: `1px solid ${theme.palette.text.primary}`,
+  paddingBottom: "1.5px",
+  width: "fit-content",
+  textDecoration: "none",
 }));
 
 export const CrowdfundDescription = styled(Typography)(({ theme }) => ({
@@ -264,7 +298,7 @@ export const CATContainer = styled(Box)(({ theme }) => ({
   flexDirection: "column",
   gap: "20px",
   justifyContent: "center",
-  width: "100%%",
+  width: "100%",
   alignItems: "center",
 }));
 
@@ -274,6 +308,25 @@ export const AddCrowdFundButton = styled(Button)(({ theme }) => ({
   textTransform: "none",
   padding: "10px 25px",
   fontSize: "15px",
+  gap: "8px",
+  color: "#ffffff",
+  backgroundColor:
+    theme.palette.mode === "dark" ? theme.palette.primary.main : "#2a9a86",
+  border: "none",
+  borderRadius: "5px",
+  transition: "all 0.3s ease-in-out",
+  "&:hover": {
+    cursor: "pointer",
+    backgroundColor:
+      theme.palette.mode === "dark" ? theme.palette.primary.dark : "#217e6d",
+  },
+}));
+
+export const EditCrowdFundButton = styled(Button)(({ theme }) => ({
+  display: "flex",
+  alignItems: "center",
+  textTransform: "none",
+  padding: "5px 12px",
   gap: "8px",
   color: "#ffffff",
   backgroundColor:
@@ -314,7 +367,7 @@ export const CrowdfundPageTitle = styled(Typography)(({ theme }) => ({
   color: theme.palette.text.primary,
 }));
 
-export const CrowdfundDescriptionRow = styled(Box)(({ theme }) => ({
+export const CrowdfundDescriptionRow = styled(Box)({
   display: "flex",
   alignItems: "center",
   justifyContent: "center",
@@ -323,7 +376,7 @@ export const CrowdfundDescriptionRow = styled(Box)(({ theme }) => ({
   fontSize: "18px",
   fontWeight: 400,
   letterSpacing: 0,
-}));
+});
 
 export const AboutMyCrowdfund = styled(Typography)(({ theme }) => ({
   fontFamily: "Copse",
@@ -334,16 +387,15 @@ export const AboutMyCrowdfund = styled(Typography)(({ theme }) => ({
   color: theme.palette.text.primary,
 }));
 
-export const CrowdfundInlineContentRow = styled(Box)(({ theme }) => ({
+export const CrowdfundInlineContentRow = styled(Box)({
   display: "flex",
   alignItems: "center",
   justifyContent: "center",
   width: "100%",
-}));
+});
 
 export const CrowdfundInlineContent = styled(Box)(({ theme }) => ({
   display: "flex",
-  padding: "20px",
   fontFamily: "Mulish",
   fontSize: "19px",
   fontWeight: 400,
@@ -351,3 +403,81 @@ export const CrowdfundInlineContent = styled(Box)(({ theme }) => ({
   userSelect: "none",
   color: theme.palette.text.primary,
 }));
+
+export const CrowdfundAccordion = styled(Accordion)(({ theme }) => ({
+  backgroundColor: theme.palette.primary.light,
+  "& .Mui-expanded": {
+    minHeight: "auto !important",
+  },
+}));
+
+export const CrowdfundAccordionSummary = styled(AccordionSummary)({
+  height: "50px",
+  "& .Mui-expanded": {
+    margin: "0px !important",
+  },
+});
+
+export const CrowdfundAccordionFont = styled(Typography)(({ theme }) => ({
+  fontFamily: "Mulish",
+  fontSize: "20px",
+  fontWeight: 400,
+  letterSpacing: "0px",
+  color: theme.palette.text.primary,
+  userSelect: "none",
+}));
+
+export const CrowdfundAccordionDetails = styled(AccordionDetails)({
+  padding: "0px 16px 16px 16px",
+});
+
+export const AddCoverImageButton = styled(Button)(({ theme }) => ({
+  display: "flex",
+  alignItems: "center",
+  fontFamily: "Montserrat",
+  fontSize: "16px",
+  fontWeight: 400,
+  letterSpacing: "0.2px",
+  color: "white",
+  gap: "5px",
+}));
+
+export const CoverImage = styled("img")({
+  width: "100%",
+  height: "250px",
+  objectFit: "cover",
+  objectPosition: "center",
+});
+
+export const CrowdfundActionButtonRow = styled(Box)({
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "space-between",
+  width: "100%",
+});
+
+export const CrowdfundActionButton = styled(Button)(({ theme }) => ({
+  display: "flex",
+  alignItems: "center",
+  fontFamily: "Montserrat",
+  fontSize: "16px",
+  fontWeight: 400,
+  letterSpacing: "0.2px",
+  color: "white",
+  gap: "5px",
+}));
+
+export const BackToHomeButton = styled(Button)({
+  position: "absolute",
+  top: "20px",
+  left: "10px",
+  display: "flex",
+  alignItems: "center",
+  fontFamily: "Montserrat",
+  fontSize: "13px",
+  fontWeight: 400,
+  letterSpacing: "0.2px",
+  color: "white",
+  gap: "5px",
+  padding: "5px 10px",
+});

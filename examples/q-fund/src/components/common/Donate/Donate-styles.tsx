@@ -9,4 +9,5 @@ export const CrowdfundPageDonateButton = styled(Button)(({ theme }) => ({
   textTransform: "uppercase",
   minWidth: "64px",
   padding: "15px 25px",
+  color: "#ffffff",
 }));
