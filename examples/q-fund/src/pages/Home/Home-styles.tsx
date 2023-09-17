@@ -211,7 +211,7 @@ export const CrowdfundListHeader = styled(Box)(({ theme }) => ({
 export const CrowdfundListTitle = styled(Typography)(({ theme }) => ({
   fontFamily: "Copse",
   fontWeight: 400,
-  fontSize: "23px",
+  fontSize: "25px",
   letterSpacing: "0.5px",
   color: theme.palette.text.primary,
   userSelect: "none",

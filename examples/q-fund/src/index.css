@@ -278,3 +278,9 @@ a:focus {
   width: 100%;
   cursor: pointer;
 }
+
+/* React Quill */
+
+.ql-editor {
+  min-height: 100px;
+}

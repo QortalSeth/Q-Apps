@@ -1,20 +1,20 @@
-import React, {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
-import { CommentEditor, addItem, updateItemDate } from "./CommentEditor";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { CommentEditor } from "./CommentEditor";
 import { Comment } from "./Comment";
-import { Box, Button, Drawer, Typography, useTheme } from "@mui/material";
+import { Box, Button, CircularProgress, useTheme } from "@mui/material";
 import { styled } from "@mui/system";
-import CloseIcon from "@mui/icons-material/Close";
 import { useSelector } from "react-redux";
 import { RootState } from "../../../state/store";
-import CommentIcon from "@mui/icons-material/Comment";
 import { useNavigate, useLocation } from "react-router-dom";
-import { commentBase } from "../../../constants";
+import { COMMENT_BASE } from "../../../constants";
+import {
+  CommentContainer,
+  CommentEditorContainer,
+  CommentsContainer,
+  LoadMoreCommentsButton,
+  LoadMoreCommentsButtonRow,
+  NoCommentsRow,
+} from "./Comments-styles";
 
 interface CommentSectionProps {
   postId: string;
@@ -52,19 +52,8 @@ export const CommentSection = ({ postId, postName }: CommentSectionProps) => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const { user } = useSelector((state: RootState) => state.auth);
   const [newMessages, setNewMessages] = useState(0);
-  // const notifications = useSelector(
-  //   (state: RootState) => state.global.notifications
-  // )
-  // const notificationCreatorComment = useSelector(
-  //   (state: RootState) => state.global.notificationCreatorComment
-  // )
+  const [loadingComments, setLoadingComments] = useState<boolean>(false);
 
-  // const fullNotifications = useMemo(() => {
-  //   return [...notificationCreatorComment, ...notifications].sort(
-  //     (a, b) => b.created - a.created
-  //   )
-  // }, [notificationCreatorComment, notifications])
-  const theme = useTheme();
   const onSubmit = (obj?: any, isEdit?: boolean) => {
     if (isEdit) {
       setListComments((prev: any[]) => {
@@ -115,7 +104,7 @@ export const CommentSection = ({ postId, postName }: CommentSectionProps) => {
       const offset = 0;
 
       const removeBaseCommentId = commentId.replace("_base_", "");
-      const url = `/arbitrary/resources/search?mode=ALL&service=BLOG_COMMENT&query=${commentBase}${postId.slice(
+      const url = `/arbitrary/resources/search?mode=ALL&service=BLOG_COMMENT&query=${COMMENT_BASE}${postId.slice(
         -12
       )}_reply_${removeBaseCommentId.slice(
         -6
@@ -154,73 +143,58 @@ export const CommentSection = ({ postId, postName }: CommentSectionProps) => {
 
   const getComments = useCallback(
     async (isNewMessages?: boolean, numberOfComments?: number) => {
-      let offset = 0;
-      if (isNewMessages && numberOfComments) {
-        offset = numberOfComments;
-      }
-      const url = `/arbitrary/resources/search?mode=ALL&service=BLOG_COMMENT&query=${commentBase}${postId.slice(
-        -12
-      )}_base_&limit=20&includemetadata=false&offset=${offset}&reverse=false&excludeblocked=true`;
-      const response = await fetch(url, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-      const responseData = await response.json();
-      let comments: any[] = [];
-      for (const comment of responseData) {
-        if (comment.identifier && comment.name) {
-          const url = `/arbitrary/BLOG_COMMENT/${comment.name}/${comment.identifier}`;
-          const response = await fetch(url, {
-            method: "GET",
-            headers: {
-              "Content-Type": "application/json",
-            },
-          });
-
-          const responseData2 = await response.text();
-          if (responseData) {
-            comments.push({
-              message: responseData2,
-              ...comment,
-            });
-          }
-          const res = await getReplies(comment.identifier, postId);
-          comments = [...comments, ...res];
+      try {
+        setLoadingComments(true);
+        let offset = 0;
+        if (isNewMessages && numberOfComments) {
+          offset = numberOfComments;
         }
-      }
-      if (isNewMessages) {
-        setListComments(prev => [...prev, ...comments]);
-        setNewMessages(0);
-      } else {
-        setListComments(comments);
+        const url = `/arbitrary/resources/search?mode=ALL&service=BLOG_COMMENT&query=${COMMENT_BASE}${postId.slice(
+          -12
+        )}_base_&limit=20&includemetadata=false&offset=${offset}&reverse=false&excludeblocked=true`;
+        const response = await fetch(url, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+        const responseData = await response.json();
+        let comments: any[] = [];
+        for (const comment of responseData) {
+          if (comment.identifier && comment.name) {
+            const url = `/arbitrary/BLOG_COMMENT/${comment.name}/${comment.identifier}`;
+            const response = await fetch(url, {
+              method: "GET",
+              headers: {
+                "Content-Type": "application/json",
+              },
+            });
+
+            const responseData2 = await response.text();
+            if (responseData) {
+              comments.push({
+                message: responseData2,
+                ...comment,
+              });
+            }
+            const res = await getReplies(comment.identifier, postId);
+            comments = [...comments, ...res];
+          }
+        }
+        if (isNewMessages) {
+          setListComments(prev => [...prev, ...comments]);
+          setNewMessages(0);
+        } else {
+          setListComments(comments);
+        }
+      } catch (error) {
+        console.error(error);
+      } finally {
+        setLoadingComments(false);
       }
     },
     [postId]
   );
-
-  // const checkAndUpdateNotification = async () => {
-  //   const filteredNotifications = fullNotifications.filter(
-  //     (notification) =>
-  //       postId.includes(notification?.partialPostId) ||
-  //       notification?.postId === postId
-  //   )
-  //   filteredNotifications.forEach((notification) => {
-  //     if (postId) {
-  //       updateItemDate({
-  //         id: notification?.identifier,
-  //         lastSeen: Date.now(),
-  //         postId
-  //       })
-  //     }
-  //   })
-  // }
-  // useEffect(() => {
-  //   if (fullNotifications && isOpen) {
-  //     checkAndUpdateNotification()
-  //   }
-  // }, [fullNotifications, isOpen])
 
   useEffect(() => {
     getComments();
@@ -241,153 +215,59 @@ export const CommentSection = ({ postId, postName }: CommentSectionProps) => {
     }, []);
   }, [listComments]);
 
-  const interval = useRef<any>(null);
-
-  // const checkNewComments = useCallback(async () => {
-  //   try {
-  //     const offset = listComments.filter(
-  //       item => !item.identifier.includes('_reply_')
-  //     ).length;
-  //     const url = `/arbitrary/resources/search?mode=ALL&service=BLOG_COMMENT&query=${commentBase}${postId.slice(
-  //       -12
-  //     )}_base_&limit=20&includemetadata=false&offset=${offset}&reverse=false&excludeblocked=true`;
-  //     const response = await fetch(url, {
-  //       method: 'GET',
-  //       headers: {
-  //         'Content-Type': 'application/json',
-  //       },
-  //     });
-  //     const responseData = await response.json();
-  //     setNewMessages(responseData.length);
-  //   } catch (error) {}
-  // }, [listComments, postId]);
-
-  // const checkNewMessagesFunc = useCallback(() => {
-  //   let isCalling = false;
-  //   interval.current = setInterval(async () => {
-  //     if (isCalling) return;
-  //     isCalling = true;
-  //     const res = await checkNewComments();
-  //     isCalling = false;
-  //   }, 15000);
-  // }, [checkNewComments]);
-
-  // useEffect(() => {
-  //   checkNewMessagesFunc();
-
-  //   return () => {
-  //     if (interval?.current) {
-  //       clearInterval(interval.current);
-  //     }
-  //   };
-  // }, [checkNewMessagesFunc]);
-
   return (
     <>
       <Panel>
-        {/* {newMessages > 0 && (
-          <Box
-            sx={{
-              display: 'flex',
-              flexDirection: 'row',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              flex: '0 0',
-              padding: '10px',
-              width: '100%',
-            }}
-          >
-            <Box
-              sx={{
-                display: 'flex',
-              }}
-            >
-              <Button
+        <CommentsContainer>
+          {loadingComments ? (
+            <NoCommentsRow>
+              <CircularProgress />
+            </NoCommentsRow>
+          ) : listComments.length === 0 ? (
+            <NoCommentsRow>
+              There are no comments yet. Be the first to comment!
+            </NoCommentsRow>
+          ) : (
+            <CommentContainer>
+              {structuredCommentList.map((comment: any) => {
+                return (
+                  <Comment
+                    key={comment?.identifier}
+                    comment={comment}
+                    onSubmit={onSubmit}
+                    postId={postId}
+                    postName={postName}
+                  />
+                );
+              })}
+            </CommentContainer>
+          )}
+          {listComments.length > 20 && (
+            <LoadMoreCommentsButtonRow>
+              <LoadMoreCommentsButton
                 onClick={() => {
                   getComments(
                     true,
                     listComments.filter(
-                      item => !item.identifier.includes('_reply_')
+                      item => !item.identifier.includes("_reply_")
                     ).length
                   );
                 }}
                 variant="contained"
                 size="small"
               >
-                Load {newMessages} new{' '}
-                {newMessages > 1 ? 'messages' : 'message'}
-              </Button>
-            </Box>
-          </Box>
-        )} */}
-        <Box
-          sx={{
-            width: "90%",
-            maxWidth: "1000px",
-            display: "flex",
-            flexDirection: "column",
-            flex: "1",
-            overflow: "auto",
-          }}
-        >
-          <Box
-            sx={{
-              display: "flex",
-              flexDirection: "column",
-              margin: "25px 0px 50px 0px",
-              maxWidth: "100%",
-              width: "100%",
-              gap: "10px",
-              padding: "0px 5px",
-            }}
-          >
-            {structuredCommentList.map((comment: any) => {
-              return (
-                <Comment
-                  key={comment?.identifier}
-                  comment={comment}
-                  onSubmit={onSubmit}
-                  postId={postId}
-                  postName={postName}
-                />
-              );
-            })}
-          </Box>
-          <Box
-            sx={{
-              display: "flex",
-            }}
-          >
-            <Button
-              onClick={() => {
-                getComments(
-                  true,
-                  listComments.filter(
-                    item => !item.identifier.includes("_reply_")
-                  ).length
-                );
-              }}
-              variant="contained"
-              size="small"
-            >
-              Load More comments
-            </Button>
-          </Box>
-        </Box>
-        <Box
-          sx={{
-            width: "100%",
-            display: "flex",
-            justifyContent: "center",
-            flex: "0 0 100px",
-          }}
-        >
+                Load More Comments
+              </LoadMoreCommentsButton>
+            </LoadMoreCommentsButtonRow>
+          )}
+        </CommentsContainer>
+        <CommentEditorContainer>
           <CommentEditor
             onSubmit={onSubmit}
             postId={postId}
             postName={postName}
           />
-        </Box>
+        </CommentEditorContainer>
       </Panel>
     </>
   );

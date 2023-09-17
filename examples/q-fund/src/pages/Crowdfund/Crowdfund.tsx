@@ -5,77 +5,74 @@ import React, {
   useRef,
   useState,
 } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../state/store";
-import {
-  Accordion,
-  AccordionDetails,
-  AccordionSummary,
-  Avatar,
-  Box,
-  Typography,
-  useTheme,
-} from "@mui/material";
+import { useTheme } from "@mui/material";
 import AttachFileIcon from "@mui/icons-material/AttachFile";
 import DownloadIcon from "@mui/icons-material/Download";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import { formatDate } from "../../utils/time";
 import { DisplayHtml } from "../../components/common/DisplayHtml";
 import FileElement from "../../components/common/FileElement";
 import { setIsLoadingGlobal } from "../../state/features/globalSlice";
 import { crowdfundBase, updateBase } from "../../constants";
 import { addToHashMap } from "../../state/features/crowdfundSlice";
 import {
-  AuthorTextComment,
   CrowdfundDescriptionRow,
-  CrowdfundTitle,
   CrowdfundPageTitle,
   CrowdfundTitleRow,
   MainCol,
   MainContainer,
-  Spacer,
-  StyledCardColComment,
-  StyledCardHeaderComment,
   AboutMyCrowdfund,
   CrowdfundInlineContentRow,
+  CrowdfundAccordion,
+  CrowdfundAccordionSummary,
+  CrowdfundAccordionFont,
+  CrowdfundAccordionDetails,
+  CrowdfundSubTitle,
+  CrowdfundSubTitleRow,
+  CoverImage,
+  BackToHomeButton,
 } from "../../components/Crowdfund/Crowdfund-styles";
-import AudioPlayer, { PlayerBox } from "../../components/common/AudioPlayer";
+import AudioPlayer from "../../components/common/AudioPlayer";
 import { NewCrowdfund } from "../../components/Crowdfund/NewCrowdfund";
 import { CommentSection } from "../../components/common/Comments/CommentSection";
 import { Donate } from "../../components/common/Donate/Donate";
 import { CrowdfundProgress } from "../../components/common/Progress/Progress";
 import { Countdown } from "../../components/common/Countdown/Countdown";
-import moment from "moment";
 import { NewUpdate } from "../../components/Crowdfund/NewUpdate";
 import { Update } from "./Update";
 import { AccountCircleSVG } from "../../assets/svgs/AccountCircleSVG";
+import moment from "moment";
+import {
+  FileAttachmentContainer,
+  FileAttachmentFont,
+  PlayerBox,
+} from "./Update-styles";
+import CoverImageDefault from "../../assets/images/CoverImageDefault.webp";
 
 export const Crowdfund = () => {
   const theme = useTheme();
   const dispatch = useDispatch();
   const { name, id } = useParams();
+  const navigate = useNavigate();
 
   const userAvatarHash = useSelector(
     (state: RootState) => state.global.userAvatarHash
   );
 
-  const avatarUrl = useMemo(() => {
-    let url = "";
-    if (name && userAvatarHash[name]) {
-      url = userAvatarHash[name];
-    }
-
-    return url;
-  }, [userAvatarHash, name]);
   const [crowdfundData, setCrowdfundData] = useState<any>(null);
   const [currentAtInfo, setCurrentAtInfo] = useState<any>(null);
+  const [loadingAtInfo, setLoadingAtInfo] = useState<boolean>(false);
   const username = useSelector((state: RootState) => state.auth?.user?.name);
   const [updatesList, setUpdatesList] = useState<any[]>([]);
   const [atAddressBalance, setAtAddressBalance] = useState<any>(null);
   const [nodeInfo, setNodeInfo] = useState<any>(null);
+
   const interval = useRef<any>(null);
   const intervalBalance = useRef<any>(null);
+  const endDateRef = useRef<any>(null);
+
   const atAddress = useMemo(() => {
     return crowdfundData?.deployedAT?.aTAddress || null;
   }, [crowdfundData]);
@@ -83,7 +80,13 @@ export const Crowdfund = () => {
     (state: RootState) => state.crowdfund.hashMapCrowdfunds
   );
 
-  const endDateRef = useRef<any>(null);
+  const avatarUrl = useMemo(() => {
+    let url = "";
+    if (name && userAvatarHash[name]) {
+      url = userAvatarHash[name];
+    }
+    return url;
+  }, [userAvatarHash, name]);
 
   const endDate = useMemo(() => {
     if (!currentAtInfo?.sleepUntilHeight || !nodeInfo?.height) return null;
@@ -94,6 +97,7 @@ export const Crowdfund = () => {
     endDateRef.current = end;
     return end;
   }, [currentAtInfo, nodeInfo]);
+
   const blocksRemaning = useMemo(() => {
     if (!currentAtInfo?.sleepUntilHeight || !nodeInfo?.height) return null;
     const diff = +currentAtInfo?.sleepUntilHeight - +nodeInfo.height;
@@ -103,6 +107,7 @@ export const Crowdfund = () => {
 
   const getCurrentAtInfo = React.useCallback(async atAddress => {
     console.log({ atAddress });
+    setLoadingAtInfo(true);
     try {
       const url = `/at/${atAddress}`;
       const response = await fetch(url, {
@@ -117,6 +122,7 @@ export const Crowdfund = () => {
       console.log(error);
     } finally {
       dispatch(setIsLoadingGlobal(false));
+      setLoadingAtInfo(false);
     }
   }, []);
 
@@ -181,6 +187,7 @@ export const Crowdfund = () => {
             categoryName: resourceData?.metadata?.categoryName,
             tags: resourceData?.metadata?.tags || [],
             description: resourceData?.metadata?.description,
+            coverImage: resourceData?.metadata?.coverImage,
             created: resourceData?.created,
             updated: resourceData?.updated,
             user: resourceData.name,
@@ -238,7 +245,8 @@ export const Crowdfund = () => {
     }
   }, []);
 
-  React.useEffect(() => {
+  // We get the crowdfund's updates if hashMapCrowdfund changes. This changes when you publish a new update or modify an existing update.
+  useEffect(() => {
     if (name && id) {
       const existingCrowdfund = hashMapCrowdfunds[id];
 
@@ -285,6 +293,7 @@ export const Crowdfund = () => {
       }
     };
   }, [checkNodeInfo]);
+
   const checkBalance = useCallback(
     atAddress => {
       let isCalling = false;
@@ -313,8 +322,19 @@ export const Crowdfund = () => {
   return (
     <>
       <NewCrowdfund editId={id} editContent={editContent} />
-      <MainContainer container spacing={2} direction={"row"}>
-        <MainCol item xs={12} sm={6}>
+      <MainContainer container direction={"row"}>
+        <span style={{ position: "relative", width: "inherit" }}>
+          <CoverImage src={crowdfundData?.coverImage || CoverImageDefault} />
+          <BackToHomeButton
+            variant="contained"
+            onClick={() => {
+              navigate("/");
+            }}
+          >
+            Back To Homepage
+          </BackToHomeButton>
+        </span>
+        <MainCol item xs={12} sm={12} md={6} gap={"15px"}>
           <CrowdfundTitleRow>
             {!avatarUrl ? (
               <AccountCircleSVG
@@ -343,95 +363,60 @@ export const Crowdfund = () => {
           <CrowdfundInlineContentRow>
             <DisplayHtml html={crowdfundData?.inlineContent} />
           </CrowdfundInlineContentRow>
-          {crowdfundData?.deployedAT?.aTAddress && (
-            <Donate
-              atAddress={crowdfundData?.deployedAT?.aTAddress}
-              onSubmit={() => {
-                return;
-              }}
-              onClose={() => {
-                return;
-              }}
-            />
-          )}
         </MainCol>
-        <MainCol item xs={12} sm={6}>
+        <MainCol item xs={12} sm={12} md={6} gap={"17px"}>
           {crowdfundData?.deployedAT?.goalValue && !isNaN(atAddressBalance) && (
             <CrowdfundProgress
               raised={atAddressBalance}
               goal={crowdfundData?.deployedAT?.goalValue}
             />
           )}
-          {endDate && blocksRemaning && (
-            <Countdown endDate={endDate} blocksRemaning={blocksRemaning} />
-          )}
+          <Countdown
+            loadingAtInfo={loadingAtInfo}
+            endDate={endDate}
+            blocksRemaning={blocksRemaning}
+          />
           {name === username && (
             <NewUpdate crowdfundId={id} crowdfundName={name || ""} />
           )}
+          {/* Ensure the AT is still active to display the donate button */}
+          {crowdfundData?.deployedAT?.aTAddress &&
+            (endDate || blocksRemaning) && (
+              <Donate
+                atAddress={crowdfundData?.deployedAT?.aTAddress}
+                onSubmit={() => {
+                  return;
+                }}
+                onClose={() => {
+                  return;
+                }}
+              />
+            )}
           <div style={{ width: "90%" }}>
             {updatesList.map(update => {
               return (
-                <Accordion key={update.identifier}>
-                  <AccordionSummary
+                <CrowdfundAccordion key={update.identifier}>
+                  <CrowdfundAccordionSummary
                     expandIcon={<ExpandMoreIcon />}
                     aria-controls="panel1a-content"
                     id="panel1a-header"
                   >
-                    <Typography>
-                      {moment(update.created).format("LLL")} update
-                    </Typography>
-                  </AccordionSummary>
-                  <AccordionDetails>
+                    <CrowdfundAccordionFont>
+                      Update for {moment(update.created).format("LLL")}
+                    </CrowdfundAccordionFont>
+                  </CrowdfundAccordionSummary>
+                  <CrowdfundAccordionDetails>
                     <Update updateObj={update} />
-                  </AccordionDetails>
-                </Accordion>
+                  </CrowdfundAccordionDetails>
+                </CrowdfundAccordion>
               );
             })}
           </div>
-          <Box
-            sx={{
-              width: "95%",
-            }}
-          >
-            <StyledCardHeaderComment
-              sx={{
-                "& .MuiCardHeader-content": {
-                  overflow: "hidden",
-                },
-              }}
-            >
-              <Box>
-                <Avatar src={avatarUrl} alt={`${name}'s avatar`} />
-              </Box>
-              <StyledCardColComment>
-                <AuthorTextComment
-                  color={
-                    theme.palette.mode === "light"
-                      ? theme.palette.text.secondary
-                      : "#d6e8ff"
-                  }
-                >
-                  {name}
-                </AuthorTextComment>
-              </StyledCardColComment>
-            </StyledCardHeaderComment>
-            <Spacer height="25px" />
-            <Spacer height="25px" />
+          <CrowdfundSubTitleRow>
             {crowdfundData?.attachments?.length > 0 && (
-              <CrowdfundTitle
-                variant="h1"
-                color="textPrimary"
-                sx={{
-                  textAlign: "center",
-                  textDecoration: "underline",
-                }}
-              >
-                Attachments
-              </CrowdfundTitle>
+              <CrowdfundSubTitle>Attachments</CrowdfundSubTitle>
             )}
-
-            <Spacer height="15px" />
-          </Box>
+          </CrowdfundSubTitleRow>
           {crowdfundData?.attachments?.map(attachment => {
             if (attachment?.service === "AUDIO")
               return (
@@ -445,7 +430,6 @@ export const Crowdfund = () => {
                     jsonId={crowdfundData?.id}
                     user={crowdfundData?.user}
                   />
-                  <Spacer height="15px" />
                 </>
               );
 
@@ -456,28 +440,16 @@ export const Crowdfund = () => {
                     minHeight: "55px",
                   }}
                 >
-                  <Box
-                    sx={{ display: "flex", alignItems: "center", pl: 1, pr: 1 }}
-                  >
+                  <FileAttachmentContainer>
                     <AttachFileIcon
                       sx={{
                         height: "16px",
                         width: "auto",
                       }}
                     ></AttachFileIcon>
-                    <Typography
-                      sx={{
-                        fontSize: "14px",
-                        wordBreak: "break-word",
-                        marginBottom: "5px",
-                      }}
-                    >
+                    <FileAttachmentFont>
                       {attachment?.filename}
-                    </Typography>
-                  </Box>
-                  <Box
-                    sx={{ display: "flex", alignItems: "center", pl: 1, pr: 1 }}
-                  >
+                    </FileAttachmentFont>
                     <FileElement
                       fileInfo={attachment}
                       title={attachment?.filename}
@@ -489,26 +461,16 @@ export const Crowdfund = () => {
                     >
                       <DownloadIcon />
                     </FileElement>
-                  </Box>
+                  </FileAttachmentContainer>
                 </PlayerBox>
-
-                <Spacer height="15px" />
               </>
             );
           })}
         </MainCol>
       </MainContainer>
-      <Spacer height="15px" />
-      <CrowdfundTitle
-        variant="h1"
-        color="textPrimary"
-        sx={{
-          textAlign: "center",
-          textDecoration: "underline",
-        }}
-      >
-        Comments
-      </CrowdfundTitle>
+      <CrowdfundSubTitleRow style={{ marginTop: "85px" }}>
+        <CrowdfundSubTitle>Comments</CrowdfundSubTitle>
+      </CrowdfundSubTitleRow>
       <CommentSection postId={id || ""} postName={name || ""} />
     </>
   );

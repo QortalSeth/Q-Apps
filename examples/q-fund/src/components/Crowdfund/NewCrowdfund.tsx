@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import {
+  AddCoverImageButton,
   AddCrowdFundButton,
   AddLogoIcon,
   CATContainer,
@@ -8,12 +9,14 @@ import {
   CustomInputField,
   LogoPreviewRow,
   ModalBody,
-  NewCrowdfundSubtitle,
+  NewCrowdFundFont,
   NewCrowdfundTimeDescription,
   NewCrowdfundTitle,
+  CrowdfundActionButtonRow,
+  CrowdfundActionButton,
   TimesIcon,
 } from "./Crowdfund-styles";
-import { Box, Button, Modal, useTheme } from "@mui/material";
+import { Box, Button, Modal, TextField, useTheme } from "@mui/material";
 import ReactQuill, { Quill } from "react-quill";
 import ImageResize from "quill-image-resize-module-react";
 import ShortUniqueId from "short-unique-id";
@@ -38,7 +41,7 @@ import {
 import ImageUploader from "../ImageUploader";
 import { DesktopDateTimePicker } from "@mui/x-date-pickers";
 import { PiggybankSVG } from "../../assets/svgs/PiggybankSVG";
-import BoundedNumericTextField from "../../../../../Library/Components/BoundedNumericTextField";
+// import BoundedNumericTextField from "../../../../../Library/Components/BoundedNumericTextField";
 
 dayjs.extend(isBetween);
 dayjs.extend(duration);
@@ -285,9 +288,11 @@ export const NewCrowdfund = ({ editId, editContent }: NewCrowdfundProps) => {
         minActivationAmount: 0,
       };
       const differenceInMinutes = dayjs().diff(value, "minute");
-      const blocksToGoal = differenceInMinutes * -1;
-      if (blocksToGoal < 2880 || blocksToGoal > 43200)
-        throw new Error("end of crowdfund needs to be between 2880 and 43200");
+      // const blocksToGoal = differenceInMinutes * -1;
+      const blocksToGoal = 20;
+      // if (blocksToGoal < 2880 || blocksToGoal > 43200)
+      //   throw new Error("end of crowdfund needs to be between 2880 and 43200");
+      if (!goalValue) throw new Error("Goal amount must be one or greater!");
       requestBody.dataBytesBase64 = createBytes(
         +goalValue,
         blocksToGoal,
@@ -461,7 +466,7 @@ export const NewCrowdfund = ({ editId, editContent }: NewCrowdfundProps) => {
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = event.target.valueAsNumber;
-
+    console.log({ newValue });
     if (newValue >= 1 && newValue <= 1_000_000) {
       setGoalValue(newValue);
     } else if (!event.target.value) {
@@ -508,7 +513,7 @@ export const NewCrowdfund = ({ editId, editContent }: NewCrowdfundProps) => {
             )}
             {!coverImage ? (
               <ImageUploader onPick={(img: string) => setCoverImage(img)}>
-                <Button variant="contained">
+                <AddCoverImageButton variant="contained">
                   Add Cover Image
                   <AddLogoIcon
                     sx={{
@@ -516,7 +521,7 @@ export const NewCrowdfund = ({ editId, editContent }: NewCrowdfundProps) => {
                       width: "auto",
                     }}
                   ></AddLogoIcon>
-                </Button>
+                </AddCoverImageButton>
               </ImageUploader>
             ) : (
               <LogoPreviewRow>
@@ -566,44 +571,50 @@ export const NewCrowdfund = ({ editId, editContent }: NewCrowdfundProps) => {
             Length of crowdfund: {diffInMins} blocks ~{" "}
             {formatDuration(diffInMins)}
           </NewCrowdfundTimeDescription>
-          <BoundedNumericTextField
-            label="Goal amount (QORT)"
+          <TextField
+            label="Goal amount"
+            type="number"
             variant="outlined"
             value={goalValue}
             onChange={handleInputChange}
-            minValue={0.01}
-            maxValue={1_000_000}
-            addIconButtons={false}
-            sigDigits={6}
+            inputProps={{
+              min: 1,
+              max: 1_000_000,
+              step: 1,
+            }}
           />
-          <NewCrowdfundSubtitle>
-            Add necessary files - optional
-          </NewCrowdfundSubtitle>
+          <NewCrowdFundFont>Add necessary files - optional</NewCrowdFundFont>
           <FileAttachment
             setAttachments={setAttachments}
             attachments={attachments}
           />
-          <NewCrowdfundSubtitle>
-            Describe your objective in depth
-          </NewCrowdfundSubtitle>
+          <NewCrowdFundFont>Describe your objective in depth</NewCrowdFundFont>
           <ReactQuill
             theme="snow"
             value={inlineContent}
             onChange={setInlineContent}
             modules={modules}
           />
-          <Button
-            sx={{
-              backgroundColor: theme.palette.primary.light,
-              color: theme.palette.text.primary,
-              fontFamily: "Arial",
-            }}
-            onClick={() => {
-              publishQDNResource();
-            }}
-          >
-            Publish
-          </Button>
+          <CrowdfundActionButtonRow>
+            <CrowdfundActionButton
+              onClick={() => {
+                onClose();
+              }}
+              variant="outlined"
+              color="error"
+              style={{ color: "#c92727ff" }}
+            >
+              Cancel
+            </CrowdfundActionButton>
+            <CrowdfundActionButton
+              variant="contained"
+              onClick={() => {
+                publishQDNResource();
+              }}
+            >
+              Publish
+            </CrowdfundActionButton>
+          </CrowdfundActionButtonRow>
         </ModalBody>
       </Modal>
     </>
