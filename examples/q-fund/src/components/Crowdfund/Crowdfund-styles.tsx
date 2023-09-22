@@ -9,6 +9,7 @@ import {
   Accordion,
   AccordionSummary,
   AccordionDetails,
+  Rating,
 } from "@mui/material";
 import AddPhotoAlternateIcon from "@mui/icons-material/AddPhotoAlternate";
 import { TimesSVG } from "../../assets/svgs/TimesSVG";
@@ -367,6 +368,19 @@ export const CrowdfundPageTitle = styled(Typography)(({ theme }) => ({
   color: theme.palette.text.primary,
 }));
 
+export const CrowdfundStatusRow = styled(Box)(({ theme }) => ({
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  fontFamily: "Mulish",
+  fontSize: "21px",
+  fontWeight: 400,
+  letterSpacing: 0,
+  border: `1px solid ${theme.palette.text.primary}`,
+  borderRadius: "8px",
+  padding: "15px 25px",
+}));
+
 export const CrowdfundDescriptionRow = styled(Box)({
   display: "flex",
   alignItems: "center",
@@ -467,10 +481,10 @@ export const CrowdfundActionButton = styled(Button)(({ theme }) => ({
   gap: "5px",
 }));
 
-export const BackToHomeButton = styled(Button)({
+export const BackToHomeButton = styled(Button)(({ theme }) => ({
   position: "absolute",
   top: "20px",
-  left: "10px",
+  left: "20px",
   display: "flex",
   alignItems: "center",
   fontFamily: "Montserrat",
@@ -480,4 +494,42 @@ export const BackToHomeButton = styled(Button)({
   color: "white",
   gap: "5px",
   padding: "5px 10px",
+  backgroundColor: theme.palette.secondary.main,
+  transition: "all 0.3s ease-in-out",
+  "&:hover": {
+    backgroundColor: theme.palette.secondary.dark,
+    cursor: "pointer",
+  },
+}));
+
+export const CrowdfundLoaderRow = styled(Box)({
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  gap: "10px",
+  padding: "10px",
 });
+
+export const RatingContainer = styled(Box)({
+  display: "flex",
+  alignItems: "center",
+  padding: "1px 5px",
+  borderRadius: "5px",
+  backgroundColor: "transparent",
+  transition: "all 0.3s ease-in-out",
+  "&:hover": {
+    cursor: "pointer",
+    backgroundColor: "#e4ddddac",
+  },
+});
+
+export const StyledRating = styled(Rating)({
+  fontSize: "28px",
+});
+
+export const NoReviewsFont = styled(Typography)(({ theme }) => ({
+  fontFamily: "Mulish",
+  fontWeight: 400,
+  letterSpacing: 0,
+  color: theme.palette.text.primary,
+}));

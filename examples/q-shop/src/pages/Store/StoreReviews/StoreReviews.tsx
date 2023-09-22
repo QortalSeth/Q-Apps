@@ -245,7 +245,8 @@ export const StoreReviews: FC<StoreReviewsProps> = ({
           position: "relative",
           padding: "25px 40px",
           borderRadius: "5px",
-          outline: "none"
+          outline: "none",
+          overflowY: "scroll",
         }}
         open={openLeaveReview}
       >

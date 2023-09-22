@@ -36,6 +36,14 @@ export const Countdown: React.FC<CountdownProps> = ({
       const now = moment();
       const duration = moment.duration(endDate.diff(now));
 
+      if (duration.asMilliseconds() <= 0) {
+        setTimeRemainingDays(0);
+        setTimeRemainingHours(0);
+        setTimeRemainingMinutes(0);
+        clearInterval(intervalId);
+        return;
+      }
+
       const totalMinutes = duration.asMinutes();
       const days = Math.floor(totalMinutes / (60 * 24));
       const hours = Math.floor((totalMinutes % (60 * 24)) / 60);
@@ -46,7 +54,7 @@ export const Countdown: React.FC<CountdownProps> = ({
       setTimeRemainingMinutes(minutes);
     };
 
-    // Ensure the crowdfund has ended before running the countdown
+    // Ensure the crowdfund has not ended before running the countdown
     if (!endDate || !blocksRemaning) return;
 
     updateCountdown();

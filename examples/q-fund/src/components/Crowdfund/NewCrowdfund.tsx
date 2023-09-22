@@ -26,7 +26,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { setNotification } from "../../state/features/notificationsSlice";
 import { objectToBase64 } from "../../utils/toBase64";
 import { RootState } from "../../state/store";
-import { attachmentBase, crowdfundBase } from "../../constants";
+import { ATTACHMENT_BASE, CROWDFUND_BASE } from "../../constants";
 import dayjs, { Dayjs } from "dayjs";
 import isBetween from "dayjs/plugin/isBetween"; // Import the plugin
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
@@ -289,9 +289,10 @@ export const NewCrowdfund = ({ editId, editContent }: NewCrowdfundProps) => {
         numUserStackPages: 0,
         minActivationAmount: 0,
       };
-      const differenceInMinutes = dayjs().diff(value, "minute");
-      // const blocksToGoal = differenceInMinutes * -1;
+      // CHANGE BACK AFTER TESTING
       const blocksToGoal = 20;
+      // const differenceInMinutes = dayjs().diff(value, "minute");
+      // const blocksToGoal = differenceInMinutes * -1;
       // if (blocksToGoal < 2880 || blocksToGoal > 43200)
       //   throw new Error("end of crowdfund needs to be between 2880 and 43200");
       if (!goalValue) throw new Error("Goal amount must be one or greater!");
@@ -350,7 +351,7 @@ export const NewCrowdfund = ({ editId, editContent }: NewCrowdfundProps) => {
         }
         const id = uid();
         const id2 = uid();
-        const identifier = `${attachmentBase}${id}_${id2}`;
+        const identifier = `${ATTACHMENT_BASE}${id}_${id2}`;
         const fileExtension = attachment?.name?.split(".")?.pop();
         if (!fileExtension) {
           throw new Error("One of your attachments does not have an extension");
@@ -387,7 +388,7 @@ export const NewCrowdfund = ({ editId, editContent }: NewCrowdfundProps) => {
 
       const identifier = editId
         ? editId
-        : `${crowdfundBase}${sanitizeTitle.slice(0, 30)}_${id}`;
+        : `${CROWDFUND_BASE}${sanitizeTitle.slice(0, 30)}_${id}`;
       const crowdfundObjectToBase64 = await objectToBase64(crowdfundObject);
       // Description is obtained from raw data
       const requestBody2: any = {
