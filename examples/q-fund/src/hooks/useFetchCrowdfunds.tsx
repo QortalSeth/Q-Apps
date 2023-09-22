@@ -1,14 +1,14 @@
-import React from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import React from "react";
+import { useDispatch, useSelector } from "react-redux";
 import {
   addToHashMap,
   upsertCrowdfunds,
   Crowdfund,
-} from '../state/features/crowdfundSlice';
+} from "../state/features/crowdfundSlice";
 
-import { RootState } from '../state/store';
-import { fetchAndEvaluateCrowdfunds } from '../utils/fetchCrowdfunds';
-import { crowdfundBase } from '../constants';
+import { RootState } from "../state/store";
+import { fetchAndEvaluateCrowdfunds } from "../utils/fetchCrowdfunds";
+import { CROWDFUND_BASE } from "../constants";
 
 export const useFetchCrowdfunds = () => {
   const dispatch = useDispatch();
@@ -56,11 +56,11 @@ export const useFetchCrowdfunds = () => {
     try {
       const offset = crowdfunds.length;
       const listLimit = 20;
-      const url = `/arbitrary/resources/search?mode=ALL&service=DOCUMENT&query=${crowdfundBase}&limit=${listLimit}&includemetadata=false&reverse=true&excludeblocked=true&exactmatchnames=true&offset=${offset}`;
+      const url = `/arbitrary/resources/search?mode=ALL&service=DOCUMENT&query=${CROWDFUND_BASE}&limit=${listLimit}&includemetadata=false&reverse=true&excludeblocked=true&exactmatchnames=true&offset=${offset}`;
       const response = await fetch(url, {
-        method: 'GET',
+        method: "GET",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
       });
       const responseData = await response.json();

@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useState } from "react";
 import {
   Box,
   Button,
@@ -8,26 +8,37 @@ import {
   DialogTitle,
   Input,
   InputAdornment,
-  InputLabel,
   Tooltip,
+  useTheme,
 } from "@mui/material";
 import { useDispatch } from "react-redux";
-import Select, { SelectChangeEvent } from "@mui/material/Select";
 import Portal from "../Portal";
-import QORT from "../../../assets/img/qort.png";
 import { setNotification } from "../../../state/features/notificationsSlice";
-import { CrowdfundPageDonateButton } from "./Donate-styles";
+import {
+  CrowdfundPageDonateButton,
+  DonateModalCol,
+  DonateModalLabel,
+} from "./Donate-styles";
+import { QortalSVG } from "../../../assets/svgs/QortalSVG";
+
 interface DonateProps {
   atAddress: string;
+  ATDonationPossible: boolean;
   onSubmit: () => void;
   onClose: () => void;
 }
 
-export const Donate = ({ onSubmit, onClose, atAddress }: DonateProps) => {
+export const Donate = ({
+  onSubmit,
+  onClose,
+  atAddress,
+  ATDonationPossible,
+}: DonateProps) => {
+  const dispatch = useDispatch();
+  const theme = useTheme();
+
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [amount, setAmount] = useState<number>(0);
-
-  const dispatch = useDispatch();
 
   const resetValues = () => {
     setAmount(0);
@@ -76,16 +87,6 @@ export const Donate = ({ onSubmit, onClose, atAddress }: DonateProps) => {
     }
   };
 
-  const getLogo = (coin: string) => {
-    switch (coin) {
-      case "QORT":
-        return QORT;
-      default:
-        "";
-      // code block
-    }
-  };
-
   return (
     <Box
       sx={{
@@ -104,9 +105,12 @@ export const Donate = ({ onSubmit, onClose, atAddress }: DonateProps) => {
             gap: 1,
             cursor: "pointer",
           }}
-          onClick={() => setIsOpen(prev => !prev)}
         >
-          <CrowdfundPageDonateButton variant="contained">
+          <CrowdfundPageDonateButton
+            onClick={() => setIsOpen(prev => !prev)}
+            disabled={!ATDonationPossible}
+            variant="contained"
+          >
             Donate Now
           </CrowdfundPageDonateButton>
         </Box>
@@ -121,40 +125,33 @@ export const Donate = ({ onSubmit, onClose, atAddress }: DonateProps) => {
           >
             <DialogTitle id="alert-dialog-title"></DialogTitle>
             <DialogContent>
-              <Box
-                sx={{
-                  width: "300px",
-                  display: "flex",
-                  justifyContent: "center",
-                }}
-              >
-                <Box>
-                  <InputLabel htmlFor="standard-adornment-amount">
-                    Amount
-                  </InputLabel>
-                  <Input
-                    id="standard-adornment-amount"
-                    type="number"
-                    value={amount}
-                    onChange={e => setAmount(+e.target.value)}
-                    startAdornment={
-                      <InputAdornment position="start">
-                        <img
-                          style={{
-                            height: "15px",
-                            width: "15px",
-                          }}
-                          src={getLogo("QORT")}
-                        />
-                      </InputAdornment>
-                    }
-                  />
-                </Box>
-              </Box>
+              <DonateModalCol>
+                <DonateModalLabel htmlFor="standard-adornment-amount">
+                  Amount
+                </DonateModalLabel>
+                <Input
+                  style={{ fontFamily: "Mulish" }}
+                  id="standard-adornment-amount"
+                  type="number"
+                  value={amount}
+                  onChange={e => setAmount(+e.target.value)}
+                  startAdornment={
+                    <InputAdornment position="start">
+                      <QortalSVG
+                        height="20px"
+                        width="20px"
+                        color={theme.palette.text.primary}
+                      />
+                    </InputAdornment>
+                  }
+                />
+              </DonateModalCol>
             </DialogContent>
             <DialogActions>
               <Button
-                variant="contained"
+                variant="outlined"
+                color="error"
+                style={{ color: "#c92727ff" }}
                 onClick={() => {
                   setIsOpen(false);
                   resetValues();

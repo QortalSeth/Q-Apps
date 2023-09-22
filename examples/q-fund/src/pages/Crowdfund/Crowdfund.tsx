@@ -8,14 +8,14 @@ import React, {
 import { useNavigate, useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../state/store";
-import { useTheme } from "@mui/material";
+import { CircularProgress, Typography, useTheme } from "@mui/material";
 import AttachFileIcon from "@mui/icons-material/AttachFile";
 import DownloadIcon from "@mui/icons-material/Download";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { DisplayHtml } from "../../components/common/DisplayHtml";
 import FileElement from "../../components/common/FileElement";
 import { setIsLoadingGlobal } from "../../state/features/globalSlice";
-import { crowdfundBase, updateBase } from "../../constants";
+import { CROWDFUND_BASE, TEST_REVIEW_BASE, UPDATE_BASE } from "../../constants";
 import { addToHashMap } from "../../state/features/crowdfundSlice";
 import {
   CrowdfundDescriptionRow,
@@ -33,6 +33,10 @@ import {
   CrowdfundSubTitleRow,
   CoverImage,
   BackToHomeButton,
+  CrowdfundStatusRow,
+  RatingContainer,
+  StyledRating,
+  NoReviewsFont,
 } from "../../components/Crowdfund/Crowdfund-styles";
 import AudioPlayer from "../../components/common/AudioPlayer";
 import { NewCrowdfund } from "../../components/Crowdfund/NewCrowdfund";
@@ -50,6 +54,12 @@ import {
   PlayerBox,
 } from "./Update-styles";
 import CoverImageDefault from "../../assets/images/CoverImageDefault.webp";
+import { setNotification } from "../../state/features/notificationsSlice";
+import { objectToBase64 } from "../../utils/toBase64";
+import { useFetchCrowdfundStatus } from "../../hooks/useFetchCrowdfundStatus";
+import { CrowdfundLoader } from "./CrowdfundLoader";
+import { ReusableModalStyled } from "../../components/common/Reviews/QFundOwnerReviews-styles";
+import { QFundOwnerReviews } from "../../components/common/Reviews/QFundOwnerReviews";
 
 export const Crowdfund = () => {
   const theme = useTheme();
@@ -61,6 +71,10 @@ export const Crowdfund = () => {
     (state: RootState) => state.global.userAvatarHash
   );
 
+  const hashMapCrowdfunds = useSelector(
+    (state: RootState) => state.crowdfund.hashMapCrowdfunds
+  );
+
   const [crowdfundData, setCrowdfundData] = useState<any>(null);
   const [currentAtInfo, setCurrentAtInfo] = useState<any>(null);
   const [loadingAtInfo, setLoadingAtInfo] = useState<boolean>(false);
@@ -68,25 +82,26 @@ export const Crowdfund = () => {
   const [updatesList, setUpdatesList] = useState<any[]>([]);
   const [atAddressBalance, setAtAddressBalance] = useState<any>(null);
   const [nodeInfo, setNodeInfo] = useState<any>(null);
+  const [openQFundOwnerReviews, setOpenQFundOwnerReviews] =
+    useState<boolean>(false);
+  const [ownerAvatar, setOwnerAvatar] = useState<string | null>(null);
+  const [averageRatingLoader, setAverageRatingLoader] =
+    useState<boolean>(false);
+  const [averageOwnerRating, setAverageOwnerRating] = useState<number | null>(
+    null
+  );
+  const [ownerRegisteredNumber, setOwnerRegisteredNumber] = useState<
+    number | null
+  >(null);
 
   const interval = useRef<any>(null);
   const intervalBalance = useRef<any>(null);
   const endDateRef = useRef<any>(null);
 
+  // Get the AT Address from the crowdfundData
   const atAddress = useMemo(() => {
     return crowdfundData?.deployedAT?.aTAddress || null;
   }, [crowdfundData]);
-  const hashMapCrowdfunds = useSelector(
-    (state: RootState) => state.crowdfund.hashMapCrowdfunds
-  );
-
-  const avatarUrl = useMemo(() => {
-    let url = "";
-    if (name && userAvatarHash[name]) {
-      url = userAvatarHash[name];
-    }
-    return url;
-  }, [userAvatarHash, name]);
 
   const endDate = useMemo(() => {
     if (!currentAtInfo?.sleepUntilHeight || !nodeInfo?.height) return null;
@@ -169,7 +184,7 @@ export const Crowdfund = () => {
         dispatch(setIsLoadingGlobal(true));
 
         // Get the resource location here
-        const url = `/arbitrary/resources/search?mode=ALL&service=DOCUMENT&query=${crowdfundBase}&limit=1&includemetadata=true&reverse=true&excludeblocked=true&name=${name}&exactmatchnames=true&offset=0&identifier=${id}`;
+        const url = `/arbitrary/resources/search?mode=ALL&service=DOCUMENT&query=${CROWDFUND_BASE}&limit=1&includemetadata=true&reverse=true&excludeblocked=true&name=${name}&exactmatchnames=true&offset=0&identifier=${id}`;
         const response = await fetch(url, {
           method: "GET",
           headers: {
@@ -229,7 +244,7 @@ export const Crowdfund = () => {
   const getUpdates = React.useCallback(async (name: string, id: string) => {
     try {
       if (!name || !id) return;
-      const url = `/arbitrary/resources/search?mode=ALL&service=DOCUMENT&query=${updateBase}${id.slice(
+      const url = `/arbitrary/resources/search?mode=ALL&service=DOCUMENT&query=${UPDATE_BASE}${id.slice(
         -12
       )}&limit=0&includemetadata=false&reverse=true&excludeblocked=true&name=${name}&exactmatchnames=true&offset=0`;
       const response = await fetch(url, {
@@ -244,6 +259,32 @@ export const Crowdfund = () => {
       console.log(error);
     }
   }, []);
+
+  const QFundOwnerAvatarUrl = useCallback(async () => {
+    try {
+      if (name) {
+        const url = await qortalRequest({
+          action: "GET_QDN_RESOURCE_URL",
+          name: name,
+          service: "THUMBNAIL",
+          identifier: "qortal_avatar",
+        });
+        console.log({ url });
+        setOwnerAvatar(url);
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  }, [name]);
+
+  // Get the Q-Fund Owner's Avatar
+  useEffect(() => {
+    QFundOwnerAvatarUrl();
+  }, [name]);
+
+  // Custom hook to get the AT Status, AT Achieved or Not, AT Amount, and AT Loading Status
+  const { ATDeployed, ATCompleted, ATLoadingStatus, ATStatus, ATAmount } =
+    useFetchCrowdfundStatus(crowdfundData, atAddress);
 
   // We get the crowdfund's updates if hashMapCrowdfund changes. This changes when you publish a new update or modify an existing update.
   useEffect(() => {
@@ -307,6 +348,69 @@ export const Crowdfund = () => {
     [getAtAddressInfo]
   );
 
+  // Get 100 store reviews from QDN and calculate the average review.
+  const getOwnerAverageReview = useCallback(async () => {
+    if (!id || !name) return;
+    try {
+      let ownerNumber: number;
+      setAverageRatingLoader(true);
+      const shortQFundOwner = name.slice(0, 15);
+      const QFundOwnerRegistration = await qortalRequest({
+        action: "GET_NAME_DATA",
+        name: name,
+      });
+      // Get the owner's name registered number to be used as a unique variable when creating reviews. This will be passed down to the <AddReview /> component
+      if (Object.keys(QFundOwnerRegistration).length > 0) {
+        ownerNumber = QFundOwnerRegistration.registered;
+        setOwnerRegisteredNumber(ownerNumber);
+      } else {
+        throw new Error("No registered number found for QFund owner name");
+      }
+      // Those first three constants will remain the same no matter which crowdfund the owner made
+      const query = `${TEST_REVIEW_BASE}-${shortQFundOwner}-${ownerNumber}`;
+      // Since it the url includes /resources, you know you're fetching the resources and not the raw data
+      const url = `/arbitrary/resources/search?service=DOCUMENT&query=${query}&limit=100&includemetadata=false&mode=LATEST&reverse=true`;
+      const response = await fetch(url, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      const responseData = await response.json();
+      if (responseData.length === 0) {
+        setAverageOwnerRating(null);
+        return;
+      }
+      // Modify resource into data that is more easily used on the front end
+      const storeRatingsArray = responseData.map((review: any) => {
+        const splitIdentifier = review.identifier.split("-");
+        const rating = Number(splitIdentifier[splitIdentifier.length - 1]) / 10;
+        return rating;
+      });
+
+      // Calculate average rating of the store
+      let averageRating =
+        storeRatingsArray.reduce((acc: number, curr: number) => {
+          return acc + curr;
+        }, 0) / storeRatingsArray.length;
+
+      averageRating = Math.ceil(averageRating * 2) / 2;
+
+      setAverageOwnerRating(averageRating);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setAverageRatingLoader(false);
+    }
+  }, [id, name]);
+
+  // Get average owner rating when id and name is available, and only if the storeId is different from the currentViewedStore when it's not your store, or if storeId is different from currentStore when it is your store. Do this to avoid unnecessary QDN calls.
+  useEffect(() => {
+    if (id && name) {
+      getOwnerAverageReview();
+    }
+  }, [id, name]);
+
   useEffect(() => {
     if (!atAddress) return;
     checkBalance(atAddress);
@@ -317,6 +421,81 @@ export const Crowdfund = () => {
       }
     };
   }, [checkBalance, atAddress]);
+
+  // Check if the crowdfund has been modified after its creation. If it has, we prevent the user from donating to the Q-Fund and redirect to homepage.
+  useEffect(() => {
+    if (crowdfundData?.created && crowdfundData?.updated) {
+      if (crowdfundData?.created === crowdfundData?.updated) {
+        return;
+      } else {
+        dispatch(
+          setNotification({
+            msg: "Q-Fund has been modified after its creation. Please be aware of this!",
+            alertType: "error",
+          })
+        );
+      }
+    }
+  }, [crowdfundData?.created, crowdfundData?.updated]);
+
+  const updateCrowdFundFunc = async () => {
+    if (!name || !id) return;
+    try {
+      const crowdfundObj = {
+        ...crowdfundData,
+        title: "Updated Q-Fund",
+      };
+
+      delete crowdfundObj.updated;
+      const crowdfundObjToBase64 = await objectToBase64(crowdfundObj);
+      const resourceResponse = await qortalRequest({
+        action: "PUBLISH_QDN_RESOURCE",
+        name: name,
+        service: "DOCUMENT",
+        data64: crowdfundObjToBase64,
+        title: "Updated Q-Fund",
+        identifier: id,
+      });
+
+      await new Promise<void>((res, rej) => {
+        setTimeout(() => {
+          res();
+        }, 1000);
+      });
+
+      dispatch(
+        setNotification({
+          msg: "Crowdfund updated!",
+          alertType: "success",
+        })
+      );
+    } catch (error: any) {
+      let notificationObj: any = null;
+      if (typeof error === "string") {
+        notificationObj = {
+          msg: error || "Failed to update blog",
+          alertType: "error",
+        };
+      } else if (typeof error?.error === "string") {
+        notificationObj = {
+          msg: error?.error || "Failed to update blog",
+          alertType: "error",
+        };
+      } else {
+        notificationObj = {
+          msg: error?.message || "Failed to update blog",
+          alertType: "error",
+        };
+      }
+      if (!notificationObj) return;
+      dispatch(setNotification(notificationObj));
+      if (error instanceof Error) {
+        throw new Error(error.message);
+      } else {
+        throw new Error("An unknown error occurred");
+      }
+    }
+  };
 
   if (!crowdfundData) return null;
   return (
@@ -333,10 +512,20 @@ export const Crowdfund = () => {
           >
             Back To Homepage
           </BackToHomeButton>
+          <BackToHomeButton
+            style={{ backgroundColor: "red", left: "200px" }}
+            color="error"
+            variant="outlined"
+            onClick={() => {
+              updateCrowdFundFunc();
+            }}
+          >
+            Update Crowdfund
+          </BackToHomeButton>
         </span>
         <MainCol item xs={12} sm={12} md={6} gap={"15px"}>
           <CrowdfundTitleRow>
-            {!avatarUrl ? (
+            {!ownerAvatar ? (
               <AccountCircleSVG
                 color={theme.palette.text.primary}
                 width="80"
@@ -344,7 +533,7 @@ export const Crowdfund = () => {
               />
             ) : (
               <img
-                src={avatarUrl}
+                src={ownerAvatar}
                 alt="User Avatar"
                 width="80"
                 height="80"
@@ -356,33 +545,83 @@ export const Crowdfund = () => {
             )}
             <CrowdfundPageTitle>{crowdfundData?.title}</CrowdfundPageTitle>
           </CrowdfundTitleRow>
+          {averageRatingLoader ? (
+            <CircularProgress />
+          ) : (
+            <RatingContainer
+              onClick={() => {
+                setOpenQFundOwnerReviews(true);
+              }}
+            >
+              {!averageOwnerRating ? (
+                <NoReviewsFont>
+                  No reviews yet. Be the first to review this Q-Fund!
+                </NoReviewsFont>
+              ) : (
+                <StyledRating
+                  precision={0.5}
+                  value={averageOwnerRating}
+                  readOnly
+                />
+              )}
+            </RatingContainer>
+          )}
+          {ATLoadingStatus ? (
+            // Loader reusable component with status text
+            <CrowdfundLoader status={ATLoadingStatus} />
+          ) : (
+            <CrowdfundStatusRow
+              style={{
+                color:
+                  ATStatus === "Q-Fund Being Deployed"
+                    ? "#F2A74B"
+                    : ATStatus === "Q-Fund Goal Achieved"
+                    ? "#0aba42"
+                    : ATStatus === "Q-Fund Goal Not Achieved"
+                    ? "#bc0f0f"
+                    : "#f8fd65",
+
+                border:
+                  ATStatus === "Q-Fund Being Deployed"
+                    ? "1px solid #F2A74B"
+                    : ATStatus === "Q-Fund Goal Achieved"
+                    ? "1px solid #0aba42"
+                    : ATStatus === "Q-Fund Goal Not Achieved"
+                    ? "1px solid #bc0f0f"
+                    : "1px solid #f8fd65",
+              }}
+            >{`Status: ${ATStatus}`}</CrowdfundStatusRow>
+          )}
           <CrowdfundDescriptionRow>
             {crowdfundData?.description}
           </CrowdfundDescriptionRow>
-          <AboutMyCrowdfund>About my Q-Fund</AboutMyCrowdfund>
+          <AboutMyCrowdfund>About My Q-Fund</AboutMyCrowdfund>
           <CrowdfundInlineContentRow>
             <DisplayHtml html={crowdfundData?.inlineContent} />
           </CrowdfundInlineContentRow>
         </MainCol>
         <MainCol item xs={12} sm={12} md={6} gap={"17px"}>
-          {crowdfundData?.deployedAT?.goalValue && !isNaN(atAddressBalance) && (
-            <CrowdfundProgress
-              raised={atAddressBalance}
-              goal={crowdfundData?.deployedAT?.goalValue}
-            />
-          )}
-          <Countdown
-            loadingAtInfo={loadingAtInfo}
-            endDate={endDate}
-            blocksRemaning={blocksRemaning}
-          />
-          {name === username && (
-            <NewUpdate crowdfundId={id} crowdfundName={name || ""} />
-          )}
-          {/* Ensure the AT is still active to display the donate button */}
-          {crowdfundData?.deployedAT?.aTAddress &&
-            (endDate || blocksRemaning) && (
+          {/* Ensure the AT is still active and not being deployed to display the donate button */}
+          {ATLoadingStatus ? (
+            // Loader reusable component with status text
+            <CrowdfundLoader status={ATLoadingStatus} />
+          ) : ATStatus === "Q-Fund Being Deployed" ? null : (
+            <>
+              {crowdfundData?.deployedAT?.goalValue &&
+                !isNaN(atAddressBalance) && (
+                  <CrowdfundProgress
+                    achieved={ATAmount || null}
+                    raised={atAddressBalance}
+                    goal={crowdfundData?.deployedAT?.goalValue}
+                  />
+                )}
+              <Countdown
+                loadingAtInfo={loadingAtInfo}
+                endDate={endDate}
+                blocksRemaning={blocksRemaning}
+              />
               <Donate
+                ATDonationPossible={ATDeployed && !ATCompleted}
                 atAddress={crowdfundData?.deployedAT?.aTAddress}
                 onSubmit={() => {
                   return;
@@ -391,27 +630,8 @@ export const Crowdfund = () => {
                   return;
                 }}
               />
-            )}
-          <div style={{ width: "90%" }}>
-            {updatesList.map(update => {
-              return (
-                <CrowdfundAccordion key={update.identifier}>
-                  <CrowdfundAccordionSummary
-                    expandIcon={<ExpandMoreIcon />}
-                    aria-controls="panel1a-content"
-                    id="panel1a-header"
-                  >
-                    <CrowdfundAccordionFont>
-                      Update for {moment(update.created).format("LLL")}
-                    </CrowdfundAccordionFont>
-                  </CrowdfundAccordionSummary>
-                  <CrowdfundAccordionDetails>
-                    <Update updateObj={update} />
-                  </CrowdfundAccordionDetails>
-                </CrowdfundAccordion>
-              );
-            })}
-          </div>
+            </>
+          )}
           <CrowdfundSubTitleRow>
             {crowdfundData?.attachments?.length > 0 && (
               <CrowdfundSubTitle>Attachments</CrowdfundSubTitle>
@@ -420,17 +640,16 @@ export const Crowdfund = () => {
           {crowdfundData?.attachments?.map(attachment => {
             if (attachment?.service === "AUDIO")
               return (
-                <>
-                  <AudioPlayer
-                    fullFile={attachment}
-                    filename={attachment.filename}
-                    name={attachment.name}
-                    identifier={attachment.identifier}
-                    service="AUDIO"
-                    jsonId={crowdfundData?.id}
-                    user={crowdfundData?.user}
-                  />
-                </>
+                <AudioPlayer
+                  key={attachment.identifier}
+                  fullFile={attachment}
+                  filename={attachment.filename}
+                  name={attachment.name}
+                  identifier={attachment.identifier}
+                  service="AUDIO"
+                  jsonId={crowdfundData?.id}
+                  user={crowdfundData?.user}
+                />
               );
 
             return (
@@ -466,12 +685,62 @@ export const Crowdfund = () => {
               </>
             );
           })}
+          {name === username && (
+            <NewUpdate crowdfundId={id} crowdfundName={name || ""} />
+          )}
+          <div style={{ width: "90%" }}>
+            {updatesList.map(update => {
+              return (
+                <CrowdfundAccordion key={update.identifier}>
+                  <CrowdfundAccordionSummary
+                    expandIcon={<ExpandMoreIcon />}
+                    aria-controls="panel1a-content"
+                    id="panel1a-header"
+                  >
+                    <CrowdfundAccordionFont>
+                      Update for {moment(update.created).format("LLL")}
+                    </CrowdfundAccordionFont>
+                  </CrowdfundAccordionSummary>
+                  <CrowdfundAccordionDetails>
+                    <Update updateObj={update} />
+                  </CrowdfundAccordionDetails>
+                </CrowdfundAccordion>
+              );
+            })}
+          </div>
         </MainCol>
       </MainContainer>
+      {/* Comments section */}
       <CrowdfundSubTitleRow style={{ marginTop: "85px" }}>
         <CrowdfundSubTitle>Comments</CrowdfundSubTitle>
       </CrowdfundSubTitleRow>
       <CommentSection postId={id || ""} postName={name || ""} />
+      <ReusableModalStyled
+        id={"qfund-owner-reviews"}
+        customStyles={{
+          width: "96%",
+          maxWidth: 1200,
+          height: "95vh",
+          backgroundColor:
+            theme.palette.mode === "light" ? "#e8e8e8" : "#32333c",
+          position: "relative",
+          padding: "25px 40px",
+          borderRadius: "5px",
+          outline: "none",
+          overflowY: "auto",
+          overflowX: "hidden",
+        }}
+        open={openQFundOwnerReviews}
+      >
+        <QFundOwnerReviews
+          QFundId={id || ""}
+          averageOwnerRating={averageOwnerRating || null}
+          QFundOwnerRegisteredNumber={ownerRegisteredNumber || null}
+          QFundOwner={name || ""}
+          QFundOwnerAvatar={ownerAvatar || ""}
+          setOpenQFundOwnerReviews={setOpenQFundOwnerReviews}
+        />
+      </ReusableModalStyled>
     </>
   );
 };

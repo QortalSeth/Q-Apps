@@ -164,21 +164,21 @@ export const Update = ({ updateObj }) => {
             {crowdfundData?.attachments?.map(attachment => {
               if (attachment?.service === "AUDIO")
                 return (
-                  <>
-                    <AudioPlayer
-                      fullFile={attachment}
-                      filename={attachment.filename}
-                      name={attachment.name}
-                      identifier={attachment.identifier}
-                      service="AUDIO"
-                      jsonId={crowdfundData?.id}
-                      user={crowdfundData?.user}
-                    />
-                  </>
+                  <AudioPlayer
+                    key={attachment.identifier}
+                    fullFile={attachment}
+                    filename={attachment.filename}
+                    name={attachment.name}
+                    identifier={attachment.identifier}
+                    service="AUDIO"
+                    jsonId={crowdfundData?.id}
+                    user={crowdfundData?.user}
+                  />
                 );
 
               return (
                 <PlayerBox
+                  key={attachment.identifier}
                   sx={{
                     minHeight: "55px",
                   }}

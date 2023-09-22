@@ -24,7 +24,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { setNotification } from "../../state/features/notificationsSlice";
 import { objectToBase64 } from "../../utils/toBase64";
 import { RootState } from "../../state/store";
-import { attachmentBase, updateBase } from "../../constants";
+import { ATTACHMENT_BASE, UPDATE_BASE } from "../../constants";
 import dayjs from "dayjs";
 import isBetween from "dayjs/plugin/isBetween"; // Import the plugin
 import duration from "dayjs/plugin/duration";
@@ -155,7 +155,7 @@ export const NewUpdate = ({
         }
         const id = uid();
         const id2 = uid();
-        const identifier = `${attachmentBase}${id}_${id2}`;
+        const identifier = `${ATTACHMENT_BASE}${id}_${id2}`;
         const fileExtension = attachment?.name?.split(".")?.pop();
         if (!fileExtension) {
           throw new Error("One of your attachments does not have an extension");
@@ -192,7 +192,7 @@ export const NewUpdate = ({
 
       const identifier = editId
         ? editId
-        : `${updateBase}${crowdfundId?.slice(-12)}_${id}`;
+        : `${UPDATE_BASE}${crowdfundId?.slice(-12)}_${id}`;
       const crowdfundObjectToBase64 = await objectToBase64(crowdfundObject);
       const requestBody2: any = {
         action: "PUBLISH_QDN_RESOURCE",

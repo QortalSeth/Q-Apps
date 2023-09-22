@@ -41,6 +41,8 @@ interface QortalRequestOptions {
   creationBytes?: string
   type?: string
   assetId?: number
+  txType?: string[]
+  confirmationStatus?: string
 }
 
 declare function qortalRequest(options: QortalRequestOptions): Promise<any>
