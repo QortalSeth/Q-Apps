@@ -131,8 +131,11 @@ export const Crowdfund = () => {
           "Content-Type": "application/json",
         },
       });
-      const responseDataSearch = await response.json();
-      setCurrentAtInfo(responseDataSearch);
+      console.log(response);
+      if (response.status === 200) {
+        const responseDataSearch = await response.json();
+        setCurrentAtInfo(responseDataSearch);
+      }
     } catch (error) {
       console.log(error);
     } finally {
@@ -555,7 +558,7 @@ export const Crowdfund = () => {
             >
               {!averageOwnerRating ? (
                 <NoReviewsFont>
-                  No reviews yet. Be the first to review this Q-Fund!
+                  No reviews yet. Be the first to review this Q-Fund owner!
                 </NoReviewsFont>
               ) : (
                 <StyledRating
@@ -605,7 +608,7 @@ export const Crowdfund = () => {
           {ATLoadingStatus ? (
             // Loader reusable component with status text
             <CrowdfundLoader status={ATLoadingStatus} />
-          ) : ATStatus === "Q-Fund Being Deployed" ? null : (
+          ) : ATStatus === "Q-Fund Being Deployed" || !currentAtInfo ? null : (
             <>
               {crowdfundData?.deployedAT?.goalValue &&
                 !isNaN(atAddressBalance) && (

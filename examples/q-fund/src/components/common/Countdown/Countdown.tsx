@@ -31,7 +31,11 @@ export const Countdown: React.FC<CountdownProps> = ({
     number | null
   >(null);
 
+  console.log({ endDate, blocksRemaning, loadingAtInfo });
+
+  // useEffect that runs the countdown timer
   useEffect(() => {
+    let intervalId: number | null = null;
     const updateCountdown = () => {
       const now = moment();
       const duration = moment.duration(endDate.diff(now));
@@ -40,7 +44,7 @@ export const Countdown: React.FC<CountdownProps> = ({
         setTimeRemainingDays(0);
         setTimeRemainingHours(0);
         setTimeRemainingMinutes(0);
-        clearInterval(intervalId);
+        if (intervalId) clearInterval(intervalId);
         return;
       }
 
@@ -58,10 +62,12 @@ export const Countdown: React.FC<CountdownProps> = ({
     if (!endDate || !blocksRemaning) return;
 
     updateCountdown();
-    const intervalId = setInterval(updateCountdown, 1000);
+    intervalId = setInterval(updateCountdown, 1000);
 
     return () => {
-      clearInterval(intervalId);
+      if (intervalId) {
+        clearInterval(intervalId);
+      }
     };
   }, [blocksRemaning, endDate]);
 
