@@ -19,7 +19,6 @@ export const useFetchCrowdfundStatus = (
 
   // Fetch AT Deployment Status using the AT Address
   const fetchQFundDeploymentStatus = useCallback(async () => {
-    console.log(atAddress, "here500");
     try {
       if (!atAddress) return;
       const res = await qortalRequest({
@@ -53,9 +52,8 @@ export const useFetchCrowdfundStatus = (
         const checkStatus = async () => {
           const ATFound = await fetchQFundDeploymentStatus();
           if (ATFound?.length > 0) {
-            clearInterval(intervalId); // Stop the polling if ATFound becomes available
+            clearInterval(intervalId); // Stop the polling if AT becomes available
           } else if (Date.now() - startTime >= maxTime) {
-            clearInterval(intervalId); // Stop the polling if maxTime is exceeded
             setATDeployed(false);
             setATLoadingStatus("");
           }
