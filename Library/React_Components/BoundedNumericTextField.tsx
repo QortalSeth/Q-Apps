@@ -4,9 +4,17 @@ import {
   TextField,
   TextFieldProps,
 } from "@mui/material";
+import React, { forwardRef, useImperativeHandle, useState } from "react";
+import { setNumberWithinBounds } from "../Utility_Functions/Numbers/Numbers";
+import {
+  isAllZerosNum,
+  isFloatNum,
+  isIntegerNum,
+  removeTrailingZeros,
+  sigDigitsExceeded,
+} from "../Utility_Functions/Numbers/StringNumbers";
 import AddIcon from "@mui/icons-material/Add";
 import RemoveIcon from "@mui/icons-material/Remove";
-import React, { forwardRef, useImperativeHandle, useState } from "react";
 
 type eventType = React.ChangeEvent<HTMLInputElement>;
 type BoundedNumericTextFieldProps = {
@@ -17,11 +25,11 @@ type BoundedNumericTextFieldProps = {
   allowNegatives?: boolean;
   onChange?: (e: eventType) => void;
   initialValue?: string;
-  sigDigits?: number;
+  maxSigDigits?: number;
 } & TextFieldProps;
 
-export type NumericTextFieldRef = {
-  getTextFieldValue: () => string;
+export type BoundedNumericTextFieldRef = {
+  getValue: () => string;
 };
 
 export const BoundedNumericTextField = forwardRef(
@@ -34,76 +42,61 @@ export const BoundedNumericTextField = forwardRef(
       allowNegatives = false,
       onChange,
       initialValue,
-      sigDigits = 6,
+      maxSigDigits = 6,
       ...props
     }: BoundedNumericTextFieldProps,
-    ref?: React.Ref<NumericTextFieldRef>
+    ref?: React.Ref<BoundedNumericTextFieldRef>
   ) => {
     const [textFieldValue, setTextFieldValue] = useState<string>(
       initialValue || ""
     );
 
-    const isInteger = /^-?[0-9]+$/;
-    const isFloatNum = /^-?[0-9]*\.?[0-9]*$/;
-    const isAllZerosNum = /^0*\.?0*$/;
-
     useImperativeHandle(
       ref,
       () => ({
-        getTextFieldValue: () => {
+        getValue: () => {
           return textFieldValue;
         },
       }),
       [textFieldValue]
     );
 
-    const isEmpty = (value: string) => {
-      return value === "" || value == Number.isNaN(Number(value));
+    const isEmptyNumber = (value: string) => {
+      const valueIsEmptyString = value === "";
+      const valueIsNaN = value === Number.isNaN(Number(value));
+      return valueIsEmptyString || valueIsNaN;
     };
 
     const skipMinMaxCheck = (value: string) => {
       const lastIndexIsDecimal = value.charAt(value.length - 1) === ".";
-
+      const isEmpty = isEmptyNumber(value);
       const isAllZeros = isAllZerosNum.test(value);
+      const isInteger = isIntegerNum.test(value);
       // skipping minMax on all 0s allows values less than 1 to be entered
 
-      return lastIndexIsDecimal || isEmpty(value) || isAllZeros;
-    };
-
-    const setValueInBounds = (num: number) => {
-      if (num > maxValue) return maxValue;
-      if (num < minValue) return minValue;
-      return num;
+      return lastIndexIsDecimal || isEmpty || (isAllZeros && !isInteger);
     };
 
     const setMinMaxValue = (value: string): string => {
       if (skipMinMaxCheck(value)) return value;
       const valueNum = Number(value);
 
-      const boundedNum = setValueInBounds(valueNum);
+      const boundedNum = setNumberWithinBounds(valueNum, minValue, maxValue);
 
       const numberInBounds = boundedNum === valueNum;
       return numberInBounds ? value : boundedNum.toString();
     };
 
-    const isTooManySignificantDigits = (value: string) => {
-      if (isInteger.test(value)) return false;
-
-      const decimalSplit = value.split(".");
-      const decimalDigits = decimalSplit[decimalSplit.length - 1].length;
-      return decimalDigits > sigDigits;
-    };
-
     const filterTypes = (value: string) => {
       if (allowDecimals === false) value = value.replace(".", "");
       if (allowNegatives === false) value = value.replace("-", "");
-      if (isTooManySignificantDigits(value)) {
+      if (sigDigitsExceeded(value, maxSigDigits)) {
         value = value.substring(0, value.length - 1);
       }
       return value;
     };
     const filterValue = (value: string) => {
-      if (isEmpty(value)) return value;
+      if (isEmptyNumber(value)) return value;
       value = filterTypes(value);
       if (isFloatNum.test(value)) {
         return setMinMaxValue(value);
@@ -117,19 +110,21 @@ export const BoundedNumericTextField = forwardRef(
       e.target.value = newValue;
       if (onChange) onChange(e);
     };
-    const removeTrailingZeros = (s: string) => {
-      return Number(s).toString();
-    };
 
-    const changeValueWithIncDecButton = (changeAmount: number) => {
+    const changeValueWithIncDecButton = (
+      e: eventType,
+      changeAmount: number
+    ) => {
       const valueNum = Number(textFieldValue);
       const newValue = setMinMaxValue((valueNum + changeAmount).toString());
+      e.target.value = newValue;
+      if (onChange) onChange(e);
       setTextFieldValue(newValue);
     };
 
     const formatValueOnBlur = (e: eventType) => {
       let value = e.target.value;
-      if (isEmpty(value) || value === ".") {
+      if (isEmptyNumber(value) || value === ".") {
         setTextFieldValue("");
         return;
       }
@@ -142,22 +137,21 @@ export const BoundedNumericTextField = forwardRef(
     return (
       <TextField
         {...props}
-        InputProps={
-          addIconButtons
-            ? {
-                endAdornment: (
-                  <InputAdornment position="end">
-                    <IconButton onClick={() => changeValueWithIncDecButton(1)}>
-                      <AddIcon />{" "}
-                    </IconButton>
-                    <IconButton onClick={() => changeValueWithIncDecButton(-1)}>
-                      <RemoveIcon />{" "}
-                    </IconButton>
-                  </InputAdornment>
-                ),
-              }
-            : {}
-        }
+        InputProps={{
+          ...props?.InputProps,
+          endAdornment: addIconButtons ? (
+            <InputAdornment position="end">
+              <IconButton onClick={e => changeValueWithIncDecButton(e, 1)}>
+                <AddIcon />{" "}
+              </IconButton>
+              <IconButton onClick={e => changeValueWithIncDecButton(e, -1)}>
+                <RemoveIcon />{" "}
+              </IconButton>
+            </InputAdornment>
+          ) : (
+            {}
+          ),
+        }}
         onChange={e => listeners(e as eventType)}
         onBlur={e => {
           formatValueOnBlur(e as eventType);
