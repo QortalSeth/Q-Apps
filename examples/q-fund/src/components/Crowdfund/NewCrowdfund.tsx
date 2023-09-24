@@ -298,10 +298,6 @@ export const NewCrowdfund = ({ editId, editContent }: NewCrowdfundProps) => {
 
       requestBody.codeBytesBase64 = codeBytes;
       const creationBytes = await fetchPostRequest("/at/create", requestBody);
-      const decodedBuffer = bs58.decode(creationBytes);
-      // Convert Buffer to Uint8Array
-      const uint8Array = Uint8Array.from(decodedBuffer);
-      const signedBytes = Array.from(uint8Array).map(toSignedByte);
       const response = await qortalRequest({
         action: "DEPLOY_AT",
         creationBytes,
