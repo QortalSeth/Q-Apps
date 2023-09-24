@@ -118,7 +118,6 @@ export const NewCrowdfund = ({ editId, editContent }: NewCrowdfundProps) => {
     const differenceInMinutes = dayjs().diff(value, "minute");
     return differenceInMinutes * -1;
   }, [value]);
-  console.log({ editContent });
 
   // Define the type for your POST request body
   interface PostRequestBody {
@@ -160,32 +159,32 @@ export const NewCrowdfund = ({ editId, editContent }: NewCrowdfundProps) => {
   }
 
   const dataBytePlaceholder = [
-    0, 0, 0, 0, 0, 0, 0, 60, 0, 0, 0, 0, 61, -3, 36, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 15, 0, 0, 0, 0, 119, 53, -108, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 58, -72, -68, -80, 127, 99, 68, -76, 42, -80, 66, 80, -56,
-    106, 110, -117, 117, -45, -3, -69, -58, 86, -107, -110, 93, 0, 0, 0, 0, 0,
-    0, 0,
+    0, 0, 0, 0, 0, 0, 0, 58, 113, -123, -80, 21, -38, 49, -10, 3, 92, 116, -59,
+    -123, -65, 37, -86, -126, 45, -75, 38, 29, 0, 98, 12, 12, 0, 0, 0, 0, 0, 0,
+    0,
   ];
 
-  // Function to replace a value at a given position in the original array with an integer
-  function replaceValue(array, position, value) {
-    const buffer = new ArrayBuffer(8);
-    const view = new DataView(buffer);
-    view.setBigInt64(0, BigInt(value));
-    for (let i = 0; i < 8; i++) {
-      array[position + i] = view.getInt8(i);
-    }
+  function adjustByteValue(byteValue) {
+    return (byteValue + 256) % 256;
   }
 
-  function replaceValueWithFloat(array, position, value) {
+
+
+  function setLongValue(array, position, value) {
     const buffer = new ArrayBuffer(8);
     const view = new DataView(buffer);
-    view.setFloat64(0, value);
+
+    view.setUint32(0, Math.floor(value / 0x100000000));
+    view.setUint32(4, value >>> 0);
+
     for (let i = 0; i < 8; i++) {
-      array[position + i] = view.getInt8(i);
+      array[position + i] = view.getInt8(i) & 0xff; // Correctly handle the byte value
     }
   }
+ 
 
   // Function to replace a value at a given position in the original array with an array
   function replaceArraySlice(originalArray, position, newArray) {
@@ -218,19 +217,14 @@ export const NewCrowdfund = ({ editId, editContent }: NewCrowdfundProps) => {
 
   const createBytes = (goalAmount: number, blocks: number, address: string) => {
     try {
-      const uint8Array = base64ToUint8Array(codeBytes);
-      console.log(uint8Array);
       const newArray = [...dataBytePlaceholder];
-      // Replacing the values for addrSleepMinutes and addrGoalAmount
-      replaceValue(newArray, 0, blocks);
-      replaceValue(newArray, 8, goalAmount);
 
-      // Decoding the awardee address and replacing its value in the array
-      const decodedAwardeeAddress = bs58.decode(address);
+      setLongValue(newArray, 0, blocks);
+      const adjustedInput = goalAmount * 1e8;
+      setLongValue(newArray, 8, adjustedInput);
+      const decodedAwardeeAddress = bs58.decode(address).map(adjustByteValue);
       replaceArraySlice(newArray, 80, decodedAwardeeAddress);
-      console.log({ newArray });
       const byteArray: Uint8Array = new Uint8Array(newArray);
-      console.log({ byteArray });
       const encodedString: string = uint8ArrayToBase64(byteArray);
       return encodedString;
     } catch (error) {
@@ -290,7 +284,7 @@ export const NewCrowdfund = ({ editId, editContent }: NewCrowdfundProps) => {
         minActivationAmount: 0,
       };
       // CHANGE BACK AFTER TESTING
-      const blocksToGoal = 20;
+      const blocksToGoal = 15;
       // const differenceInMinutes = dayjs().diff(value, "minute");
       // const blocksToGoal = differenceInMinutes * -1;
       // if (blocksToGoal < 2880 || blocksToGoal > 43200)
@@ -301,16 +295,13 @@ export const NewCrowdfund = ({ editId, editContent }: NewCrowdfundProps) => {
         blocksToGoal,
         userAddress
       );
+
       requestBody.codeBytesBase64 = codeBytes;
       const creationBytes = await fetchPostRequest("/at/create", requestBody);
       const decodedBuffer = bs58.decode(creationBytes);
-
       // Convert Buffer to Uint8Array
       const uint8Array = Uint8Array.from(decodedBuffer);
       const signedBytes = Array.from(uint8Array).map(toSignedByte);
-      console.log(signedBytes);
-      console.log({ creationBytes });
-
       const response = await qortalRequest({
         action: "DEPLOY_AT",
         creationBytes,
