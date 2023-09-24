@@ -4,7 +4,6 @@ export const useFetchCrowdfundStatus = (
   crowdfundData: any,
   atAddress: string
 ) => {
-  console.log({ crowdfundData, atAddress });
   const [ATDeployed, setATDeployed] = useState<boolean>(false);
   const [ATCompleted, setATCompleted] = useState<boolean>(false);
   const [ATLoadingStatus, setATLoadingStatus] = useState<string>(
@@ -30,12 +29,38 @@ export const useFetchCrowdfundStatus = (
         reverse: true,
       });
       if (res?.length > 0) {
-        setATDeployed(true);
-        setATLoadingStatus("Verifying Q-Fund Completion Status...");
+        // Check if AT is sleeping and isn't finished yet
+        const url = `/at/${atAddress}`;
+        const response = await fetch(url, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+        if (response.status === 200) {
+          const responseDataSearch = await response.json();
+          if (
+            responseDataSearch?.sleepUntilHeight &&
+            !responseDataSearch?.isFinished
+          ) {
+            setATDeployed(true);
+            setATLoadingStatus("Verifying Q-Fund Completion Status...");
+            return res;
+          } else {
+            setATStatus("Q-Fund Being Deployed");
+            setATDeployed(false);
+            return [];
+          }
+        } else {
+          setATStatus("Q-Fund Being Deployed");
+          setATDeployed(false);
+          return [];
+        }
       } else {
         setATStatus("Q-Fund Being Deployed");
+        setATDeployed(false);
+        return [];
       }
-      return res;
     } catch (error) {
       console.error(error);
       setATLoadingStatus("Error when fetching Q-Fund Deployment Status");
@@ -47,20 +72,17 @@ export const useFetchCrowdfundStatus = (
     if (atAddress) {
       let intervalId: number | undefined;
       const checkDeploymentStatus = async () => {
-        const startTime = Date.now();
-        const maxTime = 2 * 60 * 1000; // 2 minutes in milliseconds
         const checkStatus = async () => {
           const ATFound = await fetchQFundDeploymentStatus();
           if (ATFound?.length > 0) {
             clearInterval(intervalId); // Stop the polling if AT becomes available
-          } else if (Date.now() - startTime >= maxTime) {
+          } else {
             setATDeployed(false);
             setATLoadingStatus("");
           }
         };
         checkStatus();
         intervalId = setInterval(checkStatus, 30000);
-
         // Clear the interval when the component unmounts
         return () => {
           if (intervalId) clearInterval(intervalId);

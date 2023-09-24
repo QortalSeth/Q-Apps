@@ -118,7 +118,6 @@ export const NewCrowdfund = ({ editId, editContent }: NewCrowdfundProps) => {
     const differenceInMinutes = dayjs().diff(value, "minute");
     return differenceInMinutes * -1;
   }, [value]);
-  console.log({ editContent });
 
   // Define the type for your POST request body
   interface PostRequestBody {

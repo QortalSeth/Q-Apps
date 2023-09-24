@@ -113,10 +113,12 @@ export const Crowdfund = () => {
     return end;
   }, [currentAtInfo, nodeInfo]);
 
-  const blocksRemaning = useMemo(() => {
-    if (!currentAtInfo?.sleepUntilHeight || !nodeInfo?.height) return null;
+  const blocksRemaining = useMemo(() => {
+    if (!currentAtInfo?.sleepUntilHeight || !nodeInfo?.height) {
+      return null;
+    }
     const diff = +currentAtInfo?.sleepUntilHeight - +nodeInfo.height;
-
+    if (diff < 0) return 0;
     return diff;
   }, [currentAtInfo, nodeInfo]);
 
@@ -131,7 +133,6 @@ export const Crowdfund = () => {
           "Content-Type": "application/json",
         },
       });
-      console.log(response);
       if (response.status === 200) {
         const responseDataSearch = await response.json();
         setCurrentAtInfo(responseDataSearch);
@@ -289,7 +290,7 @@ export const Crowdfund = () => {
   const { ATDeployed, ATCompleted, ATLoadingStatus, ATStatus, ATAmount } =
     useFetchCrowdfundStatus(crowdfundData, atAddress);
 
-  // We get the crowdfund's updates if hashMapCrowdfund changes. This changes when you publish a new update or modify an existing update.
+  // We get the crowdfund's updates if hashMapCrowdfund changes. This changes when you publish a new update or modify an existing update and if the ATStatus changes inside the useFetchCrowdfundStatus hook.
   useEffect(() => {
     if (name && id) {
       const existingCrowdfund = hashMapCrowdfunds[id];
@@ -304,7 +305,7 @@ export const Crowdfund = () => {
       getUpdates(name, id);
       getNodeInfo();
     }
-  }, [id, name, hashMapCrowdfunds]);
+  }, [id, name, hashMapCrowdfunds, ATStatus]);
 
   const editContent = useMemo(() => {
     if (!crowdfundData) return null;
@@ -500,6 +501,9 @@ export const Crowdfund = () => {
     }
   };
 
+  console.log({ currentAtInfo });
+  console.log({ nodeInfo });
+
   if (!crowdfundData) return null;
   return (
     <>
@@ -621,7 +625,7 @@ export const Crowdfund = () => {
               <Countdown
                 loadingAtInfo={loadingAtInfo}
                 endDate={endDate}
-                blocksRemaning={blocksRemaning}
+                blocksRemaining={blocksRemaining}
               />
               <Donate
                 ATDonationPossible={ATDeployed && !ATCompleted}
