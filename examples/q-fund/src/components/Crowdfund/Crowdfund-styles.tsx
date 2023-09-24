@@ -379,6 +379,7 @@ export const CrowdfundStatusRow = styled(Box)(({ theme }) => ({
   border: `1px solid ${theme.palette.text.primary}`,
   borderRadius: "8px",
   padding: "15px 25px",
+  userSelect: "none",
 }));
 
 export const CrowdfundDescriptionRow = styled(Box)({
