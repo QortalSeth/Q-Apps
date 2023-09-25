@@ -1,5 +1,5 @@
-type ConfirmationStatus = "CONFIRMED" | "UNCONFIRMED" | "BOTH";
-type txType =
+export type ConfirmationStatus = "CONFIRMED" | "UNCONFIRMED" | "BOTH";
+export type TransactionType =
   | "GENESIS"
   | "PAYMENT"
   | "REGISTER_NAME"

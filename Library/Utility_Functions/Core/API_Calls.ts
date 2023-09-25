@@ -7,14 +7,15 @@ import {
 const assembleURLParams = (params: object) => {
   let finalUrl = "";
   const urls: string[] = [];
+
   Object.entries(params).map(([key, value]) => {
     urls.push(`${key}=${value.toString()}`);
   });
 
-  for (const i in urls) {
-    if (i > 0) finalUrl += "&";
-    finalUrl += urls[i];
-  }
+  urls.map((url, index) => {
+    if (index > 0) finalUrl += "&";
+    finalUrl += url;
+  });
   return finalUrl;
 };
 
@@ -36,5 +37,3 @@ export const getNamesByAddress = async (
     await response.json();
   return namesOfAddress;
 };
-// min URL: /names/address/QeJW96BDMFkmVPofkjY87stvMR7VSbj5W9
-// max URL: /names/address/QeJW96BDMFkmVPofkjY87stvMR7VSbj5W9?limit=20&offset=10&reverse=true

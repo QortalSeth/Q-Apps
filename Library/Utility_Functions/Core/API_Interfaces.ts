@@ -1,3 +1,5 @@
+import { ConfirmationStatus, TransactionType } from "./API_Types";
+
 export interface GetRequestData {
   limit?: number;
   offset?: number;
@@ -8,7 +10,7 @@ export interface TransactionSearchParams extends GetRequestData {
   startBlock?: number;
   blockLimit?: number;
   txGroupId?: number;
-  txType: string;
+  txType: TransactionType;
   address: string;
   confirmationStatus: ConfirmationStatus;
 }
