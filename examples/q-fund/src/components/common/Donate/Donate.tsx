@@ -138,6 +138,7 @@ export const Donate = ({
                   variant={"standard"}
                   allowDecimals={false}
                   allowNegatives={false}
+                  addIconButtons={false}
                   InputProps={{
                     startAdornment: (
                       <InputAdornment position="start">

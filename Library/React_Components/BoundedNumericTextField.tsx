@@ -139,10 +139,10 @@ export const BoundedNumericTextField = forwardRef(
           ...props?.InputProps,
           endAdornment: addIconButtons ? (
             <InputAdornment position="end">
-              <IconButton onChange={e => changeValueWithIncDecButton(e, 1)}>
+              <IconButton onClick={e => changeValueWithIncDecButton(e, 1)}>
                 <AddIcon />{" "}
               </IconButton>
-              <IconButton onChange={e => changeValueWithIncDecButton(e, -1)}>
+              <IconButton onClick={e => changeValueWithIncDecButton(e, -1)}>
                 <RemoveIcon />{" "}
               </IconButton>
             </InputAdornment>
