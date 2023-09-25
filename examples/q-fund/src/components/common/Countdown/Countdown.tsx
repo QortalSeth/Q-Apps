@@ -1,25 +1,29 @@
 import React, { useState, useEffect } from "react";
 import Box from "@mui/material/Box";
 import moment from "moment";
-import { CircularProgress } from "@mui/material";
+import { CircularProgress, Typography } from "@mui/material";
 import {
   CountdownCard,
   CountdownRow,
   CountdownFont,
   CountdownFontNumber,
   CountdownCol,
+  CountdownContainer,
+  EstimatedTimeRemainingFont,
 } from "./Countdown-styles";
 
 interface CountdownProps {
   endDate: moment.Moment;
   blocksRemaining: number | null;
   loadingAtInfo: boolean;
+  ATCompleted: boolean;
 }
 
 export const Countdown: React.FC<CountdownProps> = ({
   endDate,
   blocksRemaining,
   loadingAtInfo,
+  ATCompleted,
 }) => {
   const [timeRemainingDays, setTimeRemainingDays] = useState<number | null>(
     null
@@ -73,37 +77,46 @@ export const Countdown: React.FC<CountdownProps> = ({
     <>
       {!loadingAtInfo ? (
         <CountdownCard>
-          {endDate && blocksRemaining ? (
+          {!ATCompleted ? (
             <>
               <CountdownRow style={{ alignItems: "flex-start" }}>
-                <CountdownCol>
-                  <CountdownFontNumber>{timeRemainingDays}</CountdownFontNumber>
-                  <CountdownFont>{`Day${
-                    timeRemainingDays === 1 ? "" : "s"
-                  }`}</CountdownFont>
-                </CountdownCol>
-                <CountdownCol>
-                  <CountdownFontNumber>:</CountdownFontNumber>
-                </CountdownCol>
-                <CountdownCol>
-                  <CountdownFontNumber>
-                    {timeRemainingHours}
-                  </CountdownFontNumber>
-                  <CountdownFont>{`Hour${
-                    timeRemainingHours === 1 ? "" : "s"
-                  }`}</CountdownFont>
-                </CountdownCol>
-                <CountdownCol>
-                  <CountdownFontNumber>:</CountdownFontNumber>
-                </CountdownCol>
-                <CountdownCol>
-                  <CountdownFontNumber>
-                    {timeRemainingMinutes}
-                  </CountdownFontNumber>
-                  <CountdownFont>{`Minute${
-                    timeRemainingMinutes === 1 ? "" : "s"
-                  }`}</CountdownFont>
-                </CountdownCol>
+                <CountdownContainer>
+                  <EstimatedTimeRemainingFont>
+                    Estimated Time Remaining
+                  </EstimatedTimeRemainingFont>
+                  <CountdownRow style={{ alignItems: "flex-start" }}>
+                    <CountdownCol>
+                      <CountdownFontNumber>
+                        {timeRemainingDays}
+                      </CountdownFontNumber>
+                      <CountdownFont>{`Day${
+                        timeRemainingDays === 1 ? "" : "s"
+                      }`}</CountdownFont>
+                    </CountdownCol>
+                    <CountdownCol>
+                      <CountdownFontNumber>:</CountdownFontNumber>
+                    </CountdownCol>
+                    <CountdownCol>
+                      <CountdownFontNumber>
+                        {timeRemainingHours}
+                      </CountdownFontNumber>
+                      <CountdownFont>{`Hour${
+                        timeRemainingHours === 1 ? "" : "s"
+                      }`}</CountdownFont>
+                    </CountdownCol>
+                    <CountdownCol>
+                      <CountdownFontNumber>:</CountdownFontNumber>
+                    </CountdownCol>
+                    <CountdownCol>
+                      <CountdownFontNumber>
+                        {timeRemainingMinutes}
+                      </CountdownFontNumber>
+                      <CountdownFont>{`Minute${
+                        timeRemainingMinutes === 1 ? "" : "s"
+                      }`}</CountdownFont>
+                    </CountdownCol>
+                  </CountdownRow>
+                </CountdownContainer>
               </CountdownRow>
               <CountdownRow>
                 <CountdownCol>

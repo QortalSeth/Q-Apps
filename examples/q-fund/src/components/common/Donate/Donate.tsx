@@ -39,6 +39,7 @@ export const Donate = ({
 
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [amount, setAmount] = useState<number>(0);
+
   const resetValues = () => {
     setAmount(0);
     setIsOpen(false);
@@ -47,8 +48,47 @@ export const Donate = ({
   const sendCoin = async () => {
     try {
       if (!atAddress) return;
-
       if (isNaN(amount)) return;
+
+      // Check one last time if the AT has finished and if so, don't send the coin
+      const url = `/at/${atAddress}`;
+      const response = await fetch(url, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      const responseDataSearch = await response.json();
+      if (response.status !== 200 || responseDataSearch?.isFinished) {
+        dispatch(
+          setNotification({
+            msg: "This crowdfund has ended",
+            alertType: "error",
+          })
+        );
+        resetValues();
+        return;
+      }
+      // Prevent them from sending a coin if there's 4 blocks left or less to avoid timing issues
+      const url2 = `/blocks/height`;
+      const blockHeightResponse = await fetch(url2, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      const blockHeight = await blockHeightResponse.json();
+      const diff = +responseDataSearch?.sleepUntilHeight - +blockHeight;
+      if (diff <= 4) {
+        dispatch(
+          setNotification({
+            msg: "This crowdfund has ended",
+            alertType: "error",
+          })
+        );
+        resetValues();
+        return;
+      }
       await qortalRequest({
         action: "SEND_COIN",
         coin: "QORT",

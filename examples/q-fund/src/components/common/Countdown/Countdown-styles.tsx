@@ -45,3 +45,19 @@ export const CountdownFontNumber = styled(Typography)(({ theme }) => ({
   lineHeight: "45px",
   color: theme.palette.text.primary,
 }));
+
+export const CountdownContainer = styled(Box)(({ theme }) => ({
+  display: "flex",
+  flexDirection: "column",
+  alignItems: "center",
+  gap: "5px",
+}));
+
+export const EstimatedTimeRemainingFont = styled(Typography)(({ theme }) => ({
+  fontFamily: "Mulish",
+  fontSize: "16px",
+  color: theme.palette.text.primary,
+  fontWeight: 400,
+  letterSpacing: 0,
+  userSelect: "none",
+}));

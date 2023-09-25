@@ -198,32 +198,24 @@ export const QFundOwnerReviews: FC<QFundOwnerReviewsProps> = ({
             sm={averageOwnerRating ? 10 : 12}
             style={{ position: "relative" }}
           >
-            {loadingReviews ? (
-              <CircularProgress
-                style={{
-                  position: "absolute",
-                  top: "50%",
-                  left: "50%",
-                  transform: "translateX(-50%)",
-                }}
-              />
-            ) : (
-              <OwnerReviewsContainer>
-                {ownerReviews.length === 0 ? (
-                  <ReviewsFont>No reviews yet</ReviewsFont>
-                ) : (
-                  ownerReviews
-                    .filter((review: OwnerReview) => {
-                      // Change and add filter here to remove owner's own reviews
-                      return review.id.includes(reviewIdentifier);
-                    })
-                    .map((review: OwnerReview) => {
-                      return <QFundOwnerReviewCard review={review} />;
-                    })
-                )}
-              </OwnerReviewsContainer>
-            )}
-            <LazyLoad onLoadMore={handleGetReviews}></LazyLoad>
+            <OwnerReviewsContainer>
+              {ownerReviews.length === 0 ? (
+                <ReviewsFont>No reviews yet</ReviewsFont>
+              ) : (
+                ownerReviews
+                  .filter((review: OwnerReview) => {
+                    // Change and add filter here to remove owner's own reviews
+                    return review.id.includes(reviewIdentifier);
+                  })
+                  .map((review: OwnerReview) => {
+                    return <QFundOwnerReviewCard review={review} />;
+                  })
+              )}
+            </OwnerReviewsContainer>
+            <LazyLoad
+              onLoadMore={handleGetReviews}
+              isLoading={loadingReviews}
+            ></LazyLoad>
           </Grid>
         </Grid>
       </CardDetailsContainer>

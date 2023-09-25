@@ -50,7 +50,6 @@ export const StoreReviews: FC<StoreReviewsProps> = ({
   const user = useSelector((state: RootState) => state.auth.user);
 
   const [openLeaveReview, setOpenLeaveReview] = useState<boolean>(false);
-  const [loadingReviews, setLoadingReviews] = useState<boolean>(false);
   const [userHasStoreOrder, setUserHasStoreOrder] = useState<boolean>(false);
 
   // Determine whether user can leave a review
@@ -82,7 +81,6 @@ export const StoreReviews: FC<StoreReviewsProps> = ({
   const getStoreReviews = useCallback(async () => {
     if (!storeId) return;
     try {
-      setLoadingReviews(true);
       const offset = storeReviews.length;
       const parts = storeId.split("q-store-general-");
       const shortStoreId = parts[1];
@@ -129,8 +127,6 @@ export const StoreReviews: FC<StoreReviewsProps> = ({
       dispatch(upsertReviews(copiedStoreReviews));
     } catch (error) {
       console.error(error);
-    } finally {
-      setLoadingReviews(false);
     }
   }, [storeReviews, storeId]);
 
@@ -207,16 +203,6 @@ export const StoreReviews: FC<StoreReviewsProps> = ({
             sm={averageStoreRating ? 10 : 12}
             style={{ position: "relative" }}
           >
-            {loadingReviews && (
-              <CircularProgress
-                style={{
-                  position: "absolute",
-                  top: "50%",
-                  left: "50%",
-                  transform: "translateX(-50%)"
-                }}
-              />
-            )}
             <StoreReviewsContainer>
               {storeReviews.length === 0 ? (
                 <ReviewsFont>No reviews yet</ReviewsFont>
@@ -230,7 +216,6 @@ export const StoreReviews: FC<StoreReviewsProps> = ({
                   })
               )}
             </StoreReviewsContainer>
-
             <LazyLoad onLoadMore={handleGetReviews}></LazyLoad>
           </Grid>
         </Grid>
@@ -246,7 +231,7 @@ export const StoreReviews: FC<StoreReviewsProps> = ({
           padding: "25px 40px",
           borderRadius: "5px",
           outline: "none",
-          overflowY: "scroll",
+          overflowY: "scroll"
         }}
         open={openLeaveReview}
       >

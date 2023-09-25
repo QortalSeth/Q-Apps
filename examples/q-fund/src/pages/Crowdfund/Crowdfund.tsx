@@ -99,6 +99,8 @@ export const Crowdfund = () => {
   const [ownerRegisteredNumber, setOwnerRegisteredNumber] = useState<
     number | null
   >(null);
+  const [blocksRemainingZero, setBlocksRemainingZero] =
+    useState<boolean>(false);
 
   const interval = useRef<any>(null);
   const intervalBalance = useRef<any>(null);
@@ -120,13 +122,36 @@ export const Crowdfund = () => {
   }, [currentAtInfo, nodeInfo]);
 
   const blocksRemaining = useMemo(() => {
-    if (!currentAtInfo?.sleepUntilHeight || !nodeInfo?.height) {
+    if (
+      (!currentAtInfo?.sleepUntilHeight || !nodeInfo?.height) &&
+      !currentAtInfo?.isFinished
+    ) {
       return null;
+    } else if (currentAtInfo?.isFinished) {
+      setBlocksRemainingZero(true);
+      return 0;
+    } else {
+      const diff = +currentAtInfo?.sleepUntilHeight - +nodeInfo.height;
+      // If the difference is less than or equal to 0, then the crowdfund has ended and we must check /at/address to look for isFinished property on the response object. If it is true, then the crowdfund has ended. If it is false, then the crowdfund is still in progress, and we don't show the Q-Fund has ended status until then.
+      if (diff <= 0) {
+        setBlocksRemainingZero(true);
+        return 0;
+      }
+      return diff;
     }
-    const diff = +currentAtInfo?.sleepUntilHeight - +nodeInfo.height;
-    if (diff < 0) return 0;
-    return diff;
   }, [currentAtInfo, nodeInfo]);
+
+  const editContent = useMemo(() => {
+    if (!crowdfundData) return null;
+    const content = {
+      title: crowdfundData?.title,
+      inlineContent: crowdfundData?.inlineContent,
+      attachments: crowdfundData?.attachments,
+      user: crowdfundData?.user,
+      coverImage: crowdfundData?.coverImage || null,
+    };
+    return content;
+  }, [crowdfundData]);
 
   const getRawDonorData = (address: string) => {
     searchTransactions({
@@ -303,9 +328,9 @@ export const Crowdfund = () => {
     QFundOwnerAvatarUrl();
   }, [name]);
 
-  // Custom hook to get the AT Status, AT Achieved or Not, AT Amount, and AT Loading Status
+  // Custom hook to get the AT Status, AT Achieved or Not, AT Amount, and AT Loading Status. We pass down the blocksRemainingZero state once blocksRemaining is 0 or less than 0. We do this to verify the completion status of the AT.
   const { ATDeployed, ATCompleted, ATLoadingStatus, ATStatus, ATAmount } =
-    useFetchCrowdfundStatus(crowdfundData, atAddress);
+    useFetchCrowdfundStatus(crowdfundData, atAddress, blocksRemainingZero);
 
   // We get the crowdfund's updates if hashMapCrowdfund changes. This changes when you publish a new update or modify an existing update and if the ATStatus changes inside the useFetchCrowdfundStatus hook.
   useEffect(() => {
@@ -324,18 +349,7 @@ export const Crowdfund = () => {
     }
   }, [id, name, hashMapCrowdfunds, ATStatus]);
 
-  const editContent = useMemo(() => {
-    if (!crowdfundData) return null;
-    const content = {
-      title: crowdfundData?.title,
-      inlineContent: crowdfundData?.inlineContent,
-      attachments: crowdfundData?.attachments,
-      user: crowdfundData?.user,
-      coverImage: crowdfundData?.coverImage || null,
-    };
-    return content;
-  }, [crowdfundData]);
-
+  // Check node info every 30 seconds
   const checkNodeInfo = useCallback(() => {
     let isCalling = false;
     interval.current = setInterval(async () => {
@@ -459,68 +473,6 @@ export const Crowdfund = () => {
     }
   }, [crowdfundData?.created, crowdfundData?.updated]);
 
-  const updateCrowdFundFunc = async () => {
-    if (!name || !id) return;
-    try {
-      const crowdfundObj = {
-        ...crowdfundData,
-        title: "Updated Q-Fund",
-      };
-
-      delete crowdfundObj.updated;
-      const crowdfundObjToBase64 = await objectToBase64(crowdfundObj);
-      const resourceResponse = await qortalRequest({
-        action: "PUBLISH_QDN_RESOURCE",
-        name: name,
-        service: "DOCUMENT",
-        data64: crowdfundObjToBase64,
-        title: "Updated Q-Fund",
-        identifier: id,
-      });
-
-      await new Promise<void>((res, rej) => {
-        setTimeout(() => {
-          res();
-        }, 1000);
-      });
-
-      dispatch(
-        setNotification({
-          msg: "Crowdfund updated!",
-          alertType: "success",
-        })
-      );
-    } catch (error: any) {
-      let notificationObj: any = null;
-      if (typeof error === "string") {
-        notificationObj = {
-          msg: error || "Failed to update blog",
-          alertType: "error",
-        };
-      } else if (typeof error?.error === "string") {
-        notificationObj = {
-          msg: error?.error || "Failed to update blog",
-          alertType: "error",
-        };
-      } else {
-        notificationObj = {
-          msg: error?.message || "Failed to update blog",
-          alertType: "error",
-        };
-      }
-      if (!notificationObj) return;
-      dispatch(setNotification(notificationObj));
-      if (error instanceof Error) {
-        throw new Error(error.message);
-      } else {
-        throw new Error("An unknown error occurred");
-      }
-    }
-  };
-
-  console.log({ currentAtInfo });
-  console.log({ nodeInfo });
-
   if (!crowdfundData) return null;
   return (
     <>
@@ -535,16 +487,6 @@ export const Crowdfund = () => {
             }}
           >
             Back To Homepage
-          </BackToHomeButton>
-          <BackToHomeButton
-            style={{ backgroundColor: "red", left: "200px" }}
-            color="error"
-            variant="outlined"
-            onClick={() => {
-              updateCrowdFundFunc();
-            }}
-          >
-            Update Crowdfund
           </BackToHomeButton>
         </span>
         <MainCol item xs={12} sm={12} md={6} gap={"15px"}>
@@ -643,6 +585,7 @@ export const Crowdfund = () => {
                 loadingAtInfo={loadingAtInfo}
                 endDate={endDate}
                 blocksRemaining={blocksRemaining}
+                ATCompleted={ATCompleted}
               />
               <Stack direction={"column"} gap={"5px"}>
                 <Donate
