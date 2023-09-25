@@ -5,6 +5,8 @@ import {
   AddLogoIcon,
   CATContainer,
   CoverImagePreview,
+  CrowdfundActionButton,
+  CrowdfundActionButtonRow,
   CrowdfundCardTitle,
   CustomInputField,
   LogoPreviewRow,
@@ -12,8 +14,6 @@ import {
   NewCrowdFundFont,
   NewCrowdfundTimeDescription,
   NewCrowdfundTitle,
-  CrowdfundActionButtonRow,
-  CrowdfundActionButton,
   TimesIcon,
 } from "./Crowdfund-styles";
 import { Box, Modal, useTheme } from "@mui/material";
@@ -24,7 +24,11 @@ import "react-quill/dist/quill.snow.css";
 import { FileAttachment } from "./FileAttachment";
 import { useDispatch, useSelector } from "react-redux";
 import { setNotification } from "../../state/features/notificationsSlice";
-import { objectToBase64 } from "../../utils/toBase64";
+import {
+  base64ToUint8Array,
+  objectToBase64,
+  uint8ArrayToBase64,
+} from "../../utils/toBase64";
 import { RootState } from "../../state/store";
 import { ATTACHMENT_BASE, CROWDFUND_BASE } from "../../constants";
 import dayjs, { Dayjs } from "dayjs";
@@ -41,7 +45,7 @@ import {
 import ImageUploader from "../ImageUploader";
 import { DesktopDateTimePicker } from "@mui/x-date-pickers";
 import { PiggybankSVG } from "../../assets/svgs/PiggybankSVG";
-import BoundedNumericTextField from "../../../../../Library/Components/BoundedNumericTextField";
+import BoundedNumericTextField from "../../../../../Library/React_Components/BoundedNumericTextField";
 
 dayjs.extend(isBetween);
 dayjs.extend(duration);
@@ -191,25 +195,6 @@ export const NewCrowdfund = ({ editId, editContent }: NewCrowdfundProps) => {
     for (let i = 0; i < newArray.length; i++) {
       originalArray[position + i] = newArray[i];
     }
-  }
-
-  function uint8ArrayToBase64(byteArray: Uint8Array): string {
-    const chars: string[] = Array.from(byteArray).map(byte =>
-      String.fromCharCode(byte)
-    );
-    return btoa(chars.join(""));
-  }
-
-  function base64ToUint8Array(base64) {
-    const binary_string = atob(base64);
-    const len = binary_string.length;
-    const bytes = new Uint8Array(len);
-
-    for (let i = 0; i < len; i++) {
-      bytes[i] = binary_string.charCodeAt(i);
-    }
-
-    return bytes;
   }
 
   const codeBytes =

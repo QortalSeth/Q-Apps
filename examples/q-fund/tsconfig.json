@@ -20,6 +20,9 @@
     "noFallthroughCasesInSwitch": true,
     "allowSyntheticDefaultImports": true
   },
-  "include": ["src"],
+  "include": [
+    "src/*",
+    "../../Library/**/*"
+  ],
   "references": [{ "path": "./tsconfig.node.json" }]
 }

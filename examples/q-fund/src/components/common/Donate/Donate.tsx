@@ -6,7 +6,6 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
-  Input,
   InputAdornment,
   Tooltip,
   useTheme,
@@ -20,6 +19,7 @@ import {
   DonateModalLabel,
 } from "./Donate-styles";
 import { QortalSVG } from "../../../assets/svgs/QortalSVG";
+import BoundedNumericTextField from "../../../../../../Library/React_Components/BoundedNumericTextField";
 
 interface DonateProps {
   atAddress: string;
@@ -39,7 +39,6 @@ export const Donate = ({
 
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [amount, setAmount] = useState<number>(0);
-
   const resetValues = () => {
     setAmount(0);
     setIsOpen(false);
@@ -129,21 +128,28 @@ export const Donate = ({
                 <DonateModalLabel htmlFor="standard-adornment-amount">
                   Amount
                 </DonateModalLabel>
-                <Input
+                <BoundedNumericTextField
                   style={{ fontFamily: "Mulish" }}
+                  minValue={1}
+                  maxValue={Number.MAX_SAFE_INTEGER}
                   id="standard-adornment-amount"
-                  type="number"
                   value={amount}
-                  onChange={e => setAmount(+e.target.value)}
-                  startAdornment={
-                    <InputAdornment position="start">
-                      <QortalSVG
-                        height="20px"
-                        width="20px"
-                        color={theme.palette.text.primary}
-                      />
-                    </InputAdornment>
-                  }
+                  onChange={e => setAmount(Number(e.target.value))}
+                  variant={"standard"}
+                  allowDecimals={false}
+                  allowNegatives={false}
+                  addIconButtons={false}
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <QortalSVG
+                          height="20px"
+                          width="20px"
+                          color={theme.palette.text.primary}
+                        />
+                      </InputAdornment>
+                    ),
+                  }}
                 />
               </DonateModalCol>
             </DialogContent>
