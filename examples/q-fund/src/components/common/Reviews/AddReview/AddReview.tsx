@@ -99,7 +99,6 @@ export const AddReview: FC<AddReviewProps> = ({
       if (Object.keys(QFundOwnerRegistration).length > 0) {
         ownerRegistrationNumber = QFundOwnerRegistration.registered;
       }
-      console.log(ownerRegistrationNumber);
     } catch (error) {
       console.error(error);
     }

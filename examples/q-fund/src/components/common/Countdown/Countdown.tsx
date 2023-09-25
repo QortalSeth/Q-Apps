@@ -12,13 +12,13 @@ import {
 
 interface CountdownProps {
   endDate: moment.Moment;
-  blocksRemaning: number | null;
+  blocksRemaining: number | null;
   loadingAtInfo: boolean;
 }
 
 export const Countdown: React.FC<CountdownProps> = ({
   endDate,
-  blocksRemaning,
+  blocksRemaining,
   loadingAtInfo,
 }) => {
   const [timeRemainingDays, setTimeRemainingDays] = useState<number | null>(
@@ -30,8 +30,6 @@ export const Countdown: React.FC<CountdownProps> = ({
   const [timeRemainingMinutes, setTimeRemainingMinutes] = useState<
     number | null
   >(null);
-
-  console.log({ endDate, blocksRemaning, loadingAtInfo });
 
   // useEffect that runs the countdown timer
   useEffect(() => {
@@ -59,7 +57,7 @@ export const Countdown: React.FC<CountdownProps> = ({
     };
 
     // Ensure the crowdfund has not ended before running the countdown
-    if (!endDate || !blocksRemaning) return;
+    if (!endDate || !blocksRemaining) return;
 
     updateCountdown();
     intervalId = setInterval(updateCountdown, 1000);
@@ -69,13 +67,13 @@ export const Countdown: React.FC<CountdownProps> = ({
         clearInterval(intervalId);
       }
     };
-  }, [blocksRemaning, endDate]);
+  }, [blocksRemaining, endDate]);
 
   return (
     <>
       {!loadingAtInfo ? (
         <CountdownCard>
-          {endDate && blocksRemaning ? (
+          {endDate && blocksRemaining ? (
             <>
               <CountdownRow style={{ alignItems: "flex-start" }}>
                 <CountdownCol>
@@ -110,7 +108,7 @@ export const Countdown: React.FC<CountdownProps> = ({
               <CountdownRow>
                 <CountdownCol>
                   <CountdownFont style={{ fontSize: "21px" }}>
-                    Blocks Remaining: {blocksRemaning}
+                    Blocks Remaining: {blocksRemaining}
                   </CountdownFont>
                   <CountdownFont style={{ fontSize: "21px" }}>
                     updated every 30 seconds

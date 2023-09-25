@@ -23,7 +23,6 @@ export const FileAttachment = ({ setAttachments, attachments }) => {
       );
     },
   });
-  console.log({ attachments });
 
   return (
     <>
