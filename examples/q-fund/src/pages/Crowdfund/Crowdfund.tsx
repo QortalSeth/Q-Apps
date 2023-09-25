@@ -8,7 +8,7 @@ import React, {
 import { useNavigate, useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../state/store";
-import { CircularProgress, Typography, useTheme } from "@mui/material";
+import { CircularProgress, Stack, useTheme } from "@mui/material";
 import AttachFileIcon from "@mui/icons-material/AttachFile";
 import DownloadIcon from "@mui/icons-material/Download";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
@@ -18,25 +18,25 @@ import { setIsLoadingGlobal } from "../../state/features/globalSlice";
 import { CROWDFUND_BASE, TEST_REVIEW_BASE, UPDATE_BASE } from "../../constants";
 import { addToHashMap } from "../../state/features/crowdfundSlice";
 import {
+  AboutMyCrowdfund,
+  BackToHomeButton,
+  CoverImage,
+  CrowdfundAccordion,
+  CrowdfundAccordionDetails,
+  CrowdfundAccordionFont,
+  CrowdfundAccordionSummary,
   CrowdfundDescriptionRow,
+  CrowdfundInlineContentRow,
   CrowdfundPageTitle,
+  CrowdfundStatusRow,
+  CrowdfundSubTitle,
+  CrowdfundSubTitleRow,
   CrowdfundTitleRow,
   MainCol,
   MainContainer,
-  AboutMyCrowdfund,
-  CrowdfundInlineContentRow,
-  CrowdfundAccordion,
-  CrowdfundAccordionSummary,
-  CrowdfundAccordionFont,
-  CrowdfundAccordionDetails,
-  CrowdfundSubTitle,
-  CrowdfundSubTitleRow,
-  CoverImage,
-  BackToHomeButton,
-  CrowdfundStatusRow,
+  NoReviewsFont,
   RatingContainer,
   StyledRating,
-  NoReviewsFont,
 } from "../../components/Crowdfund/Crowdfund-styles";
 import AudioPlayer from "../../components/common/AudioPlayer";
 import { NewCrowdfund } from "../../components/Crowdfund/NewCrowdfund";
@@ -60,6 +60,9 @@ import { useFetchCrowdfundStatus } from "../../hooks/useFetchCrowdfundStatus";
 import { CrowdfundLoader } from "./CrowdfundLoader";
 import { ReusableModalStyled } from "../../components/common/Reviews/QFundOwnerReviews-styles";
 import { QFundOwnerReviews } from "../../components/common/Reviews/QFundOwnerReviews";
+import { searchTransactions } from "../../../../../Library/Utility_Functions/Core/API_Calls";
+import { SearchTransactionResponse } from "../../../../../Library/Utility_Functions/Core/API_Interfaces";
+import DonorInfo from "../../components/common/Donate/DonorInfo";
 
 export const Crowdfund = () => {
   const theme = useTheme();
@@ -75,6 +78,9 @@ export const Crowdfund = () => {
     (state: RootState) => state.crowdfund.hashMapCrowdfunds
   );
 
+  const [rawDonorData, setRawDonorData] = useState<SearchTransactionResponse[]>(
+    []
+  );
   const [crowdfundData, setCrowdfundData] = useState<any>(null);
   const [currentAtInfo, setCurrentAtInfo] = useState<any>(null);
   const [loadingAtInfo, setLoadingAtInfo] = useState<boolean>(false);
@@ -147,8 +153,19 @@ export const Crowdfund = () => {
     return content;
   }, [crowdfundData]);
 
+  const getRawDonorData = (address: string) => {
+    searchTransactions({
+      txType: "PAYMENT",
+      address,
+      confirmationStatus: "BOTH",
+    }).then(donorResponse => {
+      setRawDonorData(donorResponse);
+    });
+  };
+
   const getCurrentAtInfo = React.useCallback(async atAddress => {
     console.log({ atAddress });
+    getRawDonorData(atAddress);
     setLoadingAtInfo(true);
     try {
       const url = `/at/${atAddress}`;
@@ -570,16 +587,19 @@ export const Crowdfund = () => {
                 blocksRemaining={blocksRemaining}
                 ATCompleted={ATCompleted}
               />
-              <Donate
-                ATDonationPossible={ATDeployed && !ATCompleted}
-                atAddress={crowdfundData?.deployedAT?.aTAddress}
-                onSubmit={() => {
-                  return;
-                }}
-                onClose={() => {
-                  return;
-                }}
-              />
+              <Stack direction={"column"} gap={"5px"}>
+                <Donate
+                  ATDonationPossible={ATDeployed && !ATCompleted}
+                  atAddress={crowdfundData?.deployedAT?.aTAddress}
+                  onSubmit={() => {
+                    return;
+                  }}
+                  onClose={() => {
+                    return;
+                  }}
+                />
+                <DonorInfo rawDonorData={rawDonorData} />
+              </Stack>
             </>
           )}
           <CrowdfundSubTitleRow>
