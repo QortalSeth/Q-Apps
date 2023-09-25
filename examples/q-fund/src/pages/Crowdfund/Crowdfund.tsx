@@ -587,7 +587,7 @@ export const Crowdfund = () => {
                 blocksRemaining={blocksRemaining}
                 ATCompleted={ATCompleted}
               />
-              <Stack direction={"column"} gap={"5px"}>
+              <Stack direction={"row"} gap={"25px"}>
                 <Donate
                   ATDonationPossible={ATDeployed && !ATCompleted}
                   atAddress={crowdfundData?.deployedAT?.aTAddress}
