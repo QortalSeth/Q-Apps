@@ -171,8 +171,6 @@ export const NewCrowdfund = ({ editId, editContent }: NewCrowdfundProps) => {
     return (byteValue + 256) % 256;
   }
 
-
-
   function setLongValue(array, position, value) {
     const buffer = new ArrayBuffer(8);
     const view = new DataView(buffer);
@@ -184,7 +182,6 @@ export const NewCrowdfund = ({ editId, editContent }: NewCrowdfundProps) => {
       array[position + i] = view.getInt8(i) & 0xff; // Correctly handle the byte value
     }
   }
- 
 
   // Function to replace a value at a given position in the original array with an array
   function replaceArraySlice(originalArray, position, newArray) {
@@ -284,11 +281,11 @@ export const NewCrowdfund = ({ editId, editContent }: NewCrowdfundProps) => {
         minActivationAmount: 0,
       };
       // CHANGE BACK AFTER TESTING
-      const blocksToGoal = 15;
-      // const differenceInMinutes = dayjs().diff(value, "minute");
-      // const blocksToGoal = differenceInMinutes * -1;
-      // if (blocksToGoal < 2880 || blocksToGoal > 43200)
-      //   throw new Error("end of crowdfund needs to be between 2880 and 43200");
+      // const blocksToGoal = 15;
+      const differenceInMinutes = dayjs().diff(value, "minute");
+      const blocksToGoal = differenceInMinutes * -1;
+      if (blocksToGoal < 29 || blocksToGoal > 43200)
+        throw new Error("end of crowdfund needs to be between 2880 and 43200");
       if (!goalValue) throw new Error("Goal amount must be one or greater!");
       requestBody.dataBytesBase64 = createBytes(
         +goalValue,
@@ -460,7 +457,7 @@ export const NewCrowdfund = ({ editId, editContent }: NewCrowdfundProps) => {
       : setGoalValue("");
   };
 
-  const minDateTime = dayjs().add(2, "day");
+  const minDateTime = dayjs().add(30, "minute");
   const maxDateTime = dayjs().add(30, "day");
 
   return (
