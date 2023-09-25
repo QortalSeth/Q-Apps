@@ -651,7 +651,7 @@ export const Crowdfund = () => {
                     return;
                   }}
                 />
-                <DonorInfo rawDonorData={rawDonorData}>Donor Details</DonorInfo>
+                <DonorInfo rawDonorData={rawDonorData} />
               </Stack>
             </>
           )}

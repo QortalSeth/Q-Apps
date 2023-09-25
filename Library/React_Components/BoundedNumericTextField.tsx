@@ -63,7 +63,8 @@ export const BoundedNumericTextField = forwardRef(
 
     const isEmptyNumber = (value: string) => {
       const valueIsEmptyString = value === "";
-      const valueIsNaN = value === Number.isNaN(Number(value));
+      const valueIsNaN = Number.isNaN(Number(value));
+
       return valueIsEmptyString || valueIsNaN;
     };
 
@@ -111,13 +112,10 @@ export const BoundedNumericTextField = forwardRef(
       if (onChange) onChange(e);
     };
 
-    const changeValueWithIncDecButton = (
-      e: eventType,
-      changeAmount: number
-    ) => {
+    const changeValueWithIncDecButton = (e, changeAmount: number) => {
       const valueNum = Number(textFieldValue);
       const newValue = setMinMaxValue((valueNum + changeAmount).toString());
-      e.target.value = newValue;
+      if (e?.target?.value) e.target.value = newValue;
       if (onChange) onChange(e);
       setTextFieldValue(newValue);
     };
@@ -141,15 +139,15 @@ export const BoundedNumericTextField = forwardRef(
           ...props?.InputProps,
           endAdornment: addIconButtons ? (
             <InputAdornment position="end">
-              <IconButton onClick={e => changeValueWithIncDecButton(e, 1)}>
+              <IconButton onChange={e => changeValueWithIncDecButton(e, 1)}>
                 <AddIcon />{" "}
               </IconButton>
-              <IconButton onClick={e => changeValueWithIncDecButton(e, -1)}>
+              <IconButton onChange={e => changeValueWithIncDecButton(e, -1)}>
                 <RemoveIcon />{" "}
               </IconButton>
             </InputAdornment>
           ) : (
-            {}
+            <></>
           ),
         }}
         onChange={e => listeners(e as eventType)}

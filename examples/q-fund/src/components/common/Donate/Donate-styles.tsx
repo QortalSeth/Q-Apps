@@ -29,7 +29,7 @@ export const DonateModalCol = styled(Box)(({ theme }) => ({
 }));
 
 export const CrowdfundPageDonateButton = styled(Button)(({ theme }) => ({
-  ...buttonStyle,
+  buttonStyle,
   backgroundColor: kickstarterDonateButtonColor,
   "&:hover": {
     backgroundColor: changeLightness(kickstarterDonateButtonColor, -10),
@@ -37,7 +37,7 @@ export const CrowdfundPageDonateButton = styled(Button)(({ theme }) => ({
 }));
 
 export const DonorDetailsButton = styled(Button)(({ theme }) => ({
-  ...buttonStyle,
+  buttonStyle,
   backgroundColor: DonorInfoButtonColor,
   "&:hover": { backgroundColor: changeLightness(DonorInfoButtonColor, -10) },
 }));
