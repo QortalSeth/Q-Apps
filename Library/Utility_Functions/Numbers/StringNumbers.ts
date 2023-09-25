@@ -31,3 +31,11 @@ export const addStringNumbers = (s1: string, s2: string) => {
     return n1 + n2;
   });
 };
+
+export const stringIsEmptyNumber = (value: string) => {
+  return value === "";
+};
+
+export const stringIsNaN = (value: string) => {
+  return Number.isNaN(Number(value));
+};

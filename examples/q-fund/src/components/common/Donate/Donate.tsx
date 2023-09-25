@@ -135,7 +135,11 @@ export const Donate = ({
         gap: 1,
       }}
     >
-      <Tooltip title={`Support this crowdfund`} arrow>
+      <Tooltip
+        title={`Support this crowdfund`}
+        arrow
+        disableHoverListener={!ATDonationPossible}
+      >
         <Box
           sx={{
             position: "relative",
