@@ -2,10 +2,7 @@ import { styled } from "@mui/material/styles";
 import { Box, Button, InputLabel } from "@mui/material";
 import { changeLightness } from "../../../../../../Library/Utility_Functions/Numbers/Colors";
 
-const kickstarterDonateButtonColor = "#028858";
-const DonorInfoButtonColor = "#00BFFF";
-
-const buttonStyle = {
+const ButtonStyle = styled(Button)({
   fontFamily: "Mulish",
   fontWeight: "800",
   fontSize: "21px",
@@ -17,29 +14,29 @@ const buttonStyle = {
   "&:disabled": {
     filter: "brightness(0.8)",
   },
-};
+});
 
-export const DonateModalCol = styled(Box)(({ theme }) => ({
+export const DonateModalCol = styled(Box)({
   display: "flex",
   flexDirection: "column",
   alignItems: "center",
   width: "400px",
   justifyContent: "center",
   gap: "20px",
-}));
+});
 
-export const CrowdfundPageDonateButton = styled(Button)(({ theme }) => ({
-  buttonStyle,
-  backgroundColor: kickstarterDonateButtonColor,
+export const CrowdfundPageDonateButton = styled(ButtonStyle)(({ theme }) => ({
+  backgroundColor: theme.palette.primary.main,
   "&:hover": {
-    backgroundColor: changeLightness(kickstarterDonateButtonColor, -10),
+    backgroundColor: changeLightness(theme.palette.primary.main, -10),
   },
 }));
 
-export const DonorDetailsButton = styled(Button)(({ theme }) => ({
-  buttonStyle,
-  backgroundColor: DonorInfoButtonColor,
-  "&:hover": { backgroundColor: changeLightness(DonorInfoButtonColor, -10) },
+export const DonorDetailsButton = styled(ButtonStyle)(({ theme }) => ({
+  backgroundColor: theme.palette.secondary.main,
+  "&:hover": {
+    backgroundColor: changeLightness(theme.palette.secondary.main, -10),
+  },
 }));
 
 export const DonateModalLabel = styled(InputLabel)(({ theme }) => ({
