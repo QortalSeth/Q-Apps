@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { RootState } from "../../state/store";
-import { Avatar, Grid, useTheme } from "@mui/material";
+import { Avatar, Grid, Skeleton, useTheme } from "@mui/material";
 import { useFetchCrowdfunds } from "../../hooks/useFetchCrowdfunds";
 import LazyLoad from "../../components/common/LazyLoad";
 import ResponsiveImage from "../../components/ResponsiveImage";
@@ -98,12 +98,10 @@ export const CrowdfundList = () => {
             crowdfundObj = existingCrowdfund;
             hasHash = true;
           }
-
           let avatarUrl = "";
           if (userAvatarHash[crowdfundObj?.user]) {
             avatarUrl = userAvatarHash[crowdfundObj?.user];
           }
-
           return (
             <Grid item xs={12} sm={6} md={4} lg={3} xl={3} key={crowdfund.id}>
               <CardContainer
@@ -114,58 +112,73 @@ export const CrowdfundList = () => {
                 }}
               >
                 <CrowdfundImageContainer>
-                  <ResponsiveImage
-                    src={crowdfundObj?.coverImage || CoverImageDefault}
-                    width={100}
-                    height={150}
-                    styles={{
-                      maxHeight: "250px",
-                      minHeight: "250px",
-                      objectFit: "cover",
-                    }}
-                  />
+                  {!hasHash ? (
+                    <Skeleton variant="rectangular" width={100} height={250} />
+                  ) : (
+                    <ResponsiveImage
+                      src={crowdfundObj?.coverImage || CoverImageDefault}
+                      width={100}
+                      height={150}
+                      styles={{
+                        maxHeight: "250px",
+                        minHeight: "250px",
+                        objectFit: "cover",
+                      }}
+                    />
+                  )}
                   <CrowdfundTitleCard>
-                    <CrowdfundTitle>{crowdfundObj?.title}</CrowdfundTitle>
-                    <NameContainer>
-                      <Avatar
-                        sx={{ height: 30, width: 30 }}
-                        src={avatarUrl}
-                        alt={`${crowdfundObj.user}'s avatar`}
-                      />
-                      <CrowdfundOwner>by {crowdfundObj?.user}</CrowdfundOwner>
-                    </NameContainer>
+                    {!hasHash ? (
+                      <Skeleton variant="text" sx={{ fontSize: "20px" }} />
+                    ) : (
+                      <>
+                        <CrowdfundTitle>{crowdfundObj?.title}</CrowdfundTitle>
+                        <NameContainer>
+                          <Avatar
+                            sx={{ height: 30, width: 30 }}
+                            src={avatarUrl}
+                            alt={`${crowdfundObj.user}'s avatar`}
+                          />
+                          <CrowdfundOwner>
+                            by {crowdfundObj?.user}
+                          </CrowdfundOwner>
+                        </NameContainer>
+                      </>
+                    )}
                   </CrowdfundTitleCard>
                 </CrowdfundImageContainer>
-                <ChannelCard key={crowdfundObj.id}>
-                  <CrowdfundDescription>
-                    {crowdfundObj?.description}
-                  </CrowdfundDescription>
-                  <CrowdfundGoalRow>
-                    <CrowdfundText>Campaign Goal:</CrowdfundText>
-                    <CrowdfundGoal>
-                      <QortalSVG
-                        height={"22"}
-                        width={"22"}
-                        color={theme.palette.text.primary}
-                      />
-                      {crowdfundObj?.deployedAT?.goalValue}
-                    </CrowdfundGoal>
-                  </CrowdfundGoalRow>
-                  <BottomWrapper>
-                    {crowdfundObj?.created && (
-                      <CrowdfundUploadDate>
-                        {formatDate(crowdfundObj.created)}
-                      </CrowdfundUploadDate>
-                    )}
-                    <DonateButton>Back this project</DonateButton>
-                  </BottomWrapper>
-                </ChannelCard>
+                {!hasHash ? (
+                  <Skeleton variant="rectangular" width={"100%"} height={250} />
+                ) : (
+                  <ChannelCard key={crowdfundObj.id}>
+                    <CrowdfundDescription>
+                      {crowdfundObj?.description}
+                    </CrowdfundDescription>
+                    <CrowdfundGoalRow>
+                      <CrowdfundText>Campaign Goal:</CrowdfundText>
+                      <CrowdfundGoal>
+                        <QortalSVG
+                          height={"22"}
+                          width={"22"}
+                          color={theme.palette.text.primary}
+                        />
+                        {crowdfundObj?.deployedAT?.goalValue}
+                      </CrowdfundGoal>
+                    </CrowdfundGoalRow>
+                    <BottomWrapper>
+                      {crowdfundObj?.created && (
+                        <CrowdfundUploadDate>
+                          {formatDate(crowdfundObj.created)}
+                        </CrowdfundUploadDate>
+                      )}
+                      <DonateButton>Back this project</DonateButton>
+                    </BottomWrapper>
+                  </ChannelCard>
+                )}
               </CardContainer>
             </Grid>
           );
         })}
       </CrowdfundContainer>
-
       <LazyLoad
         onLoadMore={getCrowdfundsHandler}
         isLoading={isLoading}
