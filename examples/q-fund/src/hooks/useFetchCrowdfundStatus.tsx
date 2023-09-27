@@ -121,24 +121,25 @@ export const useFetchCrowdfundStatus = (
         txType: ["AT"],
         confirmationStatus: "CONFIRMED",
         address: atAddress,
-        limit: 1,
+        limit: 0,
         reverse: true,
       });
-      console.log(res, res.length, ATEnded);
-      console.log("here0");
       if (res?.length > 0 && ATEnded) {
-        console.log("here1");
+        const totalAmount: number = res.reduce(
+          (total: number, transaction) =>
+            total + parseFloat(transaction.amount),
+          0
+        );
         setATCompleted(true);
         setATLoadingStatus("");
-        setATAmount(res[0]?.amount);
+        setATAmount(totalAmount);
         // Check if AT is achieved or not achieved
-        if (res[0]?.amount >= crowdfundData?.deployedAT?.goalValue) {
+        if (totalAmount >= crowdfundData?.deployedAT?.goalValue) {
           setATStatus("Q-Fund Goal Achieved");
         } else {
           setATStatus("Q-Fund Goal Not Achieved");
         }
       } else if (res?.length === 0 && ATEnded) {
-        console.log("here2");
         setATCompleted(true);
         setATLoadingStatus("");
         setATStatus(
@@ -155,7 +156,6 @@ export const useFetchCrowdfundStatus = (
           setATStatus("Q-Fund Goal Not Achieved");
         }
       } else {
-        console.log("here3");
         setATCompleted(false);
         setATLoadingStatus("");
         setATStatus("Q-Fund In Progress");
