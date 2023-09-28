@@ -1,11 +1,11 @@
 import { DonorDetailsButton } from "./Donate-styles";
 import { Tooltip } from "@mui/material";
-import { SearchTransactionResponse } from "../../../../../../Library/Utility_Functions/Core/API_Interfaces";
+import { SearchTransactionResponse } from "../Library/Utility_Functions/Core/API_Interfaces";
 import {
   addStringNumbers,
   removeTrailingZeros,
-} from "../../../../../../Library/Utility_Functions/Numbers/StringNumbers";
-import { getNamesByAddress } from "../../../../../../Library/Utility_Functions/Core/API_Calls";
+} from "../Library/Utility_Functions/Numbers/StringNumbers";
+import { getNamesByAddress } from "../Library/Utility_Functions/Core/API_Calls";
 import React, { useEffect, useState } from "react";
 import DonorModal from "./DonorModal";
 

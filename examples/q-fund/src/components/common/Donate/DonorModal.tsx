@@ -1,6 +1,7 @@
 import {
   Button,
   Modal,
+  Stack,
   Table,
   TableBody,
   TableCell,
@@ -19,6 +20,16 @@ interface DonorModalProps {
 }
 
 const DonorModal = ({ donorData, closeModal, open }: DonorModalProps) => {
+  const getAverageDonation = () => {
+    const donorCount = donorData.length;
+    if (donorCount === 0) return 0;
+    let donorSum = 0;
+    donorData.map(data => {
+      donorSum += Number(data.amount);
+    });
+    return donorSum / donorCount;
+  };
+
   return (
     <Modal
       open={open}
@@ -57,8 +68,10 @@ const DonorModal = ({ donorData, closeModal, open }: DonorModalProps) => {
             </Table>
           </TableContainer>
         </Box>
-        <h3>Total # of donations: {donorData.length}</h3>
-
+        <Stack>
+          <h4>Total # of Donations: {donorData.length}</h4>
+          <h4>Average Donation Amount: {getAverageDonation()}</h4>
+        </Stack>
         <Button onClick={closeModal}>Close</Button>
       </ModalBody>
     </Modal>
