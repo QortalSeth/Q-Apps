@@ -25,6 +25,11 @@ import { useDispatch, useSelector } from "react-redux";
 import LazyLoad from "../../../components/common/LazyLoad";
 import { StoreReview, upsertReviews } from "../../../state/features/storeSlice";
 import { RootState } from "../../../state/store";
+import {
+  ORDER_BASE,
+  REVIEW_BASE,
+  STORE_BASE
+} from "../../../constants/identifiers";
 
 interface StoreReviewsProps {
   storeId: string;
@@ -55,11 +60,11 @@ export const StoreReviews: FC<StoreReviewsProps> = ({
   // Determine whether user can leave a review
   const doesUserHaveOrderFunc = async () => {
     if (!user?.name) return;
-    const parts = storeId.split("q-store-general-");
+    const parts = storeId.split(`${STORE_BASE}-`);
     const shortStoreId = parts[1];
 
     try {
-      const query = `q-store-order-${shortStoreId}`;
+      const query = `${ORDER_BASE}-${shortStoreId}`;
       const url = `/arbitrary/resources/search?service=DOCUMENT_PRIVATE&name=${user?.name}&exactmatchnames=true&query=${query}&limit=1&includemetadata=false&mode=LATEST&reverse=true`;
       const response = await fetch(url, {
         method: "GET",
@@ -82,9 +87,9 @@ export const StoreReviews: FC<StoreReviewsProps> = ({
     if (!storeId) return;
     try {
       const offset = storeReviews.length;
-      const parts = storeId.split("q-store-general-");
+      const parts = storeId.split(`${STORE_BASE}-`);
       const shortStoreId = parts[1];
-      const query = `q-store-review-${shortStoreId}`;
+      const query = `${REVIEW_BASE}-${shortStoreId}`;
       // Since it the url includes /resources, you know you're fetching the resources and not the raw data
       const url = `/arbitrary/resources/search?service=DOCUMENT&query=${query}&limit=10&includemetadata=true&mode=LATEST&offset=${offset}&reverse=true`;
       const response = await fetch(url, {

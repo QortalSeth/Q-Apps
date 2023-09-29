@@ -44,8 +44,8 @@ export const ProductsToSaveCard = styled(Box)(({ theme }) => ({
   justifyContent: "space-between",
   flexDirection: "column",
   width: "85vw",
-  height: "auto",
   minHeight: "500px",
+  maxHeight: "90vh",
   borderRadius: "8px",
   backgroundColor: theme.palette.mode === "light" ? "#e8e8e8" : "#32333c",
   position: "absolute",
@@ -84,15 +84,16 @@ export const ProductsCol = styled(Grid)(({ theme }) => ({
   overflowY: "auto",
   flexDirection: "row",
   padding: "0 10px 10px 10px",
+
   "&::-webkit-scrollbar-track": {
-    backgroundColor: theme.palette.background.paper
+    backgroundColor: theme.palette.mode === "light" ? "#e8e8e8" : "#32333c"
   },
   "&::-webkit-scrollbar-track:hover": {
-    backgroundColor: theme.palette.background.paper
+    backgroundColor: theme.palette.mode === "light" ? "#e8e8e8" : "#32333c"
   },
   "&::-webkit-scrollbar": {
-    width: "8px",
-    height: "5px",
+    width: "16px",
+    height: "10px",
     backgroundColor: theme.palette.mode === "light" ? "#f6f8fa" : "#292d3e"
   },
   "&::-webkit-scrollbar-thumb": {

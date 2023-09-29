@@ -72,6 +72,7 @@ import states from "../../constants/states.json";
 import moment from "moment";
 import { BackArrowSVG } from "../../assets/svgs/BackArrowSVG";
 import { CloseIconModal } from "../Store/StoreReviews/StoreReviews-styles";
+import { ORDER_BASE, STORE_BASE } from "../../constants/identifiers";
 interface CountryProps {
   text: string;
   value: string;
@@ -354,11 +355,11 @@ export const Cart = () => {
       );
       const orderId = uid();
       if (!storeId) throw new Error("Cannot find store identifier");
-      const parts = storeId.split("q-store-general-");
+      const parts = storeId.split(`${STORE_BASE}-`);
       const shortStoreId = parts[1];
       const productRequestBody = {
         action: "PUBLISH_QDN_RESOURCE",
-        identifier: `q-store-order-${shortStoreId}-${orderId}`,
+        identifier: `${ORDER_BASE}-${shortStoreId}-${orderId}`,
         name: username,
         service: "DOCUMENT_PRIVATE",
         data64: orderToBase64

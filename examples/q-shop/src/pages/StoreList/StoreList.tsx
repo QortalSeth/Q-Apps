@@ -13,13 +13,17 @@ import {
   WelcomeSubFont,
   WelcomeCol,
   QShopLogo,
-  LogoRow
+  LogoRow,
+  StoresRow
 } from "./StoreList-styles";
-import DefaultStoreImage from "../../assets/img/Q-AppsLogo.webp";
-import { Grid, useTheme } from "@mui/material";
+import { Grid, Skeleton, useTheme } from "@mui/material";
 import { StoreCard } from "../Store/StoreCard/StoreCard";
+import { withTimeout } from "../../utils/withTimeout";
+import { TIMEOUT } from "../../constants/timeout";
 import QShopLogoLight from "../../assets/img/QShopLogoLight.webp";
 import QShopLogoDark from "../../assets/img/QShopLogo.webp";
+import DefaultStoreImage from "../../assets/img/Q-AppsLogo.webp";
+import { STORE_BASE } from "../../constants/identifiers";
 
 export const StoreList = () => {
   const dispatch = useDispatch();
@@ -44,9 +48,9 @@ export const StoreList = () => {
   const getUserStores = useCallback(async () => {
     try {
       const offset = stores.length;
-      const query = `q-store-general`;
+      const query = STORE_BASE;
       // Fetch list of user stores' resources from Qortal blockchain
-      const url = `/arbitrary/resources/search?service=STORE&query=${query}&limit=20&exactmatchnames=true&mode=ALL&includemetadata=true&offset=${offset}&reverse=true`;
+      const url = `/arbitrary/resources/search?service=STORE&query=${query}&limit=20&mode=ALL&prefix=true&includemetadata=false&offset=${offset}&reverse=true`;
       const response = await fetch(url, {
         method: "GET",
         headers: {
@@ -81,28 +85,15 @@ export const StoreList = () => {
       });
       dispatch(upsertStores(copiedStores));
       // Get the store raw data from getStore API Call only if the hashmapStore doesn't have the store or if the store is more recently updated than the existing store
-      let localCatalogue: Record<string, Store> = {};
       for (const content of structureData) {
-        if (hashMapStores[content.id] || localCatalogue[content.id]) {
-          continue;
-        }
         if (content.owner && content.id) {
           const res = checkAndUpdateResource({
             id: content.id,
             updated: content.updated
           });
+          // If the store is not already inside the hashmap, fetch the store raw data. We wrap this function in a timeout util function because stores with errors will hang the app and take a long time to load. With this, the max load time will be of 5 seconds for an error store.
           if (res) {
-            const fetchedStore: Store = await getStore(
-              content.owner,
-              content.id,
-              content
-            );
-            if (fetchedStore) {
-              localCatalogue = {
-                ...localCatalogue,
-                [fetchedStore.id]: fetchedStore
-              };
-            }
+            getStore(content.owner, content.id, content);
           }
         }
       }
@@ -169,32 +160,59 @@ export const StoreList = () => {
             {filteredStores.length > 0 &&
               filteredStores
                 // Get rid of the Bester shop (test shop)
-                .filter((store: Store) => store.owner !== "Bester")
+                // .filter((store: Store) => store.owner !== "Bester")
                 .map((store: Store) => {
                   let storeItem = store;
+                  let hasHash = false;
                   const existingStore = hashMapStores[store.id];
+
                   // Check in case hashmap data isn't there yet due to async API calls.
                   // If it's not there, component will rerender once it receives the metadata
                   if (existingStore) {
                     storeItem = existingStore;
+                    hasHash = true;
                   }
                   const storeId = storeItem?.id || "";
                   const storeOwner = storeItem?.owner || "";
-                  const storeTitle = storeItem?.title || "missing metadata";
+                  const storeTitle = storeItem?.title || "Invalid Shop";
                   const storeLogo = storeItem?.logo || DefaultStoreImage;
-                  const storeDescription =
-                    storeItem?.description || "missing metadata";
-                  return (
-                    <StoreCard
-                      storeTitle={storeTitle || ""}
-                      storeLogo={storeLogo || ""}
-                      storeDescription={storeDescription || ""}
-                      storeId={storeId || ""}
-                      storeOwner={storeOwner || ""}
-                      key={storeId}
-                      userName={user?.name || ""}
-                    />
-                  );
+                  const storeDescription = storeItem?.description || "";
+                  if (!hasHash) {
+                    return (
+                      <StoresRow
+                        item
+                        xs={12}
+                        sm={6}
+                        md={6}
+                        lg={3}
+                        key={storeId}
+                      >
+                        <Skeleton
+                          variant="rectangular"
+                          style={{
+                            width: "100%",
+                            height: "460px",
+                            paddingBottom: "10px",
+                            objectFit: "contain",
+                            visibility: "visible",
+                            borderRadius: "8px"
+                          }}
+                        />
+                      </StoresRow>
+                    );
+                  } else {
+                    return (
+                      <StoreCard
+                        storeTitle={storeTitle || ""}
+                        storeLogo={storeLogo || ""}
+                        storeDescription={storeDescription || ""}
+                        storeId={storeId || ""}
+                        storeOwner={storeOwner || ""}
+                        key={storeId}
+                        userName={user?.name || ""}
+                      />
+                    );
+                  }
                 })}
             <LazyLoad onLoadMore={getStores}></LazyLoad>
           </Grid>

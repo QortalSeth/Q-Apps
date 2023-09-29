@@ -57,7 +57,10 @@ const NavBar: React.FC<Props> = ({
 
   // Get All My Stores from Redux To Display In Store Manager Dropdown
 
-  const { myStores } = useSelector((state: RootState) => state.store);
+  const myStores = useSelector((state: RootState) => state.store.myStores);
+  const hashMapStores = useSelector(
+    (state: RootState) => state.store.hashMapStores
+  );
 
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
   const [isOpenBlockedNamesModal, setIsOpenBlockedNamesModal] =
@@ -201,7 +204,7 @@ const NavBar: React.FC<Props> = ({
           </DropdownContainer>
           {myStores.length > 0 &&
             myStores.map((store: Store) => (
-              <DropdownContainer>
+              <DropdownContainer key={store.id}>
                 <DropdownText
                   onClick={() => {
                     dispatch(resetOrders());
@@ -209,9 +212,8 @@ const NavBar: React.FC<Props> = ({
                     navigate(`/${userName}/${store.id}`);
                     handleCloseStoreDropdown();
                   }}
-                  key={store.id}
                 >
-                  {store.title}
+                  {hashMapStores[store.id]?.title}
                 </DropdownText>
               </DropdownContainer>
             ))}
