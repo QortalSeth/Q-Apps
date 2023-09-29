@@ -1,18 +1,18 @@
 import { styled } from "@mui/system";
 import {
-  Box,
-  Grid,
-  Typography,
-  Checkbox,
-  TextField,
-  Button,
   Accordion,
-  AccordionSummary,
   AccordionDetails,
+  AccordionSummary,
+  Box,
+  Button,
+  Grid,
   Rating,
+  TextField,
+  Typography,
 } from "@mui/material";
 import AddPhotoAlternateIcon from "@mui/icons-material/AddPhotoAlternate";
 import { TimesSVG } from "../../assets/svgs/TimesSVG";
+import BoundedNumericTextField from "../../utils/Library/React_Components/BoundedNumericTextField";
 
 export const DoubleLine = styled(Typography)`
   display: -webkit-box;
@@ -158,6 +158,53 @@ export const CustomInputField = styled(TextField)(({ theme }) => ({
     borderBottomColor: theme.palette.secondary.main,
   },
 }));
+
+export const CustomBoundedTextField = styled(BoundedNumericTextField)(
+  ({ theme }) => ({
+    marginBottom: "10px",
+    fontFamily: "Mulish",
+    fontSize: "19px",
+    letterSpacing: "0px",
+    fontWeight: 400,
+    color: theme.palette.text.primary,
+    backgroundColor: theme.palette.background.default,
+    borderColor: theme.palette.background.paper,
+    "& label": {
+      color: theme.palette.mode === "light" ? "#808183" : "#edeef0",
+      fontFamily: "Mulish",
+      fontSize: "19px",
+      letterSpacing: "0px",
+      fontWeight: 400,
+    },
+    "& label.Mui-focused": {
+      color: theme.palette.mode === "light" ? "#A0AAB4" : "#d7d8da",
+    },
+    "& .MuiInput-underline:after": {
+      borderBottomColor: theme.palette.mode === "light" ? "#B2BAC2" : "#c9cccf",
+    },
+    "& .MuiOutlinedInput-root": {
+      "& fieldset": {
+        borderColor: "#E0E3E7",
+      },
+      "&:hover fieldset": {
+        borderColor: "#B2BAC2",
+      },
+      "&.Mui-focused fieldset": {
+        borderColor: "#6F7E8C",
+      },
+    },
+    "& .MuiInputBase-root": {
+      fontFamily: "Mulish",
+      fontSize: "19px",
+      letterSpacing: "0px",
+      fontWeight: 400,
+    },
+
+    "& .MuiFilledInput-root:after": {
+      borderBottomColor: theme.palette.secondary.main,
+    },
+  })
+);
 
 export const CrowdfundTitle = styled(Typography)(({ theme }) => ({
   fontFamily: "Copse",

@@ -8,6 +8,7 @@ import {
   CrowdfundActionButton,
   CrowdfundActionButtonRow,
   CrowdfundCardTitle,
+  CustomBoundedTextField,
   CustomInputField,
   LogoPreviewRow,
   ModalBody,
@@ -24,11 +25,7 @@ import "react-quill/dist/quill.snow.css";
 import { FileAttachment } from "./FileAttachment";
 import { useDispatch, useSelector } from "react-redux";
 import { setNotification } from "../../state/features/notificationsSlice";
-import {
-  base64ToUint8Array,
-  objectToBase64,
-  uint8ArrayToBase64,
-} from "../../utils/toBase64";
+import { objectToBase64, uint8ArrayToBase64 } from "../../utils/toBase64";
 import { RootState } from "../../state/store";
 import { ATTACHMENT_BASE, CROWDFUND_BASE } from "../../constants";
 import dayjs, { Dayjs } from "dayjs";
@@ -45,7 +42,6 @@ import {
 import ImageUploader from "../ImageUploader";
 import { DesktopDateTimePicker } from "@mui/x-date-pickers";
 import { PiggybankSVG } from "../../assets/svgs/PiggybankSVG";
-import BoundedNumericTextField from "../../../../../Library/React_Components/BoundedNumericTextField";
 
 dayjs.extend(isBetween);
 dayjs.extend(duration);
@@ -526,6 +522,16 @@ export const NewCrowdfund = ({ editId, editContent }: NewCrowdfundProps) => {
             maxRows={3}
             required
           />
+          <CustomBoundedTextField
+            label="Goal Amount (QORT)"
+            variant="filled"
+            value={goalValue}
+            onChange={handleInputChange}
+            minValue={minGoal}
+            maxValue={maxGoal}
+            addIconButtons={false}
+            allowDecimals={false}
+          />
           <LocalizationProvider dateAdapter={AdapterDayjs}>
             <DesktopDateTimePicker
               label="End date of crowdfund. Min 5 days Max 30 days"
@@ -539,16 +545,7 @@ export const NewCrowdfund = ({ editId, editContent }: NewCrowdfundProps) => {
             Length of crowdfund: {diffInMins} blocks ~{" "}
             {formatDuration(diffInMins)}
           </NewCrowdfundTimeDescription>
-          <BoundedNumericTextField
-            label="Goal Amount (QORT)"
-            variant="outlined"
-            value={goalValue}
-            onChange={handleInputChange}
-            minValue={minGoal}
-            maxValue={maxGoal}
-            addIconButtons={false}
-            allowDecimals={false}
-          />
+
           <NewCrowdFundFont>Add necessary files - optional</NewCrowdFundFont>
           <FileAttachment
             setAttachments={setAttachments}

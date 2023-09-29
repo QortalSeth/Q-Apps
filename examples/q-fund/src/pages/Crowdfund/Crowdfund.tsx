@@ -55,14 +55,13 @@ import {
 } from "./Update-styles";
 import CoverImageDefault from "../../assets/images/CoverImageDefault.webp";
 import { setNotification } from "../../state/features/notificationsSlice";
-import { objectToBase64 } from "../../utils/toBase64";
 import { useFetchCrowdfundStatus } from "../../hooks/useFetchCrowdfundStatus";
 import { CrowdfundLoader } from "./CrowdfundLoader";
 import { ReusableModalStyled } from "../../components/common/Reviews/QFundOwnerReviews-styles";
 import { QFundOwnerReviews } from "../../components/common/Reviews/QFundOwnerReviews";
-import { searchTransactions } from "../../../../../Library/Utility_Functions/Core/API_Calls";
-import { SearchTransactionResponse } from "../../../../../Library/Utility_Functions/Core/API_Interfaces";
 import DonorInfo from "../../components/common/Donate/DonorInfo";
+import { SearchTransactionResponse } from "../../utils/Library/Utility_Functions/Core_API/Interfaces";
+import { searchTransactions } from "../../utils/Library/Utility_Functions/Core_API/QortalRequest";
 
 export const Crowdfund = () => {
   const theme = useTheme();
@@ -155,7 +154,7 @@ export const Crowdfund = () => {
 
   const getRawDonorData = (address: string) => {
     searchTransactions({
-      txType: "PAYMENT",
+      txType: ["PAYMENT"],
       address,
       confirmationStatus: "BOTH",
     }).then(donorResponse => {
