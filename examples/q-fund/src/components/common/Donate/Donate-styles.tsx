@@ -1,6 +1,6 @@
 import { styled } from "@mui/material/styles";
 import { Box, Button, InputLabel } from "@mui/material";
-import { changeLightness } from "../Library/Utility_Functions/Numbers/Colors";
+import { changeLightness } from "../../../utils/Library/Utility_Functions/Numbers/Colors";
 
 const ButtonStyle = styled(Button)({
   fontFamily: "Mulish",

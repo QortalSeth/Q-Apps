@@ -1,11 +1,11 @@
 import { DonorDetailsButton } from "./Donate-styles";
 import { Tooltip } from "@mui/material";
-import { SearchTransactionResponse } from "../Library/Utility_Functions/Core/API_Interfaces";
+import { SearchTransactionResponse } from "../../../utils/Library/Utility_Functions/Core_API/Interfaces";
 import {
   addStringNumbers,
   removeTrailingZeros,
-} from "../Library/Utility_Functions/Numbers/StringNumbers";
-import { getNamesByAddress } from "../Library/Utility_Functions/Core/API_Calls";
+} from "../../../utils/Library/Utility_Functions/Numbers/StringNumbers";
+import { getAccountNames } from "../../../utils/Library/Utility_Functions/Core_API/QortalRequest";
 import React, { useEffect, useState } from "react";
 import DonorModal from "./DonorModal";
 
@@ -46,7 +46,7 @@ const DonorInfo = ({ rawDonorData, aggregateDonorData }: DonorInfoProps) => {
     const processedDonorData: ViewableDonorData[] = [];
     Promise.all(
       rawDonorData.map(({ creatorAddress, amount }) => {
-        return getNamesByAddress(creatorAddress);
+        return getAccountNames(creatorAddress);
       })
     ).then(responseArray => {
       responseArray.map((response, index) => {

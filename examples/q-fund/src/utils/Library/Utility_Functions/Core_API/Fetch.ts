@@ -2,7 +2,7 @@ import {
   GetRequestData,
   SearchTransactionResponse,
   TransactionSearchParams,
-} from "./API_Interfaces";
+} from "./Interfaces";
 
 const assembleURLParams = (params: object) => {
   let finalUrl = "";
@@ -26,7 +26,7 @@ export const searchTransactions = async (params: TransactionSearchParams) => {
   return donorTransactions;
 };
 
-export const getNamesByAddress = async (
+export const getAccountNames = async (
   address: string,
   params?: GetRequestData
 ) => {

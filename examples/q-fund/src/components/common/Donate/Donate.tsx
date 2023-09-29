@@ -19,7 +19,7 @@ import {
   DonateModalLabel,
 } from "./Donate-styles";
 import { QortalSVG } from "../../../assets/svgs/QortalSVG";
-import BoundedNumericTextField from "../Library/React_Components/BoundedNumericTextField";
+import BoundedNumericTextField from "../../../utils/Library/React_Components/BoundedNumericTextField";
 
 interface DonateProps {
   atAddress: string;

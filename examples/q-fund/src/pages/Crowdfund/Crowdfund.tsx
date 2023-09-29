@@ -60,8 +60,8 @@ import { CrowdfundLoader } from "./CrowdfundLoader";
 import { ReusableModalStyled } from "../../components/common/Reviews/QFundOwnerReviews-styles";
 import { QFundOwnerReviews } from "../../components/common/Reviews/QFundOwnerReviews";
 import DonorInfo from "../../components/common/Donate/DonorInfo";
-import { SearchTransactionResponse } from "../../components/common/Library/Utility_Functions/Core/API_Interfaces";
-import { searchTransactions } from "../../components/common/Library/Utility_Functions/Core/API_Calls";
+import { SearchTransactionResponse } from "../../utils/Library/Utility_Functions/Core_API/Interfaces";
+import { searchTransactions } from "../../utils/Library/Utility_Functions/Core_API/QortalRequest";
 
 export const Crowdfund = () => {
   const theme = useTheme();
@@ -154,7 +154,7 @@ export const Crowdfund = () => {
 
   const getRawDonorData = (address: string) => {
     searchTransactions({
-      txType: "PAYMENT",
+      txType: ["PAYMENT"],
       address,
       confirmationStatus: "BOTH",
     }).then(donorResponse => {

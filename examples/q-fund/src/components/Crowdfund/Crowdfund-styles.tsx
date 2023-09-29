@@ -12,7 +12,7 @@ import {
 } from "@mui/material";
 import AddPhotoAlternateIcon from "@mui/icons-material/AddPhotoAlternate";
 import { TimesSVG } from "../../assets/svgs/TimesSVG";
-import BoundedNumericTextField from "../common/Library/React_Components/BoundedNumericTextField";
+import BoundedNumericTextField from "../../utils/Library/React_Components/BoundedNumericTextField";
 
 export const DoubleLine = styled(Typography)`
   display: -webkit-box;
