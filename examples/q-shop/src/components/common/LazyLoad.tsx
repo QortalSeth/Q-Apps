@@ -4,9 +4,10 @@ import CircularProgress from "@mui/material/CircularProgress";
 
 interface Props {
   onLoadMore: () => Promise<void>;
+  isLoading?: boolean;
 }
 
-const LazyLoad: React.FC<Props> = ({ onLoadMore }) => {
+const LazyLoad: React.FC<Props> = ({ onLoadMore, isLoading }) => {
   const [isFetching, setIsFetching] = useState<boolean>(false);
 
   const firstLoad = useRef(false);
@@ -36,7 +37,7 @@ const LazyLoad: React.FC<Props> = ({ onLoadMore }) => {
     >
       <div
         style={{
-          visibility: isFetching ? "visible" : "hidden"
+          visibility: isFetching || isLoading ? "visible" : "hidden"
         }}
       >
         <CircularProgress />

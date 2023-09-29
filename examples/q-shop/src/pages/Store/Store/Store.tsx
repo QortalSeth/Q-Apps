@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo } from "react";
-import { redirect, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../../state/store";
 import { useParams } from "react-router-dom";
@@ -10,10 +10,12 @@ import {
   Chip,
   FormControl,
   Rating,
-  Typography
+  Typography,
+  Skeleton
 } from "@mui/material";
 import {
   Catalogue,
+  setDataContainer,
   setIsLoadingGlobal,
   updateRecentlyVisitedStoreId
 } from "../../../state/features/globalSlice";
@@ -66,6 +68,11 @@ import { StoreDetails } from "../StoreDetails/StoreDetails";
 import { StoreReviews } from "../StoreReviews/StoreReviews";
 import { setNotification } from "../../../state/features/notificationsSlice";
 import { objectToBase64 } from "../../../utils/toBase64";
+import {
+  DATA_CONTAINER_BASE,
+  REVIEW_BASE,
+  STORE_BASE
+} from "../../../constants/identifiers";
 
 interface IListProducts {
   sort: string;
@@ -115,6 +122,9 @@ export const Store = () => {
   const ownStoreListProducts = useSelector(
     (state: RootState) => state.global.listProducts
   );
+  const userOwnDataContainer = useSelector(
+    (state: RootState) => state.global.dataContainer
+  );
 
   const { checkAndUpdateResourceCatalogue, getCatalogue } = useFetchOrders();
 
@@ -136,10 +146,12 @@ export const Store = () => {
   );
   const [averageRatingLoader, setAverageRatingLoader] =
     useState<boolean>(false);
+  const [productsLoading, setProductsLoading] = useState<boolean>(false);
 
   const getProducts = useCallback(async () => {
     if (!store) return;
     try {
+      setProductsLoading(true);
       const offset = products.length;
       // Get products from store's data container, with ternary depending on whether you own the store or not
       const productList =
@@ -199,6 +211,8 @@ export const Store = () => {
       }
     } catch (error) {
       console.error(error);
+    } finally {
+      setProductsLoading(false);
     }
   }, [products, viewedStoreListProducts, ownStoreListProducts]);
 
@@ -214,7 +228,7 @@ export const Store = () => {
       dispatch(setStoreId(store));
       dispatch(updateRecentlyVisitedStoreId(store));
       dispatch(setStoreOwner(name));
-      // Check if store data is not already inside redux, and that if it is, that it's not from another store. This is to avoid unnecessary QDN calls. getProducts() will get its data from the existing data container in Redux if the store hasn't changed, hence why we clear the products array here as well as the datacontainer only if the currentViewedStore is not the same as the store in the url.
+      // Check if store data is not already inside redux, and that if it is, that it's not from another store. This is to avoid unnecessary QDN calls. getProducts() will get its data from the existing data container in Redux if the store hasn't changed, hence why we clear the products array here as well as the datacontainer only if the currentViewedStore is not the same as the store in the url. The logic below is only for other's people's stores, not your own. Your own store is handled in the global wrapper.
       if (
         (!currentViewedStore && name !== user?.name) ||
         (currentViewedStore?.id !== store && name !== user?.name)
@@ -223,7 +237,7 @@ export const Store = () => {
         dispatch(clearReviews());
         dispatch(clearViewedStoreDataContainer());
         let myStore;
-        const url = `/arbitrary/resources/search?service=STORE&identifier=${store}&exactmatchnames=true&mode=ALL&name=${name}&includemetadata=true`;
+        const url = `/arbitrary/resources/search?service=STORE&identifier=${store}&exactmatchnames=true&mode=ALL&name=${name}&includemetadata=false`;
         const info = await fetch(url, {
           method: "GET",
           headers: {
@@ -233,7 +247,7 @@ export const Store = () => {
 
         const responseDataStore = await info.json();
         const filterOut = responseDataStore.filter((store: any) =>
-          store.identifier.startsWith("q-store-general-")
+          store.identifier.startsWith(`${STORE_BASE}-`)
         );
         if (filterOut.length === 0) return;
         if (filterOut.length !== 0) {
@@ -260,30 +274,50 @@ export const Store = () => {
             description: responseData?.description || "",
             category: myStore.metadata?.category,
             tags: myStore.metadata?.tags || [],
-            logo: responseData?.logo || ""
+            logo: responseData?.logo || "",
+            shortStoreId: responseData?.shortStoreId
           })
         );
 
-        const urlDatacontainer = `/arbitrary/DOCUMENT/${name}/${store}-datacontainer`;
+        const urlDatacontainer = `/arbitrary/DOCUMENT/${name}/${store}-${DATA_CONTAINER_BASE}`;
         const responseContainer = await fetch(urlDatacontainer, {
           method: "GET",
           headers: {
             "Content-Type": "application/json"
           }
         });
-        // Set dataContainer in redux if the response is 200 status. This is to do filtering in the future since it cannot be done on QDN at the moment.
-        if (responseContainer.ok) {
-          const responseDataContainer = await responseContainer.json();
+        const responseDataContainer = await responseContainer.json();
+
+        // Call to see if the datacontainer actually exists
+        const dataContainerExists = await qortalRequest({
+          action: "SEARCH_QDN_RESOURCES",
+          service: "DOCUMENT",
+          identifier: `${myStore.identifier}-${DATA_CONTAINER_BASE}`,
+          name: name,
+          prefix: false,
+          exactMatchNames: true,
+          limit: 0,
+          offset: 0,
+          reverse: true
+        });
+
+        // Set dataContainer in redux if it is found. This is to do filtering in the future since it cannot be done on QDN at the moment.
+        if (
+          responseDataContainer &&
+          !("error" in responseDataContainer) &&
+          Object.keys(responseDataContainer).length > 0
+        ) {
           dispatch(
             setViewedStoreDataContainer({
               ...responseDataContainer,
-              id: `${store}-datacontainer`
+              id: `${store}-${DATA_CONTAINER_BASE}`
             })
           );
+          // If they haven't published a datacontainer, by querying "/arbitrary​/resources​/search", and it comes back as []
           // If you can't find the data container, aka response code of 404, and it's not your own store, redirect to home page.
         } else if (
           responseContainer.status === 404 &&
-          username !== user?.name
+          dataContainerExists.length === 0
         ) {
           navigate("/");
           dispatch(
@@ -292,36 +326,22 @@ export const Store = () => {
               alertType: "error"
             })
           );
+          // If they haven't published a datacontainer, by querying "/arbitrary​/resources​/search", and it comes back as []
           // If you can't find the data container, aka response code of 404, and it's your own store, prompt to create the data container.
         } else if (
-          responseContainer.status === 404 &&
-          username === user?.name
+          !responseContainer.ok &&
+          responseContainer.status !== 404 &&
+          dataContainerExists.length > 0
         ) {
-          // Publish Data Container to QDN
-          let formatStoreIdentifier = store;
-          if (formatStoreIdentifier.endsWith("-")) {
-            formatStoreIdentifier = formatStoreIdentifier.slice(0, -1);
-          }
-          if (formatStoreIdentifier.startsWith("-")) {
-            formatStoreIdentifier = formatStoreIdentifier.slice(1);
-          }
-          const dataContainer = {
-            storeId: store,
-            shortStoreId: formatStoreIdentifier,
-            owner: username,
-            products: {}
-          };
-          const dataContainerToBase64 = await objectToBase64(dataContainer);
-          await qortalRequest({
-            action: "PUBLISH_QDN_RESOURCE",
-            name: name,
-            service: "DOCUMENT",
-            data64: dataContainerToBase64,
-            identifier: `${storeId}-datacontainer`,
-            filename: "datacontainer.json"
-          });
-          // If you can't find the data container, but it's a response of 500, throw general error and redirect to home page.
-        } else if (!responseContainer.ok && responseContainer.status !== 404) {
+          navigate("/");
+          dispatch(
+            setNotification({
+              msg: "Server Error",
+              alertType: "error"
+            })
+          );
+          // If the datacontainer exists and you cannot find it, but it's a response of 500, throw general error and redirect to home page.
+        } else {
           navigate("/");
           dispatch(
             setNotification({
@@ -343,9 +363,9 @@ export const Store = () => {
     if (!storeId) return;
     try {
       setAverageRatingLoader(true);
-      const parts = storeId.split("q-store-general-");
+      const parts = storeId.split(`${STORE_BASE}-`);
       const shortStoreId = parts[1];
-      const query = `q-store-review-${shortStoreId}`;
+      const query = `${REVIEW_BASE}-${shortStoreId}`;
       // Since it the url includes /resources, you know you're fetching the resources and not the raw data
       const url = `/arbitrary/resources/search?service=DOCUMENT&query=${query}&limit=100&includemetadata=false&mode=LATEST&reverse=true`;
       const response = await fetch(url, {
@@ -726,26 +746,51 @@ export const Store = () => {
         <ProductsContainer container spacing={2}>
           {filteredProducts.length > 0 ? (
             filteredProducts.map((product: Product) => {
-              const storeId = currentStore?.id || "";
-              return (
-                <ProductCardCol
-                  xs={12}
-                  sm={6}
-                  md={4}
-                  lg={3}
-                  item
-                  key={product.id}
-                >
-                  <ContextMenuResource
-                    name={product.user}
-                    service="PRODUCT"
-                    identifier={product.id}
-                    link={`qortal://APP/Q-Shop/${product?.user}/${storeId}/${product?.id}/${product?.catalogueId}`}
+              if (productsLoading) {
+                return (
+                  <ProductCardCol
+                    xs={12}
+                    sm={6}
+                    md={4}
+                    lg={3}
+                    item
+                    key={product.id}
                   >
-                    <ProductCard product={product} />
-                  </ContextMenuResource>
-                </ProductCardCol>
-              );
+                    <Skeleton
+                      variant="rectangular"
+                      style={{
+                        width: "100%",
+                        height: "400px",
+                        paddingBottom: "10px",
+                        objectFit: "contain",
+                        visibility: "visible",
+                        borderRadius: "8px"
+                      }}
+                    />
+                  </ProductCardCol>
+                );
+              } else {
+                const storeId = currentStore?.id || "";
+                return (
+                  <ProductCardCol
+                    xs={12}
+                    sm={6}
+                    md={4}
+                    lg={3}
+                    item
+                    key={product.id}
+                  >
+                    <ContextMenuResource
+                      name={product.user}
+                      service="PRODUCT"
+                      identifier={product.id}
+                      link={`qortal://APP/Q-Shop/${product?.user}/${storeId}/${product?.id}/${product?.catalogueId}`}
+                    >
+                      <ProductCard product={product} />
+                    </ContextMenuResource>
+                  </ProductCardCol>
+                );
+              }
             })
           ) : filteredProducts.length === 0 && username === user?.name ? (
             <NoProductsContainer>
@@ -761,7 +806,10 @@ export const Store = () => {
             </NoProductsContainer>
           )}
         </ProductsContainer>
-        <LazyLoad onLoadMore={getProductsHandler}></LazyLoad>
+        <LazyLoad
+          isLoading={productsLoading}
+          onLoadMore={getProductsHandler}
+        ></LazyLoad>
       </Grid>
       <ReusableModalStyled
         id={"store-details"}

@@ -17,6 +17,8 @@ export interface CurrentStore {
   id: string;
   title: string;
   description: string;
+  owner: string;
+  shortStoreId: string;
   logo?: string;
   location?: string;
   shipsTo?: string;
@@ -205,6 +207,9 @@ export const globalSlice = createSlice({
         products: [],
         categories: []
       };
+    },
+    clearDataCotainer: (state) => {
+      state.dataContainer = null;
     }
   }
 });
@@ -229,7 +234,8 @@ export const {
   clearAllProductsToSave,
   resetListProducts,
   setProducts,
-  addProductsToSaveCategory
+  addProductsToSaveCategory,
+  clearDataCotainer
 } = globalSlice.actions;
 
 export default globalSlice.reducer;

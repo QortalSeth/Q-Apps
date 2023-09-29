@@ -15,6 +15,7 @@ import {
   upsertProducts
 } from "../state/features/globalSlice";
 import { fetchAndEvaluateCatalogues } from "../utils/fetchCatalogues";
+import { ORDER_BASE, STORE_BASE } from "../constants/identifiers";
 
 interface Resource {
   id: string;
@@ -106,10 +107,10 @@ export const useFetchOrders = () => {
     try {
       dispatch(setIsLoadingGlobal(true));
       const offset = orders.length;
-      const parts = store.split("q-store-general-");
+      const parts = store.split(`${STORE_BASE}-`);
       const shortStoreId = parts[1];
 
-      const query = `q-store-order-${shortStoreId}`;
+      const query = `${ORDER_BASE}-${shortStoreId}`;
       const url = `/arbitrary/resources/search?service=DOCUMENT_PRIVATE&query=${query}&limit=20&includemetadata=true&mode=ALL&offset=${offset}&reverse=true`;
       const response = await fetch(url, {
         method: "GET",
@@ -165,7 +166,7 @@ export const useFetchOrders = () => {
       try {
         dispatch(setIsLoadingGlobal(true));
         const offset = orders.length;
-        const query = `q-store-order-`;
+        const query = `${ORDER_BASE}-`;
         const url = `/arbitrary/resources/search?service=DOCUMENT_PRIVATE&query=${query}&limit=20&includemetadata=true&offset=${offset}&name=${name}&exactmatchnames=true&mode=ALL&reverse=true`;
         const response = await fetch(url, {
           method: "GET",

@@ -85,6 +85,7 @@ export interface Store {
   logo?: string;
   location?: string;
   shipsTo?: string;
+  shortStoreId?: string;
 }
 
 export interface StoreReview {
@@ -141,7 +142,7 @@ export const storeSlice = createSlice({
     },
     addToHashMapStores: (state, action) => {
       const store = action.payload;
-      state.hashMapStores[store.id] = store;
+      state.hashMapStores[store?.id] = store;
     },
     addToHashMapStoreReviews: (state, action) => {
       const review = action.payload;
