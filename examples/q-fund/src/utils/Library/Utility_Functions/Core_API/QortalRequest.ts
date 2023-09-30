@@ -3,6 +3,7 @@ import {
   SearchTransactionResponse,
   TransactionSearchParams,
 } from "./Interfaces";
+import { stringIsEmpty } from "../Numbers/StringNumbers";
 
 export const searchTransactions = async (params: TransactionSearchParams) => {
   return (await qortalRequest({
@@ -10,14 +11,23 @@ export const searchTransactions = async (params: TransactionSearchParams) => {
     ...params,
   })) as SearchTransactionResponse[];
 };
-
+type AccountName = { name: string; owner: string };
 export const getAccountNames = async (
   address: string,
   params?: GetRequestData
 ) => {
-  return (await qortalRequest({
+  const names = (await qortalRequest({
     action: "GET_ACCOUNT_NAMES",
     address,
     ...params,
-  })) as { name: string; owner: string }[];
+  })) as AccountName[];
+
+  const namelessAddress = { name: "", owner: address };
+  const emptyNamesFilled = names.map(({ name, owner }) => {
+    return stringIsEmpty(name) ? namelessAddress : { name, owner };
+  });
+
+  const emptyArrayFilled =
+    emptyNamesFilled.length > 0 ? emptyNamesFilled : [namelessAddress];
+  return emptyArrayFilled;
 };

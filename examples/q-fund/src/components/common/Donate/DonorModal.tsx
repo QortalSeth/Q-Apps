@@ -12,6 +12,7 @@ import {
 import { ModalBody } from "../../Crowdfund/Crowdfund-styles";
 import Box from "@mui/material/Box";
 import { ViewableDonorData } from "./DonorInfo";
+import { truncateNumber } from "../../../utils/Library/Utility_Functions/Numbers/StringNumbers";
 
 interface DonorModalProps {
   donorData: ViewableDonorData[];
@@ -27,7 +28,8 @@ const DonorModal = ({ donorData, closeModal, open }: DonorModalProps) => {
     donorData.map(data => {
       donorSum += Number(data.amount);
     });
-    return donorSum / donorCount;
+    const average = donorSum / donorCount;
+    return truncateNumber(average, 2);
   };
 
   return (

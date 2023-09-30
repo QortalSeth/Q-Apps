@@ -12,7 +12,7 @@ import {
   isIntegerNum,
   removeTrailingZeros,
   sigDigitsExceeded,
-  stringIsEmptyNumber,
+  stringIsEmpty,
 } from "../Utility_Functions/Numbers/StringNumbers";
 import AddIcon from "@mui/icons-material/Add";
 import RemoveIcon from "@mui/icons-material/Remove";
@@ -47,7 +47,7 @@ export const BoundedNumericTextField = ({
 
   const skipMinMaxCheck = (value: string) => {
     const lastIndexIsDecimal = value.charAt(value.length - 1) === ".";
-    const isEmpty = stringIsEmptyNumber(value);
+    const isEmpty = stringIsEmpty(value);
     const isAllZeros = isAllZerosNum.test(value);
     const isInteger = isIntegerNum.test(value);
     // skipping minMax on all 0s allows values less than 1 to be entered
@@ -74,7 +74,7 @@ export const BoundedNumericTextField = ({
     return value;
   };
   const filterValue = (value: string) => {
-    if (stringIsEmptyNumber(value)) return "";
+    if (stringIsEmpty(value)) return "";
     value = filterTypes(value);
     if (isFloatNum.test(value)) {
       return setMinMaxValue(value);
@@ -109,7 +109,7 @@ export const BoundedNumericTextField = ({
 
   const formatValueOnBlur = (e: eventType) => {
     let value = e.target.value;
-    if (stringIsEmptyNumber(value) || value === ".") {
+    if (stringIsEmpty(value) || value === ".") {
       setTextFieldValue("");
       return;
     }

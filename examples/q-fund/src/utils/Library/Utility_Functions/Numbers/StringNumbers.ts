@@ -32,10 +32,25 @@ export const addStringNumbers = (s1: string, s2: string) => {
   });
 };
 
-export const stringIsEmptyNumber = (value: string) => {
+export const stringIsEmpty = (value: string) => {
   return value === "";
 };
 
 export const stringIsNaN = (value: string) => {
   return Number.isNaN(Number(value));
+};
+
+export const stringIsNumber = (value: string) => {
+  return !stringIsNaN(value);
+};
+
+export const toNumber = (value: string | number) => {
+  return Number(value);
+};
+export const toString = (value: string | number) => {
+  return value.toString();
+};
+export const truncateNumber = (value: string | number, sigDigits: number) => {
+  const valueNum = toNumber(value);
+  return valueNum.toFixed(sigDigits);
 };
