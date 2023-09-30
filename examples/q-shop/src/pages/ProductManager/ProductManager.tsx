@@ -51,6 +51,11 @@ import { CreateButton } from "../../components/modals/CreateStoreModal-styles";
 import { ReusableModal } from "../../components/modals/ReusableModal";
 import { useParams } from "react-router-dom";
 import { useLocation } from "react-router-dom";
+import {
+  CATALOGUE_BASE,
+  DATA_CONTAINER_BASE,
+  STORE_BASE
+} from "../../constants/identifiers";
 
 const uid = new ShortUniqueId({ length: 10 });
 
@@ -58,7 +63,7 @@ export const ProductManager = () => {
   const theme = useTheme();
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const location = useLocation();
+
   // Get store id from url
   const { store } = useParams();
 
@@ -127,7 +132,13 @@ export const ProductManager = () => {
     if (!currentStore) {
       errorMsg = "Cannot create a product without having a store";
     }
+
     if (!dataContainer) {
+      errorMsg = "Cannot create a product without having a data-container";
+    }
+
+    // Add validation to make sure the dataContainer has the same store id as the current store
+    if (currentStore?.id !== dataContainer?.storeId) {
       errorMsg = "Cannot create a product without having a data-container";
     }
 
@@ -148,7 +159,7 @@ export const ProductManager = () => {
     try {
       const storeId: string = currentStore?.id;
       if (!storeId) throw new Error("Could not find your store");
-      const parts = storeId.split("q-store-general-");
+      const parts = storeId.split(`${STORE_BASE}-`);
       const shortStoreId = parts[1];
 
       if (!currentStore) throw new Error("Could not find your store");
@@ -231,7 +242,7 @@ export const ProductManager = () => {
           } else {
             // Create new catalogue
             const uidGenerator = uid();
-            const catalogueId = `q-store-catalogue-${shortStoreId}-${uidGenerator}`;
+            const catalogueId = `${CATALOGUE_BASE}-${shortStoreId}-${uidGenerator}`;
             // Add catalogueId to the product here (!important)
             listOfCataloguesToPublish.push({
               id: catalogueId,
@@ -359,7 +370,7 @@ export const ProductManager = () => {
       dispatch(
         setDataContainer({
           ...dataContainerToPublish,
-          id: `${storeId}-datacontainer`
+          id: `${storeId}-${DATA_CONTAINER_BASE}`
         })
       );
 
@@ -457,12 +468,15 @@ export const ProductManager = () => {
   }, [dataContainerProducts]);
 
   useEffect(() => {
-    if (!dataContainer && userName) {
+    if (
+      (!dataContainer || Object.keys(dataContainer).length === 0) &&
+      userName
+    ) {
       navigate(`/${userName}/${store}`);
     } else {
       return;
     }
-  }, [userName]);
+  }, [userName, dataContainer]);
 
   return (
     <ProductManagerContainer>
@@ -515,7 +529,7 @@ export const ProductManager = () => {
         </DockedProductsToSaveCard>
       ) : (
         <ReusableModal
-          customStyles={{ top: "15%", backgroundColor: "transparent" }}
+          customStyles={{ top: "5%", backgroundColor: "transparent" }}
           open={Object.keys(productsToSave).length > 0}
         >
           <ProductsToSaveCard>

@@ -1,10 +1,11 @@
 import React from "react";
 import { Box, Modal, useTheme } from "@mui/material";
+import { ReusableModalBody } from "./ReusableModal-styles";
 
 interface MyModalProps {
   open: boolean;
   onClose?: () => void;
-  onSubmit?: (obj: any) => Promise<void>;
+  // onSubmit?: (obj: any) => Promise<void>;
   children: any;
   customStyles?: any;
   id?: string;
@@ -14,7 +15,7 @@ export const ReusableModal: React.FC<MyModalProps> = ({
   id,
   open,
   onClose,
-  onSubmit,
+  // onSubmit,
   children,
   customStyles = {}
 }) => {
@@ -26,25 +27,14 @@ export const ReusableModal: React.FC<MyModalProps> = ({
       aria-labelledby="modal-title"
       aria-describedby="modal-description"
     >
-      <Box
+      <ReusableModalBody
         id={id}
         sx={{
-          position: "absolute",
-          top: "50%",
-          left: "50%",
-          transform: "translate(-50%, -50%)",
-          width: "75%",
-          bgcolor: theme.palette.background.paper,
-          boxShadow: 24,
-          p: 4,
-          display: "flex",
-          flexDirection: "column",
-          gap: 2,
           ...customStyles
         }}
       >
         {children}
-      </Box>
+      </ReusableModalBody>
     </Modal>
   );
 };

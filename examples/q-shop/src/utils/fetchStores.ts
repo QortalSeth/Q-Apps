@@ -22,17 +22,17 @@ export const fetchAndEvaluateStores = async (data: any) => {
       const responseData = await response.json()
       if (checkStructureStore(responseData)) {
         obj = {
-          ...responseData,
           ...content,
+          ...responseData,
           owner,
-          title: responseData.title,
-          created: responseData.created,
           id: storeId,
           isValid: true
         }
       }
       return obj
-    } catch (error) { }
+    } catch (error) {
+      console.error(error);
+     }
   }
 
   const res = await getStoreStores()

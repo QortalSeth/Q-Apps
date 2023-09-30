@@ -24,6 +24,7 @@ import {
   addToHashMapStoreReviews,
   addToReviews
 } from "../../../../state/features/storeSlice";
+import { REVIEW_BASE, STORE_BASE } from "../../../../constants/identifiers";
 
 /* Reviews notes
   Prevent them from adding a review to their own store
@@ -112,11 +113,11 @@ export const AddReview: FC<AddReviewProps> = ({
       );
       throw new Error(errorMsg);
     }
-    const parts = storeId.split("q-store-general-");
+    const parts = storeId.split(`${STORE_BASE}-`);
     const shortStoreId = parts[1];
     const uidGenerator = uid();
     // Create identifier for the review
-    const reviewId = `q-store-review-${shortStoreId}-${uidGenerator}-${
+    const reviewId = `${REVIEW_BASE}-${shortStoreId}-${uidGenerator}-${
       Number(rating) * 10
     }`;
     // Check if review identifier already exists

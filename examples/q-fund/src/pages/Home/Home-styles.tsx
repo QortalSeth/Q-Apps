@@ -23,10 +23,10 @@ export const SubtitleContainer = styled(Box)(({ theme }) => ({
   width: "100%",
 }));
 
-export const Subtitle = styled(Typography)(({ theme }) => ({
+export const Subtitle = styled(Typography)({
   textAlign: "center",
   fontSize: "20px",
-}));
+});
 
 const DoubleLine = styled(Typography)`
   display: -webkit-box;
@@ -217,18 +217,18 @@ export const CrowdfundListTitle = styled(Typography)(({ theme }) => ({
   userSelect: "none",
 }));
 
-export const CardContainer = styled(Box)(({ theme }) => ({
+export const CardContainer = styled(Box)({
   display: "flex",
   flexDirection: "column",
   height: "auto",
   width: "100%",
-}));
+});
 
-export const CrowdfundImageContainer = styled(Box)(({ theme }) => ({
+export const CrowdfundImageContainer = styled(Box)({
   display: "flex",
   position: "relative",
   cursor: "pointer",
-}));
+});
 
 export const CrowdfundTitleCard = styled(Box)(({ theme }) => ({
   position: "absolute",
@@ -246,23 +246,23 @@ export const CrowdfundTitleCard = styled(Box)(({ theme }) => ({
   gap: "5px",
 }));
 
-export const CrowdfundTitle = styled(Typography)(({ theme }) => ({
+export const CrowdfundTitle = styled(Typography)({
   fontFamily: "Montserrat",
   fontWeight: 400,
   fontSize: "20px",
   letterSpacing: "0.4px",
   userSelect: "none",
-}));
+});
 
-export const NameContainer = styled(Box)(({ theme }) => ({
+export const NameContainer = styled(Box)({
   display: "flex",
   flexDirection: "row",
   justifyContent: "flex-start",
   alignItems: "center",
   gap: "5px",
-}));
+});
 
-export const CrowdfundOwner = styled(Typography)(({ theme }) => ({
+export const CrowdfundOwner = styled(Typography)({
   fontFamily: "Mulish",
   fontSize: "16px",
   letterSpacing: "0px",
@@ -271,7 +271,7 @@ export const CrowdfundOwner = styled(Typography)(({ theme }) => ({
   whiteSpace: "nowrap",
   textOverflow: "ellipsis",
   width: "100%",
-}));
+});
 
 export const CrowdfundDescription = styled(Typography)(({ theme }) => ({
   fontFamily: "Mulish",
@@ -303,12 +303,12 @@ export const DonateButton = styled(Button)(({ theme }) => ({
   },
 }));
 
-export const CrowdfundGoalRow = styled(Box)(({ theme }) => ({
+export const CrowdfundGoalRow = styled(Box)({
   display: "flex",
   alignItems: "center",
   gap: "7px",
   width: "100%",
-}));
+});
 
 export const CrowdfundText = styled(Typography)({
   fontFamily: "Mulish",
@@ -318,7 +318,7 @@ export const CrowdfundText = styled(Typography)({
   userSelect: "none",
 });
 
-export const CrowdfundGoal = styled(Box)(({ theme }) => ({
+export const CrowdfundGoal = styled(Box)({
   display: "flex",
   alignItems: "center",
   gap: "3px",
@@ -326,4 +326,4 @@ export const CrowdfundGoal = styled(Box)(({ theme }) => ({
   fontSize: "18px",
   fontWeight: 400,
   letterSpacing: "0.4px",
-}));
+});

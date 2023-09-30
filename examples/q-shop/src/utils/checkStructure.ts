@@ -41,7 +41,6 @@ export const checkStructureStore = (content: any) => {
   if (!content?.title) isValid = false;
   if (!content?.created) isValid = false;
   if (!content?.description) isValid = false;
-  if (!content?.logo) isValid = false;
   if (!content?.shipsTo) isValid = false;
   if (!content?.shortStoreId) isValid = false;
   return isValid;

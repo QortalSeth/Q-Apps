@@ -283,7 +283,7 @@ export const NewCrowdfund = ({ editId, editContent }: NewCrowdfundProps) => {
         description: sanitizeTitle.slice(0, 30),
         type: "crowdfund",
         tags: "q-fund",
-        amount: 0.01,
+        amount: 0.2,
         assetId: 0,
       });
 

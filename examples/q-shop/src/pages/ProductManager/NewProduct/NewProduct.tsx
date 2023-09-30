@@ -10,6 +10,7 @@ import { Product } from "../../../state/features/storeSlice";
 import { CreateProductButton } from "./NewProduct-styles";
 import { AddSVG } from "../../../assets/svgs/AddSVG";
 import { ModalBody } from "../../../components/modals/CreateStoreModal-styles";
+import { PRODUCT_BASE, STORE_BASE } from "../../../constants/identifiers";
 
 const uid = new ShortUniqueId({ length: 10 });
 interface ProductPrice {
@@ -116,7 +117,7 @@ export const NewProduct = ({
         throw new Error("Cannot find data-container products");
       const storeId: string = currentStore?.id;
 
-      const parts = storeId.split("q-store-general-");
+      const parts = storeId.split(`${STORE_BASE}-`);
       const shortStoreId = parts[1];
       const productId = uid();
       if (!currentStore) return;
@@ -137,7 +138,7 @@ export const NewProduct = ({
 
         dispatch(setProductsToSave(productObject));
       } else {
-        const id = `q-store-product-${shortStoreId}-${productId}`;
+        const id = `${PRODUCT_BASE}-${shortStoreId}-${productId}`;
         const productObject: any = {
           title,
           description,
