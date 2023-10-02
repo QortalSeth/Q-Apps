@@ -6,6 +6,7 @@ import PageLoader from "../components/common/PageLoader";
 import { RootState } from "../state/store";
 import { setUserAvatarHash } from "../state/features/globalSlice";
 import { useLocation } from "react-router-dom";
+import ConsentModal from "../components/modals/ConsentModal";
 
 interface Props {
   children: React.ReactNode;
@@ -90,6 +91,7 @@ const GlobalWrapper: React.FC<Props> = ({ children, setTheme }) => {
           fixed={true}
         />
       )}
+      <ConsentModal />
       {children}
     </>
   );
