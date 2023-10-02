@@ -44,11 +44,11 @@ export default function ConsentModal() {
         <DialogTitle id="alert-dialog-title">Welcome</DialogTitle>
         <DialogContent>
           <DialogContentText id="alert-dialog-description">
-            Q-Fund is current in its first version and as such there could be
+            Q-Fund is currently in its first version and as such there could be
             some bugs. The Qortal community, along with its development team and
             the creators of this application, cannot be held accountable for any
             content published or displayed. Also, they are not responsible for
-            any lost of coin due to either bad actors or bugs in the
+            any loss of coin due to either bad actors or bugs in the
             application. Furthermore, they bear no responsibility for any data
             loss that may occur as a result of using this application.
           </DialogContentText>
