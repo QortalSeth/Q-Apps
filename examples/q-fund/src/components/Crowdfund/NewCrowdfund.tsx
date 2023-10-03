@@ -438,7 +438,7 @@ export const NewCrowdfund = ({ editId, editContent }: NewCrowdfundProps) => {
       : setGoalValue("");
   };
 
-  const minDateTime = dayjs().add(30, "minute");
+  const minDateTime = dayjs().add(2, "day");
   const maxDateTime = dayjs().add(30, "day");
 
   return (

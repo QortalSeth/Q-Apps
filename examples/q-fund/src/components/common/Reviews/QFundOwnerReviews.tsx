@@ -24,7 +24,7 @@ import { useDispatch, useSelector } from "react-redux";
 import LazyLoad from "../../../components/common/LazyLoad";
 import { RootState } from "../../../state/store";
 import { AddReview } from "./AddReview/AddReview";
-import { TEST_REVIEW_BASE } from "../../../constants";
+import { REVIEW_BASE } from "../../../constants";
 import {
   OwnerReview,
   upsertReviews,
@@ -77,7 +77,7 @@ export const QFundOwnerReviews: FC<QFundOwnerReviewsProps> = ({
       const offset = ownerReviews.length;
       const shortQFundOwner = QFundOwner.slice(0, 15);
       // Those first three constants will remain the same no matter which crowdfund the owner made
-      const query = `${TEST_REVIEW_BASE}-${shortQFundOwner}-${ownerRegistrationNumber}`;
+      const query = `${REVIEW_BASE}-${shortQFundOwner}-${ownerRegistrationNumber}`;
       // Set the review identifier in the local state so we can filter only the reviews that are for the current Q-Fund
       setReviewIdentifier(query);
       // Since it the url includes /resources, you know you're fetching the resources and not the raw data

@@ -15,7 +15,7 @@ import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { DisplayHtml } from "../../components/common/DisplayHtml";
 import FileElement from "../../components/common/FileElement";
 import { setIsLoadingGlobal } from "../../state/features/globalSlice";
-import { CROWDFUND_BASE, TEST_REVIEW_BASE, UPDATE_BASE } from "../../constants";
+import { CROWDFUND_BASE, REVIEW_BASE, UPDATE_BASE } from "../../constants";
 import { addToHashMap } from "../../state/features/crowdfundSlice";
 import {
   AboutMyCrowdfund,
@@ -401,7 +401,7 @@ export const Crowdfund = () => {
         throw new Error("No registered number found for QFund owner name");
       }
       // Those first three constants will remain the same no matter which crowdfund the owner made
-      const query = `${TEST_REVIEW_BASE}-${shortQFundOwner}-${ownerNumber}`;
+      const query = `${REVIEW_BASE}-${shortQFundOwner}-${ownerNumber}`;
       // Since it the url includes /resources, you know you're fetching the resources and not the raw data
       const url = `/arbitrary/resources/search?service=DOCUMENT&query=${query}&limit=100&includemetadata=false&mode=LATEST&reverse=true`;
       const response = await fetch(url, {
