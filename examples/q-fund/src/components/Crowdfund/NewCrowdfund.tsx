@@ -534,7 +534,7 @@ export const NewCrowdfund = ({ editId, editContent }: NewCrowdfundProps) => {
           />
           <LocalizationProvider dateAdapter={AdapterDayjs}>
             <DesktopDateTimePicker
-              label="End date of crowdfund. Min 5 days Max 30 days"
+              label="End date of crowdfund. Min 2 days Max 30 days"
               value={value}
               onChange={newValue => setValue(newValue)}
               minDateTime={minDateTime}
