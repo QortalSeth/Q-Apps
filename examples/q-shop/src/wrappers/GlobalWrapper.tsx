@@ -497,14 +497,20 @@ const GlobalWrapper: React.FC<Props> = ({ children, setTheme }) => {
       if (!currentStore.id) throw new Error("Store id is required");
       const name = user.name;
 
+      const parts: string[] = currentStore.id.split(`${STORE_BASE}-`);
+      const shortStoreId: string = parts[1];
+
+      // Add shortStoreId to the store object if it doesn't exist. This was added because of a previous bug where we weren't adding
       const storeObj = {
         ...currentStore,
         title,
         description,
         location,
         shipsTo,
-        logo
+        logo,
+        shortStoreId: currentStore.shortStoreId ?? shortStoreId
       };
+
       const storeToBase64 = await objectToBase64(storeObj);
       try {
         const resourceResponse = await qortalRequest({
