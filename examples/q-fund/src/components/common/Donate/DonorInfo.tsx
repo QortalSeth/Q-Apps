@@ -20,7 +20,10 @@ export type ViewableDonorData = {
   amount: string;
 };
 
-const DonorInfo = ({ rawDonorData, aggregateDonorData }: DonorInfoProps) => {
+const DonorInfo = ({
+  rawDonorData,
+  aggregateDonorData = true,
+}: DonorInfoProps) => {
   const [displayModal, setDisplayModal] = useState<boolean>(false);
   const [donorData, setDonorData] = useState<ViewableDonorData[]>([]);
 
