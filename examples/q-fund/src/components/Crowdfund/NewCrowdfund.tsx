@@ -287,7 +287,7 @@ export const NewCrowdfund = ({ editId, editContent }: NewCrowdfundProps) => {
         assetId: 0,
       });
 
-      const crowdfundObject: any = {
+      const crowdfundObject: object = {
         title,
         createdAt: Date.now(),
         version: 1,

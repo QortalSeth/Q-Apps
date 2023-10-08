@@ -8,6 +8,7 @@ import {
   ProgressRow,
 } from "./Progress-styles";
 import { QortalSVG } from "../../../assets/svgs/QortalSVG";
+
 interface CrowdfundProgressProps {
   achieved?: number | null;
   raised: number;
@@ -35,7 +36,9 @@ export const CrowdfundProgress: React.FC<CrowdfundProgressProps> = ({
               width={"22"}
               color={theme.palette.text.primary}
             />
-            <span>{achieved ? +achieved : +raised}</span>
+            <span>
+              {achieved ? +Math.round(achieved) : +Math.round(raised)}
+            </span>
           </FundAmountNumber>
         </FundAmountsRow>
         <FundAmountsRow>
