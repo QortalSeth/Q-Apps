@@ -24,7 +24,7 @@ type BoundedNumericTextFieldProps = {
   addIconButtons?: boolean;
   allowDecimals?: boolean;
   allowNegatives?: boolean;
-  onChange?: (e: eventType) => void;
+  onChange?: (s: string) => void;
   initialValue?: string;
   maxSigDigits?: number;
 } & TextFieldProps;
@@ -35,7 +35,6 @@ export const BoundedNumericTextField = ({
   addIconButtons = true,
   allowDecimals = true,
   allowNegatives = false,
-  onChange,
   initialValue,
   maxSigDigits = 6,
   ...props
@@ -86,25 +85,14 @@ export const BoundedNumericTextField = ({
     // console.log("changeEvent:", e);
     const newValue = filterValue(e.target.value);
     setTextFieldValue(newValue);
-    e.target.value = newValue;
-    if (onChange) onChange(e);
+    if (props?.onChange) props.onChange(newValue);
   };
 
   const changeValueWithIncDecButton = (e, changeAmount: number) => {
-    const valueNum = Number(textFieldValue);
-    const newValue = (valueNum + changeAmount).toString();
-
-    // const newValue = setMinMaxValue((valueNum + changeAmount).toString());
-    // if (e?.target?.value) e.target.value = newValue;
-    // if (onChange) onChange(e);
-    // setTextFieldValue(newValue);
-
-    // if (ref.current) {
-    //   ref.current.value = newValue;
-    //   setTextFieldValue(newValue);
-    //   const event = new Event("input", { bubbles: true });
-    //   ref.current.dispatchEvent(event);
-    // }
+    const changedValue = (+textFieldValue + changeAmount).toString();
+    const inBoundsValue = setMinMaxValue(changedValue);
+    setTextFieldValue(inBoundsValue);
+    if (props?.onChange) props.onChange(inBoundsValue);
   };
 
   const formatValueOnBlur = (e: eventType) => {
@@ -120,10 +108,11 @@ export const BoundedNumericTextField = ({
 
     setTextFieldValue(value);
   };
-
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { onChange, ...noChangeProps } = { ...props };
   return (
     <TextField
-      {...props}
+      {...noChangeProps}
       InputProps={{
         ...props?.InputProps,
         endAdornment: addIconButtons ? (
