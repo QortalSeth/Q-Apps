@@ -767,8 +767,6 @@ const GlobalWrapper: React.FC<Props> = ({ children, setTheme }) => {
                 navigate("/");
               }
             }
-            // Clear product data from redux global state
-            dispatch(resetProducts());
           };
           getStoreAndDataContainer();
         } catch (error) {

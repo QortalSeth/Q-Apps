@@ -253,13 +253,6 @@ export const Store = () => {
     ownStoreListProducts?.products
   ]);
 
-  useEffect(() => {
-    return () => {
-      dispatch(resetProducts());
-      dispatch(resetListProducts());
-    };
-  }, []); // Run only on unmount
-
   // Get store on mount & dipatch setCurrentViewedStore to redux when it's not your store. If it is your store, this is handled already in the global wrapper, so we do nothing as well.
   const getStore = useCallback(async () => {
     let name = username;

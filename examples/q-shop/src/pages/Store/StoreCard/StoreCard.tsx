@@ -17,6 +17,13 @@ import ContextMenuResource from "../../../components/common/ContextMenu/ContextM
 import { useNavigate } from "react-router-dom";
 import { useTheme } from "@mui/material";
 import { BriefcaseSVG } from "../../../assets/svgs/BriefcaseSVG";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  resetListProducts,
+  resetProducts
+} from "../../../state/features/globalSlice";
+import { RootState } from "../../../state/store";
+import { clearViewedStoreDataContainer } from "../../../state/features/storeSlice";
 
 interface StoreCardProps {
   storeTitle: string;
@@ -36,7 +43,15 @@ export const StoreCard: FC<StoreCardProps> = ({
   userName
 }) => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const theme = useTheme();
+
+  const currentStore = useSelector(
+    (state: RootState) => state.global.currentStore
+  );
+  const currentViewedStore = useSelector(
+    (state: RootState) => state.store.currentViewedStore
+  );
 
   const [isEllipsisActive, setIsEllipsisActive] = useState<boolean>(false);
   const [showCompleteStoreDescription, setShowCompleteStoreDescription] =
@@ -47,6 +62,14 @@ export const StoreCard: FC<StoreCardProps> = ({
   ) => {
     if ((e.target as HTMLElement)?.id === `expand-icon-${storeId}`) {
       return;
+    }
+    // When visiting a new story, reset the products and listProducts state to prevent the previous store's products from showing. We do this depending on whether the user is the store owner or not. We don't need to worry about them coming directly from a url link because the redux store will be empty in that case
+    if (userName === storeOwner && currentStore?.id !== storeId) {
+      dispatch(resetProducts());
+      dispatch(resetListProducts());
+    } else if (userName !== storeOwner && currentViewedStore?.id !== storeId) {
+      dispatch(resetProducts());
+      dispatch(clearViewedStoreDataContainer());
     }
     // Setting storeOwner and storeId into the url params which can then be used in the Store component
     navigate(`/${storeOwner}/${storeId}`);
