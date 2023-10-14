@@ -531,6 +531,7 @@ export const NewCrowdfund = ({ editId, editContent }: NewCrowdfundProps) => {
             maxValue={maxGoal}
             addIconButtons={false}
             allowDecimals={false}
+            required
           />
           <LocalizationProvider dateAdapter={AdapterDayjs}>
             <DesktopDateTimePicker

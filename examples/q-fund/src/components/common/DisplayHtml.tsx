@@ -20,7 +20,10 @@ export const DisplayHtml = ({ html }) => {
   if (!cleanContent) return null;
   return (
     <CrowdfundInlineContent>
-      <div dangerouslySetInnerHTML={{ __html: cleanContent }} />
+      <div
+        className="ql-editor"
+        dangerouslySetInnerHTML={{ __html: cleanContent }}
+      />
     </CrowdfundInlineContent>
   );
 };
