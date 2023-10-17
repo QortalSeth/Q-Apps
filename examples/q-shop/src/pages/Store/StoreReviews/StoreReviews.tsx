@@ -56,6 +56,7 @@ export const StoreReviews: FC<StoreReviewsProps> = ({
 
   const [openLeaveReview, setOpenLeaveReview] = useState<boolean>(false);
   const [userHasStoreOrder, setUserHasStoreOrder] = useState<boolean>(false);
+  const [hasFetched, setHasFetched] = useState<boolean>(false);
 
   // Determine whether user can leave a review
   const doesUserHaveOrderFunc = async () => {
@@ -113,7 +114,8 @@ export const StoreReviews: FC<StoreReviewsProps> = ({
             rating: Number(splitIdentifier[splitIdentifier.length - 1]) / 10
           };
         }
-      );
+        );
+      setHasFetched(true);
 
       // Filter out duplicates by checking if the review id already exists in storeReviews in global redux store
       const copiedStoreReviews: StoreReview[] = [...storeReviews];
@@ -209,7 +211,7 @@ export const StoreReviews: FC<StoreReviewsProps> = ({
             style={{ position: "relative" }}
           >
             <StoreReviewsContainer>
-              {storeReviews.length === 0 ? (
+              {storeReviews.length === 0 && hasFetched ? (
                 <ReviewsFont>No reviews yet</ReviewsFont>
               ) : (
                 storeReviews

@@ -1,4 +1,10 @@
-import React, { useState, useEffect, useCallback, useMemo } from "react";
+import React, {
+  useState,
+  useEffect,
+  useCallback,
+  useMemo,
+  useRef
+} from "react";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../../state/store";
@@ -15,7 +21,8 @@ import {
 } from "@mui/material";
 import {
   Catalogue,
-  setDataContainer,
+  resetListProducts,
+  resetProducts,
   setIsLoadingGlobal,
   updateRecentlyVisitedStoreId
 } from "../../../state/features/globalSlice";
@@ -93,6 +100,9 @@ enum DateFilter {
 export const Store = () => {
   const navigate = useNavigate();
   const theme = useTheme();
+  const dispatch = useDispatch();
+
+  const isFirstMountRef = useRef(false);
 
   const user = useSelector((state: RootState) => state.auth.user);
   const currentStore = useSelector(
@@ -122,6 +132,8 @@ export const Store = () => {
   const ownStoreListProducts = useSelector(
     (state: RootState) => state.global.listProducts
   );
+
+  // Your own data container
   const userOwnDataContainer = useSelector(
     (state: RootState) => state.global.dataContainer
   );
@@ -129,8 +141,6 @@ export const Store = () => {
   const { checkAndUpdateResourceCatalogue, getCatalogue } = useFetchOrders();
 
   const { store, user: username } = useParams();
-
-  const dispatch = useDispatch();
 
   const [products, setProducts] = React.useState<Product[]>([]);
   const [totalCartQuantity, setTotalCartQuantity] = useState<number>(0);
@@ -146,12 +156,11 @@ export const Store = () => {
   );
   const [averageRatingLoader, setAverageRatingLoader] =
     useState<boolean>(false);
-  const [productsLoading, setProductsLoading] = useState<boolean>(false);
+  const [hasFetched, setHasFetched] = useState<boolean>(false);
 
   const getProducts = useCallback(async () => {
     if (!store) return;
     try {
-      setProductsLoading(true);
       const offset = products.length;
       // Get products from store's data container, with ternary depending on whether you own the store or not
       const productList =
@@ -170,6 +179,8 @@ export const Store = () => {
           };
         }
       );
+      isFirstMountRef.current = true;
+      setHasFetched(true);
       const copiedProducts = [...products];
       structureData.forEach((product: Product) => {
         const index = copiedProducts.findIndex((p) => p.id === product.id);
@@ -211,10 +222,36 @@ export const Store = () => {
       }
     } catch (error) {
       console.error(error);
-    } finally {
-      setProductsLoading(false);
     }
-  }, [products, viewedStoreListProducts, ownStoreListProducts]);
+  }, [
+    products,
+    viewedStoreListProducts.products,
+    ownStoreListProducts.products,
+    store,
+    username,
+    user?.name
+  ]);
+
+  // Get products on mount
+  useEffect(() => {
+    // Get products from store's data container, with ternary depending on whether you own the store or not
+    if (!isFirstMountRef.current && store) {
+      const productList =
+        username && username !== user?.name
+          ? viewedStoreListProducts.products
+          : ownStoreListProducts.products;
+      console.log({ productList });
+      if (productList.length === 0) return;
+      getProducts();
+    }
+  }, [
+    getProducts,
+    username,
+    user?.name,
+    store,
+    viewedStoreListProducts?.products,
+    ownStoreListProducts?.products
+  ]);
 
   // Get store on mount & dipatch setCurrentViewedStore to redux when it's not your store. If it is your store, this is handled already in the global wrapper, so we do nothing as well.
   const getStore = useCallback(async () => {
@@ -437,6 +474,7 @@ export const Store = () => {
   }, [carts, user, storeId]);
 
   const getProductsHandler = useCallback(async () => {
+    if (!isFirstMountRef.current) return;
     await getProducts();
   }, [getProducts]);
 
@@ -510,6 +548,7 @@ export const Store = () => {
   const handleChipRemove = (chip: string) => {
     setCategoryChips((prevChips) => prevChips.filter((c) => c !== chip));
   };
+  console.log({ hasFetched, filteredProducts, username, user });
 
   if (isLoadingGlobal) return;
 
@@ -744,9 +783,18 @@ export const Store = () => {
           ) : null}
         </ProductManagerRow>
         <ProductsContainer container spacing={2}>
-          {filteredProducts.length > 0 ? (
+          {filteredProducts.length > 0 && hasFetched ? (
             filteredProducts.map((product: Product) => {
-              if (productsLoading) {
+              const storeId: string = currentStore?.id || "";
+              let productItem = product;
+              let hasHash = false;
+              const existingProduct =
+                catalogueHashMap[product?.catalogueId]?.products[product?.id];
+              if (existingProduct) {
+                productItem = existingProduct;
+                hasHash = true;
+              }
+              if (!hasHash) {
                 return (
                   <ProductCardCol
                     xs={12}
@@ -770,7 +818,6 @@ export const Store = () => {
                   </ProductCardCol>
                 );
               } else {
-                const storeId = currentStore?.id || "";
                 return (
                   <ProductCardCol
                     xs={12}
@@ -778,21 +825,23 @@ export const Store = () => {
                     md={4}
                     lg={3}
                     item
-                    key={product.id}
+                    key={productItem.id}
                   >
                     <ContextMenuResource
-                      name={product.user}
+                      name={productItem.user}
                       service="PRODUCT"
-                      identifier={product.id}
-                      link={`qortal://APP/Q-Shop/${product?.user}/${storeId}/${product?.id}/${product?.catalogueId}`}
+                      identifier={productItem.id}
+                      link={`qortal://APP/Q-Shop/${productItem?.user}/${storeId}/${productItem?.id}/${productItem?.catalogueId}`}
                     >
-                      <ProductCard product={product} />
+                      <ProductCard product={productItem} />
                     </ContextMenuResource>
                   </ProductCardCol>
                 );
               }
             })
-          ) : filteredProducts.length === 0 && username === user?.name ? (
+          ) : filteredProducts.length === 0 &&
+            username === user?.name &&
+            hasFetched ? (
             <NoProductsContainer>
               <NoProductsText>
                 You currently have no products! Add some in the Product Manager.
@@ -806,10 +855,7 @@ export const Store = () => {
             </NoProductsContainer>
           )}
         </ProductsContainer>
-        <LazyLoad
-          isLoading={productsLoading}
-          onLoadMore={getProductsHandler}
-        ></LazyLoad>
+        <LazyLoad onLoadMore={getProductsHandler}></LazyLoad>
       </Grid>
       <ReusableModalStyled
         id={"store-details"}
