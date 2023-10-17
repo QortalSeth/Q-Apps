@@ -12,7 +12,7 @@ import {
 import { ModalBody } from "../../Crowdfund/Crowdfund-styles";
 import Box from "@mui/material/Box";
 import { ViewableDonorData } from "./DonorInfo";
-import { truncateNumber } from "../../../utils/Library/Utility_Functions/Numbers/StringNumbers";
+import { truncateNumber } from "qortal-app-utils";
 
 interface DonorModalProps {
   donorData: ViewableDonorData[];

@@ -1,11 +1,11 @@
 import { DonorDetailsButton } from "./Donate-styles";
 import { Tooltip } from "@mui/material";
-import { SearchTransactionResponse } from "../../../utils/Library/Utility_Functions/Core_API/Interfaces";
 import {
   addStringNumbers,
+  getAccountNames,
   removeTrailingZeros,
-} from "../../../utils/Library/Utility_Functions/Numbers/StringNumbers";
-import { getAccountNames } from "../../../utils/Library/Utility_Functions/Core_API/QortalRequest";
+  SearchTransactionResponse,
+} from "qortal-app-utils";
 import React, { useEffect, useState } from "react";
 import DonorModal from "./DonorModal";
 

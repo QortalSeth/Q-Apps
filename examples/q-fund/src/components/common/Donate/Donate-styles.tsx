@@ -1,6 +1,6 @@
 import { styled } from "@mui/material/styles";
 import { Box, Button, InputLabel } from "@mui/material";
-import { changeLightness } from "../../../utils/Library/Utility_Functions/Numbers/Colors";
+import { changeLightness } from "qortal-app-utils";
 
 const ButtonStyle = styled(Button)({
   fontFamily: "Mulish",

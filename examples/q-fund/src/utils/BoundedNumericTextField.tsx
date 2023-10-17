@@ -5,15 +5,15 @@ import {
   TextFieldProps,
 } from "@mui/material";
 import React, { useRef, useState } from "react";
-import { setNumberWithinBounds } from "../Utility_Functions/Numbers/Numbers";
 import {
   isAllZerosNum,
   isFloatNum,
   isIntegerNum,
   removeTrailingZeros,
+  setNumberWithinBounds,
   sigDigitsExceeded,
   stringIsEmpty,
-} from "../Utility_Functions/Numbers/StringNumbers";
+} from "qortal-app-utils";
 import AddIcon from "@mui/icons-material/Add";
 import RemoveIcon from "@mui/icons-material/Remove";
 
