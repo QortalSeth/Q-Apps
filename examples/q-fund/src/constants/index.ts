@@ -17,13 +17,3 @@ export const UPDATE_BASE = useTestIdentifiers
   : "q-fund_update_crowdfund_";
 
 export const REVIEW_BASE = useTestIdentifiers ? "q-fund-testrw" : "q-fund-rw";
-
-// export const CROWDFUND_BASE = 'MYTEST_crowdfund_'
-
-// export const ATTACHMENT_BASE = 'attachments_MYTEST_'
-
-// export const COMMENT_BASE = 'qcomment_v1_MYTEST_'
-
-// export const UPDATE_BASE = 'MYTEST_update_crowdfund_'
-
-// export const REVIEW_BASE = "q-fund-testrw"
