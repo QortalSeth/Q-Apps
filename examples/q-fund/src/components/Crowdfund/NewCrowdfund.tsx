@@ -432,8 +432,6 @@ export const NewCrowdfund = ({ editId, editContent }: NewCrowdfundProps) => {
     }${minutes} minutes`;
   };
 
-  const handleInputChange = (value: string) => {};
-
   const minDateTime = dayjs().add(2, "day");
   const maxDateTime = dayjs().add(30, "day");
 
