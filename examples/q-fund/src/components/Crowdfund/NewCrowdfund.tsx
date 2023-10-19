@@ -432,12 +432,6 @@ export const NewCrowdfund = ({ editId, editContent }: NewCrowdfundProps) => {
     }${minutes} minutes`;
   };
 
-  const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    event.target.value
-      ? setGoalValue(Number(event.target.value))
-      : setGoalValue("");
-  };
-
   const minDateTime = dayjs().add(2, "day");
   const maxDateTime = dayjs().add(30, "day");
 
@@ -526,10 +520,12 @@ export const NewCrowdfund = ({ editId, editContent }: NewCrowdfundProps) => {
             label="Goal Amount (QORT)"
             variant="filled"
             value={goalValue}
-            onChange={handleInputChange}
+            onChange={value =>
+              value ? setGoalValue(+value) : setGoalValue("")
+            }
             minValue={minGoal}
             maxValue={maxGoal}
-            addIconButtons={false}
+            addIconButtons={true}
             allowDecimals={false}
             required
           />
@@ -564,9 +560,8 @@ export const NewCrowdfund = ({ editId, editContent }: NewCrowdfundProps) => {
               onClick={() => {
                 onClose();
               }}
-              variant="outlined"
+              variant="contained"
               color="error"
-              style={{ color: "#c92727ff" }}
             >
               Cancel
             </CrowdfundActionButton>

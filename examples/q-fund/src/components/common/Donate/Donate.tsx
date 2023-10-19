@@ -19,7 +19,7 @@ import {
   DonateModalLabel,
 } from "./Donate-styles";
 import { QortalSVG } from "../../../assets/svgs/QortalSVG";
-import BoundedNumericTextField from "../../../utils/Library/React_Components/BoundedNumericTextField";
+import BoundedNumericTextField from "../../../utils/BoundedNumericTextField";
 
 interface DonateProps {
   atAddress: string;
@@ -178,11 +178,11 @@ export const Donate = ({
                   maxValue={Number.MAX_SAFE_INTEGER}
                   id="standard-adornment-amount"
                   value={amount}
-                  onChange={e => setAmount(Number(e.target.value))}
+                  onChange={value => setAmount(+value)}
                   variant={"standard"}
                   allowDecimals={false}
                   allowNegatives={false}
-                  addIconButtons={false}
+                  addIconButtons={true}
                   InputProps={{
                     startAdornment: (
                       <InputAdornment position="start">
@@ -199,9 +199,8 @@ export const Donate = ({
             </DialogContent>
             <DialogActions>
               <Button
-                variant="outlined"
+                variant="contained"
                 color="error"
-                style={{ color: "#c92727ff" }}
                 onClick={() => {
                   setIsOpen(false);
                   resetValues();
@@ -210,7 +209,11 @@ export const Donate = ({
               >
                 Close
               </Button>
-              <Button variant="contained" onClick={sendCoin}>
+              <Button
+                variant="contained"
+                onClick={sendCoin}
+                sx={{ color: "white" }}
+              >
                 Send Coin
               </Button>
             </DialogActions>

@@ -60,8 +60,10 @@ import { CrowdfundLoader } from "./CrowdfundLoader";
 import { ReusableModalStyled } from "../../components/common/Reviews/QFundOwnerReviews-styles";
 import { QFundOwnerReviews } from "../../components/common/Reviews/QFundOwnerReviews";
 import DonorInfo from "../../components/common/Donate/DonorInfo";
-import { SearchTransactionResponse } from "../../utils/Library/Utility_Functions/Core_API/Interfaces";
-import { searchTransactions } from "../../utils/Library/Utility_Functions/Core_API/QortalRequest";
+import {
+  SearchTransactionResponse,
+  searchTransactions,
+} from "qortal-app-utils";
 
 export const Crowdfund = () => {
   const theme = useTheme();
@@ -355,6 +357,8 @@ export const Crowdfund = () => {
       if (isCalling) return;
       isCalling = true;
       const res = await getNodeInfo();
+      const address = hashMapCrowdfunds[id]?.deployedAT?.aTAddress;
+      getRawDonorData(address);
       isCalling = false;
     }, 30000);
   }, [getNodeInfo]);
