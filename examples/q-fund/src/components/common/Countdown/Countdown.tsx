@@ -1,14 +1,13 @@
-import React, { useState, useEffect } from "react";
-import Box from "@mui/material/Box";
+import React, { useEffect, useState } from "react";
 import moment from "moment";
-import { CircularProgress, Typography } from "@mui/material";
+import { CircularProgress } from "@mui/material";
 import {
   CountdownCard,
-  CountdownRow,
-  CountdownFont,
-  CountdownFontNumber,
   CountdownCol,
   CountdownContainer,
+  CountdownFont,
+  CountdownFontNumber,
+  CountdownRow,
   EstimatedTimeRemainingFont,
 } from "./Countdown-styles";
 
@@ -37,7 +36,7 @@ export const Countdown: React.FC<CountdownProps> = ({
 
   // useEffect that runs the countdown timer
   useEffect(() => {
-    let intervalId: number | null = null;
+    let intervalId: NodeJS.Timeout | null = null;
     const updateCountdown = () => {
       const now = moment();
       const duration = moment.duration(endDate.diff(now));

@@ -1,4 +1,4 @@
-import { useEffect, useCallback, useState, useRef } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 export const useFetchCrowdfundStatus = (
   crowdfundData: any,
@@ -90,7 +90,7 @@ export const useFetchCrowdfundStatus = (
   // useEffect that checks whether a Q-Fund is currently in deployment or not. If it is, we prevent the user from donating to the Q-Fund. We do polling every 30 seconds.
   useEffect(() => {
     if (atAddress) {
-      let intervalId: number | undefined;
+      let intervalId: NodeJS.Timeout | undefined;
       const checkDeploymentStatus = async () => {
         const checkStatus = async () => {
           const ATFound = await fetchQFundDeploymentStatus();
