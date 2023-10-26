@@ -127,10 +127,7 @@ export const Donate = ({
     }
   };
   useEffect(() => {
-    console.log("in useEffect");
     getUserBalance().then(foundBalance => {
-      //  printValue({ foundBalance });
-      console.log("foundBalance (notprintValue) is: ", foundBalance.toString());
       setCurrentBalance(truncateNumber(foundBalance, 2));
     });
   }, []);
