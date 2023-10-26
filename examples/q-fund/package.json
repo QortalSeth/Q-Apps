@@ -24,7 +24,7 @@
     "dompurify": "^3.0.5",
     "localforage": "^1.10.0",
     "moment": "^2.29.4",
-    "qortal-app-utils": "^1.1.1",
+    "qortal-app-utils": "latest",
     "quill-image-resize-module-react": "^3.0.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
