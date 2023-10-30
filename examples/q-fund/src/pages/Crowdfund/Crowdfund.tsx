@@ -357,8 +357,10 @@ export const Crowdfund = () => {
       if (isCalling) return;
       isCalling = true;
       const res = await getNodeInfo();
-      const address = hashMapCrowdfunds[id]?.deployedAT?.aTAddress;
-      getRawDonorData(address);
+      if (id) {
+        const address = hashMapCrowdfunds[id]?.deployedAT?.aTAddress;
+        getRawDonorData(address);
+      }
       isCalling = false;
     }, 30000);
   }, [getNodeInfo]);

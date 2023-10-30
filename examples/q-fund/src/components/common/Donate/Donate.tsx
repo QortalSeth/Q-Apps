@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Box,
   Button,
@@ -20,6 +20,7 @@ import {
 } from "./Donate-styles";
 import { QortalSVG } from "../../../assets/svgs/QortalSVG";
 import BoundedNumericTextField from "../../../utils/BoundedNumericTextField";
+import { getUserBalance, truncateNumber } from "qortal-app-utils";
 
 interface DonateProps {
   atAddress: string;
@@ -39,7 +40,7 @@ export const Donate = ({
 
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [amount, setAmount] = useState<number>(0);
-
+  const [currentBalance, setCurrentBalance] = useState<string>("");
   const resetValues = () => {
     setAmount(0);
     setIsOpen(false);
@@ -125,7 +126,11 @@ export const Donate = ({
       dispatch(setNotification(notificationObj));
     }
   };
-
+  useEffect(() => {
+    getUserBalance().then(foundBalance => {
+      setCurrentBalance(truncateNumber(foundBalance, 2));
+    });
+  }, []);
   return (
     <Box
       sx={{
@@ -196,6 +201,11 @@ export const Donate = ({
                   }}
                 />
               </DonateModalCol>
+              {currentBalance ? (
+                <div>You have {currentBalance} QORT</div>
+              ) : (
+                <></>
+              )}
             </DialogContent>
             <DialogActions>
               <Button
