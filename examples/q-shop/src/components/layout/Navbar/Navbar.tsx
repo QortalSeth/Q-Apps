@@ -9,7 +9,6 @@ import {
   toggleCreateStoreModal
 } from "../../../state/features/globalSlice";
 import { useDispatch } from "react-redux";
-import BookmarkIcon from "@mui/icons-material/Bookmark";
 import { BlockedNamesModal } from "../../common/BlockedNamesModal/BlockedNamesModal";
 import EmailIcon from "@mui/icons-material/Email";
 import {
@@ -24,19 +23,14 @@ import {
   ThemeSelectRow,
   QShopLogoContainer,
   StoreManagerIcon,
-  CartIcon
+  StoresButton
 } from "./Navbar-styles";
 import { AccountCircleSVG } from "../../../assets/svgs/AccountCircleSVG";
 import QShopLogo from "../../../assets/img/QShopLogo.webp";
 import QShopLogoLight from "../../../assets/img/QShopLogoLight.webp";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import PersonOffIcon from "@mui/icons-material/PersonOff";
-import {
-  addFilteredPosts,
-  setFilterValue,
-  setIsFiltering
-} from "../../../state/features/storeSlice";
-import { setIsOpen } from "../../../state/features/cartSlice";
+
 import { Store } from "../../../state/features/storeSlice";
 import { OrdersSVG } from "../../../assets/svgs/OrdersSVG";
 import { resetOrders } from "../../../state/features/orderSlice";
@@ -63,7 +57,10 @@ const NavBar: React.FC<Props> = ({
 
   // Get All My Stores from Redux To Display In Store Manager Dropdown
 
-  const { myStores } = useSelector((state: RootState) => state.store);
+  const myStores = useSelector((state: RootState) => state.store.myStores);
+  const hashMapStores = useSelector(
+    (state: RootState) => state.store.hashMapStores
+  );
 
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
   const [isOpenBlockedNamesModal, setIsOpenBlockedNamesModal] =
@@ -117,9 +114,6 @@ const NavBar: React.FC<Props> = ({
           alt="QShop Logo"
           onClick={() => {
             navigate(`/`);
-            dispatch(setIsFiltering(false));
-            dispatch(setFilterValue(""));
-            dispatch(addFilteredPosts([]));
             searchValRef.current = "";
             if (!inputRef.current) return;
             inputRef.current.value = "";
@@ -140,11 +134,8 @@ const NavBar: React.FC<Props> = ({
           </AuthenticateButton>
         )}
         {isAuthenticated && userName && hasAttemptedToFetchShopInitial && (
-          <StoreManagerIcon
-            color={theme.palette.text.primary}
-            height={"32"}
-            width={"32"}
-            onClickFunc={(e: any) => {
+          <StoresButton
+            onClick={(e: any) => {
               if (myStores.length > 0) {
                 handleClick(e);
                 setOpenStoreManagerDropdown(true);
@@ -152,7 +143,14 @@ const NavBar: React.FC<Props> = ({
                 dispatch(toggleCreateStoreModal(true));
               }
             }}
-          />
+          >
+            My Stores
+            <StoreManagerIcon
+              color={theme.palette.text.primary}
+              height={"32"}
+              width={"32"}
+            />
+          </StoresButton>
         )}
         {isAuthenticated && userName && (
           <>
@@ -206,7 +204,7 @@ const NavBar: React.FC<Props> = ({
           </DropdownContainer>
           {myStores.length > 0 &&
             myStores.map((store: Store) => (
-              <DropdownContainer>
+              <DropdownContainer key={store.id}>
                 <DropdownText
                   onClick={() => {
                     dispatch(resetOrders());
@@ -214,9 +212,8 @@ const NavBar: React.FC<Props> = ({
                     navigate(`/${userName}/${store.id}`);
                     handleCloseStoreDropdown();
                   }}
-                  key={store.id}
                 >
-                  {store.title}
+                  {hashMapStores[store.id]?.title}
                 </DropdownText>
               </DropdownContainer>
             ))}
@@ -231,7 +228,13 @@ const NavBar: React.FC<Props> = ({
             horizontal: "left"
           }}
         >
-          <DropdownContainer onClick={() => navigate("/my-orders")}>
+          <DropdownContainer
+            onClick={() => {
+              handleCloseUserDropdown();
+              handleCloseStoreDropdown();
+              navigate("/my-orders");
+            }}
+          >
             <OrdersSVG color={"#f9ff34"} height={"22"} width={"22"} />
             <DropdownText>My Orders</DropdownText>
           </DropdownContainer>
@@ -257,7 +260,8 @@ const NavBar: React.FC<Props> = ({
                 width: "100%",
                 display: "flex",
                 gap: "5px",
-                alignItems: "center"
+                alignItems: "center",
+                textDecoration: "none"
               }}
             >
               <EmailIcon

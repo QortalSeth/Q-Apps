@@ -5,6 +5,7 @@ interface GlobalState {
   isOpenPublishBlogModal: boolean
   isLoadingCurrentBlog: boolean
   isLoadingGlobal: boolean
+  isLoadingCustom: null | string;
   isOpenEditBlogModal: boolean
   currentBlog: {
     createdAt: number
@@ -33,11 +34,14 @@ interface GlobalState {
   downloads: any
   showingAudioPlayer: boolean
   userAvatarHash: Record<string, string>
+  privateGroups: Record<string, any>
+  hasFetchedPrivateGroups: boolean
 }
 const initialState: GlobalState = {
   isOpenPublishBlogModal: false,
   isLoadingCurrentBlog: true,
   isLoadingGlobal: false,
+  isLoadingCustom: null,
   currentBlog: null,
   isOpenEditBlogModal: false,
   visitingBlog: null,
@@ -46,7 +50,9 @@ const initialState: GlobalState = {
   audioPostId: '',
   downloads: {},
   showingAudioPlayer: false,
-  userAvatarHash: {}
+  userAvatarHash: {},
+  privateGroups: {},
+  hasFetchedPrivateGroups: false
 }
 
 export const globalSlice = createSlice({
@@ -86,6 +92,9 @@ export const globalSlice = createSlice({
     setIsLoadingGlobal: (state, action) => {
       state.isLoadingGlobal = action.payload
     },
+    setIsLoadingCustom: (state, action) => {
+      state.isLoadingCustom = action.payload
+    },
     setAddToDownloads: (state, action) => {
       const download = action.payload
       state.downloads[download.identifier] = download
@@ -103,7 +112,11 @@ export const globalSlice = createSlice({
       if (avatar?.name && avatar?.url) {
         state.userAvatarHash[avatar?.name] = avatar?.url
       }
-    }
+    },
+    setPrivateGroups: (state, action) => {
+      state.privateGroups = action.payload
+      state.hasFetchedPrivateGroups = true
+    },
   }
 })
 
@@ -119,7 +132,9 @@ export const {
   setAddToDownloads,
   updateDownloads,
   setShowingAudioPlayer,
-  setUserAvatarHash
+  setUserAvatarHash,
+  setPrivateGroups,
+  setIsLoadingCustom
 } = globalSlice.actions
 
 export default globalSlice.reducer;

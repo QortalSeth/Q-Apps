@@ -1,5 +1,5 @@
 import { styled } from "@mui/system";
-import { Box, Typography, Button } from "@mui/material";
+import { Box, Typography, Button, Grid } from "@mui/material";
 import Tabs from "@mui/material/Tabs";
 import Tab from "@mui/material/Tab";
 import { TimesSVG } from "../../assets/svgs/TimesSVG";
@@ -44,9 +44,8 @@ export const ProductsToSaveCard = styled(Box)(({ theme }) => ({
   justifyContent: "space-between",
   flexDirection: "column",
   width: "85vw",
-  height: "auto",
-  minHeight: "400px",
-  gap: "10px",
+  minHeight: "500px",
+  maxHeight: "90vh",
   borderRadius: "8px",
   backgroundColor: theme.palette.mode === "light" ? "#e8e8e8" : "#32333c",
   position: "absolute",
@@ -75,6 +74,37 @@ export const ProductToSaveCard = styled(Box)(({ theme }) => ({
   borderRadius: "8px",
   backgroundColor: "#f2f2f2",
   flexGrow: 1
+}));
+
+export const ProductsCol = styled(Grid)(({ theme }) => ({
+  display: "flex",
+  flexWrap: "wrap",
+  gap: "10px",
+  width: "100%",
+  overflowY: "auto",
+  flexDirection: "row",
+  padding: "0 10px 10px 10px",
+
+  "&::-webkit-scrollbar-track": {
+    backgroundColor: theme.palette.mode === "light" ? "#e8e8e8" : "#32333c"
+  },
+  "&::-webkit-scrollbar-track:hover": {
+    backgroundColor: theme.palette.mode === "light" ? "#e8e8e8" : "#32333c"
+  },
+  "&::-webkit-scrollbar": {
+    width: "16px",
+    height: "10px",
+    backgroundColor: theme.palette.mode === "light" ? "#f6f8fa" : "#292d3e"
+  },
+  "&::-webkit-scrollbar-thumb": {
+    backgroundColor: theme.palette.mode === "light" ? "#d3d9e1" : "#575757",
+    borderRadius: "8px",
+    backgroundClip: "content-box",
+    border: "4px solid transparent"
+  },
+  "&::-webkit-scrollbar-thumb:hover": {
+    backgroundColor: theme.palette.mode === "light" ? "#b7bcc4" : "#474646"
+  }
 }));
 
 export const ProductToSaveImageRow = styled(Box)(({ theme }) => ({
@@ -170,7 +200,8 @@ export const DockedProductsToSaveCard = styled(Box)(({ theme }) => ({
   borderBottomRightRadius: "0px",
   borderBottomLeftRadius: "0px",
   backgroundColor: theme.palette.mode === "light" ? "#e8e8e8" : "#32333c",
-  position: "absolute",
+  position: "fixed",
+  zIndex: 55,
   bottom: 0,
   right: "20px",
   gap: "15px"

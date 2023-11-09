@@ -32,6 +32,11 @@ interface QortalRequestOptions {
   blob?: Blob
   mimeType?: string
   mode?: string
+  txGroupId?: string | number
+  after?: number
+  before?: number
+  groupId?: string | number
+  message?: string
 }
 
 declare function qortalRequest(options: QortalRequestOptions): Promise<any>

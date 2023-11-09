@@ -1,7 +1,8 @@
 import { styled } from "@mui/system";
-import { Typography, Button, Box, TextField } from "@mui/material";
+import { Box, Button, TextField, Theme, Typography } from "@mui/material";
 import AddPhotoAlternateIcon from "@mui/icons-material/AddPhotoAlternate";
 import { TimesSVG } from "../../assets/svgs/TimesSVG";
+import { NumericTextFieldQshop } from "../common/NumericTextFieldQshop";
 
 export const ModalBody = styled(Box)(({ theme }) => ({
   position: "absolute",
@@ -107,44 +108,55 @@ export const TimesIcon = styled(TimesSVG)(({ theme }) => ({
   }
 }));
 
-export const CustomInputField = styled(TextField)(({ theme }) => ({
-  fontFamily: "Karla",
-  fontSize: "17.5px",
-  color: theme.palette.text.primary,
-  backgroundColor: theme.palette.background.default,
-  borderColor: theme.palette.background.paper,
-  "& label": {
-    color: theme.palette.mode === "light" ? "#808183" : "#edeef0",
-    fontFamily: "Karla",
-    fontSize: "17.5px",
-    letterSpacing: "0px"
-  },
-  "& label.Mui-focused": {
-    color: theme.palette.mode === "light" ? "#A0AAB4" : "#d7d8da"
-  },
-  "& .MuiInput-underline:after": {
-    borderBottomColor: theme.palette.mode === "light" ? "#B2BAC2" : "#c9cccf"
-  },
-  "& .MuiOutlinedInput-root": {
-    "& fieldset": {
-      borderColor: "#E0E3E7"
-    },
-    "&:hover fieldset": {
-      borderColor: "#B2BAC2"
-    },
-    "&.Mui-focused fieldset": {
-      borderColor: "#6F7E8C"
-    }
-  },
-  "& .MuiInputBase-root": {
+const customInputStyle = (theme: Theme) => {
+  return {
     fontFamily: "Karla",
     fontSize: "18px",
-    letterSpacing: "0px"
-  },
-  "& .MuiFilledInput-root:after": {
-    borderBottomColor: theme.palette.secondary.main
-  }
-}));
+    fontWeight: 300,
+    color: theme.palette.text.primary,
+    backgroundColor: theme.palette.background.default,
+    borderColor: theme.palette.background.paper,
+    "& label": {
+      color: theme.palette.mode === "light" ? "#808183" : "#edeef0",
+      fontFamily: "Karla",
+      fontSize: "18px",
+      letterSpacing: "0px"
+    },
+    "& label.Mui-focused": {
+      color: theme.palette.mode === "light" ? "#A0AAB4" : "#d7d8da"
+    },
+    "& .MuiInput-underline:after": {
+      borderBottomColor: theme.palette.mode === "light" ? "#B2BAC2" : "#c9cccf"
+    },
+    "& .MuiOutlinedInput-root": {
+      "& fieldset": {
+        borderColor: "#E0E3E7"
+      },
+      "&:hover fieldset": {
+        borderColor: "#B2BAC2"
+      },
+      "&.Mui-focused fieldset": {
+        borderColor: "#6F7E8C"
+      }
+    },
+    "& .MuiInputBase-root": {
+      fontFamily: "Karla",
+      fontSize: "18px",
+      letterSpacing: "0px"
+    },
+    "& .MuiFilledInput-root:after": {
+      borderBottomColor: theme.palette.secondary.main
+    }
+  };
+};
+
+export const CustomInputField = styled(TextField)(({ theme }) =>
+  customInputStyle(theme as Theme)
+);
+
+export const CustomNumberField = styled(NumericTextFieldQshop)(({ theme }) =>
+  customInputStyle(theme as Theme)
+);
 
 export const ButtonRow = styled(Box)(({ theme }) => ({
   display: "flex",

@@ -32,7 +32,8 @@ import '/node_modules/react-resizable/css/styles.css'
 import DynamicHeightItem from '../../components/DynamicHeightItem'
 import {
   addPrefix,
-  buildIdentifierFromCreateTitleIdAndId
+  buildIdentifierFromCreateTitleIdAndId,
+  removePrefix
 } from '../../utils/blogIdformats'
 import { DynamicHeightItemMinimal } from '../../components/DynamicHeightItemMinimal'
 import { ReusableModal } from '../../components/modals/ReusableModal'
@@ -66,7 +67,31 @@ interface ILayoutGeneralSettings {
   blogPostType: string
 }
 export const BlogIndividualPost = () => {
-  const { user, postId, blog } = useParams()
+  const { user, postId: postIdTemp, blog:blogTemp } = useParams()
+
+  const blog = React.useMemo(()=> {
+    if(postIdTemp && postIdTemp?.includes('-post-')){
+      const str = postIdTemp
+      const arr = str.split('-post-')
+      const str1 = arr[0]
+      const blogId = removePrefix(str1)
+      return blogId
+    } else {
+      return blogTemp
+    }
+  }, [postIdTemp])
+
+  const postId = React.useMemo(()=> {
+    if(postIdTemp && postIdTemp?.includes('-post-')){
+      const str = postIdTemp
+      const arr = str.split('-post-')
+      const str2 = arr[1]
+      return str2
+    } else {
+      return postIdTemp
+    }
+  }, [postIdTemp])
+  
   const blogFull = React.useMemo(() => {
     if (!blog) return ''
     return addPrefix(blog)

@@ -15,6 +15,7 @@ import {
   upsertProducts
 } from "../state/features/globalSlice";
 import { fetchAndEvaluateCatalogues } from "../utils/fetchCatalogues";
+import { ORDER_BASE, STORE_BASE } from "../constants/identifiers";
 
 interface Resource {
   id: string;
@@ -48,8 +49,8 @@ export const useFetchOrders = () => {
       orderId,
       content
     });
-
     dispatch(addToHashMap(res));
+    return res;
   };
 
   const getCatalogue = async (user: string, catalogueId: string) => {
@@ -59,6 +60,7 @@ export const useFetchOrders = () => {
     });
     if (res?.isValid) {
       dispatch(setCatalogueHashMap(res));
+      return res;
     }
   };
 
@@ -98,18 +100,18 @@ export const useFetchOrders = () => {
     [catalogueHashMap]
   );
 
+  // Get the orders that you've received from your own store
   const getOrders = React.useCallback(async () => {
     if (!store) return;
 
     try {
       dispatch(setIsLoadingGlobal(true));
       const offset = orders.length;
-      //TODO - NAME SHOULD BE EXACT
-      const parts = store.split("q-store-general-");
+      const parts = store.split(`${STORE_BASE}-`);
       const shortStoreId = parts[1];
 
-      const query = `q-store-order-${shortStoreId}`;
-      const url = `/arbitrary/resources/search?service=DOCUMENT_PRIVATE&query=${query}&limit=20&includemetadata=true&offset=${offset}&reverse=true`;
+      const query = `${ORDER_BASE}-${shortStoreId}`;
+      const url = `/arbitrary/resources/search?service=DOCUMENT_PRIVATE&query=${query}&limit=20&includemetadata=true&mode=ALL&offset=${offset}&reverse=true`;
       const response = await fetch(url, {
         method: "GET",
         headers: {
@@ -128,33 +130,44 @@ export const useFetchOrders = () => {
       });
 
       dispatch(upsertOrders(structureData));
+      // Get the order raw data from getOrder API Call only if the hashMapOrders doesn't have the order or if the order is more recently updated than the existing order
+      let localOrderHashMap: Record<string, Order> = {};
       for (const content of structureData) {
+        if (hashMapOrders[content.id] || localOrderHashMap[content.id]) {
+          continue;
+        }
         if (content.user && content.id) {
           const res = checkAndUpdateResource(content);
           if (res) {
-            getOrder(content.user, content.id, content);
+            const fetchedOrder: Order = await getOrder(
+              content.user,
+              content.id,
+              content
+            );
+            if (fetchedOrder) {
+              localOrderHashMap = {
+                ...localOrderHashMap,
+                [fetchedOrder.id]: fetchedOrder
+              };
+            }
           }
         }
       }
     } catch (error) {
+      console.error(error);
     } finally {
       dispatch(setIsLoadingGlobal(false));
     }
   }, [store, orders]);
 
+  // Get the orders that you've made from other stores (not the ones that you've received)
   const getMyOrders = React.useCallback(
     async (name: string) => {
-      if (!store) return;
-
       try {
         dispatch(setIsLoadingGlobal(true));
         const offset = orders.length;
-        //TODO - NAME SHOULD BE EXACT
-        const parts = store.split("q-store-general-");
-        const shortStoreId = parts[1];
-
-        const query = `q-store-order-`;
-        const url = `/arbitrary/resources/search?service=DOCUMENT_PRIVATE&query=${query}&limit=20&includemetadata=true&offset=${offset}&name=${name}&reverse=true`;
+        const query = `${ORDER_BASE}-`;
+        const url = `/arbitrary/resources/search?service=DOCUMENT_PRIVATE&query=${query}&limit=20&includemetadata=true&offset=${offset}&name=${name}&exactmatchnames=true&mode=ALL&reverse=true`;
         const response = await fetch(url, {
           method: "GET",
           headers: {
@@ -173,11 +186,26 @@ export const useFetchOrders = () => {
         });
 
         dispatch(upsertMyOrders(structureData));
+        // Get the order raw data from getOrder API Call only if the hashMapOrders doesn't have the order or if the order is more recently updated than the existing order
+        let localOrderHashMap: Record<string, Order> = {};
         for (const content of structureData) {
+          if (hashMapOrders[content.id] || localOrderHashMap[content.id]) {
+            continue;
+          }
           if (content.user && content.id) {
             const res = checkAndUpdateResource(content);
             if (res) {
-              getOrder(content.user, content.id, content);
+              const fetchedOrder: Order = await getOrder(
+                content.user,
+                content.id,
+                content
+              );
+              if (fetchedOrder) {
+                localOrderHashMap = {
+                  ...localOrderHashMap,
+                  [fetchedOrder.id]: fetchedOrder
+                };
+              }
             }
           }
         }
@@ -189,15 +217,13 @@ export const useFetchOrders = () => {
     [store, myOrders]
   );
 
+  // Fetch the product resources and set it with its metadata inside the catalogueHashMap. The product resources were originally set in Redux in the global wrapper by fetching the data-container from QDN
   const getProducts = React.useCallback(async () => {
-    if (!store) return;
-    console.log({ listProducts });
     try {
       dispatch(setIsLoadingGlobal(true));
       const offset = products.length;
       const productList = listProducts.products;
       const responseData = productList.slice(offset, offset + 20);
-
       const structureData = responseData.map(
         (product: ProductDataContainer): Product => {
           return {
@@ -209,8 +235,6 @@ export const useFetchOrders = () => {
           };
         }
       );
-
-      console.log("structureData", structureData);
 
       dispatch(upsertProducts(structureData));
       for (const content of structureData) {
@@ -224,6 +248,7 @@ export const useFetchOrders = () => {
         }
       }
     } catch (error) {
+      console.error(error);
     } finally {
       dispatch(setIsLoadingGlobal(false));
     }

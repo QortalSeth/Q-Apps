@@ -1,5 +1,6 @@
 import { createSlice } from '@reduxjs/toolkit'
 import { RootState } from '../store'
+import { Product } from './storeSlice'
 
 interface OrderState {
   hashMapOrders: Record<string, Order>
@@ -11,15 +12,27 @@ const initialState: OrderState = {
   orders: [],
   isOpen: false
 }
+export interface TotalPriceDetails {
+  totalPrice: number;
+}
 
-interface Details { }
+export interface ProductDetails {
+  product: Product;
+  catalogueId: string;
+  quantity: number;
+  pricePerUnit: number;
+  totalProductPrice: number;
+}
+
+export type Details = TotalPriceDetails & Record<string, ProductDetails>;
 
 interface Delivery {
   customerName: string
   shippingAddress: {
     streetAddress: string
     city: string
-    region: string
+    region?: string
+    state?: string
     country: string
     zipCode: string
   }
@@ -42,9 +55,12 @@ export interface Order {
   payment?: Payment
   communicationMethod?: CommunicationMethod[]
   user: string
+  sellerName?: string
+  storeName?: string
   id: string
-  totalPrice?: string
+  totalPrice?: number
   status?: string
+  note?: string
 }
 
 export interface Status {

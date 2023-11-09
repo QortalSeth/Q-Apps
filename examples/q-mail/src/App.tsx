@@ -17,7 +17,7 @@ function App() {
 
   return (
     <Provider store={store}>
-      <ThemeProvider theme={themeColor === 'light' ? lightTheme : darkTheme}>
+      <ThemeProvider theme={darkTheme}>
         <Notification />
         <DownloadWrapper>
           <GlobalWrapper>
@@ -25,6 +25,7 @@ function App() {
 
             <Routes>
               <Route path="/" element={<Mail />} />
+              <Route path="/to/:name" element={<Mail isFromTo />} />
             </Routes>
           </GlobalWrapper>
         </DownloadWrapper>

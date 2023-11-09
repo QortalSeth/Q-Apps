@@ -13,7 +13,7 @@ import AttachFileIcon from '@mui/icons-material/AttachFile'
 import CloseIcon from '@mui/icons-material/Close'
 import CreateIcon from '@mui/icons-material/Create'
 import { setNotification } from '../../state/features/notificationsSlice'
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation, useParams } from 'react-router-dom'
 
 import {
   objectToBase64,
@@ -42,14 +42,18 @@ interface NewMessageProps {
   setReplyTo: React.Dispatch<any>
   alias?: string
   hideButton?: boolean
+  isFromTo?: boolean
 }
 const maxSize = 25 * 1024 * 1024 // 25 MB in bytes
 export const NewMessage = ({
   setReplyTo,
   replyTo,
   alias,
-  hideButton
+  hideButton,
+  isFromTo
 }: NewMessageProps) => {
+  const { name } = useParams()
+  const [isFromToName, setIsFromToName] = useState<null | string>(null)
   const [isOpen, setIsOpen] = useState<boolean>(false)
   const [value, setValue] = useState(initialValue)
   const [title, setTitle] = useState<string>('')
@@ -67,7 +71,7 @@ export const NewMessage = ({
     message:
       'To keep yourself anonymous remember to not use the same alias as the person you are messaging'
   })
-  const navigate = useNavigate();
+  const navigate = useNavigate()
   const dispatch = useDispatch()
   const location = useLocation()
   const { getRootProps, getInputProps } = useDropzone({
@@ -101,23 +105,18 @@ export const NewMessage = ({
     setAliasValue('')
   }
 
-  console.log({location})
   useEffect(() => {
-   const query = new URLSearchParams(location.search);
-    let toVar = query?.get('to')
-    console.log({toVar})
-    if(
-      toVar
-    ){
-      if (toVar && toVar.endsWith('/')) {
-        toVar = toVar.slice(0, -1);
-      }
-      setDestinationName(toVar); // Save the value to state
-      setIsOpen(true)
-      navigate(location.pathname, { replace: true }); // Remove query from the URL
+    if (isFromTo && name) {
+      setIsFromToName(name)
     }
- 
-  }, [navigate, location]);
+  }, [isFromTo, name])
+
+  useEffect(() => {
+    if (!isFromToName) return
+    setDestinationName(isFromToName)
+    setIsOpen(true)
+    setIsFromToName(null)
+  }, [isFromToName])
 
   useEffect(() => {
     if (replyTo) {
@@ -285,7 +284,7 @@ export const NewMessage = ({
           action: 'PUBLISH_MULTIPLE_QDN_RESOURCES',
           resources: [...attachmentArray],
           encrypt: true,
-          recipientPublicKey
+          publicKeys: [recipientPublicKey]
         }
         await qortalRequest(multiplePublish)
       }
@@ -311,7 +310,7 @@ export const NewMessage = ({
         // description: description,
         identifier,
         encrypt: true,
-        recipientPublicKey
+        publicKeys: [recipientPublicKey]
       }
 
       await qortalRequest(requestBody)

@@ -78,6 +78,14 @@ const commonThemeOptions = {
         disableElevation: true,
         disableRipple: true
       }
+    },
+    MuiModal: {
+      styleOverrides: {
+        root: {
+          zIndex: 50000,
+        },
+      }
+
     }
   }
 }
@@ -119,7 +127,7 @@ const lightTheme = createTheme({
         }
       }
     },
-    MuiIcon:{
+    MuiIcon: {
       defaultProps: {
         style: {
           color: '#000000'
@@ -141,7 +149,7 @@ const darkTheme = createTheme({
     secondary: {
       main: '#45adff'
     },
-    
+
     background: {
       default: '#313338',
       paper: "#1e1e20"
@@ -155,7 +163,7 @@ const darkTheme = createTheme({
     MuiCard: {
       styleOverrides: {
         root: {
-          boxShadow:  "none",
+          boxShadow: "none",
           borderRadius: '8px',
           transition: 'all 0.3s ease-in-out',
           '&:hover': {
@@ -166,7 +174,7 @@ const darkTheme = createTheme({
         }
       }
     },
-    MuiIcon:{
+    MuiIcon: {
       defaultProps: {
         style: {
           color: '#ffffff'

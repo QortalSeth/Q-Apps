@@ -1,14 +1,14 @@
 // @ts-nocheck
 import { useEffect, useState } from "react";
 import { Routes, Route } from "react-router-dom";
-import { Product } from "./pages/Product/Product";
+import { ProductPage } from "./pages/Product/ProductPage";
 import { StoreList } from "./pages/StoreList/StoreList";
 import { ThemeProvider } from "@mui/material/styles";
 import { CssBaseline } from "@mui/material";
 import { lightTheme, darkTheme } from "./styles/theme";
 import { store } from "./state/store";
 import { Provider } from "react-redux";
-import { Store } from "./pages/Store/Store";
+import { Store } from "./pages/Store/Store/Store";
 import { MyOrders } from "./pages/MyOrders/MyOrders";
 import { ErrorElement } from "./components/common/Error/ErrorElement";
 import GlobalWrapper from "./wrappers/GlobalWrapper";
@@ -27,7 +27,10 @@ function App() {
         <GlobalWrapper setTheme={(val: string) => setTheme(val)}>
           <CssBaseline />
           <Routes>
-            <Route path="/:user/:store/:product" element={<Product />} />
+            <Route
+              path="/:user/:store/:product/:catalogue"
+              element={<ProductPage />}
+            />
             <Route
               path="/product-manager/:store"
               element={<ProductManager />}

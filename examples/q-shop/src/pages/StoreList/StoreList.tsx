@@ -1,37 +1,38 @@
 import { useState, useCallback, useMemo } from "react";
-import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../state/store";
 import LazyLoad from "../../components/common/LazyLoad";
-import ContextMenuResource from "../../components/common/ContextMenu/ContextMenuResource";
-import { setIsLoadingGlobal } from "../../state/features/globalSlice";
-import { Store } from "../../state/features/storeSlice";
+import { Store, upsertStores } from "../../state/features/storeSlice";
 import { useFetchStores } from "../../hooks/useFetchStores";
 import {
-  StoreCard,
-  StoreCardDescription,
-  StoreCardImage,
-  StoreCardImageContainer,
-  StoreCardInfo,
-  StoreCardOwner,
-  StoreCardTitle,
-  StoreCardYouOwn,
   StoresContainer,
-  StoresRow,
-  MyStoresRow,
   MyStoresCard,
-  MyStoresCheckbox
+  MyStoresCheckbox,
+  WelcomeRow,
+  WelcomeFont,
+  WelcomeSubFont,
+  WelcomeCol,
+  QShopLogo,
+  LogoRow,
+  StoresRow
 } from "./StoreList-styles";
+import { Grid, Skeleton, useTheme } from "@mui/material";
+import { StoreCard } from "../Store/StoreCard/StoreCard";
+import { withTimeout } from "../../utils/withTimeout";
+import { TIMEOUT } from "../../constants/timeout";
+import QShopLogoLight from "../../assets/img/QShopLogoLight.webp";
+import QShopLogoDark from "../../assets/img/QShopLogo.webp";
 import DefaultStoreImage from "../../assets/img/Q-AppsLogo.webp";
-import { StarSVG } from "../../assets/svgs/StarSVG";
-interface BlogListProps {
-  mode?: string;
-}
-export const StoreList = ({ mode }: BlogListProps) => {
+import { STORE_BASE } from "../../constants/identifiers";
+
+export const StoreList = () => {
   const dispatch = useDispatch();
-  const { user } = useSelector((state: RootState) => state.auth);
-  const [stores, setStores] = useState<Store[]>([]);
+  const theme = useTheme();
+
+  const user = useSelector((state: RootState) => state.auth.user);
+
   const [filterUserStores, setFilterUserStores] = useState<boolean>(false);
+
   // TODO: Need skeleton at first while the data is being fetched
   // Will rerender and replace if the hashmap wasn't found initially
   const hashMapStores = useSelector(
@@ -39,17 +40,17 @@ export const StoreList = ({ mode }: BlogListProps) => {
   );
 
   // Fetch My Stores from Redux
-  const { myStores } = useSelector((state: RootState) => state.store);
+  const myStores = useSelector((state: RootState) => state.store.myStores);
+  const stores = useSelector((state: RootState) => state.store.stores);
+
   const { getStore, checkAndUpdateResource } = useFetchStores();
-  const navigate = useNavigate();
 
   const getUserStores = useCallback(async () => {
     try {
-      dispatch(setIsLoadingGlobal(true));
       const offset = stores.length;
-      //TODO - NAME SHOULD BE EXACT
-      const query = `q-store-general`;
-      const url = `/arbitrary/resources/search?service=STORE&query=${query}&limit=20&exactmatchnames=true&includemetadata=true&offset=${offset}&reverse=true`;
+      const query = STORE_BASE;
+      // Fetch list of user stores' resources from Qortal blockchain
+      const url = `/arbitrary/resources/search?service=STORE&query=${query}&limit=20&mode=ALL&prefix=true&includemetadata=false&offset=${offset}&reverse=true`;
       const response = await fetch(url, {
         method: "GET",
         headers: {
@@ -58,6 +59,7 @@ export const StoreList = ({ mode }: BlogListProps) => {
       });
       const responseData = await response.json();
       // Data returned from that endpoint of the API
+      // tags, category, categoryName are not being used at the moment
       const structureData = responseData.map((storeItem: any): Store => {
         return {
           title: storeItem?.metadata?.title,
@@ -81,7 +83,7 @@ export const StoreList = ({ mode }: BlogListProps) => {
           copiedStores.push(storeItem);
         }
       });
-      setStores(copiedStores);
+      dispatch(upsertStores(copiedStores));
       // Get the store raw data from getStore API Call only if the hashmapStore doesn't have the store or if the store is more recently updated than the existing store
       for (const content of structureData) {
         if (content.owner && content.id) {
@@ -89,19 +91,18 @@ export const StoreList = ({ mode }: BlogListProps) => {
             id: content.id,
             updated: content.updated
           });
+          // If the store is not already inside the hashmap, fetch the store raw data. We wrap this function in a timeout util function because stores with errors will hang the app and take a long time to load. With this, the max load time will be of 5 seconds for an error store.
           if (res) {
             getStore(content.owner, content.id, content);
           }
         }
       }
     } catch (error) {
-    } finally {
-      dispatch(setIsLoadingGlobal(false));
+      console.error(error);
     }
   }, [stores]);
 
   // Get all stores on mount or if user changes
-
   const getStores = useCallback(async () => {
     await getUserStores();
   }, [getUserStores, user?.name]);
@@ -114,6 +115,7 @@ export const StoreList = ({ mode }: BlogListProps) => {
     setFilterUserStores(event.target.checked);
   };
 
+  // Memoize the filtered stores to prevent rerenders
   const filteredStores = useMemo(() => {
     if (filterUserStores) {
       return myStores;
@@ -121,69 +123,101 @@ export const StoreList = ({ mode }: BlogListProps) => {
       return stores;
     }
   }, [filterUserStores, stores, myStores, user?.name]);
+
   return (
     <>
       <StoresContainer container>
-        {user && (
-          <MyStoresRow>
-            <MyStoresCard>
-              <MyStoresCheckbox
-                checked={filterUserStores}
-                onChange={handleFilterUserStores}
-                inputProps={{ "aria-label": "controlled" }}
-              />
-              See My Stores
-            </MyStoresCard>
-          </MyStoresRow>
-        )}
-        {filteredStores.map((store: Store, index) => {
-          let storeItem = store;
-          const existingStore = hashMapStores[store.id];
-          // Check in case hashmap data isn't there yet due to async API calls.
-          // If it's not there, component will rerender once it receives the metadata
-          if (existingStore) {
-            storeItem = existingStore;
-          }
-          const storeId = storeItem?.id || "";
-          const storeOwner = storeItem?.owner || "";
-          const storeTitle = storeItem?.title || "missing metadata";
-          const storeLogo = storeItem?.logo || DefaultStoreImage;
-          const storeDescription = storeItem?.description || "missing metadata";
-          return (
-            <StoresRow item key={storeId}>
-              <ContextMenuResource
-                name={storeOwner}
-                service="STORE"
-                identifier={storeId}
-                link={`qortal://APP/Q-Store/${storeOwner}/${storeId}`}
-              >
-                <StoreCard
-                  container
-                  onClick={() => navigate(`/${storeOwner}/${storeId}`)}
-                >
-                  <StoreCardImageContainer item>
-                    <StoreCardImage src={storeLogo} alt={storeTitle} />
-                  </StoreCardImageContainer>
-                  <StoreCardInfo item>
-                    <StoreCardTitle>{storeTitle}</StoreCardTitle>
-                    <StoreCardDescription>
-                      {storeDescription}
-                    </StoreCardDescription>
-                  </StoreCardInfo>
-                  <StoreCardOwner>{storeOwner}</StoreCardOwner>
-                  {storeOwner === user?.name && (
-                    <StoreCardYouOwn>
-                      <StarSVG color={"#fbff2a"} width={"20"} height={"20"} />
-                      You own this store
-                    </StoreCardYouOwn>
-                  )}
-                </StoreCard>
-              </ContextMenuResource>
-            </StoresRow>
-          );
-        })}
+        <WelcomeRow item xs={12}>
+          <LogoRow>
+            <QShopLogo
+              src={
+                theme.palette.mode === "dark" ? QShopLogoLight : QShopLogoDark
+              }
+              alt="Q-Shop Logo"
+            />
+            <WelcomeCol>
+              <WelcomeFont>Welcome to Q-Shop 👋</WelcomeFont>
+              <WelcomeSubFont>
+                Explore the latest of what the Qortal community has for sale.
+              </WelcomeSubFont>
+            </WelcomeCol>
+          </LogoRow>
+          <WelcomeCol>
+            {user && (
+              <MyStoresCard>
+                <MyStoresCheckbox
+                  checked={filterUserStores}
+                  onChange={handleFilterUserStores}
+                  inputProps={{ "aria-label": "controlled" }}
+                />
+                See My Stores
+              </MyStoresCard>
+            )}
+          </WelcomeCol>
+        </WelcomeRow>
+        <Grid item xs={12}>
+          <Grid container spacing={3}>
+            {filteredStores.length > 0 &&
+              filteredStores
+                // Get rid of the Bester shop (test shop)
+                .filter((store: Store) => store.owner !== "Bester")
+                .map((store: Store) => {
+                  let storeItem = store;
+                  let hasHash = false;
+                  const existingStore = hashMapStores[store.id];
+
+                  // Check in case hashmap data isn't there yet due to async API calls.
+                  // If it's not there, component will rerender once it receives the metadata
+                  if (existingStore) {
+                    storeItem = existingStore;
+                    hasHash = true;
+                  }
+                  const storeId = storeItem?.id || "";
+                  const storeOwner = storeItem?.owner || "";
+                  const storeTitle = storeItem?.title || "Invalid Shop";
+                  const storeLogo = storeItem?.logo || DefaultStoreImage;
+                  const storeDescription = storeItem?.description || "";
+                  if (!hasHash) {
+                    return (
+                      <StoresRow
+                        item
+                        xs={12}
+                        sm={6}
+                        md={6}
+                        lg={3}
+                        key={storeId}
+                      >
+                        <Skeleton
+                          variant="rectangular"
+                          style={{
+                            width: "100%",
+                            height: "460px",
+                            paddingBottom: "10px",
+                            objectFit: "contain",
+                            visibility: "visible",
+                            borderRadius: "8px"
+                          }}
+                        />
+                      </StoresRow>
+                    );
+                  } else {
+                    return (
+                      <StoreCard
+                        storeTitle={storeTitle || ""}
+                        storeLogo={storeLogo || ""}
+                        storeDescription={storeDescription || ""}
+                        storeId={storeId || ""}
+                        storeOwner={storeOwner || ""}
+                        key={storeId}
+                        userName={user?.name || ""}
+                      />
+                    );
+                  }
+                })}
+            <LazyLoad onLoadMore={getStores}></LazyLoad>
+          </Grid>
+        </Grid>
       </StoresContainer>
-      <LazyLoad onLoadMore={getStores}></LazyLoad>
     </>
   );
 };

@@ -1,6 +1,6 @@
-import React from 'react';
-import CircularProgress from '@mui/material/CircularProgress';
-import Box from '@mui/system/Box';
+import React from 'react'
+import CircularProgress from '@mui/material/CircularProgress'
+import Box from '@mui/system/Box'
 import { useTheme } from '@mui/material'
 
 interface PageLoaderProps {
@@ -26,7 +26,7 @@ const PageLoader: React.FC<PageLoaderProps> = ({
         top: 0,
         left: 0,
         backgroundColor: 'rgba(255, 255, 255, 0.25)',
-        zIndex: 1000
+        zIndex: 200000
       }}
     >
       <CircularProgress
@@ -40,4 +40,4 @@ const PageLoader: React.FC<PageLoaderProps> = ({
   )
 }
 
-export default PageLoader;
+export default PageLoader

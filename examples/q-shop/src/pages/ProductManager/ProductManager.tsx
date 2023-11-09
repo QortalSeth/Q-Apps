@@ -2,11 +2,11 @@ import React, { useMemo, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../state/store";
-import { Box, useTheme } from "@mui/material";
+import { Box, Grid, useTheme } from "@mui/material";
 import LazyLoad from "../../components/common/LazyLoad";
-import { NewProduct } from "./NewProduct";
-import { ShowOrder } from "./ShowOrder";
-import SimpleTable from "./ProductTable";
+import { NewProduct } from "./NewProduct/NewProduct";
+import { ShowOrder } from "./ShowOrder/ShowOrder";
+import { SimpleTable } from "./ProductTable/ProductTable";
 import { setNotification } from "../../state/features/notificationsSlice";
 import { objectToBase64 } from "../../utils/toBase64";
 import ShortUniqueId from "short-unique-id";
@@ -16,7 +16,9 @@ import {
   DataContainer,
   clearAllProductsToSave,
   removeFromProductsToSave,
-  updateRecentlyVisitedStoreId
+  setDataContainer,
+  setProducts,
+  updateCatalogueHashMap
 } from "../../state/features/globalSlice";
 import { Price, Product } from "../../state/features/storeSlice";
 import { useFetchOrders } from "../../hooks/useFetchOrders";
@@ -35,45 +37,54 @@ import {
   MinimizeIcon,
   DockedMinimizeIcon,
   DockedProductsToSaveCard,
-  ProductManagerContainer
+  ProductManagerContainer,
+  ProductsCol
 } from "./ProductManager-styles";
-import OrderTable from "./OrderTable";
-import { BackToStorefrontButton } from "../Store/Store-styles";
+import { OrderTable } from "./OrderTable/OrderTable";
+import { BackToStorefrontButton } from "../Store/Store/Store-styles";
 import { QortalSVG } from "../../assets/svgs/QortalSVG";
 import { CategorySVG } from "../../assets/svgs/CategorySVG";
 import { LoyaltySVG } from "../../assets/svgs/LoyaltySVG";
 import useConfirmationModal from "../../hooks/useConfirmModal";
 import { CreateButton } from "../../components/modals/CreateStoreModal-styles";
-import { useProductsToSaveLocalStorage } from "../../hooks/useProductsToSaveLocalStorage";
+// import { useProductsToSaveLocalStorage } from "../../hooks/useProductsToSaveLocalStorage";
 import { ReusableModal } from "../../components/modals/ReusableModal";
 import { useParams } from "react-router-dom";
+import { useLocation } from "react-router-dom";
+import {
+  CATALOGUE_BASE,
+  DATA_CONTAINER_BASE,
+  STORE_BASE
+} from "../../constants/identifiers";
 
 const uid = new ShortUniqueId({ length: 10 });
 
 export const ProductManager = () => {
   const theme = useTheme();
-  const { user } = useSelector((state: RootState) => state.auth);
-
-  const productsToSave = useSelector(
-    (state: RootState) => state.global.productsToSave
-  );
-
-  const currentStore = useSelector(
-    (state: RootState) => state.global.currentStore
-  );
-
-  const dataContainer = useSelector(
-    (state: RootState) => state.global.dataContainer
-  );
-
-  const orders = useSelector((state: RootState) => state.order.orders);
-
-  const products = useSelector((state: RootState) => state.global.products);
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   // Get store id from url
   const { store } = useParams();
 
-  console.log("products", products);
+  const user = useSelector((state: RootState) => state.auth.user);
+  const productsToSave = useSelector(
+    (state: RootState) => state.global.productsToSave
+  );
+  const currentStore = useSelector(
+    (state: RootState) => state.global.currentStore
+  );
+  const dataContainer = useSelector(
+    (state: RootState) => state.global.dataContainer
+  );
+  const orders = useSelector((state: RootState) => state.order.orders);
+  const listProducts = useSelector(
+    (state: RootState) => state.global.listProducts
+  );
+  // Products to map
+  const products = useSelector((state: RootState) => state.global.products);
+
+  const { products: dataContainerProducts } = listProducts;
 
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [order, setOrder] = useState<any>(null);
@@ -88,28 +99,18 @@ export const ProductManager = () => {
     return user.name;
   }, [user]);
 
-  const dispatch = useDispatch();
-  const navigate = useNavigate();
-
   // get and set productsToSave from local storage
-  const { productsToSaveLS, saveProductsToLocalStorage } =
-    useProductsToSaveLocalStorage();
+  // const { productsToSaveLS, saveProductsToLocalStorage } =
+  //   useProductsToSaveLocalStorage();
 
-  // When component mounts, updated recently viewed store id in global redux store to get latest data container and current store inside product manager
-  useEffect(() => {
-    if (store) {
-      dispatch(updateRecentlyVisitedStoreId(store));
-    }
-  }, [store]);
-
-  console.log("productsToSaveLS", productsToSaveLS);
+  // Redirect to Store page if they're hot reloading
 
   // Get productsToSave from Redux store and set them in local storage
-  useEffect(() => {
-    if (Object.keys(productsToSave).length > 0) {
-      saveProductsToLocalStorage(productsToSave);
-    }
-  }, [productsToSave]);
+  // useEffect(() => {
+  //   if (Object.keys(productsToSave).length > 0) {
+  //     saveProductsToLocalStorage(productsToSave);
+  //   }
+  // }, [productsToSave]);
 
   // Publish productsToSave to QDN
   async function publishQDNResource() {
@@ -131,7 +132,13 @@ export const ProductManager = () => {
     if (!currentStore) {
       errorMsg = "Cannot create a product without having a store";
     }
+
     if (!dataContainer) {
+      errorMsg = "Cannot create a product without having a data-container";
+    }
+
+    // Add validation to make sure the dataContainer has the same store id as the current store
+    if (currentStore?.id !== dataContainer?.storeId) {
       errorMsg = "Cannot create a product without having a data-container";
     }
 
@@ -152,7 +159,7 @@ export const ProductManager = () => {
     try {
       const storeId: string = currentStore?.id;
       if (!storeId) throw new Error("Could not find your store");
-      const parts = storeId.split("q-store-general-");
+      const parts = storeId.split(`${STORE_BASE}-`);
       const shortStoreId = parts[1];
 
       if (!currentStore) throw new Error("Could not find your store");
@@ -182,7 +189,7 @@ export const ProductManager = () => {
       // If catalogue was found on QDN, add it to the list of catalogues to publish when it has less than 10 products
       if (catalogue) listOfCataloguesToPublish.push(catalogue);
 
-      // Loop through productsToSave and add them to the catalogue if it has less than 10 products, otherwise create a new catalogue
+      // Loop through productsToSave and add them to the catalogue if it has less than 10 products, otherwise create a new catalogue. Also add new products to global redux store.
       Object.keys(productsToSave)
         .filter((item) => !productsToSave[item]?.isUpdate)
         .forEach((key) => {
@@ -192,14 +199,17 @@ export const ProductManager = () => {
           )?.value;
           if (!priceInQort)
             throw new Error("Cannot find price for one of your products");
-
           const lastCatalogueInList = listOfCataloguesToPublish.at(-1);
           if (
             lastCatalogueInList &&
             Object.keys(lastCatalogueInList?.products)?.length < 10
           ) {
             const copyLastCatalogue = { ...lastCatalogueInList };
-            copyLastCatalogue.products[key] = product;
+            // Add catalogueId to the product here (!important)
+            copyLastCatalogue.products[key] = {
+              ...product,
+              catalogueId: copyLastCatalogue.id
+            };
             dataContainerToPublish.products[key] = {
               created: product.created,
               priceQort: priceInQort,
@@ -232,11 +242,12 @@ export const ProductManager = () => {
           } else {
             // Create new catalogue
             const uidGenerator = uid();
-            const catalogueId = `q-store-catalogue-${shortStoreId}-${uidGenerator}`;
+            const catalogueId = `${CATALOGUE_BASE}-${shortStoreId}-${uidGenerator}`;
+            // Add catalogueId to the product here (!important)
             listOfCataloguesToPublish.push({
               id: catalogueId,
               products: {
-                [key]: product
+                [key]: { ...product, catalogueId: catalogueId }
               }
             });
             try {
@@ -248,7 +259,7 @@ export const ProductManager = () => {
                 status: AVAILABLE
               };
             } catch (error) {
-              console.log("my error", error);
+              console.error(error);
             }
 
             if (!dataContainerToPublish.catalogues)
@@ -286,7 +297,8 @@ export const ProductManager = () => {
         )?.value;
         if (!priceInQort)
           throw new Error("Cannot find price for one of your products");
-
+        if (priceInQort <= 0)
+          throw new Error("Price cannot be less than or equal to 0");
         dataContainerToPublish.products[product.id] = {
           created: product.created,
           priceQort: priceInQort,
@@ -350,14 +362,51 @@ export const ProductManager = () => {
         resources: [...publishMultipleCatalogues, publishDataContainer]
       };
       await qortalRequest(multiplePublish);
+
       // Clear productsToSave from Redux store
       dispatch(clearAllProductsToSave());
+
+      // Replace dataContainer in the store
+      dispatch(
+        setDataContainer({
+          ...dataContainerToPublish,
+          id: `${storeId}-${DATA_CONTAINER_BASE}`
+        })
+      );
+
+      const newProductsArray = Object.keys(dataContainerToPublish.products).map(
+        (key) => {
+          const product = dataContainerToPublish.products[key];
+          return {
+            ...product,
+            id: key
+          };
+        }
+      );
+
+      // Reset products to first 20 in the array of listProducts
+      dispatch(setProducts(newProductsArray));
+
+      const newCatalogueHashMapFunc = () => {
+        let newCatalogueHashMap: Record<string, Catalogue> = {};
+
+        listOfCataloguesToPublish.forEach((catalogue) => {
+          newCatalogueHashMap[catalogue.id] = catalogue;
+        });
+        return newCatalogueHashMap;
+      };
+
+      const catalogueHashMapToDispatch = newCatalogueHashMapFunc();
+      dispatch(updateCatalogueHashMap(catalogueHashMapToDispatch));
+
+      // Toast
       dispatch(
         setNotification({
           msg: "Products saved",
           alertType: "success"
         })
       );
+
       // Error handling
     } catch (error: any) {
       let notificationObj = null;
@@ -413,6 +462,22 @@ export const ProductManager = () => {
     await getProducts();
   }, [getProducts]);
 
+  // Fetch products from hashMap if listProducts changes
+  useEffect(() => {
+    handleGetProducts();
+  }, [dataContainerProducts]);
+
+  useEffect(() => {
+    if (
+      (!dataContainer || Object.keys(dataContainer).length === 0) &&
+      userName
+    ) {
+      navigate(`/${userName}/${store}`);
+    } else {
+      return;
+    }
+  }, [userName, dataContainer]);
+
   return (
     <ProductManagerContainer>
       <TabsContainer>
@@ -437,16 +502,16 @@ export const ProductManager = () => {
             }}
             label="Products"
           />
+          <StyledTab
+            sx={{
+              "&.Mui-selected": {
+                color: theme.palette.text.primary,
+                fontWeight: theme.typography.fontWeightMedium
+              }
+            }}
+            label="Orders"
+          />
         </StyledTabs>
-        <StyledTab
-          sx={{
-            "&.Mui-selected": {
-              color: theme.palette.text.primary,
-              fontWeight: theme.typography.fontWeightMedium
-            }
-          }}
-          label="Orders"
-        />
       </TabsContainer>
 
       {/* productsToSave card inside Product Manager */}
@@ -464,37 +529,59 @@ export const ProductManager = () => {
         </DockedProductsToSaveCard>
       ) : (
         <ReusableModal
-          customStyles={{ top: "15%" }}
+          customStyles={{ top: "5%", backgroundColor: "transparent" }}
           open={Object.keys(productsToSave).length > 0}
         >
           <ProductsToSaveCard>
-            {Object.keys(productsToSave).map((key: string) => {
-              const product = productsToSave[key];
-              const { id } = product;
-              return (
-                <ProductToSaveCard>
-                  <CardHeader>{product?.title}</CardHeader>
-                  <Bulletpoints>
-                    <QortalSVG color={"#000000"} height={"22"} width={"22"} />{" "}
-                    Price: {product?.price && product?.price[0].value} QORT
-                  </Bulletpoints>
-                  <Bulletpoints>
-                    <LoyaltySVG color={"#000000"} height={"22"} width={"22"} />
-                    Type: {product?.type}
-                  </Bulletpoints>
-                  <Bulletpoints>
-                    <CategorySVG color={"#000000"} height={"22"} width={"22"} />
-                    Category: {product?.category}
-                  </Bulletpoints>
-                  <TimesIcon
-                    onClickFunc={() => handleRemoveConfirmation(id)}
-                    color={"#000000"}
-                    height={"22"}
-                    width={"22"}
-                  />
-                </ProductToSaveCard>
-              );
-            })}
+            <ProductsCol container spacing={1}>
+              {Object.keys(productsToSave).map((key: string) => {
+                const product = productsToSave[key];
+                const { id } = product;
+                return (
+                  <Grid
+                    style={{ maxWidth: "100%", flexGrow: 1 }}
+                    item
+                    xs={12}
+                    sm={3}
+                    key={product?.id}
+                  >
+                    <ProductToSaveCard>
+                      <CardHeader>{product?.title}</CardHeader>
+                      <Bulletpoints>
+                        <QortalSVG
+                          color={"#000000"}
+                          height={"22"}
+                          width={"22"}
+                        />{" "}
+                        Price: {product?.price && product?.price[0].value} QORT
+                      </Bulletpoints>
+                      <Bulletpoints>
+                        <LoyaltySVG
+                          color={"#000000"}
+                          height={"22"}
+                          width={"22"}
+                        />
+                        Type: {product?.type}
+                      </Bulletpoints>
+                      <Bulletpoints>
+                        <CategorySVG
+                          color={"#000000"}
+                          height={"22"}
+                          width={"22"}
+                        />
+                        Category: {product?.category}
+                      </Bulletpoints>
+                      <TimesIcon
+                        onClickFunc={() => handleRemoveConfirmation(id)}
+                        color={"#000000"}
+                        height={"22"}
+                        width={"22"}
+                      />
+                    </ProductToSaveCard>
+                  </Grid>
+                );
+              })}
+            </ProductsCol>
             <CardButtonRow>
               <AddMoreButton onClick={() => setOpenAddProduct(true)}>
                 Add Another Product
@@ -533,6 +620,7 @@ export const ProductManager = () => {
           />
         </Box>
         <SimpleTable
+          // editProduct gets changed here, as what comes from the ProductManager only contains id, status, created, user & catalogueId. After this you'll have all the metadata as well.
           openProduct={(product) => {
             setProductToEdit(product);
           }}
@@ -553,6 +641,7 @@ export const ProductManager = () => {
             setIsOpen(true);
           }}
           data={orders}
+          from="ProductManager"
         ></OrderTable>
         <LazyLoad onLoadMore={handleGetOrders}></LazyLoad>
       </TabPanel>

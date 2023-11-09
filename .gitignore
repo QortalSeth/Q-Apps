@@ -1,1 +1,6 @@
 .DS_Store
+.idea
+/Library/node_modules/
+/Library/package.json
+/Library/package-lock.json
+/Library/tsconfig.json

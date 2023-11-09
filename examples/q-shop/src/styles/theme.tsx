@@ -7,6 +7,7 @@ const commonThemeOptions = {
       "Raleway, sans-serif",
       "Karla",
       "Merriweather Sans",
+      "Montserrat",
       "Proxima Nova",
       "Oxygen",
       "Catamaran",
@@ -108,6 +109,31 @@ const lightTheme = createTheme({
     }
   },
   components: {
+    MuiCssBaseline: {
+      styleOverrides: {
+        "body::-webkit-scrollbar-track": {
+          backgroundColor: "#fcfcfc"
+        },
+        "body::-webkit-scrollbar-track:hover": {
+          backgroundColor: "#fcfcfc"
+        },
+        "body::-webkit-scrollbar": {
+          width: "16px",
+          height: "10px",
+          backgroundColor: "#fcfcfc"
+        },
+        "body::-webkit-scrollbar-thumb": {
+          backgroundColor: "#417Ed4",
+          borderRadius: "8px",
+          backgroundClip: "content-box",
+          border: "4px solid transparent",
+          transition: "all 0.3s ease-in-out"
+        },
+        "body::-webkit-scrollbar-thumb:hover": {
+          backgroundColor: "#3e74c1"
+        }
+      }
+    },
     MuiCard: {
       styleOverrides: {
         root: {
@@ -157,6 +183,31 @@ const darkTheme = createTheme({
     }
   },
   components: {
+    MuiCssBaseline: {
+      styleOverrides: {
+        "body::-webkit-scrollbar-track": {
+          backgroundColor: "#111111"
+        },
+        "body::-webkit-scrollbar-track:hover": {
+          backgroundColor: "#111111"
+        },
+        "body::-webkit-scrollbar": {
+          width: "16px",
+          height: "10px",
+          backgroundColor: "#111111"
+        },
+        "body::-webkit-scrollbar-thumb": {
+          backgroundColor: "#2e3d60",
+          borderRadius: "8px",
+          backgroundClip: "content-box",
+          border: "4px solid transparent",
+          transition: "all 0.3s ease-in-out"
+        },
+        "body::-webkit-scrollbar-thumb:hover": {
+          backgroundColor: "#1a2744"
+        }
+      }
+    },
     MuiCard: {
       styleOverrides: {
         root: {

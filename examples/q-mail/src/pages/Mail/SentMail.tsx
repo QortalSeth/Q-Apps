@@ -281,13 +281,13 @@ export const SentMail = ({}: SentMailProps) => {
         return
       }
       dispatch(setIsLoadingGlobal(true))
-      const findUser = await findUserFunc(messageIdentifier)
-      if (!findUser) throw new Error('cannot find user')
+      // const findUser = await findUserFunc(messageIdentifier)
+      // if (!findUser) throw new Error('cannot find user')
       const res = await fetchAndEvaluateMail({
         user,
         messageIdentifier,
         content,
-        otherUser: findUser
+        otherUser: user
       })
       setMessage(res)
       dispatch(addToHashMapMail(res))

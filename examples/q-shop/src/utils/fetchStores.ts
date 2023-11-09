@@ -9,7 +9,7 @@ export const fetchAndEvaluateStores = async (data: any) => {
     }
 
     if (!owner || !storeId) return obj
-
+  // Fetch rawdata from QDN based on resource's location (need name, service type and identifier)
     try {
       const url = `/arbitrary/STORE/${owner}/${storeId}`
       const response = await fetch(url, {
@@ -22,17 +22,17 @@ export const fetchAndEvaluateStores = async (data: any) => {
       const responseData = await response.json()
       if (checkStructureStore(responseData)) {
         obj = {
-          ...responseData,
           ...content,
+          ...responseData,
           owner,
-          title: responseData.title,
-          created: responseData.created,
           id: storeId,
           isValid: true
         }
       }
       return obj
-    } catch (error) { }
+    } catch (error) {
+      console.error(error);
+     }
   }
 
   const res = await getStoreStores()

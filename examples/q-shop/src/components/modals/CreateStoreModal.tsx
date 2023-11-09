@@ -1,12 +1,5 @@
-import React, { ChangeEvent, useState } from "react";
-import {
-  Box,
-  Button,
-  Typography,
-  Modal,
-  FormControl,
-  useTheme
-} from "@mui/material";
+import { FC, ChangeEvent, useState, useEffect } from "react";
+import { Typography, Modal, FormControl, useTheme } from "@mui/material";
 import { useDispatch } from "react-redux";
 import { toggleCreateStoreModal } from "../../state/features/globalSlice";
 import ImageUploader from "../common/ImageUploader";
@@ -35,14 +28,16 @@ export interface onPublishParam {
 
 interface CreateStoreModalProps {
   open: boolean;
-  onClose: () => void;
+  closeCreateStoreModal: boolean;
+  setCloseCreateStoreModal: (val: boolean) => void;
   onPublish: (param: onPublishParam) => Promise<void>;
   username: string;
 }
 
 const CreateStoreModal: React.FC<CreateStoreModalProps> = ({
   open,
-  onClose,
+  closeCreateStoreModal,
+  setCloseCreateStoreModal,
   onPublish,
   username
 }) => {
@@ -72,7 +67,6 @@ const CreateStoreModal: React.FC<CreateStoreModalProps> = ({
         storeIdentifier,
         logo
       });
-      handleClose();
     } catch (error: any) {
       setErrorMessage(error.message);
     }
@@ -83,7 +77,6 @@ const CreateStoreModal: React.FC<CreateStoreModalProps> = ({
     setDescription("");
     setErrorMessage("");
     dispatch(toggleCreateStoreModal(false));
-    onClose();
   };
 
   const handleInputChangeId = (event: ChangeEvent<HTMLInputElement>) => {
@@ -106,10 +99,17 @@ const CreateStoreModal: React.FC<CreateStoreModalProps> = ({
     setStoreIdentifier(newValue);
   };
 
+  // Close modal when closeCreateStoreModal is true and reset closeCreateStoreModal to false. This is done once the data container is created inside the GlobalWrapper createStore function.
+  useEffect(() => {
+    if (closeCreateStoreModal) {
+      handleClose();
+      setCloseCreateStoreModal(false);
+    }
+  }, [closeCreateStoreModal]);
+
   return (
     <Modal
       open={open}
-      onClose={onClose}
       aria-labelledby="modal-title"
       aria-describedby="modal-description"
     >
