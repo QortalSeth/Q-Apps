@@ -111,7 +111,7 @@ export const CommentSection = ({ postId, postName }: CommentSectionProps) => {
       }
       const url = `/arbitrary/resources/search?mode=ALL&service=BLOG_COMMENT&query=qcomment_v1_qblog_${postId.slice(
         -12
-      )}&limit=20&includemetadata=true&offset=${offset}&reverse=false&excludeblocked=true`
+      )}&limit=20&includemetadata=false&offset=${offset}&reverse=false&excludeblocked=true`
       const response = await fetch(url, {
         method: 'GET',
         headers: {
@@ -200,7 +200,7 @@ export const CommentSection = ({ postId, postName }: CommentSectionProps) => {
       const offset = listComments.length
       const url = `/arbitrary/resources/search?mode=ALL&service=BLOG_COMMENT&query=qcomment_v1_qblog_${postId.slice(
         -12
-      )}&limit=20&includemetadata=true&offset=${offset}&reverse=false&excludeblocked=true`
+      )}&limit=20&includemetadata=false&offset=${offset}&reverse=false&excludeblocked=true`
       const response = await fetch(url, {
         method: 'GET',
         headers: {
