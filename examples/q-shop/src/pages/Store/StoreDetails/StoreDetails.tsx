@@ -10,7 +10,7 @@ import {
   HeaderRow,
   CardDetailsContainer,
   StoreTitle,
-  StoreDescription
+  StoreDescription,
 } from "./StoreDetails-styles";
 import { OwnerSVG } from "../../../assets/svgs/OwnerSVG";
 import { useTheme } from "@mui/material";
@@ -39,7 +39,7 @@ export const StoreDetails: FC<StoreDetailsProps> = ({
   dateCreated,
   location,
   shipsTo,
-  setOpenStoreDetails
+  setOpenStoreDetails,
 }) => {
   const theme = useTheme();
   return (
@@ -56,7 +56,7 @@ export const StoreDetails: FC<StoreDetailsProps> = ({
       </HeaderRow>
       <Divider />
       <CardDetailsContainer>
-        <CardDetailsContainer style={{ gap: "10px" }}>
+        <CardDetailsContainer style={{ gap: "15px" }}>
           <CardRow>
             <IconsRow>
               <OwnerSVG
@@ -118,7 +118,7 @@ export const StoreDetails: FC<StoreDetailsProps> = ({
                 sx={{
                   color: theme.palette.text.primary,
                   width: "22px",
-                  height: "22px"
+                  height: "22px",
                 }}
               />
               Email

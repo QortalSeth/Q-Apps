@@ -692,7 +692,7 @@ const GlobalWrapper: React.FC<Props> = ({ children, setTheme }) => {
                   id: `${myStoreFound.id}-${DATA_CONTAINER_BASE}`
                 })
               );
-            } else {
+            } else if (user?.name && recentlyVisitedStoreId) {
               // Call to see if the datacontainer actually exists
               const dataContainerExists = await qortalRequest({
                 action: "SEARCH_QDN_RESOURCES",

@@ -18,7 +18,7 @@ import {
   removeFromProductsToSave,
   setDataContainer,
   setProducts,
-  updateCatalogueHashMap
+  updateCatalogueHashMap,
 } from "../../state/features/globalSlice";
 import { Price, Product } from "../../state/features/storeSlice";
 import { useFetchOrders } from "../../hooks/useFetchOrders";
@@ -38,7 +38,7 @@ import {
   DockedMinimizeIcon,
   DockedProductsToSaveCard,
   ProductManagerContainer,
-  ProductsCol
+  ProductsCol,
 } from "./ProductManager-styles";
 import { OrderTable } from "./OrderTable/OrderTable";
 import { BackToStorefrontButton } from "../Store/Store/Store-styles";
@@ -54,7 +54,7 @@ import { useLocation } from "react-router-dom";
 import {
   CATALOGUE_BASE,
   DATA_CONTAINER_BASE,
-  STORE_BASE
+  STORE_BASE,
 } from "../../constants/identifiers";
 
 const uid = new ShortUniqueId({ length: 10 });
@@ -146,7 +146,7 @@ export const ProductManager = () => {
       dispatch(
         setNotification({
           msg: errorMsg,
-          alertType: "error"
+          alertType: "error",
         })
       );
       throw new Error(errorMsg);
@@ -172,7 +172,7 @@ export const ProductManager = () => {
       const dataContainerToPublish: DataContainer = {
         ...dataContainer,
         products: structuredClone(dataContainer.products),
-        catalogues: structuredClone(dataContainer.catalogues)
+        catalogues: structuredClone(dataContainer.catalogues),
       };
 
       if (lastCatalogue && Object.keys(lastCatalogue?.products)?.length < 10) {
@@ -181,7 +181,7 @@ export const ProductManager = () => {
           action: "FETCH_QDN_RESOURCE",
           name: name,
           service: "DOCUMENT",
-          identifier: lastCatalogue.id
+          identifier: lastCatalogue.id,
         });
         if (catalogueResponse && !catalogueResponse?.error)
           catalogue = catalogueResponse;
@@ -191,8 +191,8 @@ export const ProductManager = () => {
 
       // Loop through productsToSave and add them to the catalogue if it has less than 10 products, otherwise create a new catalogue. Also add new products to global redux store.
       Object.keys(productsToSave)
-        .filter((item) => !productsToSave[item]?.isUpdate)
-        .forEach((key) => {
+        .filter(item => !productsToSave[item]?.isUpdate)
+        .forEach(key => {
           const product = productsToSave[key];
           const priceInQort = product?.price?.find(
             (item: Price) => item?.currency === "qort"
@@ -208,21 +208,21 @@ export const ProductManager = () => {
             // Add catalogueId to the product here (!important)
             copyLastCatalogue.products[key] = {
               ...product,
-              catalogueId: copyLastCatalogue.id
+              catalogueId: copyLastCatalogue.id,
             };
             dataContainerToPublish.products[key] = {
               created: product.created,
               priceQort: priceInQort,
               category: product?.category || "",
               catalogueId: copyLastCatalogue.id,
-              status: AVAILABLE
+              status: AVAILABLE,
             };
             if (!dataContainerToPublish.catalogues)
               dataContainerToPublish.catalogues = [];
             // Determine if data container's catalogue has products
             const findCatalogueInDataContainer =
               dataContainerToPublish.catalogues.findIndex(
-                (item) => item.id === copyLastCatalogue.id
+                item => item.id === copyLastCatalogue.id
               );
             if (findCatalogueInDataContainer >= 0) {
               dataContainerToPublish.catalogues[
@@ -234,9 +234,9 @@ export const ProductManager = () => {
                 {
                   id: copyLastCatalogue.id,
                   products: {
-                    [key]: true
-                  }
-                }
+                    [key]: true,
+                  },
+                },
               ];
             }
           } else {
@@ -247,8 +247,8 @@ export const ProductManager = () => {
             listOfCataloguesToPublish.push({
               id: catalogueId,
               products: {
-                [key]: { ...product, catalogueId: catalogueId }
-              }
+                [key]: { ...product, catalogueId: catalogueId },
+              },
             });
             try {
               dataContainerToPublish.products[key] = {
@@ -256,7 +256,7 @@ export const ProductManager = () => {
                 priceQort: priceInQort,
                 category: product?.category || "",
                 catalogueId,
-                status: AVAILABLE
+                status: AVAILABLE,
               };
             } catch (error) {
               console.error(error);
@@ -267,7 +267,7 @@ export const ProductManager = () => {
 
             const findCatalogueInDataContainer =
               dataContainerToPublish.catalogues.findIndex(
-                (item) => item.id === catalogueId
+                item => item.id === catalogueId
               );
             // Determine if data container's catalogue has products
             if (findCatalogueInDataContainer >= 0) {
@@ -280,17 +280,17 @@ export const ProductManager = () => {
                 {
                   id: catalogueId,
                   products: {
-                    [key]: true
-                  }
-                }
+                    [key]: true,
+                  },
+                },
               ];
             }
           }
         });
       // Update products when sending productsToSave inside existing data container
       const productsToUpdate = Object.keys(productsToSave)
-        .filter((item) => !!productsToSave[item]?.isUpdate)
-        .map((key) => productsToSave[key]);
+        .filter(item => !!productsToSave[item]?.isUpdate)
+        .map(key => productsToSave[key]);
       for (const product of productsToUpdate) {
         const priceInQort = product?.price?.find(
           (item: Price) => item?.currency === "qort"
@@ -304,12 +304,12 @@ export const ProductManager = () => {
           priceQort: priceInQort,
           category: product?.category || "",
           catalogueId: product.catalogueId,
-          status: product?.status || ""
+          status: product?.status || "",
         };
         // Replace product from listOfCataloguesToPublish with updated product
         const findCatalogueFromExistingList =
           listOfCataloguesToPublish.findIndex(
-            (cat) => cat.id === product.catalogueId
+            cat => cat.id === product.catalogueId
           );
         if (findCatalogueFromExistingList >= 0) {
           listOfCataloguesToPublish[findCatalogueFromExistingList].products[
@@ -321,7 +321,7 @@ export const ProductManager = () => {
             action: "FETCH_QDN_RESOURCE",
             name: name,
             service: "DOCUMENT",
-            identifier: product.catalogueId
+            identifier: product.catalogueId,
           });
           if (catalogueResponse && !catalogueResponse?.error) {
             const copiedCatalogue = structuredClone(catalogueResponse);
@@ -341,7 +341,7 @@ export const ProductManager = () => {
           service: "DOCUMENT",
           identifier: catalogue.id,
           filename: "catalogue.json",
-          data64: catalogueToBase64
+          data64: catalogueToBase64,
         };
         publishMultipleCatalogues.push(publish);
       }
@@ -354,12 +354,12 @@ export const ProductManager = () => {
         service: "DOCUMENT",
         identifier: dataContainerToPublish.id,
         filename: "datacontainer.json",
-        data64: dataContainerToBase64
+        data64: dataContainerToBase64,
       };
       // Publish the catalogues and the data container to QDN. Remember that there can be multiple catalogues because each catalogue holds a maximum of 10 products. Therefore, if you're publishing multiple products, you will possibly fill up the last catalogue, before then creating a new one.
       const multiplePublish = {
         action: "PUBLISH_MULTIPLE_QDN_RESOURCES",
-        resources: [...publishMultipleCatalogues, publishDataContainer]
+        resources: [...publishMultipleCatalogues, publishDataContainer],
       };
       await qortalRequest(multiplePublish);
 
@@ -370,16 +370,16 @@ export const ProductManager = () => {
       dispatch(
         setDataContainer({
           ...dataContainerToPublish,
-          id: `${storeId}-${DATA_CONTAINER_BASE}`
+          id: `${storeId}-${DATA_CONTAINER_BASE}`,
         })
       );
 
       const newProductsArray = Object.keys(dataContainerToPublish.products).map(
-        (key) => {
+        key => {
           const product = dataContainerToPublish.products[key];
           return {
             ...product,
-            id: key
+            id: key,
           };
         }
       );
@@ -390,7 +390,7 @@ export const ProductManager = () => {
       const newCatalogueHashMapFunc = () => {
         let newCatalogueHashMap: Record<string, Catalogue> = {};
 
-        listOfCataloguesToPublish.forEach((catalogue) => {
+        listOfCataloguesToPublish.forEach(catalogue => {
           newCatalogueHashMap[catalogue.id] = catalogue;
         });
         return newCatalogueHashMap;
@@ -403,7 +403,7 @@ export const ProductManager = () => {
       dispatch(
         setNotification({
           msg: "Products saved",
-          alertType: "success"
+          alertType: "success",
         })
       );
 
@@ -413,17 +413,17 @@ export const ProductManager = () => {
       if (typeof error === "string") {
         notificationObj = {
           msg: error || "Failed to send message",
-          alertType: "error"
+          alertType: "error",
         };
       } else if (typeof error?.error === "string") {
         notificationObj = {
           msg: error?.error || "Failed to send message",
-          alertType: "error"
+          alertType: "error",
         };
       } else {
         notificationObj = {
           msg: error?.message || "Failed to send message",
-          alertType: "error"
+          alertType: "error",
         };
       }
       if (!notificationObj) return;
@@ -440,7 +440,7 @@ export const ProductManager = () => {
   // Confirmation to delete product from productsToSave
   const { Modal, showModal } = useConfirmationModal({
     title: "Remove Product from List To Save to the Shop",
-    message: "Are you sure you want to proceed?"
+    message: "Are you sure you want to proceed?",
   });
 
   const handleRemoveConfirmation = async (key: string) => {
@@ -497,8 +497,8 @@ export const ProductManager = () => {
             sx={{
               "&.Mui-selected": {
                 color: theme.palette.text.primary,
-                fontWeight: theme.typography.fontWeightMedium
-              }
+                fontWeight: theme.typography.fontWeightMedium,
+              },
             }}
             label="Products"
           />
@@ -506,8 +506,8 @@ export const ProductManager = () => {
             sx={{
               "&.Mui-selected": {
                 color: theme.palette.text.primary,
-                fontWeight: theme.typography.fontWeightMedium
-              }
+                fontWeight: theme.typography.fontWeightMedium,
+              },
             }}
             label="Orders"
           />
@@ -607,7 +607,7 @@ export const ProductManager = () => {
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
-            width: "100%"
+            width: "100%",
           }}
         >
           <NewProduct
@@ -621,7 +621,7 @@ export const ProductManager = () => {
         </Box>
         <SimpleTable
           // editProduct gets changed here, as what comes from the ProductManager only contains id, status, created, user & catalogueId. After this you'll have all the metadata as well.
-          openProduct={(product) => {
+          openProduct={product => {
             setProductToEdit(product);
           }}
           data={products}
@@ -636,7 +636,7 @@ export const ProductManager = () => {
           from="ProductManager"
         />
         <OrderTable
-          openOrder={(order) => {
+          openOrder={order => {
             setOrder(order);
             setIsOpen(true);
           }}
@@ -669,7 +669,7 @@ export function TabPanel(props: TabPanelProps) {
       aria-labelledby={`mail-tabs-${index}`}
       {...other}
       style={{
-        width: "100%"
+        width: "100%",
       }}
     >
       {value === index && children}

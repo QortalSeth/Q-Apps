@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import {
   Cart as CartInterface,
   setIsOpen,
-  setProductToCart
+  setProductToCart,
 } from "../../state/features/cartSlice";
 import { RootState } from "../../state/store";
 import { useNavigate, useParams } from "react-router-dom";
@@ -14,7 +14,7 @@ import DangerousIcon from "@mui/icons-material/Dangerous";
 import { CartIcon } from "../../components/layout/Navbar/Navbar-styles";
 import {
   CartIconContainer,
-  NotificationBadge
+  NotificationBadge,
 } from "../Store/Store/Store-styles";
 import { useFetchOrders } from "../../hooks/useFetchOrders";
 import {
@@ -27,7 +27,7 @@ import {
   ProductNotFound,
   ProductPrice,
   ProductTitle,
-  UnavailableButton
+  UnavailableButton,
 } from "./ProductPage-styles";
 import { QortalSVG } from "../../assets/svgs/QortalSVG";
 import { setNotification } from "../../state/features/notificationsSlice";
@@ -35,7 +35,7 @@ import { BackArrowSVG } from "../../assets/svgs/BackArrowSVG";
 import {
   NumericTextFieldQshop,
   NumericTextFieldRef,
-  Variant
+  Variant,
 } from "../../components/common/NumericTextFieldQshop";
 
 export const ProductPage = () => {
@@ -72,7 +72,7 @@ export const ProductPage = () => {
       // Get the orders of this cart
       const orders = shopCart?.orders || {};
       let totalQuantity = 0;
-      Object.keys(orders).forEach((key) => {
+      Object.keys(orders).forEach(key => {
         const order = orders[key];
         const { quantity } = order;
         totalQuantity += quantity;
@@ -102,15 +102,14 @@ export const ProductPage = () => {
     awaitProductData();
   }, [catalogueHashMap]);
 
-  const price = product?.price?.find((item) => item?.currency === "qort")
-    ?.value;
+  const price = product?.price?.find(item => item?.currency === "qort")?.value;
 
   const addToCart = () => {
     if (user?.name === storeOwner) {
       dispatch(
         setNotification({
           alertType: "error",
-          msg: "You own this store! You cannot add your own products to your cart!"
+          msg: "You own this store! You cannot add your own products to your cart!",
         })
       );
       return;
@@ -122,7 +121,7 @@ export const ProductPage = () => {
             productId: product.id,
             catalogueId: product.catalogueId,
             storeId,
-            storeOwner
+            storeOwner,
           })
         );
       }
@@ -160,7 +159,7 @@ export const ProductPage = () => {
           dispatch(
             setNotification({
               alertType: "error",
-              msg: "You own this store! You cannot add your own products to your cart!"
+              msg: "You own this store! You cannot add your own products to your cart!",
             })
           );
           return;
@@ -168,7 +167,7 @@ export const ProductPage = () => {
         dispatch(
           setNotification({
             alertType: "error",
-            msg: "This product is out of stock!"
+            msg: "This product is out of stock!",
           })
         );
       }}
