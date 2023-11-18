@@ -40,6 +40,7 @@ export interface CatalogueDataContainer {
 export interface Catalogue {
   id: string;
   products: Record<string, Product>;
+  user?: string;
 }
 interface GlobalState {
   isOpenCreateStoreModal: boolean;

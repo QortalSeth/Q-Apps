@@ -10,7 +10,7 @@ import {
   ProductDescription,
   ProductTitle,
   StyledCard,
-  StyledCardContent
+  StyledCardContent,
 } from "./ProductCard-styles";
 import { CartSVG } from "../../../assets/svgs/CartSVG";
 import { useNavigate } from "react-router-dom";
@@ -38,6 +38,10 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
 
   const user = useSelector((state: RootState) => state.auth.user);
 
+  const catalogueHashMap = useSelector(
+    (state: RootState) => state.global.catalogueHashMap
+  );
+
   const userName = useMemo(() => {
     if (!user?.name) return "";
     return user.name;
@@ -50,19 +54,19 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
       dispatch(
         setNotification({
           alertType: "error",
-          msg: "Unable to load product! Please try again!"
+          msg: "Unable to load product! Please try again!",
         })
       );
       return;
     }
     navigate(
-      `/${product?.user}/${storeId}/${product?.id}/${product.catalogueId}`
+      `/${
+        product?.user || catalogueHashMap[product?.catalogueId]?.user
+      }/${storeId}/${product?.id}/${product.catalogueId}`
     );
   };
 
-  const price = product?.price?.find(
-    (item) => item?.currency === "qort"
-  )?.value;
+  const price = product?.price?.find(item => item?.currency === "qort")?.value;
 
   return (
     <StyledCard>
@@ -71,8 +75,8 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           "&.MuiCardMedia-root": {
             padding: "10px",
             borderRadius: "12px",
-            objectFit: "contain"
-          }
+            objectFit: "contain",
+          },
         }}
         component="img"
         height="140"
@@ -90,7 +94,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
             display: "flex",
             gap: "5px",
             marginTop: "auto",
-            fontWeight: "bold"
+            fontWeight: "bold",
           }}
         >
           <QortalSVG
@@ -105,7 +109,8 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
         {storeOwner !== userName && (
           <AddToCartButton
             style={{
-              cursor: product.status === "AVAILABLE" ? "pointer" : "not-allowed"
+              cursor:
+                product.status === "AVAILABLE" ? "pointer" : "not-allowed",
             }}
             color="primary"
             onClick={() => {
@@ -113,7 +118,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
                 dispatch(
                   setNotification({
                     alertType: "error",
-                    msg: "Product is not available!"
+                    msg: "Product is not available!",
                   })
                 );
                 return;
@@ -123,7 +128,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
                   productId: product.id,
                   catalogueId: product.catalogueId,
                   storeId,
-                  storeOwner
+                  storeOwner,
                 })
               );
             }}

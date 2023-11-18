@@ -3,7 +3,7 @@ import React, {
   useEffect,
   useCallback,
   useMemo,
-  useRef
+  useRef,
 } from "react";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
@@ -17,21 +17,21 @@ import {
   FormControl,
   Rating,
   Typography,
-  Skeleton
+  Skeleton,
 } from "@mui/material";
 import {
   Catalogue,
   resetListProducts,
   resetProducts,
   setIsLoadingGlobal,
-  updateRecentlyVisitedStoreId
+  updateRecentlyVisitedStoreId,
 } from "../../../state/features/globalSlice";
 import {
   Product,
   clearReviews,
   clearViewedStoreDataContainer,
   setCurrentViewedStore,
-  setViewedStoreDataContainer
+  setViewedStoreDataContainer,
 } from "../../../state/features/storeSlice";
 import LazyLoad from "../../../components/common/LazyLoad";
 import ContextMenuResource from "../../../components/common/ContextMenu/ContextMenuResource";
@@ -64,7 +64,7 @@ import {
   StoreTitleCol,
   StoreTitle,
   RatingContainer,
-  ReusableModalStyled
+  ReusableModalStyled,
 } from "./Store-styles";
 import { toggleEditStoreModal } from "../../../state/features/globalSlice";
 import { CartIcon } from "../../../components/layout/Navbar/Navbar-styles";
@@ -78,7 +78,7 @@ import { objectToBase64 } from "../../../utils/toBase64";
 import {
   DATA_CONTAINER_BASE,
   REVIEW_BASE,
-  STORE_BASE
+  STORE_BASE,
 } from "../../../constants/identifiers";
 
 interface IListProducts {
@@ -89,12 +89,12 @@ interface IListProducts {
 
 enum PriceFilter {
   highest = "Highest",
-  lowest = "Lowest"
+  lowest = "Lowest",
 }
 
 enum DateFilter {
   newest = "Newest",
-  oldest = "Oldest"
+  oldest = "Oldest",
 }
 
 export const Store = () => {
@@ -175,7 +175,7 @@ export const Store = () => {
             catalogueId: product.catalogueId,
             id: product?.productId || "",
             user: product?.user || "",
-            status: product?.status || ""
+            status: product?.status || "",
           };
         }
       );
@@ -183,7 +183,7 @@ export const Store = () => {
       setHasFetched(true);
       const copiedProducts = [...products];
       structureData.forEach((product: Product) => {
-        const index = copiedProducts.findIndex((p) => p.id === product.id);
+        const index = copiedProducts.findIndex(p => p.id === product.id);
         if (index !== -1) {
           copiedProducts[index] = product;
         } else {
@@ -204,7 +204,7 @@ export const Store = () => {
         }
         if (content.user && content.id) {
           const res = checkAndUpdateResourceCatalogue({
-            id: content.catalogueId
+            id: content.catalogueId,
           });
           if (res) {
             const fetchedCatalogue: Catalogue = await getCatalogue(
@@ -214,7 +214,7 @@ export const Store = () => {
             if (fetchedCatalogue) {
               localCatalogue = {
                 ...localCatalogue,
-                [content.catalogueId]: fetchedCatalogue
+                [content.catalogueId]: fetchedCatalogue,
               };
             }
           }
@@ -229,7 +229,7 @@ export const Store = () => {
     ownStoreListProducts.products,
     store,
     username,
-    user?.name
+    user?.name,
   ]);
 
   // Get products on mount
@@ -242,6 +242,7 @@ export const Store = () => {
           : ownStoreListProducts.products;
       console.log({ productList });
       if (productList.length === 0) return;
+      // This gets the product raw data
       getProducts();
     }
   }, [
@@ -250,7 +251,7 @@ export const Store = () => {
     user?.name,
     store,
     viewedStoreListProducts?.products,
-    ownStoreListProducts?.products
+    ownStoreListProducts?.products,
   ]);
 
   // Get store on mount & dipatch setCurrentViewedStore to redux when it's not your store. If it is your store, this is handled already in the global wrapper, so we do nothing as well.
@@ -278,8 +279,8 @@ export const Store = () => {
         const info = await fetch(url, {
           method: "GET",
           headers: {
-            "Content-Type": "application/json"
-          }
+            "Content-Type": "application/json",
+          },
         });
 
         const responseDataStore = await info.json();
@@ -296,8 +297,8 @@ export const Store = () => {
         const resource = await fetch(urlStore, {
           method: "GET",
           headers: {
-            "Content-Type": "application/json"
-          }
+            "Content-Type": "application/json",
+          },
         });
         const responseData = await resource.json();
         // Set shop data to redux now that you have the info/metadata & resource
@@ -312,7 +313,7 @@ export const Store = () => {
             category: myStore.metadata?.category,
             tags: myStore.metadata?.tags || [],
             logo: responseData?.logo || "",
-            shortStoreId: responseData?.shortStoreId
+            shortStoreId: responseData?.shortStoreId,
           })
         );
 
@@ -320,8 +321,8 @@ export const Store = () => {
         const responseContainer = await fetch(urlDatacontainer, {
           method: "GET",
           headers: {
-            "Content-Type": "application/json"
-          }
+            "Content-Type": "application/json",
+          },
         });
         const responseDataContainer = await responseContainer.json();
 
@@ -335,7 +336,7 @@ export const Store = () => {
           exactMatchNames: true,
           limit: 0,
           offset: 0,
-          reverse: true
+          reverse: true,
         });
 
         // Set dataContainer in redux if it is found. This is to do filtering in the future since it cannot be done on QDN at the moment.
@@ -347,7 +348,7 @@ export const Store = () => {
           dispatch(
             setViewedStoreDataContainer({
               ...responseDataContainer,
-              id: `${store}-${DATA_CONTAINER_BASE}`
+              id: `${store}-${DATA_CONTAINER_BASE}`,
             })
           );
           // If they haven't published a datacontainer, by querying "/arbitrary​/resources​/search", and it comes back as []
@@ -360,7 +361,7 @@ export const Store = () => {
           dispatch(
             setNotification({
               msg: "Error getting store data container.",
-              alertType: "error"
+              alertType: "error",
             })
           );
           // If they haven't published a datacontainer, by querying "/arbitrary​/resources​/search", and it comes back as []
@@ -374,7 +375,7 @@ export const Store = () => {
           dispatch(
             setNotification({
               msg: "Server Error",
-              alertType: "error"
+              alertType: "error",
             })
           );
           // If the datacontainer exists and you cannot find it, but it's a response of 500, throw general error and redirect to home page.
@@ -383,7 +384,7 @@ export const Store = () => {
           dispatch(
             setNotification({
               msg: "Server Error",
-              alertType: "error"
+              alertType: "error",
             })
           );
         }
@@ -408,8 +409,8 @@ export const Store = () => {
       const response = await fetch(url, {
         method: "GET",
         headers: {
-          "Content-Type": "application/json"
-        }
+          "Content-Type": "application/json",
+        },
       });
       const responseData = await response.json();
       if (responseData.length === 0) {
@@ -464,7 +465,7 @@ export const Store = () => {
       // Get the orders of this cart
       const orders = shopCart?.orders || {};
       let totalQuantity = 0;
-      Object.keys(orders).forEach((key) => {
+      Object.keys(orders).forEach(key => {
         const order = orders[key];
         const { quantity } = order;
         totalQuantity += quantity;
@@ -489,7 +490,7 @@ export const Store = () => {
           return {
             ...product,
             ...catalogueHashMap[product.catalogueId].products[product?.id],
-            catalogueId: product?.catalogueId || ""
+            catalogueId: product?.catalogueId || "",
           };
         } else {
           return product;
@@ -523,7 +524,7 @@ export const Store = () => {
       const condition =
         categoryChips.length > 0
           ? product?.category &&
-            categoryChips.some((chip) => chip === product.category)
+            categoryChips.some(chip => chip === product.category)
           : true;
       return condition;
     });
@@ -546,7 +547,7 @@ export const Store = () => {
   };
 
   const handleChipRemove = (chip: string) => {
-    setCategoryChips((prevChips) => prevChips.filter((c) => c !== chip));
+    setCategoryChips(prevChips => prevChips.filter(c => c !== chip));
   };
   console.log({ hasFetched, filteredProducts, username, user });
 
@@ -616,12 +617,12 @@ export const Store = () => {
                 renderOption={(props, option: any) => (
                   <li {...props}>
                     <FiltersCheckbox
-                      checked={categoryChips.some((chip) => chip === option)}
+                      checked={categoryChips.some(chip => chip === option)}
                     />
                     {option}
                   </li>
                 )}
-                renderInput={(params) => (
+                renderInput={params => (
                   <FilterSelectMenuItems
                     {...params}
                     label="Categories"
@@ -794,6 +795,7 @@ export const Store = () => {
                 productItem = existingProduct;
                 hasHash = true;
               }
+              console.log({ productItem });
               if (!hasHash) {
                 return (
                   <ProductCardCol
@@ -812,7 +814,7 @@ export const Store = () => {
                         paddingBottom: "10px",
                         objectFit: "contain",
                         visibility: "visible",
-                        borderRadius: "8px"
+                        borderRadius: "8px",
                       }}
                     />
                   </ProductCardCol>
@@ -831,7 +833,12 @@ export const Store = () => {
                       name={productItem.user}
                       service="PRODUCT"
                       identifier={productItem.id}
-                      link={`qortal://APP/Q-Shop/${productItem?.user}/${storeId}/${productItem?.id}/${productItem?.catalogueId}`}
+                      link={`qortal://APP/Q-Shop/${
+                        productItem?.user ||
+                        catalogueHashMap[productItem?.catalogueId]?.user
+                      }/${storeId}/${productItem?.id}/${
+                        productItem?.catalogueId
+                      }`}
                     >
                       <ProductCard product={productItem} />
                     </ContextMenuResource>
@@ -861,7 +868,7 @@ export const Store = () => {
         id={"store-details"}
         customStyles={{
           width: "96%",
-          maxWidth: 700,
+          maxWidth: 1000,
           height: "70%",
           backgroundColor:
             theme.palette.mode === "light" ? "#e8e8e8" : "#32333c",
@@ -869,7 +876,7 @@ export const Store = () => {
           padding: "25px 40px",
           borderRadius: "5px",
           outline: "none",
-          overflowY: "auto"
+          overflowY: "auto",
         }}
         open={openStoreDetails}
       >
@@ -921,7 +928,7 @@ export const Store = () => {
           borderRadius: "5px",
           outline: "none",
           overflowY: "auto",
-          overflowX: "hidden"
+          overflowX: "hidden",
         }}
         open={openStoreReviews}
       >

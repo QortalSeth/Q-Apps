@@ -38,7 +38,7 @@ export const NewProduct = ({
   editProduct,
   onClose,
   openAddProduct,
-  setOpenAddProduct
+  setOpenAddProduct,
 }: NewMessageProps) => {
   const { user } = useSelector((state: RootState) => state.auth);
 
@@ -76,7 +76,7 @@ export const NewProduct = ({
     price,
     mainImageIndex,
     category,
-    status
+    status,
   }: PublishProductParams) {
     let address: string = "";
     let name: string = "";
@@ -89,7 +89,7 @@ export const NewProduct = ({
       errorMsg = "Cannot send: your address isn't available";
     }
     if (!name) {
-      errorMsg = "Cannot send a message without a access to your name";
+      errorMsg = "Cannot add or edit a product without a access to your name";
     }
     if (images.length === 0) {
       errorMsg = "Missing images";
@@ -105,7 +105,7 @@ export const NewProduct = ({
       dispatch(
         setNotification({
           msg: errorMsg,
-          alertType: "error"
+          alertType: "error",
         })
       );
       return;
@@ -133,7 +133,8 @@ export const NewProduct = ({
           price,
           category,
           isUpdate: true,
-          status
+          status,
+          user: name,
         };
 
         dispatch(setProductsToSave(productObject));
@@ -152,7 +153,8 @@ export const NewProduct = ({
           shortStoreId,
           category,
           id,
-          status: "AVAILABLE"
+          status: "AVAILABLE",
+          user: name,
         };
         // Add Product to productsToSave object in Global Slice Redux Store
         dispatch(setProductsToSave(productObject));
@@ -164,17 +166,17 @@ export const NewProduct = ({
       if (typeof error === "string") {
         notificationObj = {
           msg: error || "Failed to send message",
-          alertType: "error"
+          alertType: "error",
         };
       } else if (typeof error?.error === "string") {
         notificationObj = {
           msg: error?.error || "Failed to send message",
-          alertType: "error"
+          alertType: "error",
         };
       } else {
         notificationObj = {
           msg: error?.message || "Failed to send message",
-          alertType: "error"
+          alertType: "error",
         };
       }
       if (!notificationObj) return;
@@ -188,7 +190,7 @@ export const NewProduct = ({
     <Box
       sx={{
         display: "flex",
-        padding: "5px 15px"
+        padding: "5px 15px",
       }}
     >
       <CreateProductButton onClick={openModal}>
