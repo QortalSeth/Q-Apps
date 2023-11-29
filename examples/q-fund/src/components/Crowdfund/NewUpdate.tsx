@@ -3,17 +3,17 @@ import CreateIcon from "@mui/icons-material/Create";
 import {
   AddCrowdFundButton,
   CATContainer,
+  CrowdfundActionButton,
+  CrowdfundActionButtonRow,
   CrowdfundCardTitle,
   CustomInputField,
   EditCrowdFundButton,
   ModalBody,
   NewCrowdFundFont,
   NewCrowdfundTitle,
-  CrowdfundActionButton,
-  CrowdfundActionButtonRow,
 } from "./Crowdfund-styles";
 
-import { Box, Button, Modal, useTheme } from "@mui/material";
+import { Box, Modal, useTheme } from "@mui/material";
 import ReactQuill, { Quill } from "react-quill";
 import ImageResize from "quill-image-resize-module-react";
 import ShortUniqueId from "short-unique-id";
@@ -24,7 +24,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { setNotification } from "../../state/features/notificationsSlice";
 import { objectToBase64 } from "../../utils/toBase64";
 import { RootState } from "../../state/store";
-import { ATTACHMENT_BASE, UPDATE_BASE } from "../../constants";
+import { ATTACHMENT_BASE, UPDATE_BASE } from "../../constants/Identifiers.ts";
 import dayjs from "dayjs";
 import isBetween from "dayjs/plugin/isBetween"; // Import the plugin
 import duration from "dayjs/plugin/duration";
@@ -280,7 +280,10 @@ export const NewUpdate = ({
                 </>
               </EditCrowdFundButton>
             ) : (
-              <AddCrowdFundButton onClick={() => setIsOpen(true)}>
+              <AddCrowdFundButton
+                style={{ backgroundColor: "red" }}
+                onClick={() => setIsOpen(true)}
+              >
                 <>
                   <AddIcon fontSize="large" />{" "}
                   <CrowdfundCardTitle>Add an update</CrowdfundCardTitle>

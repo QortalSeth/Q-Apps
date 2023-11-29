@@ -25,17 +25,19 @@ export const DonateModalCol = styled(Box)({
   gap: "20px",
 });
 
+const donateButtonColor = "#34BFA6";
 export const CrowdfundPageDonateButton = styled(ButtonStyle)(({ theme }) => ({
-  backgroundColor: theme.palette.primary.main,
+  backgroundColor: donateButtonColor,
   "&:hover": {
-    backgroundColor: changeLightness(theme.palette.primary.main, -10),
+    backgroundColor: changeLightness(donateButtonColor, -10),
   },
 }));
 
+const donorDetailsButtonColor = "#57AAF2";
 export const DonorDetailsButton = styled(ButtonStyle)(({ theme }) => ({
-  backgroundColor: theme.palette.secondary.main,
+  backgroundColor: donorDetailsButtonColor,
   "&:hover": {
-    backgroundColor: changeLightness(theme.palette.secondary.main, -10),
+    backgroundColor: changeLightness(donorDetailsButtonColor, -10),
   },
 }));
 

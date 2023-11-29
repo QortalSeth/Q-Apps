@@ -1,12 +1,12 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { CommentEditor } from "./CommentEditor";
 import { Comment } from "./Comment";
-import { Box, Button, CircularProgress, useTheme } from "@mui/material";
+import { CircularProgress } from "@mui/material";
 import { styled } from "@mui/system";
 import { useSelector } from "react-redux";
 import { RootState } from "../../../state/store";
-import { useNavigate, useLocation } from "react-router-dom";
-import { COMMENT_BASE } from "../../../constants";
+import { useLocation, useNavigate } from "react-router-dom";
+import { COMMENT_BASE } from "../../../constants/Identifiers.ts";
 import {
   CommentContainer,
   CommentEditorContainer,

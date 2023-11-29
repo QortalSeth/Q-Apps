@@ -2,13 +2,13 @@ import React from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
   addToHashMap,
-  upsertCrowdfunds,
   Crowdfund,
+  upsertCrowdfunds,
 } from "../state/features/crowdfundSlice";
 
 import { RootState } from "../state/store";
 import { fetchAndEvaluateCrowdfunds } from "../utils/fetchCrowdfunds";
-import { CROWDFUND_BASE } from "../constants";
+import { CROWDFUND_BASE } from "../constants/Identifiers.ts";
 
 export const useFetchCrowdfunds = () => {
   const dispatch = useDispatch();

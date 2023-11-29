@@ -10,6 +10,7 @@ import {
   CountdownRow,
   EstimatedTimeRemainingFont,
 } from "./Countdown-styles";
+import { getDurationFromBlocks } from "qortal-app-utils";
 
 interface CountdownProps {
   endDate: moment.Moment;
@@ -49,14 +50,13 @@ export const Countdown: React.FC<CountdownProps> = ({
         return;
       }
 
-      const totalMinutes = duration.asMinutes();
-      const days = Math.floor(totalMinutes / (60 * 24));
-      const hours = Math.floor((totalMinutes % (60 * 24)) / 60);
-      const minutes = Math.floor(totalMinutes % 60);
-
-      setTimeRemainingDays(days);
-      setTimeRemainingHours(hours);
-      setTimeRemainingMinutes(minutes);
+      getDurationFromBlocks(duration.asMinutes()).then(
+        ({ days, hours, minutes }) => {
+          setTimeRemainingDays(days);
+          setTimeRemainingHours(hours);
+          setTimeRemainingMinutes(minutes);
+        }
+      );
     };
 
     // Ensure the crowdfund has not ended before running the countdown

@@ -1,18 +1,8 @@
-import { styled } from "@mui/system";
-import {
-  Accordion,
-  AccordionDetails,
-  AccordionSummary,
-  Box,
-  Button,
-  Grid,
-  Rating,
-  TextField,
-  Typography,
-} from "@mui/material";
-import AddPhotoAlternateIcon from "@mui/icons-material/AddPhotoAlternate";
-import { TimesSVG } from "../../assets/svgs/TimesSVG";
-import BoundedNumericTextField from "../../utils/BoundedNumericTextField";
+import { styled } from '@mui/system';
+import { Accordion, AccordionDetails, AccordionSummary, Box, Button, Grid, Rating, TextField, Typography } from '@mui/material';
+import AddPhotoAlternateIcon from '@mui/icons-material/AddPhotoAlternate';
+import { TimesSVG } from '../../assets/svgs/TimesSVG';
+import BoundedNumericTextField from '../../utils/BoundedNumericTextField';
 
 export const DoubleLine = styled(Typography)`
   display: -webkit-box;

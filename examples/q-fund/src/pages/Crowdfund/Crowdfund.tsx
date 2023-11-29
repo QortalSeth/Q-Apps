@@ -15,7 +15,11 @@ import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { DisplayHtml } from "../../components/common/DisplayHtml";
 import FileElement from "../../components/common/FileElement";
 import { setIsLoadingGlobal } from "../../state/features/globalSlice";
-import { CROWDFUND_BASE, REVIEW_BASE, UPDATE_BASE } from "../../constants";
+import {
+  CROWDFUND_BASE,
+  REVIEW_BASE,
+  UPDATE_BASE,
+} from "../../constants/Identifiers.ts";
 import { addToHashMap } from "../../state/features/crowdfundSlice";
 import {
   AboutMyCrowdfund,
@@ -592,18 +596,20 @@ export const Crowdfund = () => {
                 blocksRemaining={blocksRemaining}
                 ATCompleted={ATCompleted}
               />
-              <Stack direction={"row"} gap={"25px"}>
-                <Donate
-                  ATDonationPossible={ATDeployed && !ATCompleted}
-                  atAddress={crowdfundData?.deployedAT?.aTAddress}
-                  onSubmit={() => {
-                    return;
-                  }}
-                  onClose={() => {
-                    return;
-                  }}
-                />
-                <DonorInfo rawDonorData={rawDonorData} />
+              <Stack direction={"column"} gap={"25px"}>
+                <Stack direction={"row"} gap={"25px"}>
+                  <Donate
+                    ATDonationPossible={ATDeployed && !ATCompleted}
+                    atAddress={crowdfundData?.deployedAT?.aTAddress}
+                    onSubmit={() => {
+                      return;
+                    }}
+                    onClose={() => {
+                      return;
+                    }}
+                  />
+                  <DonorInfo rawDonorData={rawDonorData} />
+                </Stack>
               </Stack>
             </>
           )}

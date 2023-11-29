@@ -1,30 +1,28 @@
-import { FC, useState, useCallback, useEffect, useMemo } from "react";
-import { CircularProgress, Grid, Rating, useTheme } from "@mui/material";
+import { FC, useCallback, useState } from "react";
+import { Grid, Rating, useTheme } from "@mui/material";
 import {
+  AddReviewButton,
+  AverageReviewContainer,
+  AverageReviewNumber,
   CardDetailsContainer,
+  CloseIconModal,
   Divider,
   HeaderRow,
   OwnerAvatar,
   OwnerName,
   OwnerNameCol,
   OwnerReviewsContainer,
-} from "./QFundOwnerReviews-styles";
-import { StarSVG } from "../../../assets/svgs/StarSVG";
-import {
-  AddReviewButton,
-  AverageReviewContainer,
-  AverageReviewNumber,
-  CloseIconModal,
   ReviewsFont,
   TotalReviewsFont,
 } from "./QFundOwnerReviews-styles";
+import { StarSVG } from "../../../assets/svgs/StarSVG";
 import { QFundOwnerReviewCard } from "./QFundOwnerReviewCard";
 import { ReusableModal } from "../../modals/ReusableModal";
 import { useDispatch, useSelector } from "react-redux";
 import LazyLoad from "../../../components/common/LazyLoad";
 import { RootState } from "../../../state/store";
 import { AddReview } from "./AddReview/AddReview";
-import { REVIEW_BASE } from "../../../constants";
+import { REVIEW_BASE } from "../../../constants/Identifiers.ts";
 import {
   OwnerReview,
   upsertReviews,

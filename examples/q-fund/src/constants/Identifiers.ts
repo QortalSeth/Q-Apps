@@ -1,4 +1,4 @@
-const useTestIdentifiers = false;
+const useTestIdentifiers = true;
 
 export const CROWDFUND_BASE = useTestIdentifiers
   ? "MYTEST_crowdfund_"
