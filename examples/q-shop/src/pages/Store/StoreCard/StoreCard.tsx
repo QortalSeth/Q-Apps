@@ -1,5 +1,7 @@
 import { FC, useEffect, useState } from "react";
 import {
+  AcceptedCoin,
+  AcceptedCoinsRow,
   ExpandDescriptionIcon,
   OpenStoreCard,
   StoreCardDescription,
@@ -11,7 +13,7 @@ import {
   StoresRow,
   StyledStoreCard,
   StyledTooltip,
-  YouOwnIcon
+  YouOwnIcon,
 } from "../../StoreList/StoreList-styles";
 import ContextMenuResource from "../../../components/common/ContextMenu/ContextMenuResource";
 import { useNavigate } from "react-router-dom";
@@ -20,10 +22,12 @@ import { BriefcaseSVG } from "../../../assets/svgs/BriefcaseSVG";
 import { useDispatch, useSelector } from "react-redux";
 import {
   resetListProducts,
-  resetProducts
+  resetProducts,
 } from "../../../state/features/globalSlice";
 import { RootState } from "../../../state/store";
 import { clearViewedStoreDataContainer } from "../../../state/features/storeSlice";
+import QORT from "../../../assets/img/qort.png";
+import ARRR from "../../../assets/img/arrr.png";
 
 interface StoreCardProps {
   storeTitle: string;
@@ -40,7 +44,7 @@ export const StoreCard: FC<StoreCardProps> = ({
   storeDescription,
   storeId,
   storeOwner,
-  userName
+  userName,
 }) => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -119,7 +123,7 @@ export const StoreCard: FC<StoreCardProps> = ({
                 color={theme.palette.text.primary}
                 onClickFunc={(e: React.MouseEvent<any>) => {
                   e.stopPropagation();
-                  setShowCompleteStoreDescription((prevState) => !prevState);
+                  setShowCompleteStoreDescription(prevState => !prevState);
                 }}
                 showCompleteStoreDescription={
                   showCompleteStoreDescription ? true : false
@@ -127,6 +131,10 @@ export const StoreCard: FC<StoreCardProps> = ({
               />
             )}
           </StoreCardInfo>
+          <AcceptedCoinsRow>
+            <AcceptedCoin src={QORT} alt="QORT-logo" />
+            <AcceptedCoin src={ARRR} alt="ARRR-logo" />
+          </AcceptedCoinsRow>
           <StoreCardOwner>{storeOwner}</StoreCardOwner>
           {storeOwner === userName && (
             <StyledTooltip placement="top" title="You own this store">

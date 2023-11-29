@@ -1,5 +1,13 @@
 import { FC, ChangeEvent, useState, useEffect } from "react";
-import { Typography, Modal, FormControl, useTheme } from "@mui/material";
+import {
+  Typography,
+  Modal,
+  FormControl,
+  useTheme,
+  IconButton,
+  Zoom,
+  Tooltip,
+} from "@mui/material";
 import { useDispatch } from "react-redux";
 import { toggleCreateStoreModal } from "../../state/features/globalSlice";
 import ImageUploader from "../common/ImageUploader";
@@ -14,8 +22,20 @@ import {
   ModalBody,
   ButtonRow,
   CancelButton,
-  CreateButton
+  CreateButton,
+  WalletRow,
+  DownloadArrrWalletIcon,
 } from "./CreateStoreModal-styles";
+import {
+  FilterSelect,
+  FilterSelectMenuItems,
+  FiltersCheckbox,
+  FiltersChip,
+  FiltersOption,
+} from "../../pages/Store/Store/Store-styles";
+import { supportedCoinsArray } from "../../constants/supported-coins";
+import { QortalSVG } from "../../assets/svgs/QortalSVG";
+import { ARRRSVG } from "../../assets/svgs/ARRRSVG";
 
 export interface onPublishParam {
   title: string;
@@ -39,7 +59,7 @@ const CreateStoreModal: React.FC<CreateStoreModalProps> = ({
   closeCreateStoreModal,
   setCloseCreateStoreModal,
   onPublish,
-  username
+  username,
 }) => {
   const dispatch = useDispatch();
   const theme = useTheme();
@@ -51,6 +71,11 @@ const CreateStoreModal: React.FC<CreateStoreModalProps> = ({
   const [errorMessage, setErrorMessage] = useState<string>("");
   const [storeIdentifier, setStoreIdentifier] = useState("");
   const [logo, setLogo] = useState<string | null>(null);
+  const [supportedCoinsSelected, setSupportedCoinsSelected] = useState<
+    string[]
+  >(["QORT"]);
+  const [qortWalletAddress, setQortWalletAddress] = useState<string>("");
+  const [arrrWalletAddress, setArrrWalletAddress] = useState<string>("");
 
   const handlePublish = async (): Promise<void> => {
     try {
@@ -65,7 +90,7 @@ const CreateStoreModal: React.FC<CreateStoreModalProps> = ({
         shipsTo,
         location,
         storeIdentifier,
-        logo
+        logo,
       });
     } catch (error: any) {
       setErrorMessage(error.message);
@@ -107,6 +132,15 @@ const CreateStoreModal: React.FC<CreateStoreModalProps> = ({
     }
   }, [closeCreateStoreModal]);
 
+  const handleChipSelect = (value: string[]) => {
+    setSupportedCoinsSelected(value);
+  };
+
+  const handleChipRemove = (chip: string) => {
+    if (chip === "QORT") return;
+    setSupportedCoinsSelected(prevChips => prevChips.filter(c => c !== chip));
+  };
+
   return (
     <Modal
       open={open}
@@ -122,7 +156,7 @@ const CreateStoreModal: React.FC<CreateStoreModalProps> = ({
               <AddLogoIcon
                 sx={{
                   height: "25px",
-                  width: "auto"
+                  width: "auto",
                 }}
               ></AddLogoIcon>
             </AddLogoButton>
@@ -201,6 +235,123 @@ const CreateStoreModal: React.FC<CreateStoreModalProps> = ({
           fullWidth
           required
           variant="filled"
+        />
+
+        {/* QORT Wallet Input Field */}
+        <WalletRow>
+          <CustomInputField
+            id="modal-qort-wallet-input"
+            label="QORT Wallet Address"
+            value={qortWalletAddress}
+            onChange={(e: any) => {
+              setQortWalletAddress(e.target.value);
+            }}
+            fullWidth
+            required
+            variant="filled"
+          />
+          <Tooltip
+            TransitionComponent={Zoom}
+            placement="top"
+            arrow={true}
+            title="Import your QORT Wallet Address from your current account"
+          >
+            <IconButton disableFocusRipple={true} disableRipple={true}>
+              <DownloadArrrWalletIcon
+                color={theme.palette.text.primary}
+                height="40"
+                width="40"
+              />
+            </IconButton>
+          </Tooltip>
+        </WalletRow>
+
+        {/* ARRR Wallet Input Field */}
+        <WalletRow>
+          <CustomInputField
+            id="modal-arrr-wallet-input"
+            label="ARRR Wallet Address"
+            value={arrrWalletAddress}
+            onChange={(e: any) => {
+              setArrrWalletAddress(e.target.value);
+            }}
+            fullWidth
+            required
+            variant="filled"
+          />
+          <Tooltip
+            TransitionComponent={Zoom}
+            placement="top"
+            arrow={true}
+            title="Import your ARRR Wallet Address from your current account"
+          >
+            <IconButton disableFocusRipple={true} disableRipple={true}>
+              <DownloadArrrWalletIcon
+                color={theme.palette.text.primary}
+                height="40"
+                width="40"
+              />
+            </IconButton>
+          </Tooltip>
+        </WalletRow>
+        {/* Coin selection available for your shop */}
+        <FilterSelect
+          disableClearable
+          multiple
+          id="coin-select"
+          value={supportedCoinsSelected}
+          options={supportedCoinsArray}
+          disableCloseOnSelect
+          onChange={(e: any, value) => {
+            if (e.target.textContent === "QORT") return;
+            handleChipSelect(value as string[]);
+          }}
+          renderTags={(values: any) =>
+            values.map((value: string) => {
+              return (
+                <FiltersChip
+                  key={value}
+                  label={value}
+                  onDelete={
+                    value !== "QORT" ? () => handleChipRemove(value) : undefined
+                  }
+                  clickable={value === "QORT" ? false : true}
+                />
+              );
+            })
+          }
+          renderOption={(props, option: any) => {
+            const isDisabled = option === "QORT";
+            return (
+              <FiltersOption {...props}>
+                <FiltersCheckbox
+                  disabled={isDisabled}
+                  checked={supportedCoinsSelected.some(coin => coin === option)}
+                />
+                {option === "QORT" ? (
+                  <QortalSVG
+                    height="22"
+                    width="22"
+                    color={theme.palette.text.primary}
+                  />
+                ) : option === "ARRR" ? (
+                  <ARRRSVG
+                    height="22"
+                    width="22"
+                    color={theme.palette.text.primary}
+                  />
+                ) : null}
+                <span style={{ marginLeft: "5px" }}>{option}</span>
+              </FiltersOption>
+            );
+          }}
+          renderInput={params => (
+            <FilterSelectMenuItems
+              {...params}
+              label="Supported Coins"
+              placeholder="Choose the coins that will be supported by your shop"
+            />
+          )}
         />
 
         <FormControl fullWidth sx={{ marginBottom: 2 }}></FormControl>

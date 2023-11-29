@@ -11,14 +11,18 @@ import {
   CardDetailsContainer,
   StoreTitle,
   StoreDescription,
+  CurrencyRow,
 } from "./StoreDetails-styles";
 import { OwnerSVG } from "../../../assets/svgs/OwnerSVG";
-import { useTheme } from "@mui/material";
+import { Box, useTheme } from "@mui/material";
 import { CalendarSVG } from "../../../assets/svgs/CalendarSVG";
 import { CloseIconModal } from "../StoreReviews/StoreReviews-styles";
 import { DescriptionSVG } from "../../../assets/svgs/DescriptionSVG";
 import { LocationSVG } from "../../../assets/svgs/LocationSVG";
 import { ShippingSVG } from "../../../assets/svgs/ShippingSVG";
+import { CurrencySVG } from "../../../assets/svgs/CurrencySVG";
+import { QortalSVG } from "../../../assets/svgs/QortalSVG";
+import { ARRRSVG } from "../../../assets/svgs/ARRRSVG";
 
 interface StoreDetailsProps {
   storeTitle: string;
@@ -111,6 +115,28 @@ export const StoreDetails: FC<StoreDetailsProps> = ({
               Ships To
             </IconsRow>
             {shipsTo}
+          </CardRow>
+          <CardRow>
+            <IconsRow>
+              <CurrencySVG
+                color={theme.palette.text.primary}
+                width={"22px"}
+                height={"22px"}
+              />
+              Accepted Coins
+            </IconsRow>
+            <CurrencyRow>
+              <QortalSVG
+                color={theme.palette.text.primary}
+                width={"32px"}
+                height={"32px"}
+              />
+              <ARRRSVG
+                color={theme.palette.text.primary}
+                width={"32px"}
+                height={"32px"}
+              />
+            </CurrencyRow>
           </CardRow>
           <CardRow>
             <IconsRow>

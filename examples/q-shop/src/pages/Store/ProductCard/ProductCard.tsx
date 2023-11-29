@@ -15,6 +15,8 @@ import {
 import { CartSVG } from "../../../assets/svgs/CartSVG";
 import { useNavigate } from "react-router-dom";
 import { setNotification } from "../../../state/features/notificationsSlice";
+import { AcceptedCoinRow } from "../Store/Store-styles";
+import { ARRRSVG } from "../../../assets/svgs/ARRRSVG";
 
 function addEllipsis(str: string, limit: number) {
   if (str.length > limit) {
@@ -92,17 +94,28 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
         <ProductDescription
           style={{
             display: "flex",
-            gap: "5px",
+            gap: "20px",
             marginTop: "auto",
             fontWeight: "bold",
+            width: "100%",
           }}
         >
-          <QortalSVG
-            color={theme.palette.text.primary}
-            height={"22"}
-            width={"22"}
-          />{" "}
-          {price}
+          <AcceptedCoinRow>
+            <QortalSVG
+              color={theme.palette.text.primary}
+              height={"23"}
+              width={"23"}
+            />{" "}
+            {price}
+          </AcceptedCoinRow>
+          <AcceptedCoinRow>
+            <ARRRSVG
+              color={theme.palette.text.primary}
+              height={"23"}
+              width={"23"}
+            />{" "}
+            {price}
+          </AcceptedCoinRow>
         </ProductDescription>
       </StyledCardContent>
       <div style={{ height: "37px" }}>

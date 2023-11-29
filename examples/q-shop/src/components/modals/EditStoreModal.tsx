@@ -1,22 +1,42 @@
 import { useState, useEffect } from "react";
-import { Typography, Modal, FormControl, useTheme } from "@mui/material";
+import {
+  Typography,
+  Modal,
+  FormControl,
+  useTheme,
+  IconButton,
+  Tooltip,
+  Zoom,
+} from "@mui/material";
 import { useDispatch, useSelector } from "react-redux";
 import { toggleCreateStoreModal } from "../../state/features/globalSlice";
 import { RootState } from "../../state/store";
 import {
   AddLogoButton,
   AddLogoIcon,
+  WalletRow,
   ButtonRow,
   CancelButton,
   CreateButton,
   CustomInputField,
+  DownloadArrrWalletIcon,
   LogoPreviewRow,
   ModalBody,
   ModalTitle,
   StoreLogoPreview,
-  TimesIcon
+  TimesIcon,
 } from "./CreateStoreModal-styles";
 import ImageUploader from "../common/ImageUploader";
+import {
+  FilterSelect,
+  FilterSelectMenuItems,
+  FiltersCheckbox,
+  FiltersChip,
+  FiltersOption,
+} from "../../pages/Store/Store/Store-styles";
+import { supportedCoinsArray } from "../../constants/supported-coins";
+import { QortalSVG } from "../../assets/svgs/QortalSVG";
+import { ARRRSVG } from "../../assets/svgs/ARRRSVG";
 export interface onPublishParamEdit {
   title: string;
   description: string;
@@ -45,6 +65,11 @@ const MyModal: React.FC<MyModalProps> = ({ open, onClose, onPublish }) => {
   const [shipsTo, setShipsTo] = useState<string>("");
   const [errorMessage, setErrorMessage] = useState<string>("");
   const [logo, setLogo] = useState<string | null>(null);
+  const [supportedCoinsSelected, setSupportedCoinsSelected] = useState<
+    string[]
+  >(["QORT"]);
+  const [qortWalletAddress, setQortWalletAddress] = useState<string>("");
+  const [arrrWalletAddress, setArrrWalletAddress] = useState<string>("");
 
   const theme = useTheme();
 
@@ -60,7 +85,7 @@ const MyModal: React.FC<MyModalProps> = ({ open, onClose, onPublish }) => {
         description,
         shipsTo,
         location,
-        logo
+        logo,
       });
       handleClose();
     } catch (error: any) {
@@ -90,6 +115,15 @@ const MyModal: React.FC<MyModalProps> = ({ open, onClose, onPublish }) => {
     onClose();
   };
 
+  const handleChipSelect = (value: string[]) => {
+    setSupportedCoinsSelected(value);
+  };
+
+  const handleChipRemove = (chip: string) => {
+    if (chip === "QORT") return;
+    setSupportedCoinsSelected(prevChips => prevChips.filter(c => c !== chip));
+  };
+
   return (
     <Modal
       open={open}
@@ -108,7 +142,7 @@ const MyModal: React.FC<MyModalProps> = ({ open, onClose, onPublish }) => {
               <AddLogoIcon
                 sx={{
                   height: "25px",
-                  width: "auto"
+                  width: "auto",
                 }}
               ></AddLogoIcon>
             </AddLogoButton>
@@ -128,7 +162,7 @@ const MyModal: React.FC<MyModalProps> = ({ open, onClose, onPublish }) => {
           id="modal-title-input"
           label="Title"
           value={title}
-          onChange={(e) => setTitle(e.target.value)}
+          onChange={e => setTitle(e.target.value)}
           inputProps={{ maxLength: 50 }}
           fullWidth
           required
@@ -138,7 +172,7 @@ const MyModal: React.FC<MyModalProps> = ({ open, onClose, onPublish }) => {
           id="modal-description-input"
           label="Description"
           value={description}
-          onChange={(e) => setDescription(e.target.value)}
+          onChange={e => setDescription(e.target.value)}
           multiline
           rows={4}
           fullWidth
@@ -149,7 +183,7 @@ const MyModal: React.FC<MyModalProps> = ({ open, onClose, onPublish }) => {
           id="modal-location-input"
           label="Location"
           value={location}
-          onChange={(e) => setLocation(e.target.value)}
+          onChange={e => setLocation(e.target.value)}
           fullWidth
           required
           variant="filled"
@@ -158,10 +192,126 @@ const MyModal: React.FC<MyModalProps> = ({ open, onClose, onPublish }) => {
           id="modal-shipsTo-input"
           label="Ships To"
           value={shipsTo}
-          onChange={(e) => setShipsTo(e.target.value)}
+          onChange={e => setShipsTo(e.target.value)}
           fullWidth
           required
           variant="filled"
+        />
+
+        {/* QORT Wallet Input Field */}
+        <WalletRow>
+          <CustomInputField
+            id="modal-qort-wallet-input"
+            label="QORT Wallet Address"
+            value={qortWalletAddress}
+            onChange={(e: any) => {
+              setQortWalletAddress(e.target.value);
+            }}
+            fullWidth
+            required
+            variant="filled"
+          />
+          <Tooltip
+            TransitionComponent={Zoom}
+            placement="top"
+            arrow={true}
+            title="Import your QORT Wallet Address from your current account"
+          >
+            <IconButton disableFocusRipple={true} disableRipple={true}>
+              <DownloadArrrWalletIcon
+                color={theme.palette.text.primary}
+                height="40"
+                width="40"
+              />
+            </IconButton>
+          </Tooltip>
+        </WalletRow>
+
+        {/* ARRR Wallet Input Field */}
+        <WalletRow>
+          <CustomInputField
+            id="modal-arrr-wallet-input"
+            label="ARRR Wallet Address"
+            value={arrrWalletAddress}
+            onChange={(e: any) => {
+              setArrrWalletAddress(e.target.value);
+            }}
+            fullWidth
+            required
+            variant="filled"
+          />
+          <Tooltip
+            TransitionComponent={Zoom}
+            placement="top"
+            arrow={true}
+            title="Import your ARRR Wallet Address from your current account"
+          >
+            <IconButton disableFocusRipple={true} disableRipple={true}>
+              <DownloadArrrWalletIcon
+                color={theme.palette.text.primary}
+                height="40"
+                width="40"
+              />
+            </IconButton>
+          </Tooltip>
+        </WalletRow>
+        <FilterSelect
+          disableClearable
+          multiple
+          id="coin-select"
+          value={supportedCoinsSelected}
+          options={supportedCoinsArray}
+          disableCloseOnSelect
+          onChange={(e: any, value) => {
+            if (e.target.textContent === "QORT") return;
+            handleChipSelect(value as string[]);
+          }}
+          renderTags={(values: any) =>
+            values.map((value: string) => {
+              return (
+                <FiltersChip
+                  key={value}
+                  label={value}
+                  onDelete={
+                    value !== "QORT" ? () => handleChipRemove(value) : undefined
+                  }
+                  clickable={value === "QORT" ? false : true}
+                />
+              );
+            })
+          }
+          renderOption={(props, option: any) => {
+            const isDisabled = option === "QORT";
+            return (
+              <FiltersOption {...props}>
+                <FiltersCheckbox
+                  disabled={isDisabled}
+                  checked={supportedCoinsSelected.some(coin => coin === option)}
+                />
+                {option === "QORT" ? (
+                  <QortalSVG
+                    height="22"
+                    width="22"
+                    color={theme.palette.text.primary}
+                  />
+                ) : option === "ARRR" ? (
+                  <ARRRSVG
+                    height="22"
+                    width="22"
+                    color={theme.palette.text.primary}
+                  />
+                ) : null}
+                <span style={{ marginLeft: "5px" }}>{option}</span>
+              </FiltersOption>
+            );
+          }}
+          renderInput={params => (
+            <FilterSelectMenuItems
+              {...params}
+              label="Supported Coins"
+              placeholder="Choose the coins that will be supported by your shop"
+            />
+          )}
         />
         <FormControl fullWidth sx={{ marginBottom: 2 }}></FormControl>
         {errorMessage && (

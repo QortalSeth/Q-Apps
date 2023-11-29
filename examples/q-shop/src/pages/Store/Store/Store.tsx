@@ -65,6 +65,10 @@ import {
   StoreTitle,
   RatingContainer,
   ReusableModalStyled,
+  FiltersOption,
+  FiltersChip,
+  AcceptedCoinRow,
+  OfferedCoinsRow,
 } from "./Store-styles";
 import { toggleEditStoreModal } from "../../../state/features/globalSlice";
 import { CartIcon } from "../../../components/layout/Navbar/Navbar-styles";
@@ -74,12 +78,21 @@ import { ExpandMoreSVG } from "../../../assets/svgs/ExpandMoreSVG";
 import { StoreDetails } from "../StoreDetails/StoreDetails";
 import { StoreReviews } from "../StoreReviews/StoreReviews";
 import { setNotification } from "../../../state/features/notificationsSlice";
-import { objectToBase64 } from "../../../utils/toBase64";
 import {
   DATA_CONTAINER_BASE,
   REVIEW_BASE,
   STORE_BASE,
 } from "../../../constants/identifiers";
+import QORT from "../../../assets/img/qort.png";
+import ARRR from "../../../assets/img/arrr.png";
+import {
+  AcceptedCoin,
+  ExchangeRateCard,
+  ExchangeRateRow,
+  ExchangeRateSubTitle,
+  ExchangeRateTitle,
+} from "../../StoreList/StoreList-styles";
+import { CompareArrowsSVG } from "../../../assets/svgs/CompareArrowsSVG";
 
 interface IListProducts {
   sort: string;
@@ -95,6 +108,11 @@ enum PriceFilter {
 enum DateFilter {
   newest = "Newest",
   oldest = "Oldest",
+}
+
+enum CoinFilter {
+  qort = "QORT",
+  arrr = "ARRR",
 }
 
 export const Store = () => {
@@ -148,6 +166,7 @@ export const Store = () => {
   const [filterDate, setFilterDate] = useState<DateFilter | null>(
     DateFilter.newest
   );
+  const [filterCoin, setFilterCoin] = useState<CoinFilter[]>([CoinFilter.qort]);
   const [categoryChips, setCategoryChips] = useState<string[]>([]);
   const [openStoreDetails, setOpenStoreDetails] = useState<boolean>(false);
   const [openStoreReviews, setOpenStoreReviews] = useState<boolean>(false);
@@ -240,7 +259,6 @@ export const Store = () => {
         username && username !== user?.name
           ? viewedStoreListProducts.products
           : ownStoreListProducts.products;
-      console.log({ productList });
       if (productList.length === 0) return;
       // This gets the product raw data
       getProducts();
@@ -549,7 +567,6 @@ export const Store = () => {
   const handleChipRemove = (chip: string) => {
     setCategoryChips(prevChips => prevChips.filter(c => c !== chip));
   };
-  console.log({ hasFetched, filteredProducts, username, user });
 
   if (isLoadingGlobal) return;
 
@@ -604,7 +621,7 @@ export const Store = () => {
                 renderTags={(values: any) =>
                   values.map((value: string) => {
                     return (
-                      <Chip
+                      <FiltersChip
                         key={value}
                         label={value}
                         onDelete={() => {
@@ -615,12 +632,12 @@ export const Store = () => {
                   })
                 }
                 renderOption={(props, option: any) => (
-                  <li {...props}>
+                  <FiltersOption {...props}>
                     <FiltersCheckbox
                       checked={categoryChips.some(chip => chip === option)}
                     />
                     {option}
-                  </li>
+                  </FiltersOption>
                 )}
                 renderInput={params => (
                   <FilterSelectMenuItems
@@ -645,7 +662,7 @@ export const Store = () => {
               Highest
               <FiltersCheckbox
                 checked={filterPrice === PriceFilter.highest}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                onChange={() => {
                   setFilterPrice(PriceFilter.highest);
                   setFilterDate(null);
                 }}
@@ -656,9 +673,57 @@ export const Store = () => {
               Lowest
               <FiltersCheckbox
                 checked={filterPrice === PriceFilter.lowest}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                onChange={() => {
                   setFilterPrice(PriceFilter.lowest);
                   setFilterDate(null);
+                }}
+                inputProps={{ "aria-label": "controlled" }}
+              />
+            </FiltersRow>
+          </FiltersSubContainer>
+          <FiltersTitle>
+            Prices In
+            <ExpandMoreSVG
+              color={theme.palette.text.primary}
+              height={"22"}
+              width={"22"}
+            />
+          </FiltersTitle>
+          <FiltersSubContainer>
+            <FiltersRow>
+              <AcceptedCoinRow>
+                QORT
+                <AcceptedCoin src={QORT} alt="QORT-logo" />
+              </AcceptedCoinRow>
+              <FiltersCheckbox
+                checked={filterCoin.includes(CoinFilter.qort)}
+                onChange={() => {
+                  setFilterCoin(prevState => {
+                    if (prevState.includes(CoinFilter.qort)) {
+                      return prevState.filter(coin => coin !== CoinFilter.qort);
+                    } else {
+                      return [...prevState, CoinFilter.qort];
+                    }
+                  });
+                }}
+                inputProps={{ "aria-label": "controlled" }}
+              />
+            </FiltersRow>
+            <FiltersRow>
+              <AcceptedCoinRow>
+                ARRR
+                <AcceptedCoin src={ARRR} alt="ARRR-logo" />
+              </AcceptedCoinRow>
+              <FiltersCheckbox
+                checked={filterCoin.includes(CoinFilter.arrr)}
+                onChange={() => {
+                  setFilterCoin(prevState => {
+                    if (prevState.includes(CoinFilter.arrr)) {
+                      return prevState.filter(coin => coin !== CoinFilter.arrr);
+                    } else {
+                      return [...prevState, CoinFilter.arrr];
+                    }
+                  });
                 }}
                 inputProps={{ "aria-label": "controlled" }}
               />
@@ -677,7 +742,7 @@ export const Store = () => {
               Most Recent
               <FiltersCheckbox
                 checked={filterDate === DateFilter.newest}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                onChange={() => {
                   setFilterDate(DateFilter.newest);
                   setFilterPrice(null);
                 }}
@@ -688,13 +753,34 @@ export const Store = () => {
               Oldest
               <FiltersCheckbox
                 checked={filterDate === DateFilter.oldest}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                onChange={() => {
                   setFilterDate(DateFilter.oldest);
                   setFilterPrice(null);
                 }}
                 inputProps={{ "aria-label": "controlled" }}
               />
             </FiltersRow>
+          </FiltersSubContainer>
+          <FiltersSubContainer>
+            <ExchangeRateCard>
+              <ExchangeRateRow>
+                <ExchangeRateTitle>1 QORT = 0.59 ARRR</ExchangeRateTitle>
+              </ExchangeRateRow>
+              <ExchangeRateRow>
+                <ExchangeRateSubTitle>
+                  {`Guaranteed rate as of ${new Date().toLocaleString()}`}
+                </ExchangeRateSubTitle>
+              </ExchangeRateRow>
+              <ExchangeRateRow style={{ gap: "10px" }}>
+                <AcceptedCoin src={QORT} alt="QORT-logo" />
+                <CompareArrowsSVG
+                  color={theme.palette.text.primary}
+                  height={"32"}
+                  width={"32"}
+                />
+                <AcceptedCoin src={ARRR} alt="ARRR-logo" />
+              </ExchangeRateRow>
+            </ExchangeRateCard>
           </FiltersSubContainer>
         </FiltersContainer>
       </FiltersCol>
@@ -742,6 +828,21 @@ export const Store = () => {
                   )}
                 </RatingContainer>
               )}
+              <OfferedCoinsRow>
+                Accepted Coins
+                <AcceptedCoinRow>
+                  <AcceptedCoin
+                    style={{ width: "26px", height: "26px" }}
+                    src={QORT}
+                    alt="QORT-logo"
+                  />
+                  <AcceptedCoin
+                    style={{ width: "26px", height: "26px" }}
+                    src={ARRR}
+                    alt="ARRR-logo"
+                  />
+                </AcceptedCoinRow>
+              </OfferedCoinsRow>
             </StoreTitleCol>
           </StoreTitleCard>
           {username === user?.name ? (
@@ -795,7 +896,6 @@ export const Store = () => {
                 productItem = existingProduct;
                 hasHash = true;
               }
-              console.log({ productItem });
               if (!hasHash) {
                 return (
                   <ProductCardCol

@@ -10,14 +10,14 @@ import {
   Typography,
   Checkbox,
   IconButton,
-  Tooltip
+  Tooltip,
 } from "@mui/material";
 import { DoubleArrowDownSVG } from "../../assets/svgs/DoubleArrowDownSVG";
 
 export const StoresContainer = styled(Grid)(({ theme }) => ({
   position: "relative",
   padding: "10px 55px 30px 55px",
-  flexDirection: "column"
+  flexDirection: "column",
 }));
 
 export const WelcomeRow = styled(Grid)(({ theme }) => ({
@@ -29,15 +29,15 @@ export const WelcomeRow = styled(Grid)(({ theme }) => ({
   gap: "10px",
   padding: "0 15px 45px 0px",
   [theme.breakpoints.down("sm")]: {
-    flexDirection: "column"
-  }
+    flexDirection: "column",
+  },
 }));
 
 export const WelcomeFont = styled(Typography)(({ theme }) => ({
   fontFamily: "Cairo",
   fontSize: "40px",
   userSelect: "none",
-  color: theme.palette.text.primary
+  color: theme.palette.text.primary,
 }));
 
 export const WelcomeSubFont = styled(Typography)(({ theme }) => ({
@@ -45,13 +45,13 @@ export const WelcomeSubFont = styled(Typography)(({ theme }) => ({
   fontSize: "24px",
   userSelect: "none",
   color: theme.palette.text.primary,
-  opacity: 0.8
+  opacity: 0.8,
 }));
 
 export const WelcomeCol = styled(Box)(({ theme }) => ({
   display: "flex",
   flexDirection: "column",
-  alignItems: "flex-start"
+  alignItems: "flex-start",
 }));
 
 export const StoresRow = styled(Grid)(({ theme }) => ({
@@ -62,8 +62,8 @@ export const StoresRow = styled(Grid)(({ theme }) => ({
   width: "auto",
   position: "relative",
   "@media (max-width: 450px)": {
-    width: "100%"
-  }
+    width: "100%",
+  },
 }));
 
 export const StyledStoreCard = styled(Grid)<StoreListProps>(
@@ -76,10 +76,10 @@ export const StyledStoreCard = styled(Grid)<StoreListProps>(
     minWidth: "100%",
     maxWidth: "100%",
     height: "100%",
-    maxHeight: showCompleteStoreDescription ? "100%" : "460px",
+    maxHeight: showCompleteStoreDescription ? "100%" : "500px",
     backgroundColor: "transparent",
     borderRadius: "8px",
-    paddingBottom: "20px",
+    paddingBottom: "60px",
     justifyContent: "space-between",
     border:
       theme.palette.mode === "dark"
@@ -93,9 +93,9 @@ export const StyledStoreCard = styled(Grid)<StoreListProps>(
           ? "0px 8px 10px 1px hsla(0,0%,0%,0.14), 0px 3px 14px 2px hsla(0,0%,0%,0.12), 0px 5px 5px -3px hsla(0,0%,0%,0.2)"
           : "rgba(0, 0, 0, 0.1) 0px 4px 6px -1px, rgba(0, 0, 0, 0.06) 0px 2px 4px -1px;",
       "& div div": {
-        visibility: "visible"
-      }
-    }
+        visibility: "visible",
+      },
+    },
   })
 );
 
@@ -104,7 +104,7 @@ export const StoreCardInfo = styled(Grid)(({ theme }) => ({
   display: "flex",
   flexDirection: "column",
   gap: "5px",
-  padding: "0 20px 10px 15px"
+  padding: "0 20px 10px 15px",
 }));
 
 export const StoreCardImageContainer = styled(Box)(({ theme }) => ({}));
@@ -123,7 +123,7 @@ export const OpenStoreCard = styled(Box)(({ theme }) => ({
   padding: "2px 8px",
   userSelect: "none",
   borderRadius: "20px",
-  transition: "all 0.2s ease-in"
+  transition: "all 0.2s ease-in",
 }));
 
 export const StoreCardImage = styled("img")(({ theme }) => ({
@@ -131,7 +131,7 @@ export const StoreCardImage = styled("img")(({ theme }) => ({
   objectFit: "contain",
   maxHeight: "250px",
   height: "250px",
-  borderRadius: "10px"
+  borderRadius: "10px",
 }));
 
 export const StoreCardTitle = styled(Typography)(({ theme }) => ({
@@ -140,7 +140,7 @@ export const StoreCardTitle = styled(Typography)(({ theme }) => ({
   fontSize: "24px",
   letterSpacing: "0.4px",
   color: theme.palette.text.primary,
-  userSelect: "none"
+  userSelect: "none",
 }));
 
 export const StoreCardDescription = styled(Typography)(({ theme }) => ({
@@ -152,26 +152,45 @@ export const StoreCardDescription = styled(Typography)(({ theme }) => ({
   userSelect: "none",
   overflowY: "auto",
   "&::-webkit-scrollbar-track": {
-    backgroundColor: "transparent"
+    backgroundColor: "transparent",
   },
   "&::-webkit-scrollbar-track:hover": {
-    backgroundColor: "transparent"
+    backgroundColor: "transparent",
   },
   "&::-webkit-scrollbar": {
     width: "8px",
     height: "10px",
-    backgroundColor: "transparent"
+    backgroundColor: "transparent",
   },
   "&::-webkit-scrollbar-thumb": {
     backgroundColor: theme.palette.mode === "light" ? "#d3d9e1" : "#414763",
     borderRadius: "8px",
     backgroundClip: "content-box",
-    border: "4px solid transparent"
+    border: "4px solid transparent",
   },
   "&::-webkit-scrollbar-thumb:hover": {
-    backgroundColor: theme.palette.mode === "light" ? "#b7bcc4" : "#40455f"
-  }
+    backgroundColor: theme.palette.mode === "light" ? "#b7bcc4" : "#40455f",
+  },
 }));
+
+export const AcceptedCoinsRow = styled(Grid)({
+  display: "flex",
+  flexDirection: "row",
+  alignItems: "center",
+  justifyContent: "flex-start",
+  gap: "5px",
+  width: "100%",
+  position: "absolute",
+  bottom: "5px",
+  left: "10px",
+});
+
+export const AcceptedCoin = styled("img")({
+  width: "30px",
+  height: "30px",
+  objectFit: "contain",
+  userSelect: "none",
+});
 
 export const StoreCardOwner = styled(Typography)(({ theme }) => ({
   fontFamily: "Livvic",
@@ -180,7 +199,8 @@ export const StoreCardOwner = styled(Typography)(({ theme }) => ({
   position: "absolute",
   bottom: "5px",
   right: "10px",
-  userSelect: "none"
+  maxWidth: "180px",
+  userSelect: "none",
 }));
 
 export const StyledTooltip = styled(Tooltip)(({ theme }) => ({
@@ -190,8 +210,9 @@ export const StyledTooltip = styled(Tooltip)(({ theme }) => ({
     letterSpacing: "0px",
     fontWeight: 300,
     color: theme.palette.text.primary,
-    backgroundColor: theme.palette.background.paper
-  }
+    backgroundColor: theme.palette.background.paper,
+    zIndex: 10,
+  },
 }));
 
 export const YouOwnIcon = styled(IconButton)(({ theme }) => ({
@@ -207,15 +228,15 @@ export const YouOwnIcon = styled(IconButton)(({ theme }) => ({
     backgroundColor:
       theme.palette.mode === "dark"
         ? "rgba(255, 255, 255, 0.08);"
-        : "rgba(255, 255, 255, 0.06);"
-  }
+        : "rgba(255, 255, 255, 0.06);",
+  },
 }));
 
 export const MyStoresRow = styled(Grid)(({ theme }) => ({
   display: "flex",
   flexDirection: "row",
   justifyContent: "flex-end",
-  width: "100%"
+  width: "100%",
 }));
 
 export const MyStoresCard = styled(Box)(({ theme }) => ({
@@ -231,15 +252,15 @@ export const MyStoresCard = styled(Box)(({ theme }) => ({
   fontSize: "15px",
   color: theme.palette.text.primary,
   userSelect: "none",
-  gap: "8px"
+  gap: "8px",
 }));
 
 export const MyStoresCheckbox = styled(Checkbox)(({ theme }) => ({
   color: "#c0d4ff",
   padding: 0,
   "&.Mui-checked": {
-    color: "#6596ff"
-  }
+    color: "#6596ff",
+  },
 }));
 
 export const ExpandDescriptionIcon = styled(DoubleArrowDownSVG)<StoreListProps>(
@@ -252,14 +273,14 @@ export const ExpandDescriptionIcon = styled(DoubleArrowDownSVG)<StoreListProps>(
     "& svg": {
       transform: showCompleteStoreDescription
         ? "rotate(180deg)"
-        : "rotate(0deg)"
+        : "rotate(0deg)",
     },
     "&:hover": {
       cursor: "pointer",
       transform: showCompleteStoreDescription
         ? "translateY(-2px)"
-        : "translateY(2px)"
-    }
+        : "translateY(2px)",
+    },
   })
 );
 
@@ -267,12 +288,51 @@ export const LogoRow = styled(Box)(({ theme }) => ({
   display: "flex",
   alignItems: "center",
   flexDirection: "row",
-  gap: "5px"
+  gap: "5px",
 }));
 
 export const QShopLogo = styled("img")(({ theme }) => ({
   width: "200px",
   height: "100%",
   objectFit: "contain",
-  userSelect: "none"
+  userSelect: "none",
+}));
+
+export const ExchangeRateCard = styled(Box)(({ theme }) => ({
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  flexDirection: "column",
+  gap: "10px",
+  padding: "10px 15px",
+  width: "100%",
+  height: "200px",
+  backgroundColor: theme.palette.background.paper,
+  borderRadius: "10px",
+  marginTop: "10px",
+}));
+
+export const ExchangeRateRow = styled(Box)(({ theme }) => ({
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  width: "100%",
+}));
+
+export const ExchangeRateTitle = styled(Typography)(({ theme }) => ({
+  fontFamily: "Merriweather Sans, sans-serif",
+  fontSize: "22px",
+  fontWeight: 400,
+  letterSpacing: "0.3px",
+  color: theme.palette.text.primary,
+  userSelect: "none",
+}));
+
+export const ExchangeRateSubTitle = styled(Typography)(({ theme }) => ({
+  fontFamily: "Karla",
+  fontSize: "17px",
+  fontWeight: 300,
+  letterSpacing: "0px",
+  color: theme.palette.text.primary,
+  userSelect: "none",
 }));

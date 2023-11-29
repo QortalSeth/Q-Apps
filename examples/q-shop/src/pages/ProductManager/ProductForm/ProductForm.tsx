@@ -14,7 +14,7 @@ import {
   CustomInputField,
   CustomNumberField,
   LogoPreviewRow,
-  StoreLogoPreview
+  StoreLogoPreview,
 } from "../../../components/modals/CreateStoreModal-styles";
 import {
   AddButton,
@@ -24,7 +24,7 @@ import {
   CustomSelect,
   InputFieldCustomLabel,
   MaximumImagesRow,
-  ProductImagesRow
+  ProductImagesRow,
 } from "../NewProduct/NewProduct-styles";
 import { setNotification } from "../../../state/features/notificationsSlice";
 import { addProductsToSaveCategory } from "../../../state/features/globalSlice";
@@ -46,7 +46,7 @@ interface ProductObj {
 export const ProductForm: React.FC<ProductFormProps> = ({
   onClose,
   onSubmit,
-  editProduct
+  editProduct,
 }) => {
   const theme = useTheme();
   const dispatch = useDispatch();
@@ -61,7 +61,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
     title: "",
     description: "",
     price: 0,
-    images: []
+    images: [],
   });
   const [categoryList, setCategoryList] = useState<string[]>([]);
   const [selectedType, setSelectedType] = useState<string>("digital");
@@ -77,7 +77,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setProduct({
       ...product,
-      [event.target.name]: event.target.value as string | number
+      [event.target.name]: event.target.value as string | number,
     });
   };
 
@@ -88,7 +88,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
 
   const handleSelectChange = (event: SelectChangeEvent<string | null>) => {
     const optionId = event.target.value;
-    const selectedOption = categoryList.find((option) => option === optionId);
+    const selectedOption = categoryList.find(option => option === optionId);
     setSelectedCategory(selectedOption || null);
   };
 
@@ -101,7 +101,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
       dispatch(
         setNotification({
           msg: "Please select type and category",
-          alertType: "error"
+          alertType: "error",
         })
       );
       return;
@@ -111,7 +111,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
       dispatch(
         setNotification({
           alertType: "error",
-          msg: "Price must be a number!"
+          msg: "Price must be a number!",
         })
       );
       return;
@@ -127,17 +127,17 @@ export const ProductForm: React.FC<ProductFormProps> = ({
       price: [
         {
           currency: "qort",
-          value: product.price
-        }
+          value: product.price,
+        },
       ],
-      mainImageIndex: 0
+      mainImageIndex: 0,
     });
   };
 
   const addNewCategoryToList = () => {
     if (!newCategory) return;
     setSelectedCategory(newCategory);
-    setCategoryList((prev) => [...prev, newCategory]);
+    setCategoryList(prev => [...prev, newCategory]);
     setNewCategory("");
     dispatch(addProductsToSaveCategory(newCategory));
   };
@@ -159,7 +159,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
           title,
           description,
           images: [],
-          price: editProductQortPrice
+          price: editProductQortPrice,
         });
         if (images) {
           setImages(images);
@@ -190,7 +190,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
                 <CloseIcon
                   color={theme.palette.text.primary}
                   onClickFunc={() => {
-                    setImages((prev) => prev.filter((item) => item !== img));
+                    setImages(prev => prev.filter(item => item !== img));
                   }}
                   height={"22"}
                   width={"22"}
@@ -202,14 +202,14 @@ export const ProductForm: React.FC<ProductFormProps> = ({
       )}
       {(images.length === 0 || images.length < 3) && (
         <ImageUploader
-          onPick={(img: string) => setImages((prev) => [...prev, img])}
+          onPick={(img: string) => setImages(prev => [...prev, img])}
         >
           <AddLogoButton>
             Add Product Image
             <AddLogoIcon
               sx={{
                 height: "25px",
-                width: "auto"
+                width: "auto",
               }}
             ></AddLogoIcon>
           </AddLogoButton>
@@ -237,7 +237,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
       />
       <CustomNumberField
         name="price"
-        label="Price (QORT)"
+        label="Price in QORT"
         variant={Variant.filled}
         initialValue={editProductQortPrice.toString()}
         addIconButtons={false}
@@ -246,6 +246,18 @@ export const ProductForm: React.FC<ProductFormProps> = ({
         allowDecimals={true}
         onChangeFunc={handleProductPriceChange}
         required={true}
+      />
+      <CustomNumberField
+        name="arrr-price"
+        label="Price in ARRR"
+        variant={Variant.filled}
+        // initialValue={editProductQortPrice.toString()}
+        addIconButtons={false}
+        minValue={0}
+        maxValue={Number.MAX_SAFE_INTEGER}
+        allowDecimals={true}
+        // onChangeFunc={handleProductPriceChange}
+        required={false}
       />
       <Box>
         <FormControl fullWidth>
@@ -257,7 +269,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
             label="Product Type"
             variant="filled"
             value={selectedType}
-            onChange={(event) => {
+            onChange={event => {
               setSelectedType(event.target.value as string);
             }}
             required
@@ -279,7 +291,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
             label="Category"
             value={selectedCategory}
             displayEmpty={true}
-            onChange={(event) => {
+            onChange={event => {
               handleSelectChange(event as SelectChangeEvent<string | null>);
             }}
             required
@@ -288,7 +300,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
             <CustomMenuItem value="">
               <em>Add a Category</em>
             </CustomMenuItem>
-            {categoryList.map((category) => (
+            {categoryList.map(category => (
               <CustomMenuItem value={category}>{category}</CustomMenuItem>
             ))}
           </CustomSelect>
@@ -318,9 +330,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
             name="status"
             label="Product Status"
             value={selectedStatus}
-            onChange={(event) =>
-              setSelectedStatus(event.target.value as string)
-            }
+            onChange={event => setSelectedStatus(event.target.value as string)}
             required
             fullWidth
           >

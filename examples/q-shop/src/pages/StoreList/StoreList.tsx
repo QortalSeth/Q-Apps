@@ -14,12 +14,10 @@ import {
   WelcomeCol,
   QShopLogo,
   LogoRow,
-  StoresRow
+  StoresRow,
 } from "./StoreList-styles";
 import { Grid, Skeleton, useTheme } from "@mui/material";
 import { StoreCard } from "../Store/StoreCard/StoreCard";
-import { withTimeout } from "../../utils/withTimeout";
-import { TIMEOUT } from "../../constants/timeout";
 import QShopLogoLight from "../../assets/img/QShopLogoLight.webp";
 import QShopLogoDark from "../../assets/img/QShopLogo.webp";
 import DefaultStoreImage from "../../assets/img/Q-AppsLogo.webp";
@@ -54,8 +52,8 @@ export const StoreList = () => {
       const response = await fetch(url, {
         method: "GET",
         headers: {
-          "Content-Type": "application/json"
-        }
+          "Content-Type": "application/json",
+        },
       });
       const responseData = await response.json();
       // Data returned from that endpoint of the API
@@ -70,7 +68,7 @@ export const StoreList = () => {
           created: storeItem.created,
           updated: storeItem.updated,
           owner: storeItem.name,
-          id: storeItem.identifier
+          id: storeItem.identifier,
         };
       });
       // Add stores to localstate & guard against duplicates
@@ -89,7 +87,7 @@ export const StoreList = () => {
         if (content.owner && content.id) {
           const res = checkAndUpdateResource({
             id: content.id,
-            updated: content.updated
+            updated: content.updated,
           });
           // If the store is not already inside the hashmap, fetch the store raw data. We wrap this function in a timeout util function because stores with errors will hang the app and take a long time to load. With this, the max load time will be of 5 seconds for an error store.
           if (res) {
@@ -160,7 +158,7 @@ export const StoreList = () => {
             {filteredStores.length > 0 &&
               filteredStores
                 // Get rid of the Bester shop (test shop)
-                .filter((store: Store) => store.owner !== "Bester")
+                // .filter((store: Store) => store.owner !== "Bester")
                 .map((store: Store) => {
                   let storeItem = store;
                   let hasHash = false;
@@ -191,11 +189,11 @@ export const StoreList = () => {
                           variant="rectangular"
                           style={{
                             width: "100%",
-                            height: "460px",
-                            paddingBottom: "10px",
+                            height: "500px",
+                            paddingBottom: "60px",
                             objectFit: "contain",
                             visibility: "visible",
-                            borderRadius: "8px"
+                            borderRadius: "8px",
                           }}
                         />
                       </StoresRow>

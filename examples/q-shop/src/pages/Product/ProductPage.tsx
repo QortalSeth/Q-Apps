@@ -19,6 +19,7 @@ import {
 import { useFetchOrders } from "../../hooks/useFetchOrders";
 import {
   AddToCartButton,
+  ArrrSwitch,
   BackToStoreButton,
   CartBox,
   ProductDescription,
@@ -26,6 +27,7 @@ import {
   ProductLayout,
   ProductNotFound,
   ProductPrice,
+  ProductPriceRow,
   ProductTitle,
   UnavailableButton,
 } from "./ProductPage-styles";
@@ -37,6 +39,7 @@ import {
   NumericTextFieldRef,
   Variant,
 } from "../../components/common/NumericTextFieldQshop";
+import { ARRRSVG } from "../../assets/svgs/ARRRSVG";
 
 export const ProductPage = () => {
   const dispatch = useDispatch();
@@ -53,6 +56,7 @@ export const ProductPage = () => {
 
   const [product, setProduct] = useState<Product | null>(null);
   const [cartAddAmount, setCartAddAmount] = useState<number>(0);
+  const [displayArrrPrice, setDisplayArrrPrice] = useState<boolean>(false);
 
   const catalogueHashMap = useSelector(
     (state: RootState) => state.global.catalogueHashMap
@@ -187,22 +191,39 @@ export const ProductPage = () => {
         <BackArrowSVG height={"20"} width={"20"} color={"#ffffff"} />
         Store
       </BackToStoreButton>
-      <TabImageList images={product.images} />
+      <TabImageList imgStyle={{ objectFit: "cover" }} images={product.images} />
       <ProductDetailsContainer>
         <ProductTitle variant="h2">{product.title}</ProductTitle>
         <ProductDescription variant="h3">
           {product.description}
         </ProductDescription>
-        <ProductPrice variant="h4">
-          <QortalSVG
-            height={"22"}
-            width={"22"}
-            color={theme.palette.text.primary}
-          />{" "}
-          {price}
-        </ProductPrice>
+        <ProductPriceRow>
+          <ProductPrice>
+            <QortalSVG
+              height={"26"}
+              width={"26"}
+              color={theme.palette.text.primary}
+            />{" "}
+            {price}
+          </ProductPrice>
+          {displayArrrPrice && (
+            <ProductPrice>
+              <ARRRSVG
+                height={"26"}
+                width={"26"}
+                color={theme.palette.text.primary}
+              />{" "}
+              {price}
+            </ProductPrice>
+          )}
+        </ProductPriceRow>
         {available ? availableJSX : unavailableJSX}
       </ProductDetailsContainer>
+      {/* Toggle to show price of ARRR or not */}
+      <ArrrSwitch
+        checked={displayArrrPrice}
+        onChange={() => setDisplayArrrPrice(prevState => !prevState)}
+      />
       {user?.name && user?.name !== storeOwner ? (
         <CartBox>
           <CartIconContainer fixedCartPosition={false}>

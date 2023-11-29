@@ -1,5 +1,5 @@
 import { styled } from "@mui/system";
-import { Box, Button, Select, TextField, Typography } from "@mui/material";
+import { Box, Button } from "@mui/material";
 
 export const EmailUser = styled("a")(({ theme }) => ({
   display: "flex",
@@ -7,18 +7,18 @@ export const EmailUser = styled("a")(({ theme }) => ({
   alignItems: "center",
   fontFamily: "Karla",
   letterSpacing: "0px",
-  fontSize: "21px"
+  fontSize: "21px",
 }));
 
 export const CloseButtonRow = styled(Box)(({ theme }) => ({
   display: "flex",
   gap: 1,
-  justifyContent: "flex-end"
+  justifyContent: "flex-end",
 }));
 
 export const CloseButton = styled(Button)(({ theme }) => ({
   fontFamily: "Raleway",
-  fontSize: "15px"
+  fontSize: "15px",
 }));
 
 export const StoreTitleCard = styled(Box)(({ theme }) => ({
@@ -39,8 +39,8 @@ export const StoreTitleCard = styled(Box)(({ theme }) => ({
     boxShadow:
       theme.palette.mode === "dark"
         ? "0px 8px 10px 1px hsla(0,0%,0%,0.14), 0px 3px 14px 2px hsla(0,0%,0%,0.12), 0px 5px 5px -3px hsla(0,0%,0%,0.2)"
-        : "rgba(0, 0, 0, 0.1) 0px 4px 6px -1px, rgba(0, 0, 0, 0.06) 0px 2px 4px -1px;"
-  }
+        : "rgba(0, 0, 0, 0.1) 0px 4px 6px -1px, rgba(0, 0, 0, 0.06) 0px 2px 4px -1px;",
+  },
 }));
 
 export const Divider = styled(Box)(({ theme }) => ({
@@ -48,7 +48,7 @@ export const Divider = styled(Box)(({ theme }) => ({
   height: "2px",
   backgroundColor: theme.palette.text.primary,
   padding: "0 10px",
-  divider: 0.7
+  divider: 0.7,
 }));
 
 export const CardRow = styled(Box)({
@@ -59,7 +59,7 @@ export const CardRow = styled(Box)({
   fontFamily: "Karla",
   fontWeight: 300,
   fontSize: "20px",
-  letterSpacing: "0px"
+  letterSpacing: "0px",
 });
 
 export const IconsRow = styled(Box)({
@@ -69,7 +69,7 @@ export const IconsRow = styled(Box)({
   opacity: 0.9,
   fontSize: "22px",
   fontWeight: "bold",
-  whiteSpace: "nowrap"
+  whiteSpace: "nowrap",
 });
 
 export const HeaderRow = styled(Box)(({ theme }) => ({
@@ -81,30 +81,36 @@ export const HeaderRow = styled(Box)(({ theme }) => ({
   padding: "10px 15px",
   fontFamily: "Merriweather Sans, sans-serif",
   fontSize: "23px",
-  color: theme.palette.text.primary
+  color: theme.palette.text.primary,
 }));
 
-export const StoreLogo = styled("img")(({ theme }) => ({
+export const StoreLogo = styled("img")({
   width: "90px",
   height: "90px",
   borderRadius: "3px",
-  objectFit: "contain"
-}));
+  objectFit: "contain",
+});
 
-export const StoreTitle = styled(Box)(({ theme }) => ({
+export const StoreTitle = styled(Box)({
   display: "flex",
   justifySelf: "center",
-  userSelect: "none"
-}));
+  userSelect: "none",
+});
 
-export const CardDetailsContainer = styled(Box)(({ theme }) => ({
+export const CardDetailsContainer = styled(Box)({
   display: "flex",
   flexDirection: "column",
-  flexGrow: 1
-}));
+  flexGrow: 1,
+});
 
-export const StoreDescription = styled(Box)(({ theme }) => ({
+export const StoreDescription = styled(Box)({
   display: "flex",
   flexDirection: "column",
-  maxWidth: "60%"
-}));
+  maxWidth: "60%",
+});
+
+export const CurrencyRow = styled(Box)({
+  display: "flex",
+  alignItems: "center",
+  gap: "10px",
+});

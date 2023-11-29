@@ -6,13 +6,13 @@ export const ShowOrderHeader = styled(Box)(({ theme }) => ({
   display: "flex",
   justifyContent: "space-between",
   width: "100%",
-  alignItems: "flex-start"
+  alignItems: "flex-start",
 }));
 
 export const ShowOrderImages = styled(Box)(({ theme }) => ({
   display: "flex",
   alignItems: "center",
-  gap: "5px"
+  gap: "5px",
 }));
 
 export const ShowOrderCol = styled(Box)(({ theme }) => ({
@@ -20,13 +20,14 @@ export const ShowOrderCol = styled(Box)(({ theme }) => ({
   alignItems: "center",
   justifyContent: "flex-start",
   flexDirection: "column",
-  gap: "5px"
+  gap: "5px",
 }));
 
 export const ShowOrderProductImage = styled("img")(({ theme }) => ({
   width: "60px",
   height: "60px",
-  borderRadius: "3px"
+  borderRadius: "3px",
+  objectFit: "cover",
 }));
 
 export const ShowOrderTitle = styled("a")(({ theme }) => ({
@@ -35,7 +36,7 @@ export const ShowOrderTitle = styled("a")(({ theme }) => ({
   alignItems: "center",
   fontFamily: "Merriweather Sans, sans-serif",
   letterSpacing: "0px",
-  fontSize: "21px"
+  fontSize: "21px",
 }));
 
 export const CustomSelect = styled(Select)(({ theme }) => ({
@@ -44,11 +45,11 @@ export const CustomSelect = styled(Select)(({ theme }) => ({
   fontWeight: 300,
   letterSpacing: 0,
   "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-    borderColor: theme.palette.secondary.main
+    borderColor: theme.palette.secondary.main,
   },
   "&.MuiInputBase-input": {
-    padding: "15px 12px 8px"
-  }
+    padding: "15px 12px 8px",
+  },
 }));
 
 export const UpdateStatusButton = styled(Button)(({ theme }) => ({
@@ -62,8 +63,8 @@ export const UpdateStatusButton = styled(Button)(({ theme }) => ({
   transition: "all 0.2s ease-in-out",
   "&:hover": {
     cursor: "pointer",
-    backgroundColor: theme.palette.secondary.dark
-  }
+    backgroundColor: theme.palette.secondary.dark,
+  },
 }));
 
 export const ShowOrderDateCreated = styled(Box)(({ theme }) => ({
@@ -73,7 +74,7 @@ export const ShowOrderDateCreated = styled(Box)(({ theme }) => ({
   lineHeight: "1.4",
   letterSpacing: "0.2px",
   color: theme.palette.text.primary,
-  opacity: 0.8
+  opacity: 0.8,
 }));
 
 export const ShowOrderContent = styled(Box)(({ theme }) => ({
@@ -85,31 +86,31 @@ export const ShowOrderContent = styled(Box)(({ theme }) => ({
   overflow: "auto",
   width: "100%",
   "&::-webkit-scrollbar-track": {
-    backgroundColor: "transparent"
+    backgroundColor: "transparent",
   },
   "&::-webkit-scrollbar-track:hover": {
-    backgroundColor: "transparent"
+    backgroundColor: "transparent",
   },
   "&::-webkit-scrollbar": {
     width: "16px",
     height: "10px",
-    backgroundColor: "transparent"
+    backgroundColor: "transparent",
   },
   "&::-webkit-scrollbar-thumb": {
     backgroundColor: theme.palette.mode === "light" ? "#d3d9e1" : "#414763",
     borderRadius: "8px",
     backgroundClip: "content-box",
-    border: "4px solid transparent"
+    border: "4px solid transparent",
   },
   "&::-webkit-scrollbar-thumb:hover": {
-    backgroundColor: theme.palette.mode === "light" ? "#b7bcc4" : "#40455f"
-  }
+    backgroundColor: theme.palette.mode === "light" ? "#b7bcc4" : "#40455f",
+  },
 }));
 
 export const SellerOrderStatusRow = styled(Box)(({ theme }) => ({
   display: "flex",
   flexDirection: "column",
-  gap: "10px"
+  gap: "10px",
 }));
 
 export const OrderStatusRow = styled(Box)(({ theme }) => ({
@@ -118,7 +119,7 @@ export const OrderStatusRow = styled(Box)(({ theme }) => ({
   justifyContent: "space-between",
   margin: "10px 0",
   width: "100%",
-  padding: "0 10px"
+  padding: "0 10px",
 }));
 
 export const OrderStatusCard = styled(Box)(({ theme }) => ({
@@ -131,7 +132,7 @@ export const OrderStatusCard = styled(Box)(({ theme }) => ({
   color: "black",
   fontFamily: "Raleway",
   fontSize: "18px",
-  userSelect: "none"
+  userSelect: "none",
 }));
 
 export const OrderStatusNote = styled(Box)(({ theme }) => ({
@@ -142,25 +143,25 @@ export const OrderStatusNote = styled(Box)(({ theme }) => ({
   maxWidth: "300px",
   maxHeight: "500px",
   "&::-webkit-scrollbar-track": {
-    backgroundColor: "transparent"
+    backgroundColor: "transparent",
   },
   "&::-webkit-scrollbar-track:hover": {
-    backgroundColor: "transparent"
+    backgroundColor: "transparent",
   },
   "&::-webkit-scrollbar": {
     width: "16px",
     height: "10px",
-    backgroundColor: "transparent"
+    backgroundColor: "transparent",
   },
   "&::-webkit-scrollbar-thumb": {
     backgroundColor: theme.palette.mode === "light" ? "#d3d9e1" : "#414763",
     borderRadius: "8px",
     backgroundClip: "content-box",
-    border: "4px solid transparent"
+    border: "4px solid transparent",
   },
   "&::-webkit-scrollbar-thumb:hover": {
-    backgroundColor: theme.palette.mode === "light" ? "#b7bcc4" : "#40455f"
-  }
+    backgroundColor: theme.palette.mode === "light" ? "#b7bcc4" : "#40455f",
+  },
 }));
 
 export const OrderDetails = styled(Box)(({ theme }) => ({
@@ -168,8 +169,8 @@ export const OrderDetails = styled(Box)(({ theme }) => ({
   gap: "15px",
   width: "100%",
   "& > :not(:first-child)": {
-    borderTop: `1px solid ${theme.palette.text.primary}`
-  }
+    borderTop: `1px solid ${theme.palette.text.primary}`,
+  },
 }));
 
 export const OrderDetailsContainer = styled(Box)(({ theme }) => ({
@@ -177,7 +178,7 @@ export const OrderDetailsContainer = styled(Box)(({ theme }) => ({
   alignItems: "center",
   gap: "15px",
   width: "100%",
-  padding: "8px 10px 8px 0"
+  padding: "8px 10px 8px 0",
 }));
 
 export const OrderDetailsCard = styled(Box)(({ theme }) => ({
@@ -187,14 +188,14 @@ export const OrderDetailsCard = styled(Box)(({ theme }) => ({
   alignItems: "center",
   justifyContent: "space-between",
   borderRadius: "8px",
-  width: "100%"
+  width: "100%",
 }));
 
 export const OrderTitleCol = styled(Box)(({ theme }) => ({
   display: "flex",
   flexDirection: "column",
   alignItems: "flex-start",
-  gap: "3px"
+  gap: "3px",
 }));
 
 export const OrderTitle = styled(Typography)(({ theme }) => ({
@@ -204,8 +205,8 @@ export const OrderTitle = styled(Typography)(({ theme }) => ({
   fontWeight: 300,
   color: theme.palette.text.primary,
   "& span": {
-    fontWeight: 500
-  }
+    fontWeight: 500,
+  },
 }));
 
 export const OrderId = styled(Typography)(({ theme }) => ({
@@ -213,7 +214,7 @@ export const OrderId = styled(Typography)(({ theme }) => ({
   letterSpacing: "0px",
   fontSize: "15px",
   opacity: 0.9,
-  color: theme.palette.text.primary
+  color: theme.palette.text.primary,
 }));
 
 export const OrderQuantityRow = styled(Box)(({ theme }) => ({
@@ -221,7 +222,7 @@ export const OrderQuantityRow = styled(Box)(({ theme }) => ({
   alignItems: "center",
   justifyContent: "flex-end",
   gap: "5px",
-  width: "100%"
+  width: "100%",
 }));
 
 export const TotalPriceRow = styled(Box)(({ theme }) => ({
@@ -229,13 +230,13 @@ export const TotalPriceRow = styled(Box)(({ theme }) => ({
   alignItems: "center",
   justifyContent: "center",
   gap: "5px",
-  width: "100%"
+  width: "100%",
 }));
 
 export const TotalCostContainer = styled(Box)(({ theme }) => ({
   position: "relative",
   display: "flex",
-  gap: "25px"
+  gap: "25px",
 }));
 
 export const TotalCostCol = styled(Box)(({ theme }) => ({
@@ -243,32 +244,32 @@ export const TotalCostCol = styled(Box)(({ theme }) => ({
   flexDirection: "column",
   alignItems: "center",
   justifyContent: "center",
-  gap: "10px"
+  gap: "10px",
 }));
 
 export const TotalCostFont = styled(Typography)(({ theme }) => ({
   fontFamily: "Montserrat",
   fontSize: "18px",
-  fontWeight: 500
+  fontWeight: 500,
 }));
 
 export const DetailsFont = styled(Typography)(({ theme }) => ({
   fontFamily: "Raleway",
   fontSize: "16px",
-  fontWeight: 400
+  fontWeight: 400,
 }));
 
 export const Divider = styled("div")(({ theme }) => ({
   width: "30px",
   height: "3px",
   backgroundColor: theme.palette.text.primary,
-  userSelect: "none"
+  userSelect: "none",
 }));
 
 export const PriceRow = styled(Box)(({ theme }) => ({
   display: "flex",
   alignItems: "center",
-  gap: "5px"
+  gap: "5px",
 }));
 
 export const DetailsRow = styled(Box)(({ theme }) => ({
@@ -279,8 +280,8 @@ export const DetailsRow = styled(Box)(({ theme }) => ({
   "&:hover": {
     cursor: "pointer",
     filter:
-      theme.palette.mode === "dark" ? "brightness(1.2)" : "brightness(0.9)"
-  }
+      theme.palette.mode === "dark" ? "brightness(1.2)" : "brightness(0.9)",
+  },
 }));
 
 export const DetailsCard = styled(Box)(({ theme }) => ({
@@ -304,28 +305,28 @@ export const DetailsCard = styled(Box)(({ theme }) => ({
   maxHeight: "400px",
   overflowY: "auto",
   "&::-webkit-scrollbar-track": {
-    backgroundColor: "transparent"
+    backgroundColor: "transparent",
   },
   "&::-webkit-scrollbar-track:hover": {
-    backgroundColor: "transparent"
+    backgroundColor: "transparent",
   },
   "&::-webkit-scrollbar": {
     width: "16px",
     height: "10px",
-    backgroundColor: "transparent"
+    backgroundColor: "transparent",
   },
   "&::-webkit-scrollbar-thumb": {
     backgroundColor: theme.palette.mode === "light" ? "#d3d9e1" : "#414763",
     borderRadius: "8px",
     backgroundClip: "content-box",
-    border: "4px solid transparent"
+    border: "4px solid transparent",
   },
   "&::-webkit-scrollbar-thumb:hover": {
-    backgroundColor: theme.palette.mode === "light" ? "#b7bcc4" : "#40455f"
+    backgroundColor: theme.palette.mode === "light" ? "#b7bcc4" : "#40455f",
   },
   "& span": {
-    fontWeight: 500
-  }
+    fontWeight: 500,
+  },
 }));
 
 export const CloseDetailsCardIcon = styled(TimesSVG)(({ theme }) => ({
@@ -335,8 +336,8 @@ export const CloseDetailsCardIcon = styled(TimesSVG)(({ theme }) => ({
   transition: "all 0.2s ease-in-out",
   "&:hover": {
     cursor: "pointer",
-    transform: "scale(1.1)"
-  }
+    transform: "scale(1.1)",
+  },
 }));
 
 export const DeliveryInfoCard = styled(Box)(({ theme }) => ({
@@ -347,16 +348,16 @@ export const DeliveryInfoCard = styled(Box)(({ theme }) => ({
   borderRadius: "6px",
   gap: "5px",
   backgroundColor: theme.palette.mode === "dark" ? "#343434" : "#e8e8e8",
-  margin: "15px"
+  margin: "15px",
 }));
 
 export const CloseButtonRow = styled(Box)(({ theme }) => ({
   display: "flex",
   gap: 1,
-  justifyContent: "flex-end"
+  justifyContent: "flex-end",
 }));
 
 export const CloseButton = styled(Button)(({ theme }) => ({
   fontFamily: "Raleway",
-  fontSize: "15px"
+  fontSize: "15px",
 }));

@@ -7,7 +7,7 @@ import { RootState } from "../../../state/store";
 import {
   base64ToUint8Array,
   objectToBase64,
-  uint8ArrayToObject
+  uint8ArrayToObject,
 } from "../../../utils/toBase64";
 import {
   Divider,
@@ -42,7 +42,7 @@ import {
   SellerOrderStatusRow,
   CustomSelect,
   UpdateStatusButton,
-  TotalPriceRow
+  TotalPriceRow,
 } from "./ShowOrder-styles";
 import moment from "moment";
 import { DialogsSVG } from "../../../assets/svgs/DialogsSVG";
@@ -52,6 +52,8 @@ import { ExpandMoreSVG } from "../../../assets/svgs/ExpandMoreSVG";
 import { setNotification } from "../../../state/features/notificationsSlice";
 import { CustomInputField } from "../../../components/modals/CreateStoreModal-styles";
 import { CustomMenuItem } from "../NewProduct/NewProduct-styles";
+
+/* <QortalSVG /> must be replaced by <ARRRSVG /> everywhere here depending on the payment info */
 
 interface ShowOrderProps {
   isOpen: boolean;
@@ -64,7 +66,7 @@ export const ShowOrder: FC<ShowOrderProps> = ({
   isOpen,
   setIsOpen,
   order,
-  from
+  from,
 }) => {
   const theme = useTheme();
   const username = useSelector((state: RootState) => state.auth.user?.name);
@@ -92,33 +94,35 @@ export const ShowOrder: FC<ShowOrderProps> = ({
       const response = await fetch(url, {
         method: "GET",
         headers: {
-          "Content-Type": "application/json"
-        }
+          "Content-Type": "application/json",
+        },
       });
-
+      // Coin payment info must be added to responseData so we can display it to the user
       const responseData = await response.json();
       if (responseData && !responseData.error) {
         setPaymentInfo(responseData);
       }
-    } catch (error) {}
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   const updateStatus = async () => {
     try {
       const orderStateObject: any = {
         status: selectedStatus,
-        note
+        note,
       };
       const orderStatusToBase64 = await objectToBase64(orderStateObject);
 
       let res = await qortalRequest({
         action: "GET_NAME_DATA",
-        name: order?.user
+        name: order?.user,
       });
       const address = res.owner;
       const resAddress = await qortalRequest({
         action: "GET_ACCOUNT_DATA",
-        address: address
+        address: address,
       });
       if (!resAddress?.publicKey) throw new Error("Cannot find store owner");
       const string = order?.id;
@@ -132,13 +136,13 @@ export const ShowOrder: FC<ShowOrderProps> = ({
         filename: `${order?.id}_status.json`,
         data64: orderStatusToBase64,
         encrypt: true,
-        publicKeys: [resAddress.publicKey, usernamePublicKey]
+        publicKeys: [resAddress.publicKey, usernamePublicKey],
       };
       await qortalRequest(productRequestBody);
       dispatch(
         setNotification({
           alertType: "success",
-          msg: "Order status updated successfully!"
+          msg: "Order status updated successfully!",
         })
       );
     } catch (error) {
@@ -160,8 +164,8 @@ export const ShowOrder: FC<ShowOrderProps> = ({
       const response = await fetch(url, {
         method: "GET",
         headers: {
-          "Content-Type": "application/json"
-        }
+          "Content-Type": "application/json",
+        },
       });
       const responseData = await response.json();
       if (responseData.length === 0) return;
@@ -172,17 +176,17 @@ export const ShowOrder: FC<ShowOrderProps> = ({
           name: from === "ProductManager" ? username : order?.sellerName,
           service: "DOCUMENT_PRIVATE",
           identifier: query,
-          encoding: "base64"
+          encoding: "base64",
         });
         const base64 = orderRawData;
         let orderUserName = await qortalRequest({
           action: "GET_NAME_DATA",
-          name: order?.user
+          name: order?.user,
         });
         const address = orderUserName.owner;
         const resAddress = await qortalRequest({
           action: "GET_ACCOUNT_DATA",
-          address: address
+          address: address,
         });
         if (!resAddress?.publicKey) throw new Error("Cannot find order owner");
         const recipientPublicKey = resAddress.publicKey;
@@ -190,7 +194,7 @@ export const ShowOrder: FC<ShowOrderProps> = ({
         let requestEncryptBody: any = {
           action: "DECRYPT_DATA",
           encryptedData: base64,
-          publicKey: recipientPublicKey
+          publicKey: recipientPublicKey,
         };
         const resDecrypt = await qortalRequest(requestEncryptBody);
 
@@ -203,7 +207,7 @@ export const ShowOrder: FC<ShowOrderProps> = ({
           addToHashMap({
             ...order,
             status: orderStatus?.status,
-            note: orderStatus?.note
+            note: orderStatus?.note,
           })
         );
         return;
@@ -220,8 +224,8 @@ export const ShowOrder: FC<ShowOrderProps> = ({
     if (order && order?.details) {
       if (!order) return false;
       return Object.keys(order?.details || {})
-        .filter((key) => key !== "totalPrice")
-        .every((key) => {
+        .filter(key => key !== "totalPrice")
+        .every(key => {
           const product = order?.details?.[key]?.product;
           if (!product) return false;
           return product?.type === "digital";
@@ -243,7 +247,7 @@ export const ShowOrder: FC<ShowOrderProps> = ({
       sx={{
         display: "flex",
         justifyContent: "flex-end",
-        width: "100%"
+        width: "100%",
       }}
     >
       <ReusableModal
@@ -254,13 +258,13 @@ export const ShowOrder: FC<ShowOrderProps> = ({
           height: "90%",
           wordBreak: "break-word",
           borderRadius: 8,
-          padding: "32px 20px"
+          padding: "32px 20px",
         }}
       >
         <ShowOrderHeader>
           <ShowOrderImages>
             {Object.keys(order?.details || {})
-              .filter((key) => key !== "totalPrice")
+              .filter(key => key !== "totalPrice")
               .map((key, index) => {
                 return (
                   <ShowOrderProductImage
@@ -282,7 +286,7 @@ export const ShowOrder: FC<ShowOrderProps> = ({
             >
               <EmailIcon
                 sx={{
-                  color: "#50e3c2"
+                  color: "#50e3c2",
                 }}
               />
               {from === "ProductManager"
@@ -304,7 +308,7 @@ export const ShowOrder: FC<ShowOrderProps> = ({
                 <CustomSelect
                   name="status"
                   value={selectedStatus}
-                  onChange={(event) => {
+                  onChange={event => {
                     setSelectedStatus(event.target.value as string);
                   }}
                   variant="filled"
@@ -320,7 +324,7 @@ export const ShowOrder: FC<ShowOrderProps> = ({
                   label="Note"
                   value={note}
                   variant="filled"
-                  onChange={(e) => setNote(e.target.value)}
+                  onChange={e => setNote(e.target.value)}
                   size="small"
                   fullWidth
                 />
@@ -339,7 +343,7 @@ export const ShowOrder: FC<ShowOrderProps> = ({
                         ? "#29b100"
                         : hashMapOrders[order?.id]?.status === " Refunded"
                         ? "#f33c3c"
-                        : "#e5e916"
+                        : "#e5e916",
                   }}
                 >
                   Order Status: {hashMapOrders[order?.id]?.status}
@@ -355,8 +359,8 @@ export const ShowOrder: FC<ShowOrderProps> = ({
               <>
                 <OrderDetails>
                   {Object.keys(order?.details || {})
-                    .filter((key) => key !== "totalPrice")
-                    .map((key) => {
+                    .filter(key => key !== "totalPrice")
+                    .map(key => {
                       const product = order?.details?.[key];
                       return (
                         <OrderDetailsContainer key={key}>
@@ -432,7 +436,7 @@ export const ShowOrder: FC<ShowOrderProps> = ({
                   </TotalCostCol>
                   {paymentInfo && (
                     <DetailsCard>
-                      {Object.keys(paymentInfo || {}).map((key) => {
+                      {Object.keys(paymentInfo || {}).map(key => {
                         return (
                           <>
                             <span>{key}:</span>{" "}

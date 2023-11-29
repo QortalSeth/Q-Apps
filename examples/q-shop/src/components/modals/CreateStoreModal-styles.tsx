@@ -3,6 +3,7 @@ import { Box, Button, TextField, Theme, Typography } from "@mui/material";
 import AddPhotoAlternateIcon from "@mui/icons-material/AddPhotoAlternate";
 import { TimesSVG } from "../../assets/svgs/TimesSVG";
 import { NumericTextFieldQshop } from "../common/NumericTextFieldQshop";
+import { DownloadSVG } from "../../assets/svgs/DownloadSVG";
 
 export const ModalBody = styled(Box)(({ theme }) => ({
   position: "absolute",
@@ -23,32 +24,32 @@ export const ModalBody = styled(Box)(({ theme }) => ({
       ? "0px 4px 5px 0px hsla(0,0%,0%,0.14),  0px 1px 10px 0px hsla(0,0%,0%,0.12),  0px 2px 4px -1px hsla(0,0%,0%,0.2)"
       : "rgba(99, 99, 99, 0.2) 0px 2px 8px 0px",
   "&::-webkit-scrollbar-track": {
-    backgroundColor: theme.palette.background.paper
+    backgroundColor: theme.palette.background.paper,
   },
   "&::-webkit-scrollbar-track:hover": {
-    backgroundColor: theme.palette.background.paper
+    backgroundColor: theme.palette.background.paper,
   },
   "&::-webkit-scrollbar": {
     width: "16px",
     height: "10px",
-    backgroundColor: theme.palette.mode === "light" ? "#f6f8fa" : "#292d3e"
+    backgroundColor: theme.palette.mode === "light" ? "#f6f8fa" : "#292d3e",
   },
   "&::-webkit-scrollbar-thumb": {
     backgroundColor: theme.palette.mode === "light" ? "#d3d9e1" : "#575757",
     borderRadius: "8px",
     backgroundClip: "content-box",
-    border: "4px solid transparent"
+    border: "4px solid transparent",
   },
   "&::-webkit-scrollbar-thumb:hover": {
-    backgroundColor: theme.palette.mode === "light" ? "#b7bcc4" : "#474646"
-  }
+    backgroundColor: theme.palette.mode === "light" ? "#b7bcc4" : "#474646",
+  },
 }));
 
 export const ModalTitle = styled(Typography)(({ theme }) => ({
   fontWeight: 400,
   fontFamily: "Raleway",
   fontSize: "25px",
-  userSelect: "none"
+  userSelect: "none",
 }));
 
 export const StoreLogoPreview = styled("img")(({ theme }) => ({
@@ -57,7 +58,7 @@ export const StoreLogoPreview = styled("img")(({ theme }) => ({
   objectFit: "contain",
   userSelect: "none",
   borderRadius: "3px",
-  marginBottom: "10px"
+  marginBottom: "10px",
 }));
 
 export const AddLogoButton = styled(Button)(({ theme }) => ({
@@ -81,20 +82,20 @@ export const AddLogoButton = styled(Button)(({ theme }) => ({
       theme.palette.mode === "dark"
         ? "0px 8px 10px 1px hsla(0,0%,0%,0.14), 0px 3px 14px 2px hsla(0,0%,0%,0.12), 0px 5px 5px -3px hsla(0,0%,0%,0.2)"
         : "rgba(0, 0, 0, 0.1) 0px 4px 6px -1px, rgba(0, 0, 0, 0.06) 0px 2px 4px -1px;",
-    backgroundColor: theme.palette.secondary.dark
-  }
+    backgroundColor: theme.palette.secondary.dark,
+  },
 }));
 
 export const LogoPreviewRow = styled(Box)(({ theme }) => ({
   display: "flex",
   alignItems: "center",
-  gap: "10px"
+  gap: "10px",
 }));
 
 export const AddLogoIcon = styled(AddPhotoAlternateIcon)(({ theme }) => ({
   color: "#fff",
   height: "25px",
-  width: "auto"
+  width: "auto",
 }));
 
 export const TimesIcon = styled(TimesSVG)(({ theme }) => ({
@@ -104,8 +105,8 @@ export const TimesIcon = styled(TimesSVG)(({ theme }) => ({
   transition: "all 0.2s ease-in-out",
   "&:hover": {
     cursor: "pointer",
-    scale: "1.1"
-  }
+    scale: "1.1",
+  },
 }));
 
 const customInputStyle = (theme: Theme) => {
@@ -120,33 +121,33 @@ const customInputStyle = (theme: Theme) => {
       color: theme.palette.mode === "light" ? "#808183" : "#edeef0",
       fontFamily: "Karla",
       fontSize: "18px",
-      letterSpacing: "0px"
+      letterSpacing: "0px",
     },
     "& label.Mui-focused": {
-      color: theme.palette.mode === "light" ? "#A0AAB4" : "#d7d8da"
+      color: theme.palette.mode === "light" ? "#A0AAB4" : "#d7d8da",
     },
     "& .MuiInput-underline:after": {
-      borderBottomColor: theme.palette.mode === "light" ? "#B2BAC2" : "#c9cccf"
+      borderBottomColor: theme.palette.mode === "light" ? "#B2BAC2" : "#c9cccf",
     },
     "& .MuiOutlinedInput-root": {
       "& fieldset": {
-        borderColor: "#E0E3E7"
+        borderColor: "#E0E3E7",
       },
       "&:hover fieldset": {
-        borderColor: "#B2BAC2"
+        borderColor: "#B2BAC2",
       },
       "&.Mui-focused fieldset": {
-        borderColor: "#6F7E8C"
-      }
+        borderColor: "#6F7E8C",
+      },
     },
     "& .MuiInputBase-root": {
       fontFamily: "Karla",
       fontSize: "18px",
-      letterSpacing: "0px"
+      letterSpacing: "0px",
     },
     "& .MuiFilledInput-root:after": {
-      borderBottomColor: theme.palette.secondary.main
-    }
+      borderBottomColor: theme.palette.secondary.main,
+    },
   };
 };
 
@@ -161,12 +162,12 @@ export const CustomNumberField = styled(NumericTextFieldQshop)(({ theme }) =>
 export const ButtonRow = styled(Box)(({ theme }) => ({
   display: "flex",
   gap: "10px",
-  justifyContent: "flex-end"
+  justifyContent: "flex-end",
 }));
 
 export const CancelButton = styled(Button)(({ theme }) => ({
   fontFamily: "Raleway",
-  fontSize: "15px"
+  fontSize: "15px",
 }));
 
 export const CreateButton = styled(Button)(({ theme }) => ({
@@ -176,6 +177,21 @@ export const CreateButton = styled(Button)(({ theme }) => ({
   color: "black",
   "&:hover": {
     cursor: "pointer",
-    backgroundColor: "#2bb131"
-  }
+    backgroundColor: "#2bb131",
+  },
+}));
+
+export const WalletRow = styled(Box)(({ theme }) => ({
+  display: "flex",
+  alignItems: "center",
+  gap: "10px",
+}));
+
+export const DownloadArrrWalletIcon = styled(DownloadSVG)(({ theme }) => ({
+  padding: "5px 7px",
+  borderRadius: "50%",
+  backgroundColor: theme.palette.background.paper,
+  "&:hover": {
+    cursor: "pointer",
+  },
 }));
