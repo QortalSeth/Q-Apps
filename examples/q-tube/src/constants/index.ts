@@ -1,8 +1,8 @@
-const useTestIdentifiers = true;
+const useTestIdentifiers = false;
 
 export const QTUBE_VIDEO_BASE = useTestIdentifiers
   ? "MYTEST_vid_"
-  : "qtube_vidres_";
+  : "qtube_vid_";
 
   export const QTUBE_PLAYLIST_BASE = useTestIdentifiers
   ? "MYTEST_playlist_"
@@ -44,6 +44,7 @@ export const categories = [
     {"id": 19, "name": "Nature & Environment"},
     {"id": 20, "name": "Business & Finance"},
     {"id": 21, "name": "Personal Development"},
+    {"id": 22, "name": "Other"},
 ]
 
 
