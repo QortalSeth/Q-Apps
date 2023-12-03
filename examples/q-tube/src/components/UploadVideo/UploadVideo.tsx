@@ -210,7 +210,7 @@ export const UploadVideo = ({ editId, editContent }: NewCrowdfundProps) => {
         title: title.slice(0, 50),
         description: metadescription,
         identifier: identifier + '_metadata',
-        tag1: 'qtube_vid_',
+        tag1: QTUBE_VIDEO_BASE,
         code
       };
       const requestBodyVideo: any = {
@@ -221,7 +221,7 @@ export const UploadVideo = ({ editId, editContent }: NewCrowdfundProps) => {
         title: title.slice(0, 50),
         description: metadescription,
         identifier,
-        tag1: 'qtube_vid_'
+        tag1: QTUBE_VIDEO_BASE
       };
       listOfPublishes.push(requestBodyJson);
       listOfPublishes.push(requestBodyVideo)
@@ -286,7 +286,7 @@ export const UploadVideo = ({ editId, editContent }: NewCrowdfundProps) => {
         title: title.slice(0, 50),
         description: metadescription,
         identifier: identifier + '_metadata',
-        tag1: 'qtube_vid_'
+        tag1: QTUBE_VIDEO_BASE
       };
 
       
