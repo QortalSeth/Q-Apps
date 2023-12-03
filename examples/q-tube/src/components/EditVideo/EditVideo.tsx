@@ -42,7 +42,7 @@ import {
   updateInHashMap,
 } from "../../state/features/videoSlice";
 import ImageUploader from "../common/ImageUploader";
-import { categories, subCategories } from "../../constants";
+import { QTUBE_VIDEO_BASE, categories, subCategories } from "../../constants";
 
 const uid = new ShortUniqueId();
 const shortuid = new ShortUniqueId({ length: 5 });
@@ -218,7 +218,7 @@ export const EditVideo = () => {
         title: title.slice(0, 50),
         description: metadescription,
         identifier: editVideoProperties.id,
-        tag1: "qtube_vid_",
+        tag1: QTUBE_VIDEO_BASE,
       };
 
       await qortalRequest(requestBodyJson);

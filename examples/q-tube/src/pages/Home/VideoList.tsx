@@ -113,6 +113,7 @@ export const VideoList = ({ mode }: VideoListProps) => {
   const filteredVideos = useSelector(
     (state: RootState) => state.video.filteredVideos
   );
+  const username = useSelector((state: RootState) => state.auth?.user?.name);
   const isFilterMode = useRef(false);
   const firstFetch = useRef(false);
   const afterFetch = useRef(false);
@@ -595,21 +596,25 @@ export const VideoList = ({ mode }: VideoListProps) => {
                     onMouseLeave={() => setShowIcons(null)}
                     key={videoObj.id}
                   >
+                   
                     <IconsBox
                       sx={{
                         opacity: showIcons === videoObj.id ? 1 : 0,
                         zIndex: 2,
                       }}
                     >
-                       <Tooltip title="Edit video properties" placement="top">
-                      <BlockIconContainer>
-                        <EditIcon
-                          onClick={() => {
-                            dispatch(setEditPlaylist(videoObj));
-                          }}
-                        />
-                      </BlockIconContainer>
-                    </Tooltip>
+                       {videoObj?.user === username && (
+                          <Tooltip title="Edit playlist" placement="top">
+                          <BlockIconContainer>
+                            <EditIcon
+                              onClick={() => {
+                                dispatch(setEditPlaylist(videoObj));
+                              }}
+                            />
+                          </BlockIconContainer>
+                        </Tooltip>
+                      )}
+                     
                       <Tooltip title="Block user content" placement="top">
                         <BlockIconContainer>
                           <BlockIcon
@@ -703,15 +708,19 @@ export const VideoList = ({ mode }: VideoListProps) => {
                       zIndex: 2,
                     }}
                   >
-                    <Tooltip title="Edit video properties" placement="top">
-                      <BlockIconContainer>
-                        <EditIcon
-                          onClick={() => {
-                            dispatch(setEditVideo(videoObj));
-                          }}
-                        />
-                      </BlockIconContainer>
-                    </Tooltip>
+                     {videoObj?.user === username && ( 
+                       <Tooltip title="Edit video properties" placement="top">
+                       <BlockIconContainer>
+                         <EditIcon
+                           onClick={() => {
+                             dispatch(setEditVideo(videoObj));
+                           }}
+                         />
+                       </BlockIconContainer>
+                     </Tooltip>
+
+                     )}
+                   
                     <Tooltip title="Block user content" placement="top">
                       <BlockIconContainer>
                         <BlockIcon

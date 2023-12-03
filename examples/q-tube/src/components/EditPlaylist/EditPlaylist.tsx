@@ -43,7 +43,7 @@ import {
   setEditPlaylist,
 } from "../../state/features/videoSlice";
 import ImageUploader from "../common/ImageUploader";
-import { categories, subCategories } from "../../constants";
+import { QTUBE_VIDEO_BASE, categories, subCategories } from "../../constants";
 import { Playlists } from "../Playlists/Playlists";
 import { PlaylistListEdit } from "../PlaylistListEdit/PlaylistListEdit";
 
@@ -281,7 +281,7 @@ export const EditPlaylist = () => {
         title: title.slice(0, 50),
         description: metadescription,
         identifier: editVideoProperties.id,
-        tag1: "qtube_vid_",
+        tag1: QTUBE_VIDEO_BASE,
       };
 
       await qortalRequest(requestBodyJson);

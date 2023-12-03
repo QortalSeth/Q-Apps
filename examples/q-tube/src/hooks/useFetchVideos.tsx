@@ -14,7 +14,7 @@ import {
 } from '../state/features/globalSlice'
 import { RootState } from '../state/store'
 import { fetchAndEvaluateVideos } from '../utils/fetchVideos'
-import { QTUBE_PLAYLIST_BASE, QTUBE_VIDEO_BASE, displayedNames } from '../constants'
+import { QTUBE_PLAYLIST_BASE, QTUBE_VIDEO_BASE } from '../constants'
 import { RequestQueue } from '../utils/queue'
 import { queue } from '../wrappers/GlobalWrapper'
 
