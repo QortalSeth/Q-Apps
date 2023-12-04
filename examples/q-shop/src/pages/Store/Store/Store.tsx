@@ -337,6 +337,7 @@ export const Store = () => {
           limit: 0,
           offset: 0,
           reverse: true,
+          mode: "ALL"
         });
 
         // Set dataContainer in redux if it is found. This is to do filtering in the future since it cannot be done on QDN at the moment.
