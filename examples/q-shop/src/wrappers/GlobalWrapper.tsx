@@ -703,7 +703,8 @@ const GlobalWrapper: React.FC<Props> = ({ children, setTheme }) => {
                 exactMatchNames: true,
                 limit: 0,
                 offset: 0,
-                reverse: true
+                reverse: true,
+                mode: "ALL"
               });
               if (dataContainerExists?.length === 0) {
                 // Publish Data Container to QDN
