@@ -66,7 +66,7 @@ export const StoreReviews: FC<StoreReviewsProps> = ({
 
     try {
       const query = `${ORDER_BASE}-${shortStoreId}`;
-      const url = `/arbitrary/resources/search?service=DOCUMENT_PRIVATE&name=${user?.name}&exactmatchnames=true&query=${query}&limit=1&includemetadata=false&mode=LATEST&reverse=true`;
+      const url = `/arbitrary/resources/search?service=DOCUMENT_PRIVATE&name=${user?.name}&exactmatchnames=true&query=${query}&limit=1&includemetadata=false&mode=ALL&reverse=true`;
       const response = await fetch(url, {
         method: "GET",
         headers: {
@@ -92,7 +92,7 @@ export const StoreReviews: FC<StoreReviewsProps> = ({
       const shortStoreId = parts[1];
       const query = `${REVIEW_BASE}-${shortStoreId}`;
       // Since it the url includes /resources, you know you're fetching the resources and not the raw data
-      const url = `/arbitrary/resources/search?service=DOCUMENT&query=${query}&limit=10&includemetadata=true&mode=LATEST&offset=${offset}&reverse=true`;
+      const url = `/arbitrary/resources/search?service=DOCUMENT&query=${query}&limit=10&includemetadata=true&mode=ALL&offset=${offset}&reverse=true`;
       const response = await fetch(url, {
         method: "GET",
         headers: {
