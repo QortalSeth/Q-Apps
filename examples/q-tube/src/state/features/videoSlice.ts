@@ -99,6 +99,7 @@ export const videoSlice = createSlice({
       state.videos = []
     },
     updateVideo: (state, action) => {
+      console.log({action})
       const { id } = action.payload
       const index = state.videos.findIndex((video) => video.id === id)
       if (index !== -1) {

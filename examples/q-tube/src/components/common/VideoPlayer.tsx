@@ -89,6 +89,9 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
   const [anchorEl, setAnchorEl] = useState(null)
   const videoPlaying = useSelector((state: RootState) => state.global.videoPlaying);
   const reDownload = useRef<boolean>(false)
+  const isFetchingProperties = useRef<boolean>(false)
+
+  const status = useRef<null | string>(null)
   const { downloads } = useSelector((state: RootState) => state.global)
   const download = useMemo(() => {
     if (!downloads || !identifier) return {}
@@ -133,6 +136,27 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
       updatePlaybackRate(playbackRate - speedChange);
     }
   }
+
+  
+
+  const refetch = React.useCallback(async () => {
+    if (!name || !identifier || !service || isFetchingProperties.current) return
+    try {
+      isFetchingProperties.current = true
+      await qortalRequest({
+        action: 'GET_QDN_RESOURCE_PROPERTIES',
+        name,
+        service,
+        identifier
+      })
+      
+    } catch (error) {
+      
+    } finally {
+      isFetchingProperties.current = false
+    }
+   
+  }, [identifier, name, service])
 
 
   const toggleRef = useRef<any>(null)
@@ -384,12 +408,31 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
     }
   }
 
+  const refetchInInterval = ()=> {
+    try {
+      const interval = setInterval(()=> {
+          if(status?.current === 'DOWNLOADED'){
+            refetch()
+          }
+          if(status?.current === 'READY'){
+            clearInterval(interval);
+          }
+         
+        }, 7500)
+    } catch (error) {
+      
+    }
+  }
+
   useEffect(() => {
+    if(resourceStatus?.status){
+      status.current = resourceStatus?.status
+    }
     if (
       resourceStatus?.status === 'DOWNLOADED' &&
       reDownload?.current === false
     ) {
-      getSrc()
+      refetchInInterval()
       reDownload.current = true
     }
   }, [getSrc, resourceStatus])

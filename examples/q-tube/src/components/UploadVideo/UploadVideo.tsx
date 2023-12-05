@@ -105,11 +105,24 @@ export const UploadVideo = ({ editId, editContent }: NewCrowdfundProps) => {
       });
       setFiles((prev) => [...prev, ...formatArray]);
 
+      let errorString = null
       rejectedFiles.forEach(({ file, errors }) => {
         errors.forEach((error) => {
+          if(error.code === 'file-too-large'){
+            errorString = 'File must be under 400mb'
+          }
           console.log(`Error with file ${file.name}: ${error.message}`);
         });
       });
+      if(errorString){
+       const notificationObj = {
+          msg: errorString,
+          alertType: "error",
+        };
+      
+
+      dispatch(setNotification(notificationObj));
+      }
     },
   });
 

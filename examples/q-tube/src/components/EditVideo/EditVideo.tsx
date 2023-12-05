@@ -43,6 +43,7 @@ import {
 } from "../../state/features/videoSlice";
 import ImageUploader from "../common/ImageUploader";
 import { QTUBE_VIDEO_BASE, categories, subCategories } from "../../constants";
+import { MultiplePublish } from "../common/MultiplePublish/MultiplePublish";
 
 const uid = new ShortUniqueId();
 const shortuid = new ShortUniqueId({ length: 5 });
@@ -72,15 +73,51 @@ export const EditVideo = () => {
   const editVideoProperties = useSelector(
     (state: RootState) => state.video.editVideoProperties
   );
+  const [publishes, setPublishes] = useState<any[]>([])
+  const [isOpenMultiplePublish, setIsOpenMultiplePublish] = useState(false);
+  const [videoPropertiesToSetToRedux, setVideoPropertiesToSetToRedux] = useState(null)
 
   const [title, setTitle] = useState<string>("");
   const [description, setDescription] = useState<string>("");
   const [coverImage, setCoverImage] = useState<string>("");
-
+  const [file, setFile] = useState(null)
   const [selectedCategoryVideos, setSelectedCategoryVideos] =
     useState<any>(null);
   const [selectedSubCategoryVideos, setSelectedSubCategoryVideos] =
     useState<any>(null);
+
+    const { getRootProps, getInputProps } = useDropzone({
+      accept: {
+        "video/*": [],
+      },
+      maxFiles: 1,
+      maxSize: 419430400, // 400 MB in bytes
+      onDrop: (acceptedFiles, rejectedFiles) => {
+        const firstFile = acceptedFiles[0]
+        
+        setFile(firstFile);
+
+        let errorString = null
+
+        rejectedFiles.forEach(({ file, errors }) => {
+          errors.forEach((error) => {
+            if(error.code === 'file-too-large'){
+              errorString = 'File must be under 400mb'
+            }
+            console.log(`Error with file ${file.name}: ${error.message}`);
+          });
+        });
+        if(errorString){
+          const notificationObj = {
+             msg: errorString,
+             alertType: "error",
+           };
+         
+   
+         dispatch(setNotification(notificationObj));
+         }
+      },
+    });
 
   // useEffect(() => {
   //   if (editVideoProperties) {
@@ -156,6 +193,11 @@ export const EditVideo = () => {
 
   const onClose = () => {
     dispatch(setEditVideo(null));
+    setVideoPropertiesToSetToRedux(null)
+    setFile(null)
+    setTitle("")
+    setDescription("")
+    setCoverImage("")
   };
 
   async function publishQDNResource() {
@@ -189,6 +231,7 @@ export const EditVideo = () => {
         );
         return;
       }
+      let listOfPublishes = []
       const category = selectedCategoryVideos.id;
       const subcategory = selectedSubCategoryVideos?.id || "";
 
@@ -220,23 +263,34 @@ export const EditVideo = () => {
         identifier: editVideoProperties.id,
         tag1: QTUBE_VIDEO_BASE,
       };
+      listOfPublishes.push(requestBodyJson);
 
-      await qortalRequest(requestBodyJson);
+      if(file && editVideoProperties.videoReference?.identifier){
+        const requestBodyVideo: any = {
+          action: "PUBLISH_QDN_RESOURCE",
+          name: username,
+          service: "VIDEO",
+          file,
+          title: title.slice(0, 50),
+          description: metadescription,
+          identifier: editVideoProperties.videoReference?.identifier,
+          tag1: QTUBE_VIDEO_BASE
+        };
+        
+        listOfPublishes.push(requestBodyVideo)
 
-      dispatch(
-        updateVideo({
-          ...editVideoProperties,
-          ...videoObject,
-        })
-      );
-      dispatch(
-        updateInHashMap({
-          ...editVideoProperties,
-          ...videoObject,
-        })
-      );
+        
+      }
 
-      onClose();
+      setPublishes(listOfPublishes)
+      setIsOpenMultiplePublish(true);
+      setVideoPropertiesToSetToRedux({
+        ...editVideoProperties,
+        ...videoObject,
+      })
+      
+     
+
     } catch (error: any) {
       let notificationObj: any = null;
       if (typeof error === "string") {
@@ -296,7 +350,6 @@ export const EditVideo = () => {
     setSelectedSubCategoryVideos(selectedOption || null);
   };
 
-
   return (
     <>
       <Modal
@@ -315,6 +368,24 @@ export const EditVideo = () => {
             <NewCrowdfundTitle>Update Video properties</NewCrowdfundTitle>
           </Box>
           <>
+          <Box
+                {...getRootProps()}
+                sx={{
+                  border: "1px dashed gray",
+                  padding: 2,
+                  textAlign: "center",
+                  marginBottom: 2,
+                  cursor: "pointer",
+                }}
+              >
+                <input {...getInputProps()} />
+                <Typography>
+                  Click to update video file - optional
+                </Typography>
+              </Box>
+              <Typography sx={{
+                marginBottom: '10px'
+              }}>{file?.name}</Typography>
             <Box
               sx={{
                 display: "flex",
@@ -443,6 +514,29 @@ export const EditVideo = () => {
           </CrowdfundActionButtonRow>
         </ModalBody>
       </Modal>
+      {isOpenMultiplePublish && (
+        <MultiplePublish
+          isOpen={isOpenMultiplePublish}
+          onSubmit={() => {
+            setIsOpenMultiplePublish(false);
+            const clonedCopy = structuredClone(videoPropertiesToSetToRedux)
+            dispatch(
+              updateVideo(clonedCopy)
+            );
+            dispatch(
+              updateInHashMap(clonedCopy)
+            );
+            dispatch(
+              setNotification({
+                msg: "Video updated",
+                alertType: "success",
+              })
+            );
+            onClose()
+          }}
+          publishes={publishes}
+        />
+      )}
     </>
   );
 };
