@@ -160,7 +160,7 @@ export const ShowOrder: FC<ShowOrderProps> = ({
       setStatusLoader(true);
       const query = `q-store-status-order-${extractedOrderIdEnd}`;
       // Check if resource exists
-      const url = `/arbitrary/resources/search?service=DOCUMENT_PRIVATE&query=${query}&limit=1&includemetadata=false&mode=LATEST&reverse=true`;
+      const url = `/arbitrary/resources/search?service=DOCUMENT_PRIVATE&query=${query}&limit=1&includemetadata=false&mode=ALL&reverse=true`;
       const response = await fetch(url, {
         method: "GET",
         headers: {

@@ -355,6 +355,7 @@ export const Store = () => {
           limit: 0,
           offset: 0,
           reverse: true,
+          mode: "ALL"
         });
 
         // Set dataContainer in redux if it is found. This is to do filtering in the future since it cannot be done on QDN at the moment.
@@ -423,7 +424,7 @@ export const Store = () => {
       const shortStoreId = parts[1];
       const query = `${REVIEW_BASE}-${shortStoreId}`;
       // Since it the url includes /resources, you know you're fetching the resources and not the raw data
-      const url = `/arbitrary/resources/search?service=DOCUMENT&query=${query}&limit=100&includemetadata=false&mode=LATEST&reverse=true`;
+      const url = `/arbitrary/resources/search?service=DOCUMENT&query=${query}&limit=100&includemetadata=false&mode=ALL&reverse=true`;
       const response = await fetch(url, {
         method: "GET",
         headers: {

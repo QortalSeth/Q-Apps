@@ -13,7 +13,7 @@ interface QortalRequestOptions {
   metaData?: string
   encoding?: string
   includeMetadata?: boolean
-  limit?: number
+  limit?: numebr
   offset?: number
   reverse?: boolean
   resources?: any[]
@@ -33,9 +33,11 @@ interface QortalRequestOptions {
   mimeType?: string
   file?: File
   encryptedData?: string
-  prefix?: boolean
-  exactMatchNames?: boolean,
+  name?: string
   mode?: string
+  query?: string
+  excludeBlocked?: boolean
+  exactMatchNames?: boolean
 }
 
 declare function qortalRequest(options: QortalRequestOptions): Promise<any>
