@@ -12,6 +12,9 @@ export interface ProductDataContainer {
   status: string;
 }
 
+interface ForeignCoins {
+  [key: string]: string;
+}
 export interface CurrentStore {
   created: number;
   id: string;
@@ -22,6 +25,8 @@ export interface CurrentStore {
   logo?: string;
   location?: string;
   shipsTo?: string;
+  foreignCoins: ForeignCoins;
+  supportedCoins: string[];
 }
 
 export interface DataContainer {

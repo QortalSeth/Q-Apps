@@ -37,12 +37,18 @@ import {
 import { supportedCoinsArray } from "../../constants/supported-coins";
 import { QortalSVG } from "../../assets/svgs/QortalSVG";
 import { ARRRSVG } from "../../assets/svgs/ARRRSVG";
+
+interface ForeignCoins {
+  [key: string]: string;
+}
 export interface onPublishParamEdit {
   title: string;
   description: string;
   shipsTo: string;
   location: string;
   logo: string;
+  foreignCoins: ForeignCoins;
+  supportedCoins: string[];
 }
 interface MyModalProps {
   open: boolean;
@@ -80,12 +86,23 @@ const MyModal: React.FC<MyModalProps> = ({ open, onClose, onPublish }) => {
         setErrorMessage("A logo is required");
         return;
       }
+
+      const foreignCoins: ForeignCoins = {
+        ARRR: arrrWalletAddress
+      }
+      supportedCoinsSelected.filter((coin)=> coin !== 'QORT').forEach((item: string)=> {
+        if(!foreignCoins[item]) throw new Error(`Please add a ${item} address`)
+      })
       await onPublish({
         title,
         description,
         shipsTo,
         location,
         logo,
+        foreignCoins: {
+          ARRR: arrrWalletAddress
+        },
+        supportedCoins: supportedCoinsSelected
       });
       handleClose();
     } catch (error: any) {
@@ -95,11 +112,14 @@ const MyModal: React.FC<MyModalProps> = ({ open, onClose, onPublish }) => {
 
   useEffect(() => {
     if (open && currentStore && storeId === currentStore.id) {
+      console.log({currentStore})
       setTitle(currentStore?.title || "");
       setDescription(currentStore?.description || "");
       setLogo(currentStore?.logo || null);
       setLocation(currentStore?.location || "");
       setShipsTo(currentStore?.shipsTo || "");
+      setSupportedCoinsSelected(currentStore?.supportedCoins || ['QORT'])
+      setArrrWalletAddress(currentStore?.foreignCoins?.ARRR || "")
     }
   }, [currentStore, storeId, open]);
 
@@ -111,6 +131,8 @@ const MyModal: React.FC<MyModalProps> = ({ open, onClose, onPublish }) => {
     setLogo(null);
     setLocation("");
     setShipsTo("");
+    setArrrWalletAddress("")
+    setSupportedCoinsSelected(["QORT"])
     dispatch(toggleCreateStoreModal(false));
     onClose();
   };
@@ -123,6 +145,21 @@ const MyModal: React.FC<MyModalProps> = ({ open, onClose, onPublish }) => {
     if (chip === "QORT") return;
     setSupportedCoinsSelected(prevChips => prevChips.filter(c => c !== chip));
   };
+
+  const importAddress = async (coin: string)=> {
+    try {
+      const res = await qortalRequest({
+        action: 'GET_USER_WALLET',
+        coin
+      })
+      if(res?.address){
+        setArrrWalletAddress(res.address)
+      }
+      console.log({res})
+    } catch (error) {
+      
+    }
+  }
 
   return (
     <Modal
@@ -199,7 +236,7 @@ const MyModal: React.FC<MyModalProps> = ({ open, onClose, onPublish }) => {
         />
 
         {/* QORT Wallet Input Field */}
-        <WalletRow>
+        {/* <WalletRow>
           <CustomInputField
             id="modal-qort-wallet-input"
             label="QORT Wallet Address"
@@ -214,7 +251,20 @@ const MyModal: React.FC<MyModalProps> = ({ open, onClose, onPublish }) => {
           <Tooltip
             TransitionComponent={Zoom}
             placement="top"
-            arrow={true}
+            arrow={true} const importAddress = async (coin: string)=> {
+    try {
+      const res = await qortalRequest({
+        action: 'GET_USER_WALLET',
+        coin
+      })
+      if(res?.address){
+        setArrrWalletAddress(res.address)
+      }
+      console.log({res})
+    } catch (error) {
+      
+    }
+  }
             title="Import your QORT Wallet Address from your current account"
           >
             <IconButton disableFocusRipple={true} disableRipple={true}>
@@ -225,7 +275,7 @@ const MyModal: React.FC<MyModalProps> = ({ open, onClose, onPublish }) => {
               />
             </IconButton>
           </Tooltip>
-        </WalletRow>
+        </WalletRow> */}
 
         {/* ARRR Wallet Input Field */}
         <WalletRow>
@@ -246,7 +296,7 @@ const MyModal: React.FC<MyModalProps> = ({ open, onClose, onPublish }) => {
             arrow={true}
             title="Import your ARRR Wallet Address from your current account"
           >
-            <IconButton disableFocusRipple={true} disableRipple={true}>
+            <IconButton disableFocusRipple={true} disableRipple={true} onClick={()=> importAddress('ARRR')}>
               <DownloadArrrWalletIcon
                 color={theme.palette.text.primary}
                 height="40"

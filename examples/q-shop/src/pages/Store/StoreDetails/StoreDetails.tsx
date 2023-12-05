@@ -23,6 +23,7 @@ import { ShippingSVG } from "../../../assets/svgs/ShippingSVG";
 import { CurrencySVG } from "../../../assets/svgs/CurrencySVG";
 import { QortalSVG } from "../../../assets/svgs/QortalSVG";
 import { ARRRSVG } from "../../../assets/svgs/ARRRSVG";
+import { ForeignCoins } from "../../../components/modals/CreateStoreModal";
 
 interface StoreDetailsProps {
   storeTitle: string;
@@ -33,6 +34,8 @@ interface StoreDetailsProps {
   location: string;
   shipsTo: string;
   setOpenStoreDetails: (open: boolean) => void;
+  supportedCoins: string[];
+  foreignCoins: ForeignCoins
 }
 
 export const StoreDetails: FC<StoreDetailsProps> = ({
@@ -44,6 +47,8 @@ export const StoreDetails: FC<StoreDetailsProps> = ({
   location,
   shipsTo,
   setOpenStoreDetails,
+  supportedCoins,
+  foreignCoins
 }) => {
   const theme = useTheme();
   return (
@@ -131,11 +136,14 @@ export const StoreDetails: FC<StoreDetailsProps> = ({
                 width={"32px"}
                 height={"32px"}
               />
-              <ARRRSVG
-                color={theme.palette.text.primary}
-                width={"32px"}
-                height={"32px"}
-              />
+               {foreignCoins?.ARRR && (
+                   <ARRRSVG
+                   color={theme.palette.text.primary}
+                   width={"32px"}
+                   height={"32px"}
+                 />
+                  )}
+              
             </CurrencyRow>
           </CardRow>
           <CardRow>

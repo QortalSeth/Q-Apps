@@ -332,6 +332,8 @@ export const Store = () => {
             tags: myStore.metadata?.tags || [],
             logo: responseData?.logo || "",
             shortStoreId: responseData?.shortStoreId,
+            supportedCoins: responseData?.supportedCoins || [],
+            foreignCoins: responseData?.foreignCoins || {}
           })
         );
 
@@ -583,6 +585,11 @@ export const Store = () => {
         Store Not Found!
       </Typography>
     );
+
+  const storeToUse = username === user?.name
+  ? currentStore
+  : currentViewedStore
+
 
   return (
     <Grid container sx={{ width: "100%" }}>
@@ -837,11 +844,14 @@ export const Store = () => {
                     src={QORT}
                     alt="QORT-logo"
                   />
-                  <AcceptedCoin
+                  {storeToUse?.foreignCoins?.ARRR && (
+                    <AcceptedCoin
                     style={{ width: "26px", height: "26px" }}
                     src={ARRR}
                     alt="ARRR-logo"
                   />
+                  )}
+                  
                 </AcceptedCoinRow>
               </OfferedCoinsRow>
             </StoreTitleCol>
@@ -1013,6 +1023,16 @@ export const Store = () => {
             username === user?.name
               ? currentStore?.shipsTo || ""
               : currentViewedStore?.shipsTo || ""
+          }
+          supportedCoins={
+            username === user?.name
+              ? currentStore?.supportedCoins || ['QORT']
+              : currentViewedStore?.supportedCoins || ['QORT']
+          }
+          foreignCoins={
+            username === user?.name
+              ? currentStore?.foreignCoins || {}
+              : currentViewedStore?.foreignCoins || {}
           }
         />
       </ReusableModalStyled>

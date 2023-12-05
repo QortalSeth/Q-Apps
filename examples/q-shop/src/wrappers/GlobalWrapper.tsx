@@ -198,7 +198,9 @@ const GlobalWrapper: React.FC<Props> = ({ children, setTheme }) => {
         category: store.metadata?.category,
         tags: store.metadata?.tags || [],
         logo: responseData?.logo || "",
-        shortStoreId: responseData?.shortStoreId
+        shortStoreId: responseData?.shortStoreId,
+        supportedCoins: responseData?.supportedCoins || [],
+        foreignCoins: responseData?.foreignCoins || {}
       })
     );
     // Set listProducts in the Redux global state
@@ -355,7 +357,9 @@ const GlobalWrapper: React.FC<Props> = ({ children, setTheme }) => {
       location,
       shipsTo,
       storeIdentifier,
-      logo
+      logo,
+      foreignCoins,
+      supportedCoins
     }: onPublishParam) => {
       if (!user || !user.name)
         throw new Error("Cannot publish: You do not have a Qortal name");
@@ -388,15 +392,21 @@ const GlobalWrapper: React.FC<Props> = ({ children, setTheme }) => {
         shipsTo,
         created: Date.now(),
         shortStoreId: formatStoreIdentifier,
-        logo
+        logo,
+        foreignCoins,
+        supportedCoins
       };
       if (!storeObj.shortStoreId) {
         throw new Error("Please insert a valid store id");
       }
-      const storeToBase64 = await objectToBase64(storeObj);
       // Store Data Container to send to QDN (this will allow easier querying of products afterwards. Think of it as a database in the redux global state for the current store. Max 1 per store). At first there's no products, but they will be added later. We store this in the state so we can reuse it easily if our data container fails to publish.
       try {
+
+        const storeToBase64 = await objectToBase64(storeObj);
+
         // Publish Store to QDN
+        let metadescription = `**coins:QORTtrue,ARRR${supportedCoins.includes('ARRR')}**` + description.slice(0,180)
+
         const resourceResponse = await qortalRequest({
           action: "PUBLISH_QDN_RESOURCE",
           name: name,
@@ -404,7 +414,7 @@ const GlobalWrapper: React.FC<Props> = ({ children, setTheme }) => {
           data64: storeToBase64,
           filename: "store.json",
           title,
-          description,
+          description: metadescription,
           identifier: identifier
         });
         if (isSuccessful(resourceResponse)) {
@@ -486,7 +496,9 @@ const GlobalWrapper: React.FC<Props> = ({ children, setTheme }) => {
       description,
       location,
       shipsTo,
-      logo
+      logo,
+      foreignCoins,
+      supportedCoins
     }: onPublishParamEdit) => {
       if (!user || !user.name || !currentStore)
         throw new Error("Cannot publish: You do not have a Qortal name");
@@ -508,11 +520,15 @@ const GlobalWrapper: React.FC<Props> = ({ children, setTheme }) => {
         location,
         shipsTo,
         logo,
-        shortStoreId: currentStore.shortStoreId ?? shortStoreId
+        shortStoreId: currentStore.shortStoreId ?? shortStoreId,
+        foreignCoins,
+        supportedCoins
       };
 
-      const storeToBase64 = await objectToBase64(storeObj);
       try {
+        const storeToBase64 = await objectToBase64(storeObj);
+
+        let metadescription = `**coins:QORTtrue,ARRR${supportedCoins.includes('ARRR')}**` + description.slice(0,180)
         const resourceResponse = await qortalRequest({
           action: "PUBLISH_QDN_RESOURCE",
           name: name,
@@ -669,7 +685,9 @@ const GlobalWrapper: React.FC<Props> = ({ children, setTheme }) => {
                 category: myStoreFound?.category,
                 tags: myStoreFound?.tags || [],
                 logo: shopResource?.logo,
-                shortStoreId: shopResource?.shortStoreId
+                shortStoreId: shopResource?.shortStoreId,
+                supportedCoins: shopResource?.supportedCoins || [],
+                foreignCoins: shopResource?.foreignCoins || {}
               })
             );
             // Fetch data container data on QDN (product resources)
