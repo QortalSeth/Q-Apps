@@ -97,6 +97,17 @@ const DownloadWrapper: React.FC<Props> = ({ children }) => {
         service: service,
         identifier: identifier
       })
+      if(res?.status === 'NOT_PUBLISHED'){
+        dispatch(
+          updateDownloads({
+            name,
+            service,
+            identifier,
+            status: res
+          })
+        )
+        clearInterval(intervalId)
+      }
       isCalling = false
       if (res.localChunkCount) {
         if (res.percentLoaded) {

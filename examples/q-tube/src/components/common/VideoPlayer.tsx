@@ -569,7 +569,7 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
     }
   }
 
-
+console.log({resourceStatus, download}, isLoading)
   return (
     <VideoContainer
       tabIndex={0}
@@ -609,6 +609,9 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
                 textAlign: 'center'
               }}
             >
+              {resourceStatus?.status === 'NOT_PUBLISHED' && (
+                 <>Video file was not published. Please inform the publisher!</>
+              )}
               {resourceStatus?.status === 'REFETCHING' ? (
                 <>
                   <>

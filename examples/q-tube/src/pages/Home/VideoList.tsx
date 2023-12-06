@@ -626,7 +626,11 @@ export const VideoList = ({ mode }: VideoListProps) => {
                       </Tooltip>
                     </IconsBox>
                     <VideoCard
+                      sx={{
+                        cursor: !hasHash && 'default'
+                      }}
                       onClick={() => {
+                        if(!hasHash) return
                         navigate(
                           `/video/${videoObj?.videos?.[0]?.name}/${videoObj?.videos?.[0]?.identifier}`
                         );

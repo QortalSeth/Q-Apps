@@ -15,7 +15,9 @@ import {
 } from "./Upload-styles";
 import {
   Box,
+  Button,
   FormControl,
+  Input,
   InputLabel,
   MenuItem,
   Modal,
@@ -29,6 +31,7 @@ import ShortUniqueId from "short-unique-id";
 import { useDispatch, useSelector } from "react-redux";
 import AddBoxIcon from "@mui/icons-material/AddBox";
 import { useDropzone } from "react-dropzone";
+import AddIcon from '@mui/icons-material/Add';
 
 import { setNotification } from "../../state/features/notificationsSlice";
 import { objectToBase64, uint8ArrayToBase64 } from "../../utils/toBase64";
@@ -41,6 +44,8 @@ import {
 import ImageUploader from "../common/ImageUploader";
 import { QTUBE_PLAYLIST_BASE, QTUBE_VIDEO_BASE, categories, subCategories } from "../../constants";
 import { MultiplePublish } from "../common/MultiplePublish/MultiplePublish";
+import { CrowdfundSubTitle, CrowdfundSubTitleRow } from "../EditPlaylist/Upload-styles";
+import { CardContentContainerComment } from "../common/Comments/Comments-styles";
 
 const uid = new ShortUniqueId();
 const shortuid = new ShortUniqueId({ length: 5 });
@@ -77,7 +82,9 @@ export const UploadVideo = ({ editId, editContent }: NewCrowdfundProps) => {
   const [playlistCoverImage, setPlaylistCoverImage] = useState<null | string>(
     null
   );
-
+    const [selectExistingPlaylist, setSelectExistingPlaylist] = useState<any>(null)
+  const [searchResults, setSearchResults] = useState([])
+  const [filterSearch, setFilterSearch] = useState("")
   const [playlistTitle, setPlaylistTitle] = useState<string>("");
   const [playlistDescription, setPlaylistDescription] = useState<string>("");
   const [selectedCategory, setSelectedCategory] = useState<any>(null);
@@ -135,6 +142,19 @@ export const UploadVideo = ({ editId, editContent }: NewCrowdfundProps) => {
   const onClose = () => {
     setIsOpen(false);
   };
+
+  const search = async()=> {
+
+    const url = `/arbitrary/resources/search?mode=ALL&service=PLAYLIST&mode=ALL&identifier=${QTUBE_PLAYLIST_BASE}&title=${filterSearch}&limit=20&includemetadata=true&reverse=true&name=${username}&exactmatchnames=true&offset=0`
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    })
+    const responseDataSearchVid = await response.json()
+    setSearchResults(responseDataSearchVid)
+  }
 
   async function publishQDNResource() {
     try {
@@ -263,7 +283,7 @@ export const UploadVideo = ({ editId, editContent }: NewCrowdfundProps) => {
         : `${QTUBE_PLAYLIST_BASE}${sanitizeTitle.slice(0, 30)}_${id}`;
 
 
-      const videos = listOfPublishes.filter((item)=> item.service === 'DOCUMENT' && item.tag1 === 'qtube_vid_').map((vid)=> {
+      const videos = listOfPublishes.filter((item)=> item.service === 'DOCUMENT' && item.tag1 === QTUBE_VIDEO_BASE).map((vid)=> {
         return {
           identifier: vid.identifier,
           service: vid.service,
@@ -304,6 +324,62 @@ export const UploadVideo = ({ editId, editContent }: NewCrowdfundProps) => {
 
       
       listOfPublishes.push(requestBodyJson)
+      } else if(playlistSetting === "existing"){
+
+        if(!selectExistingPlaylist){
+          throw new Error('select a playlist')
+        }
+
+
+        // get raw data for playlist
+        const responseData = await qortalRequest({
+          action: 'FETCH_QDN_RESOURCE',
+          name: selectExistingPlaylist.name,
+          service: selectExistingPlaylist.service,
+          identifier: selectExistingPlaylist.identifier
+        })
+        if(responseData && !responseData.error){
+          console.log({listOfPublishes})
+          const videos = listOfPublishes.filter((item)=> item.service === 'DOCUMENT' && item.tag1 === QTUBE_VIDEO_BASE).map((vid)=> {
+            return {
+              identifier: vid.identifier,
+              service: vid.service,
+              name: vid.name,
+              code: vid.code
+            }
+          })
+
+          console.log({videos})
+          const videosInPlaylist = [...responseData.videos, ...videos ]
+          const playlistObject: any = {
+            ...responseData,
+            videos: videosInPlaylist
+          };
+          console.log({playlistObject})
+          const codes = videosInPlaylist.map(item => `c:${item.code};`).join('');
+
+          let metadescription = `**category:${playlistObject.category};subcategory:${playlistObject.subcategory};${codes}**` + playlistObject.description.slice(0,120)
+    
+    
+          
+          const crowdfundObjectToBase64 = await objectToBase64(playlistObject);
+          // Description is obtained from raw data
+          const requestBodyJson: any = {
+            action: "PUBLISH_QDN_RESOURCE",
+            name: name,
+            service: "PLAYLIST",
+            data64: crowdfundObjectToBase64,
+            title: playlistObject.title.slice(0, 50),
+            description: metadescription,
+            identifier: selectExistingPlaylist.identifier,
+            tag1: QTUBE_VIDEO_BASE
+          };
+    
+          
+          listOfPublishes.push(requestBodyJson)
+        } else {
+          throw new Error('cannot get playlist data')
+        }
       }
       
 
@@ -618,7 +694,17 @@ export const UploadVideo = ({ editId, editContent }: NewCrowdfundProps) => {
                   gap: "20px",
                 }}
               >
+                 <CrowdfundActionButton
+                  variant="contained"
+                  color={!playlistSetting ? "success" : "primary"}
+                  onClick={() => {
+                    setPlaylistSetting(null);
+                  }}
+                >
+                  no playlist
+                </CrowdfundActionButton>
                 <CrowdfundActionButton
+                color={playlistSetting === "new" ? "success" : "primary"}
                   variant="contained"
                   onClick={() => {
                     setPlaylistSetting("new");
@@ -626,15 +712,125 @@ export const UploadVideo = ({ editId, editContent }: NewCrowdfundProps) => {
                 >
                   New playlist
                 </CrowdfundActionButton>
-                {/* <CrowdfundActionButton
+                <CrowdfundActionButton
+                 color={playlistSetting === "existing" ? "success" : "primary"}
                   variant="contained"
                   onClick={() => {
                     setPlaylistSetting("existing");
                   }}
                 >
                   Existing playlist
-                </CrowdfundActionButton> */}
+                </CrowdfundActionButton>
+               
               </Box>
+              {playlistSetting === "existing" && (
+                <Box
+                sx={{
+                  display: "flex",
+                  flexDirection: "column",
+                  width: "100%",
+                  alignItems: "center"
+                }}
+              >
+                 
+                <CrowdfundSubTitleRow>
+                  <CrowdfundSubTitle>Select existing playlist</CrowdfundSubTitle>
+                </CrowdfundSubTitleRow>
+                <Typography>{selectExistingPlaylist?.metadata?.title}</Typography>
+                <CardContentContainerComment
+                  sx={{
+                    marginTop: "25px",
+                    height: "450px",
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center"
+                  }}
+                >
+                   <Box sx={{
+                      display: 'flex',
+                      gap: '10px'
+                  }}>
+                      <Input
+                      id="standard-adornment-name"
+                      onChange={(e) => {
+                        setFilterSearch(e.target.value);
+                      }}
+                      value={filterSearch}
+                      placeholder="Search by title"
+                      sx={{
+                        borderBottom: "1px solid white",
+                        "&&:before": {
+                          borderBottom: "none",
+                        },
+                        "&&:after": {
+                          borderBottom: "none",
+                        },
+                        "&&:hover:before": {
+                          borderBottom: "none",
+                        },
+                        "&&.Mui-focused:before": {
+                          borderBottom: "none",
+                        },
+                        "&&.Mui-focused": {
+                          outline: "none",
+                        },
+                        fontSize: "18px",
+                      }}
+                    />
+                     <Button
+                      onClick={() => {
+                        search();
+                      }}
+                      
+                      variant="contained"
+                    >
+                      Search
+                    </Button>
+                  </Box>
+                  
+                  {searchResults?.map((vid, index) => {
+                    return (
+                      <Box
+                        key={vid?.identifier}
+                        sx={{
+                          display: "flex",
+                          gap: "10px",
+                          width: "100%",
+                          alignItems: "center",
+                          padding: "10px",
+                          borderRadius: "5px",
+                          userSelect: "none",
+                        }}
+                      >
+                        <Typography
+                          sx={{
+                            fontSize: "14px",
+                          }}
+                        >
+                          {index + 1}
+                        </Typography>
+                        <Typography
+                          sx={{
+                            fontSize: "18px",
+                            wordBreak: 'break-word'
+                          }}
+                        >
+                          {vid?.metadata?.title}
+                        </Typography>
+                        <AddIcon
+                          onClick={() => {
+                            setSelectExistingPlaylist(vid);
+                          }}
+                          sx={{
+                            cursor: "pointer",
+                          }}
+                        />
+                      </Box>
+                    );
+                  })}
+                </CardContentContainerComment>
+              </Box>
+              )}
               {playlistSetting === "new" && (
                 <>
                   {!playlistCoverImage ? (

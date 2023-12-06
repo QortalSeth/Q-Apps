@@ -2,6 +2,8 @@ import React, { useState, useRef } from "react";
 import { Box, Button, Input, Popover, useTheme } from "@mui/material";
 import ExitToAppIcon from "@mui/icons-material/ExitToApp";
 import { BlockedNamesModal } from "../../common/BlockedNamesModal/BlockedNamesModal";
+import AddBoxIcon from "@mui/icons-material/AddBox";
+
 import {
   AvatarContainer,
   CustomAppBar,
@@ -27,12 +29,14 @@ import Logo from "../../../assets/img/logo.png";
 import { useDispatch, useSelector } from "react-redux";
 import {
   addFilteredVideos,
+  setEditPlaylist,
   setFilterValue,
   setIsFiltering,
 } from "../../../state/features/videoSlice";
 import { RootState } from "../../../state/store";
 import { useWindowSize } from "../../../hooks/useWindowSize";
 import { UploadVideo } from "../../UploadVideo/UploadVideo";
+import { StyledButton } from "../../UploadVideo/Upload-styles";
 interface Props {
   isAuthenticated: boolean;
   userName: string | null;
@@ -383,7 +387,22 @@ const NavBar: React.FC<Props> = ({
           </>
         )}
         <AvatarContainer>
-          <UploadVideo />
+          {isAuthenticated && userName && (
+            <>
+            <UploadVideo />
+          <StyledButton
+              color="primary"
+              startIcon={<AddBoxIcon />}
+              onClick={() => {
+                dispatch(setEditPlaylist({mode: 'new'}))
+              }}
+            >
+              create playlist
+            </StyledButton>
+            </>
+          )}
+          
+          
         </AvatarContainer>
 
         <Popover

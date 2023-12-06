@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   AddCoverImageButton,
   AddLogoIcon,
@@ -43,7 +43,7 @@ import {
   setEditPlaylist,
 } from "../../state/features/videoSlice";
 import ImageUploader from "../common/ImageUploader";
-import { QTUBE_VIDEO_BASE, categories, subCategories } from "../../constants";
+import { QTUBE_PLAYLIST_BASE, QTUBE_VIDEO_BASE, categories, subCategories } from "../../constants";
 import { Playlists } from "../Playlists/Playlists";
 import { PlaylistListEdit } from "../PlaylistListEdit/PlaylistListEdit";
 
@@ -84,6 +84,18 @@ export const EditPlaylist = () => {
     useState<any>(null);
   const [selectedSubCategoryVideos, setSelectedSubCategoryVideos] =
     useState<any>(null);
+
+  const isNew = useMemo(()=> {
+    return editVideoProperties?.mode === 'new'
+  }, [editVideoProperties])
+
+  useEffect(()=> {
+    if(isNew){
+      setPlaylistData({
+        videos: []
+      })
+    }
+  }, [isNew])
 
   // useEffect(() => {
   //   if (editVideoProperties) {
@@ -189,7 +201,15 @@ export const EditPlaylist = () => {
   }, [editVideoProperties]);
 
   const onClose = () => {
+    setTitle("")
+    setDescription("")
+    setVideos([])
+    setPlaylistData(null)
+    setSelectedCategoryVideos(null)
+    setSelectedSubCategoryVideos(null)
+    setCoverImage("")
     dispatch(setEditPlaylist(null));
+  
   };
 
   async function publishQDNResource() {
@@ -212,7 +232,7 @@ export const EditPlaylist = () => {
           "Cannot publish without access to your name. Please authenticate.";
       }
 
-      if (editVideoProperties?.user !== username) {
+      if (!isNew && editVideoProperties?.user !== username) {
         errorMsg = "Cannot publish another user's resource";
       }
 
@@ -254,6 +274,13 @@ export const EditPlaylist = () => {
           code: codeValue,
         };
       });
+      const id = uid();
+
+      let commentsId =  editVideoProperties?.id
+      
+      if(isNew){
+        commentsId = `${QTUBE_PLAYLIST_BASE}_cm_${id}`
+      }
 
       const playlistObject: any = {
         title,
@@ -261,7 +288,7 @@ export const EditPlaylist = () => {
         description,
         image: coverImage,
         videos: videoStructured,
-        commentsId: editVideoProperties.commentsId,
+        commentsId: commentsId,
         category,
         subcategory
       };
@@ -273,6 +300,17 @@ export const EditPlaylist = () => {
 
       const crowdfundObjectToBase64 = await objectToBase64(playlistObject);
       // Description is obtained from raw data
+
+      let identifier =  editVideoProperties?.id
+      const sanitizeTitle = title
+        .replace(/[^a-zA-Z0-9\s-]/g, "")
+        .replace(/\s+/g, "-")
+        .replace(/-+/g, "-")
+        .trim()
+        .toLowerCase();
+      if(isNew){
+        identifier = `${QTUBE_PLAYLIST_BASE}${sanitizeTitle.slice(0, 30)}_${id}`;
+      }
       const requestBodyJson: any = {
         action: "PUBLISH_QDN_RESOURCE",
         name: username,
@@ -280,24 +318,42 @@ export const EditPlaylist = () => {
         data64: crowdfundObjectToBase64,
         title: title.slice(0, 50),
         description: metadescription,
-        identifier: editVideoProperties.id,
+        identifier: identifier,
         tag1: QTUBE_VIDEO_BASE,
       };
 
       await qortalRequest(requestBodyJson);
-
-      dispatch(
-        updateVideo({
-          ...editVideoProperties,
-          ...playlistObject,
-        })
-      );
-      dispatch(
-        updateInHashMap({
-          ...editVideoProperties,
-          ...playlistObject,
-        })
-      );
+      if(isNew){
+        const objectToStore = {
+          title: title.slice(0, 50),
+          description: metadescription,
+          id: identifier,
+          service: "PLAYLIST",
+          name: username,
+          ...playlistObject
+        }
+        dispatch(
+          updateVideo(objectToStore)
+        );
+        dispatch(
+          updateInHashMap(objectToStore)
+        );
+      } else {
+        dispatch(
+          updateVideo({
+            ...editVideoProperties,
+            ...playlistObject,
+          })
+        );
+        dispatch(
+          updateInHashMap({
+            ...editVideoProperties,
+            ...playlistObject,
+          })
+        );
+      }
+      
+      
 
       onClose();
     } catch (error: any) {
@@ -387,7 +443,13 @@ export const EditPlaylist = () => {
               justifyContent: "space-between",
             }}
           >
-            <NewCrowdfundTitle>Update Playlist properties</NewCrowdfundTitle>
+            {isNew ? (
+              <NewCrowdfundTitle>Create new playlist</NewCrowdfundTitle>
+
+            ) : (
+        <NewCrowdfundTitle>Update Playlist properties</NewCrowdfundTitle>
+
+            )}
           </Box>
           <>
             <Box
@@ -464,7 +526,7 @@ export const EditPlaylist = () => {
               )}
               <CustomInputField
                 name="title"
-                label="Title of video"
+                label="Title of playlist"
                 variant="filled"
                 value={title}
                 onChange={(e) => {
@@ -477,7 +539,7 @@ export const EditPlaylist = () => {
               />
               <CustomInputField
                 name="description"
-                label="Describe your video in a few words"
+                label="Describe your playlist in a few words"
                 variant="filled"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
