@@ -40,7 +40,7 @@ export const IndividualProfile = () => {
             }}
           >
             <Box>
-              <Avatar src={avatarUrl} alt={`${paramName}'s avatar`} />
+              <Avatar src={`/arbitrary/THUMBNAIL/${paramName}/qortal_avatar`} alt={`${paramName}'s avatar`}  />
             </Box>
             <StyledCardColComment>
               <AuthorTextComment

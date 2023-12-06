@@ -181,7 +181,7 @@ export const VideoListComponentLevel = ({ mode }: VideoListProps) => {
                   <VideoCardTitle>{videoObj.title}</VideoCardTitle>
                   <BottomParent>
                   <NameContainer>
-                  <Avatar sx={{height: 24, width: 24}} src={avatarUrl} alt={`${videoObj.user}'s avatar`} />
+                  <Avatar sx={{height: 24, width: 24}} src={`/arbitrary/THUMBNAIL/${videoObj?.user}/qortal_avatar`} alt={`${videoObj.user}'s avatar`} />
                   <VideoCardName>{videoObj.user}</VideoCardName>
                   </NameContainer>
                 

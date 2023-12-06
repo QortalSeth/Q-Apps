@@ -651,7 +651,7 @@ export const VideoList = ({ mode }: VideoListProps) => {
                         >
                           <Avatar
                             sx={{ height: 24, width: 24 }}
-                            src={avatarUrl}
+                            src={`/arbitrary/THUMBNAIL/${videoObj?.user}/qortal_avatar`}
                             alt={`${videoObj?.user}'s avatar`}
                           />
                           <VideoCardName
@@ -755,7 +755,7 @@ export const VideoList = ({ mode }: VideoListProps) => {
                       >
                         <Avatar
                           sx={{ height: 24, width: 24 }}
-                          src={avatarUrl}
+                          src={`/arbitrary/THUMBNAIL/${videoObj?.user}/qortal_avatar`}
                           alt={`${videoObj?.user}'s avatar`}
                         />
                         <VideoCardName

@@ -293,7 +293,7 @@ export const VideoContent = () => {
             }}
           >
             <Box>
-              <Avatar src={avatarUrl} alt={`${name}'s avatar`} />
+              <Avatar src={`/arbitrary/THUMBNAIL/${name}/qortal_avatar`} alt={`${name}'s avatar`} />
             </Box>
             <StyledCardColComment>
               <AuthorTextComment
