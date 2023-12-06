@@ -417,7 +417,8 @@ export const UploadVideo = ({ editId, editContent }: NewCrowdfundProps) => {
     setFiles((prev) => {
       let formattedValue = value
       if(type === 'title'){
-        formattedValue = value.replace(/[^a-zA-Z0-9\s]/g, "")
+         formattedValue = value.replace(/[^a-zA-Z0-9\s-_!?]/g, "");
+
     
       }
       const copyFiles = [...prev];
@@ -639,7 +640,7 @@ export const UploadVideo = ({ editId, editContent }: NewCrowdfundProps) => {
                       onChange={(e) =>
                         handleOnchange(index, "description", e.target.value)
                       }
-                      inputProps={{ maxLength: 180 }}
+                      inputProps={{ maxLength: 10000 }}
                       multiline
                       maxRows={3}
                       required
@@ -741,6 +742,7 @@ export const UploadVideo = ({ editId, editContent }: NewCrowdfundProps) => {
                   sx={{
                     marginTop: "25px",
                     height: "450px",
+                    overflow: 'auto',
                     display: "flex",
                     flexDirection: "column",
                     alignItems: "center"
@@ -867,8 +869,8 @@ export const UploadVideo = ({ editId, editContent }: NewCrowdfundProps) => {
                       const value = e.target.value
                       let formattedValue: string = value
                       
-                        formattedValue = value.replace(/[^a-zA-Z0-9\s]/g, "")
-                    
+                         formattedValue = value.replace(/[^a-zA-Z0-9\s-_!?]/g, "");
+
                       
                       setPlaylistTitle(formattedValue)
                     }}
@@ -881,7 +883,7 @@ export const UploadVideo = ({ editId, editContent }: NewCrowdfundProps) => {
                     variant="filled"
                     value={playlistDescription}
                     onChange={(e) => setPlaylistDescription(e.target.value)}
-                    inputProps={{ maxLength: 180 }}
+                    inputProps={{ maxLength: 10000 }}
                     multiline
                     maxRows={3}
                     required

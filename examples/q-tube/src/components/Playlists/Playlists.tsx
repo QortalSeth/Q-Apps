@@ -22,7 +22,8 @@ export const Playlists = ({playlistData, currentVideoIdentifier}) => {
       </CrowdfundSubTitleRow>
       <CardContentContainerComment sx={{
           marginTop: '25px',
-          height: '450px'
+          height: '450px',
+          overflow: 'auto'
       }}>
         {playlistData?.videos?.map((vid, index)=> {
             const isCurrentVidPlayling = vid?.identifier === currentVideoIdentifier;

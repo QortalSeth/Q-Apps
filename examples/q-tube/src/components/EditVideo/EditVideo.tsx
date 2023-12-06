@@ -465,7 +465,7 @@ export const EditVideo = () => {
                 value={title}
                 onChange={(e) => {
                   const value = e.target.value
-                  const formattedValue = value.replace(/[^a-zA-Z0-9\s]/g, "");
+                  const formattedValue = value.replace(/[^a-zA-Z0-9\s-_!?]/g, "");
                   setTitle(formattedValue);
                 }}
                 inputProps={{ maxLength: 180 }}
@@ -477,7 +477,7 @@ export const EditVideo = () => {
                 variant="filled"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                inputProps={{ maxLength: 180 }}
+                inputProps={{ maxLength: 10000 }}
                 multiline
                 maxRows={3}
                 required

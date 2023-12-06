@@ -176,9 +176,9 @@ export const useFetchVideos = () => {
       if(reset){
         offset = 0
       }
-      const videoLimit = limit || 10
+      const videoLimit = limit || 20
 
-      let defaultUrl = `/arbitrary/resources/search?mode=ALL&includemetadata=false&reverse=true&excludeblocked=true&exactmatchnames=true&offset=${offset}`
+      let defaultUrl = `/arbitrary/resources/search?mode=ALL&includemetadata=false&reverse=true&excludeblocked=true&exactmatchnames=true&offset=${offset}&limit=${videoLimit}`
 
 
       if(name){

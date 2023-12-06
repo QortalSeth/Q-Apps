@@ -55,6 +55,7 @@ const [filterSearch, setFilterSearch] = useState("")
         sx={{
           marginTop: "25px",
           height: "450px",
+          overflow: 'auto'
         }}
       >
         {playlistData?.videos?.map((vid, index) => {
@@ -116,6 +117,7 @@ const [filterSearch, setFilterSearch] = useState("")
         sx={{
           marginTop: "25px",
           height: "450px",
+          overflow: 'auto'
         }}
       >
          <Box sx={{

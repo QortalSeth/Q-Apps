@@ -45,6 +45,7 @@ export const categories = [
     {"id": 20, "name": "Business & Finance"},
     {"id": 21, "name": "Personal Development"},
     {"id": 22, "name": "Other"},
+    {"id": 23, "name": "History"},
 ]
 
 
