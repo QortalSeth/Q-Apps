@@ -240,7 +240,6 @@ export const Store = () => {
         username && username !== user?.name
           ? viewedStoreListProducts.products
           : ownStoreListProducts.products;
-      console.log({ productList });
       if (productList.length === 0) return;
       // This gets the product raw data
       getProducts();
@@ -550,7 +549,6 @@ export const Store = () => {
   const handleChipRemove = (chip: string) => {
     setCategoryChips(prevChips => prevChips.filter(c => c !== chip));
   };
-  console.log({ hasFetched, filteredProducts, username, user });
 
   if (isLoadingGlobal) return;
 
@@ -796,7 +794,6 @@ export const Store = () => {
                 productItem = existingProduct;
                 hasHash = true;
               }
-              console.log({ productItem });
               if (!hasHash) {
                 return (
                   <ProductCardCol
