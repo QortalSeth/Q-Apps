@@ -175,6 +175,7 @@ export const StoreList = () => {
                   const storeTitle = storeItem?.title || "Invalid Shop";
                   const storeLogo = storeItem?.logo || DefaultStoreImage;
                   const storeDescription = storeItem?.description || "";
+                  const supportedCoins = storeItem?.supportedCoins || ['QORT'];
                   if (!hasHash) {
                     return (
                       <StoresRow
@@ -208,6 +209,7 @@ export const StoreList = () => {
                         storeOwner={storeOwner || ""}
                         key={storeId}
                         userName={user?.name || ""}
+                        supportedCoins={supportedCoins}
                       />
                     );
                   }

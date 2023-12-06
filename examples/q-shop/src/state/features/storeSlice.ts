@@ -1,6 +1,7 @@
 import { createSlice } from "@reduxjs/toolkit";
 import { RootState } from "../store";
 import { CurrentStore, DataContainer, ProductDataContainer } from "./globalSlice";
+import { ForeignCoins } from "../../components/modals/CreateStoreModal";
 
 interface GlobalState {
   products: Product[];
@@ -86,6 +87,8 @@ export interface Store {
   location?: string;
   shipsTo?: string;
   shortStoreId?: string;
+  foreignCoins?: ForeignCoins;
+  supportedCoins?: string[];
 }
 
 export interface StoreReview {

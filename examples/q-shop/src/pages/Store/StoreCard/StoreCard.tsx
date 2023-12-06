@@ -36,6 +36,7 @@ interface StoreCardProps {
   storeId: string;
   storeOwner: string;
   userName: string;
+  supportedCoins: string[];
 }
 
 export const StoreCard: FC<StoreCardProps> = ({
@@ -45,6 +46,7 @@ export const StoreCard: FC<StoreCardProps> = ({
   storeId,
   storeOwner,
   userName,
+  supportedCoins
 }) => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -133,7 +135,9 @@ export const StoreCard: FC<StoreCardProps> = ({
           </StoreCardInfo>
           <AcceptedCoinsRow>
             <AcceptedCoin src={QORT} alt="QORT-logo" />
-            <AcceptedCoin src={ARRR} alt="ARRR-logo" />
+            {supportedCoins?.includes('ARRR') && (
+             <AcceptedCoin src={ARRR} alt="ARRR-logo" />
+            )}
           </AcceptedCoinsRow>
           <StoreCardOwner>{storeOwner}</StoreCardOwner>
           {storeOwner === userName && (

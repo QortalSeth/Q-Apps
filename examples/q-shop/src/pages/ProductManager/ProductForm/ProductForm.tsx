@@ -29,6 +29,7 @@ import {
 import { setNotification } from "../../../state/features/notificationsSlice";
 import { addProductsToSaveCategory } from "../../../state/features/globalSlice";
 import { Variant } from "../../../components/common/NumericTextFieldQshop";
+import { CoinFilter } from "../../Store/Store/Store";
 
 interface ProductFormProps {
   onSubmit: (product: PublishProductParams) => void;
@@ -41,6 +42,8 @@ interface ProductObj {
   price: number;
   images: string[];
   category?: string;
+  priceARRR?: number;
+  priceQORT?: number;
 }
 
 export const ProductForm: React.FC<ProductFormProps> = ({
@@ -63,6 +66,9 @@ export const ProductForm: React.FC<ProductFormProps> = ({
     price: 0,
     images: [],
   });
+  const currentStore = useSelector(
+    (state: RootState) => state.global.currentStore
+  );
   const [categoryList, setCategoryList] = useState<string[]>([]);
   const [selectedType, setSelectedType] = useState<string>("digital");
   const [images, setImages] = useState<string[]>([]);
@@ -73,6 +79,9 @@ export const ProductForm: React.FC<ProductFormProps> = ({
   const editProductQortPrice =
     editProduct?.price?.find((item: Price) => item?.currency === "qort")
       ?.value || product.price;
+      const editProductARRRPrice =
+      editProduct?.price?.find((item: Price) => item?.currency === CoinFilter.arrr)
+        ?.value || "";
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setProduct({
@@ -84,6 +93,10 @@ export const ProductForm: React.FC<ProductFormProps> = ({
   const handleProductPriceChange = (value: string) => {
     const price = Number(value);
     setProduct({ ...product, price: price });
+  };
+  const handleProductPriceChangeForeign = (value: string, coin:string) => {
+    const price = Number(value);
+    setProduct({ ...product, [`price${coin}`]: price });
   };
 
   const handleSelectChange = (event: SelectChangeEvent<string | null>) => {
@@ -117,6 +130,23 @@ export const ProductForm: React.FC<ProductFormProps> = ({
       return;
     }
 
+    let price = []
+    price.push({
+      currency: "qort",
+      value: product.price,
+    })
+
+    for (const value of Object.values(CoinFilter)) {
+      if(product[`price${value}`]){
+        price.push(
+          {
+            currency: value,
+            value: +(product[`price${value}`] || 0),
+          },
+        )
+      }
+    }
+
     onSubmit({
       title: product.title,
       description: product.description,
@@ -124,12 +154,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
       images,
       category: selectedCategory,
       status: selectedStatus,
-      price: [
-        {
-          currency: "qort",
-          value: product.price,
-        },
-      ],
+      price: price,
       mainImageIndex: 0,
     });
   };
@@ -247,18 +272,21 @@ export const ProductForm: React.FC<ProductFormProps> = ({
         onChangeFunc={handleProductPriceChange}
         required={true}
       />
-      <CustomNumberField
-        name="arrr-price"
-        label="Price in ARRR"
-        variant={Variant.filled}
-        // initialValue={editProductQortPrice.toString()}
-        addIconButtons={false}
-        minValue={0}
-        maxValue={Number.MAX_SAFE_INTEGER}
-        allowDecimals={true}
-        // onChangeFunc={handleProductPriceChange}
-        required={false}
-      />
+      {currentStore?.supportedCoins?.includes(CoinFilter.arrr) && (
+         <CustomNumberField
+         name="arrr-price"
+         label="Price in ARRR"
+         variant={Variant.filled}
+         initialValue={editProductARRRPrice.toString()}
+         addIconButtons={false}
+         minValue={0}
+         maxValue={Number.MAX_SAFE_INTEGER}
+         allowDecimals={true}
+         onChangeFunc={(val)=>handleProductPriceChangeForeign(val, CoinFilter.arrr)}
+         required={false}
+       />
+      )}
+     
       <Box>
         <FormControl fullWidth>
           <InputFieldCustomLabel id="product-type-label">

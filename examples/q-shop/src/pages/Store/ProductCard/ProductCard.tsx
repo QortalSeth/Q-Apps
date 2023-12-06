@@ -17,6 +17,7 @@ import { useNavigate } from "react-router-dom";
 import { setNotification } from "../../../state/features/notificationsSlice";
 import { AcceptedCoinRow } from "../Store/Store-styles";
 import { ARRRSVG } from "../../../assets/svgs/ARRRSVG";
+import { CoinFilter } from "../Store/Store";
 
 function addEllipsis(str: string, limit: number) {
   if (str.length > limit) {
@@ -27,9 +28,11 @@ function addEllipsis(str: string, limit: number) {
 }
 interface ProductCardProps {
   product: Product;
+  exchangeRate: number | null;
+  filterCoin: string;
 }
 
-export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
+export const ProductCard: React.FC<ProductCardProps> = ({ product, exchangeRate, filterCoin }) => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const theme = useTheme();
@@ -68,7 +71,11 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
     );
   };
 
-  const price = product?.price?.find(item => item?.currency === "qort")?.value;
+  let price = product?.price?.find(item => item?.currency === "qort")?.value;
+  console.log({product})
+  if(price && exchangeRate && filterCoin !== CoinFilter.qort){
+    price = +price * exchangeRate
+  }
 
   return (
     <StyledCard>
@@ -100,7 +107,8 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
             width: "100%",
           }}
         >
-          <AcceptedCoinRow>
+          {filterCoin === CoinFilter.qort && (
+            <AcceptedCoinRow>
             <QortalSVG
               color={theme.palette.text.primary}
               height={"23"}
@@ -108,14 +116,18 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
             />{" "}
             {price}
           </AcceptedCoinRow>
-          <AcceptedCoinRow>
-            <ARRRSVG
-              color={theme.palette.text.primary}
-              height={"23"}
-              width={"23"}
-            />{" "}
-            {price}
-          </AcceptedCoinRow>
+          )}
+          {filterCoin === CoinFilter.arrr && (
+             <AcceptedCoinRow>
+             <ARRRSVG
+               color={theme.palette.text.primary}
+               height={"23"}
+               width={"23"}
+             />{" "}
+             {price}
+           </AcceptedCoinRow>
+          )}
+        
         </ProductDescription>
       </StyledCardContent>
       <div style={{ height: "37px" }}>

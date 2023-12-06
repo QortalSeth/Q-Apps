@@ -536,7 +536,7 @@ const GlobalWrapper: React.FC<Props> = ({ children, setTheme }) => {
           data64: storeToBase64,
           filename: "store.json",
           title,
-          description,
+          description: metadescription,
           identifier: currentStore.id
         });
 

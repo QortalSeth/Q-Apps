@@ -110,7 +110,7 @@ enum DateFilter {
   oldest = "Oldest",
 }
 
-enum CoinFilter {
+export enum CoinFilter {
   qort = "QORT",
   arrr = "ARRR",
 }
@@ -166,7 +166,7 @@ export const Store = () => {
   const [filterDate, setFilterDate] = useState<DateFilter | null>(
     DateFilter.newest
   );
-  const [filterCoin, setFilterCoin] = useState<CoinFilter[]>([CoinFilter.qort]);
+  const [filterCoin, setFilterCoin] = useState<string>(CoinFilter.qort);
   const [categoryChips, setCategoryChips] = useState<string[]>([]);
   const [openStoreDetails, setOpenStoreDetails] = useState<boolean>(false);
   const [openStoreReviews, setOpenStoreReviews] = useState<boolean>(false);
@@ -176,7 +176,9 @@ export const Store = () => {
   const [averageRatingLoader, setAverageRatingLoader] =
     useState<boolean>(false);
   const [hasFetched, setHasFetched] = useState<boolean>(false);
-
+  const [exchangeRate, setExchangeRate] = useState<number | null>(
+    null
+  );
   const getProducts = useCallback(async () => {
     if (!store) return;
     try {
@@ -591,6 +593,40 @@ export const Store = () => {
   : currentViewedStore
 
 
+  const calculateARRRExchangeRate = async()=> {
+    try {
+      const url = '/crosschain/price/PIRATECHAIN?maxtrades=10&inverse=true'
+    const info = await fetch(url, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    const responseDataStore = await info.text();
+
+    const ratio = +responseDataStore /100000000
+    if(isNaN(ratio)) throw new Error('Cannot get exchange rate')
+    setExchangeRate(ratio)
+    } catch (error) {
+      setFilterCoin(CoinFilter.qort)
+      dispatch(
+        setNotification({
+          alertType: "error",
+          msg: "Cannot get exchange rate- reverted to QORT",
+        })
+      );
+    }
+
+  }
+
+  const switchCoin = async ()=> {
+    dispatch(setIsLoadingGlobal(true));
+
+    await calculateARRRExchangeRate()
+    dispatch(setIsLoadingGlobal(false));
+
+
+  }
   return (
     <Grid container sx={{ width: "100%" }}>
       <FiltersCol item xs={12} sm={3}>
@@ -707,17 +743,17 @@ export const Store = () => {
                 checked={filterCoin.includes(CoinFilter.qort)}
                 onChange={() => {
                   setFilterCoin(prevState => {
-                    if (prevState.includes(CoinFilter.qort)) {
-                      return prevState.filter(coin => coin !== CoinFilter.qort);
-                    } else {
-                      return [...prevState, CoinFilter.qort];
-                    }
+                    if (prevState !== CoinFilter.qort) {
+                      return CoinFilter.qort
+                    } 
+                    return prevState
                   });
                 }}
                 inputProps={{ "aria-label": "controlled" }}
               />
             </FiltersRow>
-            <FiltersRow>
+            {storeToUse?.foreignCoins?.ARRR && storeToUse?.supportedCoins?.includes('ARRR') && (
+              <FiltersRow>
               <AcceptedCoinRow>
                 ARRR
                 <AcceptedCoin src={ARRR} alt="ARRR-logo" />
@@ -726,16 +762,19 @@ export const Store = () => {
                 checked={filterCoin.includes(CoinFilter.arrr)}
                 onChange={() => {
                   setFilterCoin(prevState => {
-                    if (prevState.includes(CoinFilter.arrr)) {
-                      return prevState.filter(coin => coin !== CoinFilter.arrr);
-                    } else {
-                      return [...prevState, CoinFilter.arrr];
-                    }
+                    if (prevState !== CoinFilter.arrr) {
+                      return CoinFilter.arrr
+                    } 
+
+                  return prevState
                   });
+                  switchCoin()
                 }}
                 inputProps={{ "aria-label": "controlled" }}
               />
             </FiltersRow>
+            )}
+            
           </FiltersSubContainer>
           <FiltersTitle>
             Date Product Added
@@ -769,14 +808,15 @@ export const Store = () => {
               />
             </FiltersRow>
           </FiltersSubContainer>
-          <FiltersSubContainer>
+          {filterCoin === 'ARRR' && exchangeRate && (
+            <FiltersSubContainer>
             <ExchangeRateCard>
               <ExchangeRateRow>
-                <ExchangeRateTitle>1 QORT = 0.59 ARRR</ExchangeRateTitle>
+                <ExchangeRateTitle>1 QORT = {exchangeRate} ARRR</ExchangeRateTitle>
               </ExchangeRateRow>
               <ExchangeRateRow>
                 <ExchangeRateSubTitle>
-                  {`Guaranteed rate as of ${new Date().toLocaleString()}`}
+                  {`Rate calculated by recent trade portal trades`}
                 </ExchangeRateSubTitle>
               </ExchangeRateRow>
               <ExchangeRateRow style={{ gap: "10px" }}>
@@ -790,6 +830,8 @@ export const Store = () => {
               </ExchangeRateRow>
             </ExchangeRateCard>
           </FiltersSubContainer>
+          )}
+          
         </FiltersContainer>
       </FiltersCol>
       <Grid item xs={12} sm={9}>
@@ -844,7 +886,7 @@ export const Store = () => {
                     src={QORT}
                     alt="QORT-logo"
                   />
-                  {storeToUse?.foreignCoins?.ARRR && (
+                  {storeToUse?.foreignCoins?.ARRR && storeToUse?.supportedCoins?.includes('ARRR') && (
                     <AcceptedCoin
                     style={{ width: "26px", height: "26px" }}
                     src={ARRR}
@@ -951,7 +993,7 @@ export const Store = () => {
                         productItem?.catalogueId
                       }`}
                     >
-                      <ProductCard product={productItem} />
+                      <ProductCard product={productItem} exchangeRate={exchangeRate} filterCoin={filterCoin} />
                     </ContextMenuResource>
                   </ProductCardCol>
                 );
@@ -1026,8 +1068,8 @@ export const Store = () => {
           }
           supportedCoins={
             username === user?.name
-              ? currentStore?.supportedCoins || ['QORT']
-              : currentViewedStore?.supportedCoins || ['QORT']
+              ? currentStore?.supportedCoins || [CoinFilter.qort]
+              : currentViewedStore?.supportedCoins || [CoinFilter.qort]
           }
           foreignCoins={
             username === user?.name
