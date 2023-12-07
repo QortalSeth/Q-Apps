@@ -31,7 +31,7 @@ import ShortUniqueId from "short-unique-id";
 import { useDispatch, useSelector } from "react-redux";
 import AddBoxIcon from "@mui/icons-material/AddBox";
 import { useDropzone } from "react-dropzone";
-import AddIcon from '@mui/icons-material/Add';
+import AddIcon from "@mui/icons-material/Add";
 
 import { setNotification } from "../../state/features/notificationsSlice";
 import { objectToBase64, uint8ArrayToBase64 } from "../../utils/toBase64";
@@ -42,9 +42,17 @@ import {
   upsertVideos,
 } from "../../state/features/videoSlice";
 import ImageUploader from "../common/ImageUploader";
-import { QTUBE_PLAYLIST_BASE, QTUBE_VIDEO_BASE, categories, subCategories } from "../../constants";
+import {
+  QTUBE_PLAYLIST_BASE,
+  QTUBE_VIDEO_BASE,
+  categories,
+  subCategories,
+} from "../../constants";
 import { MultiplePublish } from "../common/MultiplePublish/MultiplePublish";
-import { CrowdfundSubTitle, CrowdfundSubTitleRow } from "../EditPlaylist/Upload-styles";
+import {
+  CrowdfundSubTitle,
+  CrowdfundSubTitleRow,
+} from "../EditPlaylist/Upload-styles";
 import { CardContentContainerComment } from "../common/Comments/Comments-styles";
 
 const uid = new ShortUniqueId();
@@ -82,19 +90,22 @@ export const UploadVideo = ({ editId, editContent }: NewCrowdfundProps) => {
   const [playlistCoverImage, setPlaylistCoverImage] = useState<null | string>(
     null
   );
-    const [selectExistingPlaylist, setSelectExistingPlaylist] = useState<any>(null)
-  const [searchResults, setSearchResults] = useState([])
-  const [filterSearch, setFilterSearch] = useState("")
+  const [selectExistingPlaylist, setSelectExistingPlaylist] =
+    useState<any>(null);
+  const [searchResults, setSearchResults] = useState([]);
+  const [filterSearch, setFilterSearch] = useState("");
   const [playlistTitle, setPlaylistTitle] = useState<string>("");
   const [playlistDescription, setPlaylistDescription] = useState<string>("");
   const [selectedCategory, setSelectedCategory] = useState<any>(null);
   const [selectedSubCategory, setSelectedSubCategory] = useState<any>(null);
 
-  const [selectedCategoryVideos, setSelectedCategoryVideos] = useState<any>(null);
-  const [selectedSubCategoryVideos, setSelectedSubCategoryVideos] = useState<any>(null);
+  const [selectedCategoryVideos, setSelectedCategoryVideos] =
+    useState<any>(null);
+  const [selectedSubCategoryVideos, setSelectedSubCategoryVideos] =
+    useState<any>(null);
 
   const [playlistSetting, setPlaylistSetting] = useState<null | string>(null);
-  const [publishes, setPublishes] = useState<any[]>([])
+  const [publishes, setPublishes] = useState<any[]>([]);
   const { getRootProps, getInputProps } = useDropzone({
     accept: {
       "video/*": [],
@@ -110,32 +121,31 @@ export const UploadVideo = ({ editId, editContent }: NewCrowdfundProps) => {
           coverImage: "",
         };
       });
+
       setFiles((prev) => [...prev, ...formatArray]);
 
-      let errorString = null
+      let errorString = null;
       rejectedFiles.forEach(({ file, errors }) => {
         errors.forEach((error) => {
-          if(error.code === 'file-too-large'){
-            errorString = 'File must be under 400mb'
+          if (error.code === "file-too-large") {
+            errorString = "File must be under 400mb";
           }
           console.log(`Error with file ${file.name}: ${error.message}`);
         });
       });
-      if(errorString){
-       const notificationObj = {
+      if (errorString) {
+        const notificationObj = {
           msg: errorString,
           alertType: "error",
         };
-      
 
-      dispatch(setNotification(notificationObj));
+        dispatch(setNotification(notificationObj));
       }
     },
   });
 
   useEffect(() => {
     if (editContent) {
-     
     }
   }, [editContent]);
 
@@ -143,26 +153,25 @@ export const UploadVideo = ({ editId, editContent }: NewCrowdfundProps) => {
     setIsOpen(false);
   };
 
-  const search = async()=> {
-
-    const url = `/arbitrary/resources/search?mode=ALL&service=PLAYLIST&mode=ALL&identifier=${QTUBE_PLAYLIST_BASE}&title=${filterSearch}&limit=20&includemetadata=true&reverse=true&name=${username}&exactmatchnames=true&offset=0`
+  const search = async () => {
+    const url = `/arbitrary/resources/search?mode=ALL&service=PLAYLIST&mode=ALL&identifier=${QTUBE_PLAYLIST_BASE}&title=${filterSearch}&limit=20&includemetadata=true&reverse=true&name=${username}&exactmatchnames=true&offset=0`;
     const response = await fetch(url, {
-      method: 'GET',
+      method: "GET",
       headers: {
-        'Content-Type': 'application/json'
-      }
-    })
-    const responseDataSearchVid = await response.json()
-    setSearchResults(responseDataSearchVid)
-  }
+        "Content-Type": "application/json",
+      },
+    });
+    const responseDataSearchVid = await response.json();
+    setSearchResults(responseDataSearchVid);
+  };
 
   async function publishQDNResource() {
     try {
-      if(playlistSetting === 'new'){
-        if(!playlistTitle) throw new Error('Please enter a title')
-        if(!playlistDescription) throw new Error('Please enter a description')
-        if(!playlistCoverImage) throw new Error('Please select cover image')
-        if(!selectedCategory) throw new Error('Please select a category')
+      if (playlistSetting === "new") {
+        if (!playlistTitle) throw new Error("Please enter a title");
+        if (!playlistDescription) throw new Error("Please enter a description");
+        if (!playlistCoverImage) throw new Error("Please select cover image");
+        if (!selectedCategory) throw new Error("Please select a category");
       }
       if (!userAddress) throw new Error("Unable to locate user address");
       let errorMsg = "";
@@ -174,7 +183,7 @@ export const UploadVideo = ({ editId, editContent }: NewCrowdfundProps) => {
         errorMsg =
           "Cannot publish without access to your name. Please authenticate.";
       }
-   
+
       if (editId && editContent?.user !== name) {
         errorMsg = "Cannot publish another user's resource";
       }
@@ -189,179 +198,204 @@ export const UploadVideo = ({ editId, editContent }: NewCrowdfundProps) => {
         return;
       }
 
-      let listOfPublishes = []
+      let listOfPublishes = [];
 
       for (const publish of files) {
-        const title = publish.title
-        const description = publish.description
-        const category = selectedCategoryVideos.id
-        const subcategory = selectedSubCategoryVideos?.id || ""
-        const coverImage = publish.coverImage
-        const file = publish.file
+        const title = publish.title;
+        const description = publish.description;
+        const category = selectedCategoryVideos.id;
+        const subcategory = selectedSubCategoryVideos?.id || "";
+        const coverImage = publish.coverImage;
+        const file = publish.file;
         const sanitizeTitle = title
-        .replace(/[^a-zA-Z0-9\s-]/g, "")
-        .replace(/\s+/g, "-")
-        .replace(/-+/g, "-")
-        .trim()
-        .toLowerCase();
+          .replace(/[^a-zA-Z0-9\s-]/g, "")
+          .replace(/\s+/g, "-")
+          .replace(/-+/g, "-")
+          .trim()
+          .toLowerCase();
 
         const id = uid();
 
         const identifier = editId
-        ? editId
-        : `${QTUBE_VIDEO_BASE}${sanitizeTitle.slice(0, 30)}_${id}`;
+          ? editId
+          : `${QTUBE_VIDEO_BASE}${sanitizeTitle.slice(0, 30)}_${id}`;
 
-        const code = shortuid()
+        const code = shortuid();
 
-      const videoObject: any = {
-        title,
-        version: 1,
-        fullDescription: description,
-        videoImage: coverImage,
-        videoReference: {
-          name,
-          identifier: identifier,
-          service: "VIDEO"
-        },
-        commentsId: `${QTUBE_VIDEO_BASE}_cm_${id}`,
-        category,
-        subcategory,
-        code
-      };
+        const videoObject: any = {
+          title,
+          version: 1,
+          fullDescription: description,
+          videoImage: coverImage,
+          videoReference: {
+            name,
+            identifier: identifier,
+            service: "VIDEO",
+          },
+          commentsId: `${QTUBE_VIDEO_BASE}_cm_${id}`,
+          category,
+          subcategory,
+          code,
+          videoType: file?.type || "video/mp4",
+        };
 
-      let metadescription = `**category:${category};subcategory:${subcategory};code:${code}**` + description.slice(0,150)
+        let metadescription =
+          `**category:${category};subcategory:${subcategory};code:${code}**` +
+          description.slice(0, 150);
 
+        let fileExtension = "mp4";
+        const fileExtensionSplit = file?.name?.split(".");
+        if (fileExtensionSplit?.length > 1) {
+          fileExtension = fileExtensionSplit?.pop() || "mp4";
+        }
 
-      
-      const crowdfundObjectToBase64 = await objectToBase64(videoObject);
-      // Description is obtained from raw data
-      const requestBodyJson: any = {
-        action: "PUBLISH_QDN_RESOURCE",
-        name: name,
-        service: "DOCUMENT",
-        data64: crowdfundObjectToBase64,
-        title: title.slice(0, 50),
-        description: metadescription,
-        identifier: identifier + '_metadata',
-        tag1: QTUBE_VIDEO_BASE,
-        code
-      };
-      const requestBodyVideo: any = {
-        action: "PUBLISH_QDN_RESOURCE",
-        name: name,
-        service: "VIDEO",
-        file,
-        title: title.slice(0, 50),
-        description: metadescription,
-        identifier,
-        tag1: QTUBE_VIDEO_BASE
-      };
-      listOfPublishes.push(requestBodyJson);
-      listOfPublishes.push(requestBodyVideo)
+        let filename = title.slice(0, 15);
+        // Step 1: Replace all white spaces with underscores
 
-    }
+        // Replace all forms of whitespace (including non-standard ones) with underscores
+        let stringWithUnderscores = filename.replace(/[\s\uFEFF\xA0]+/g, "_");
 
-      const isNewPlaylist = playlistSetting === 'new'
+        // Remove all non-alphanumeric characters (except underscores)
+        let alphanumericString = stringWithUnderscores.replace(
+          /[^a-zA-Z0-9_]/g,
+          ""
+        );
 
-      if(isNewPlaylist){
-        const title = playlistTitle
-        const description = playlistDescription
-        const category = selectedCategory.id
-        const subcategory = selectedSubCategory?.id || ""
-        const coverImage = playlistCoverImage
+        const crowdfundObjectToBase64 = await objectToBase64(videoObject);
+        // Description is obtained from raw data
+        const requestBodyJson: any = {
+          action: "PUBLISH_QDN_RESOURCE",
+          name: name,
+          service: "DOCUMENT",
+          data64: crowdfundObjectToBase64,
+          title: title.slice(0, 50),
+          description: metadescription,
+          identifier: identifier + "_metadata",
+          tag1: QTUBE_VIDEO_BASE,
+          filename: `video_metadata.json`,
+          code,
+        };
+        const requestBodyVideo: any = {
+          action: "PUBLISH_QDN_RESOURCE",
+          name: name,
+          service: "VIDEO",
+          file,
+          title: title.slice(0, 50),
+          description: metadescription,
+          identifier,
+          filename: `${alphanumericString.trim()}.${fileExtension}`,
+          tag1: QTUBE_VIDEO_BASE,
+        };
+        listOfPublishes.push(requestBodyJson);
+        listOfPublishes.push(requestBodyVideo);
+      }
+
+      const isNewPlaylist = playlistSetting === "new";
+
+      if (isNewPlaylist) {
+        const title = playlistTitle;
+        const description = playlistDescription;
+        const category = selectedCategory.id;
+        const subcategory = selectedSubCategory?.id || "";
+        const coverImage = playlistCoverImage;
         const sanitizeTitle = title
-        .replace(/[^a-zA-Z0-9\s-]/g, "")
-        .replace(/\s+/g, "-")
-        .replace(/-+/g, "-")
-        .trim()
-        .toLowerCase();
+          .replace(/[^a-zA-Z0-9\s-]/g, "")
+          .replace(/\s+/g, "-")
+          .replace(/-+/g, "-")
+          .trim()
+          .toLowerCase();
 
         const id = uid();
 
         const identifier = editId
-        ? editId
-        : `${QTUBE_PLAYLIST_BASE}${sanitizeTitle.slice(0, 30)}_${id}`;
+          ? editId
+          : `${QTUBE_PLAYLIST_BASE}${sanitizeTitle.slice(0, 30)}_${id}`;
 
-
-      const videos = listOfPublishes.filter((item)=> item.service === 'DOCUMENT' && item.tag1 === QTUBE_VIDEO_BASE).map((vid)=> {
-        return {
-          identifier: vid.identifier,
-          service: vid.service,
-          name: vid.name,
-          code: vid.code
-        }
-      })
-
-      const playlistObject: any = {
-        title,
-        version: 1,
-        description,
-        image: coverImage,
-        videos,
-        commentsId: `${QTUBE_PLAYLIST_BASE}_cm_${id}`,
-        category,
-        subcategory
-      };
-
-      const codes = videos.map(item => `c:${item.code};`).join('');
-
-      let metadescription = `**category:${category};subcategory:${subcategory};${codes}**` + description.slice(0,120)
-
-
-      
-      const crowdfundObjectToBase64 = await objectToBase64(playlistObject);
-      // Description is obtained from raw data
-      const requestBodyJson: any = {
-        action: "PUBLISH_QDN_RESOURCE",
-        name: name,
-        service: "PLAYLIST",
-        data64: crowdfundObjectToBase64,
-        title: title.slice(0, 50),
-        description: metadescription,
-        identifier: identifier + '_metadata',
-        tag1: QTUBE_VIDEO_BASE
-      };
-
-      
-      listOfPublishes.push(requestBodyJson)
-      } else if(playlistSetting === "existing"){
-
-        if(!selectExistingPlaylist){
-          throw new Error('select a playlist')
-        }
-
-
-        // get raw data for playlist
-        const responseData = await qortalRequest({
-          action: 'FETCH_QDN_RESOURCE',
-          name: selectExistingPlaylist.name,
-          service: selectExistingPlaylist.service,
-          identifier: selectExistingPlaylist.identifier
-        })
-        if(responseData && !responseData.error){
-          console.log({listOfPublishes})
-          const videos = listOfPublishes.filter((item)=> item.service === 'DOCUMENT' && item.tag1 === QTUBE_VIDEO_BASE).map((vid)=> {
+        const videos = listOfPublishes
+          .filter(
+            (item) =>
+              item.service === "DOCUMENT" && item.tag1 === QTUBE_VIDEO_BASE
+          )
+          .map((vid) => {
             return {
               identifier: vid.identifier,
               service: vid.service,
               name: vid.name,
-              code: vid.code
-            }
-          })
+              code: vid.code,
+            };
+          });
 
-          console.log({videos})
-          const videosInPlaylist = [...responseData.videos, ...videos ]
+        const playlistObject: any = {
+          title,
+          version: 1,
+          description,
+          image: coverImage,
+          videos,
+          commentsId: `${QTUBE_PLAYLIST_BASE}_cm_${id}`,
+          category,
+          subcategory,
+        };
+
+        const codes = videos.map((item) => `c:${item.code};`).join("");
+
+        let metadescription =
+          `**category:${category};subcategory:${subcategory};${codes}**` +
+          description.slice(0, 120);
+
+        const crowdfundObjectToBase64 = await objectToBase64(playlistObject);
+        // Description is obtained from raw data
+        const requestBodyJson: any = {
+          action: "PUBLISH_QDN_RESOURCE",
+          name: name,
+          service: "PLAYLIST",
+          data64: crowdfundObjectToBase64,
+          title: title.slice(0, 50),
+          description: metadescription,
+          identifier: identifier + "_metadata",
+          tag1: QTUBE_VIDEO_BASE,
+        };
+
+        listOfPublishes.push(requestBodyJson);
+      } else if (playlistSetting === "existing") {
+        if (!selectExistingPlaylist) {
+          throw new Error("select a playlist");
+        }
+
+        // get raw data for playlist
+        const responseData = await qortalRequest({
+          action: "FETCH_QDN_RESOURCE",
+          name: selectExistingPlaylist.name,
+          service: selectExistingPlaylist.service,
+          identifier: selectExistingPlaylist.identifier,
+        });
+        if (responseData && !responseData.error) {
+          const videos = listOfPublishes
+            .filter(
+              (item) =>
+                item.service === "DOCUMENT" && item.tag1 === QTUBE_VIDEO_BASE
+            )
+            .map((vid) => {
+              return {
+                identifier: vid.identifier,
+                service: vid.service,
+                name: vid.name,
+                code: vid.code,
+              };
+            });
+
+          const videosInPlaylist = [...responseData.videos, ...videos];
           const playlistObject: any = {
             ...responseData,
-            videos: videosInPlaylist
+            videos: videosInPlaylist,
           };
-          console.log({playlistObject})
-          const codes = videosInPlaylist.map(item => `c:${item.code};`).join('');
+          const codes = videosInPlaylist
+            .map((item) => `c:${item.code};`)
+            .join("");
 
-          let metadescription = `**category:${playlistObject.category};subcategory:${playlistObject.subcategory};${codes}**` + playlistObject.description.slice(0,120)
-    
-    
-          
+          let metadescription =
+            `**category:${playlistObject.category};subcategory:${playlistObject.subcategory};${codes}**` +
+            playlistObject.description.slice(0, 120);
+
           const crowdfundObjectToBase64 = await objectToBase64(playlistObject);
           // Description is obtained from raw data
           const requestBodyJson: any = {
@@ -372,21 +406,16 @@ export const UploadVideo = ({ editId, editContent }: NewCrowdfundProps) => {
             title: playlistObject.title.slice(0, 50),
             description: metadescription,
             identifier: selectExistingPlaylist.identifier,
-            tag1: QTUBE_VIDEO_BASE
+            tag1: QTUBE_VIDEO_BASE,
           };
-    
-          
-          listOfPublishes.push(requestBodyJson)
+
+          listOfPublishes.push(requestBodyJson);
         } else {
-          throw new Error('cannot get playlist data')
+          throw new Error("cannot get playlist data");
         }
       }
-      
 
-      
-     
-
-      setPublishes(listOfPublishes)
+      setPublishes(listOfPublishes);
       setIsOpenMultiplePublish(true);
     } catch (error: any) {
       let notificationObj: any = null;
@@ -415,11 +444,9 @@ export const UploadVideo = ({ editId, editContent }: NewCrowdfundProps) => {
 
   const handleOnchange = (index: number, type: string, value: string) => {
     setFiles((prev) => {
-      let formattedValue = value
-      if(type === 'title'){
-         formattedValue = value.replace(/[^a-zA-Z0-9\s-_!?]/g, "");
-
-    
+      let formattedValue = value;
+      if (type === "title") {
+        formattedValue = value.replace(/[^a-zA-Z0-9\s-_!?]/g, "");
       }
       const copyFiles = [...prev];
       copyFiles[index] = {
@@ -446,7 +473,9 @@ export const UploadVideo = ({ editId, editContent }: NewCrowdfundProps) => {
     setSelectedSubCategory(selectedOption || null);
   };
 
-  const handleOptionCategoryChangeVideos = (event: SelectChangeEvent<string>) => {
+  const handleOptionCategoryChangeVideos = (
+    event: SelectChangeEvent<string>
+  ) => {
     const optionId = event.target.value;
     const selectedOption = categories.find((option) => option.id === +optionId);
     setSelectedCategoryVideos(selectedOption || null);
@@ -462,26 +491,25 @@ export const UploadVideo = ({ editId, editContent }: NewCrowdfundProps) => {
     setSelectedSubCategoryVideos(selectedOption || null);
   };
 
-  const next = ()=> {
-
+  const next = () => {
     try {
-      if(!selectedCategoryVideos) throw new Error('Please select a category')
-      files.forEach((file)=> {
-        if(!file.title) throw new Error('Please enter a title')
-        if(!file.description) throw new Error('Please enter a description')
-        if(!file.coverImage) throw new Error('Please select cover image')
-      })
-  
+      if (!selectedCategoryVideos) throw new Error("Please select a category");
+      files.forEach((file) => {
+        if (!file.title) throw new Error("Please enter a title");
+        if (!file.description) throw new Error("Please enter a description");
+        if (!file.coverImage) throw new Error("Please select cover image");
+      });
+
       setStep("playlist");
     } catch (error) {
-     
-    dispatch(setNotification({
-      msg: error?.message || "Please fill out all inputs",
-      alertType: "error",
-    }));
+      dispatch(
+        setNotification({
+          msg: error?.message || "Please fill out all inputs",
+          alertType: "error",
+        })
+      );
     }
-   
-  }
+  };
 
   return (
     <>
@@ -538,55 +566,61 @@ export const UploadVideo = ({ editId, editContent }: NewCrowdfundProps) => {
                   Drag and drop a video files here or click to select files
                 </Typography>
               </Box>
-              <Box sx={{
-                display: 'flex',
-                gap: '20px',
-                alignItems: 'center'
-              }}>
+              <Box
+                sx={{
+                  display: "flex",
+                  gap: "20px",
+                  alignItems: "center",
+                }}
+              >
                 {files?.length > 0 && (
                   <>
-                   <FormControl fullWidth sx={{ marginBottom: 2}}>
-                    <InputLabel id="Category">Select a Category</InputLabel>
-                    <Select
-                      labelId="Category"
-                      input={<OutlinedInput label="Select a Category" />}
-                      value={selectedCategoryVideos?.id || ""}
-                      onChange={handleOptionCategoryChangeVideos}
-                    >
-                      {categories.map((option) => (
-                        <MenuItem key={option.id} value={option.id}>
-                          {option.name}
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
-                  {selectedCategoryVideos && subCategories[selectedCategoryVideos?.id] && (
                     <FormControl fullWidth sx={{ marginBottom: 2 }}>
-                      <InputLabel id="Category">
-                        Select a Sub-Category
-                      </InputLabel>
+                      <InputLabel id="Category">Select a Category</InputLabel>
                       <Select
-                        labelId="Sub-Category"
-                        input={<OutlinedInput label="Select a Sub-Category" />}
-                        value={selectedSubCategoryVideos?.id || ""}
-                        onChange={(e) =>
-                          handleOptionSubCategoryChangeVideos(
-                            e,
-                            subCategories[selectedCategoryVideos?.id]
-                          )
-                        }
+                        labelId="Category"
+                        input={<OutlinedInput label="Select a Category" />}
+                        value={selectedCategoryVideos?.id || ""}
+                        onChange={handleOptionCategoryChangeVideos}
                       >
-                        {subCategories[selectedCategoryVideos.id].map((option) => (
+                        {categories.map((option) => (
                           <MenuItem key={option.id} value={option.id}>
                             {option.name}
                           </MenuItem>
                         ))}
                       </Select>
                     </FormControl>
-                  )}
+                    {selectedCategoryVideos &&
+                      subCategories[selectedCategoryVideos?.id] && (
+                        <FormControl fullWidth sx={{ marginBottom: 2 }}>
+                          <InputLabel id="Category">
+                            Select a Sub-Category
+                          </InputLabel>
+                          <Select
+                            labelId="Sub-Category"
+                            input={
+                              <OutlinedInput label="Select a Sub-Category" />
+                            }
+                            value={selectedSubCategoryVideos?.id || ""}
+                            onChange={(e) =>
+                              handleOptionSubCategoryChangeVideos(
+                                e,
+                                subCategories[selectedCategoryVideos?.id]
+                              )
+                            }
+                          >
+                            {subCategories[selectedCategoryVideos.id].map(
+                              (option) => (
+                                <MenuItem key={option.id} value={option.id}>
+                                  {option.name}
+                                </MenuItem>
+                              )
+                            )}
+                          </Select>
+                        </FormControl>
+                      )}
                   </>
                 )}
-             
               </Box>
               {files.map((file, index) => {
                 return (
@@ -695,7 +729,7 @@ export const UploadVideo = ({ editId, editContent }: NewCrowdfundProps) => {
                   gap: "20px",
                 }}
               >
-                 <CrowdfundActionButton
+                <CrowdfundActionButton
                   variant="contained"
                   color={!playlistSetting ? "success" : "primary"}
                   onClick={() => {
@@ -705,7 +739,7 @@ export const UploadVideo = ({ editId, editContent }: NewCrowdfundProps) => {
                   no playlist
                 </CrowdfundActionButton>
                 <CrowdfundActionButton
-                color={playlistSetting === "new" ? "success" : "primary"}
+                  color={playlistSetting === "new" ? "success" : "primary"}
                   variant="contained"
                   onClick={() => {
                     setPlaylistSetting("new");
@@ -714,7 +748,7 @@ export const UploadVideo = ({ editId, editContent }: NewCrowdfundProps) => {
                   New playlist
                 </CrowdfundActionButton>
                 <CrowdfundActionButton
-                 color={playlistSetting === "existing" ? "success" : "primary"}
+                  color={playlistSetting === "existing" ? "success" : "primary"}
                   variant="contained"
                   onClick={() => {
                     setPlaylistSetting("existing");
@@ -722,116 +756,119 @@ export const UploadVideo = ({ editId, editContent }: NewCrowdfundProps) => {
                 >
                   Existing playlist
                 </CrowdfundActionButton>
-               
               </Box>
               {playlistSetting === "existing" && (
                 <Box
-                sx={{
-                  display: "flex",
-                  flexDirection: "column",
-                  width: "100%",
-                  alignItems: "center"
-                }}
-              >
-                 
-                <CrowdfundSubTitleRow>
-                  <CrowdfundSubTitle>Select existing playlist</CrowdfundSubTitle>
-                </CrowdfundSubTitleRow>
-                <Typography>{selectExistingPlaylist?.metadata?.title}</Typography>
-                <CardContentContainerComment
                   sx={{
-                    marginTop: "25px",
-                    height: "450px",
-                    overflow: 'auto',
                     display: "flex",
                     flexDirection: "column",
-                    alignItems: "center"
+                    width: "100%",
+                    alignItems: "center",
                   }}
                 >
-                   <Box sx={{
-                      display: 'flex',
-                      gap: '10px'
-                  }}>
-                      <Input
-                      id="standard-adornment-name"
-                      onChange={(e) => {
-                        setFilterSearch(e.target.value);
-                      }}
-                      value={filterSearch}
-                      placeholder="Search by title"
+                  <CrowdfundSubTitleRow>
+                    <CrowdfundSubTitle>
+                      Select existing playlist
+                    </CrowdfundSubTitle>
+                  </CrowdfundSubTitleRow>
+                  <Typography>
+                    {selectExistingPlaylist?.metadata?.title}
+                  </Typography>
+                  <CardContentContainerComment
+                    sx={{
+                      marginTop: "25px",
+                      height: "450px",
+                      overflow: "auto",
+                      display: "flex",
+                      flexDirection: "column",
+                      alignItems: "center",
+                    }}
+                  >
+                    <Box
                       sx={{
-                        borderBottom: "1px solid white",
-                        "&&:before": {
-                          borderBottom: "none",
-                        },
-                        "&&:after": {
-                          borderBottom: "none",
-                        },
-                        "&&:hover:before": {
-                          borderBottom: "none",
-                        },
-                        "&&.Mui-focused:before": {
-                          borderBottom: "none",
-                        },
-                        "&&.Mui-focused": {
-                          outline: "none",
-                        },
-                        fontSize: "18px",
+                        display: "flex",
+                        gap: "10px",
                       }}
-                    />
-                     <Button
-                      onClick={() => {
-                        search();
-                      }}
-                      
-                      variant="contained"
                     >
-                      Search
-                    </Button>
-                  </Box>
-                  
-                  {searchResults?.map((vid, index) => {
-                    return (
-                      <Box
-                        key={vid?.identifier}
-                        sx={{
-                          display: "flex",
-                          gap: "10px",
-                          width: "100%",
-                          alignItems: "center",
-                          padding: "10px",
-                          borderRadius: "5px",
-                          userSelect: "none",
+                      <Input
+                        id="standard-adornment-name"
+                        onChange={(e) => {
+                          setFilterSearch(e.target.value);
                         }}
+                        value={filterSearch}
+                        placeholder="Search by title"
+                        sx={{
+                          borderBottom: "1px solid white",
+                          "&&:before": {
+                            borderBottom: "none",
+                          },
+                          "&&:after": {
+                            borderBottom: "none",
+                          },
+                          "&&:hover:before": {
+                            borderBottom: "none",
+                          },
+                          "&&.Mui-focused:before": {
+                            borderBottom: "none",
+                          },
+                          "&&.Mui-focused": {
+                            outline: "none",
+                          },
+                          fontSize: "18px",
+                        }}
+                      />
+                      <Button
+                        onClick={() => {
+                          search();
+                        }}
+                        variant="contained"
                       >
-                        <Typography
+                        Search
+                      </Button>
+                    </Box>
+
+                    {searchResults?.map((vid, index) => {
+                      return (
+                        <Box
+                          key={vid?.identifier}
                           sx={{
-                            fontSize: "14px",
+                            display: "flex",
+                            gap: "10px",
+                            width: "100%",
+                            alignItems: "center",
+                            padding: "10px",
+                            borderRadius: "5px",
+                            userSelect: "none",
                           }}
                         >
-                          {index + 1}
-                        </Typography>
-                        <Typography
-                          sx={{
-                            fontSize: "18px",
-                            wordBreak: 'break-word'
-                          }}
-                        >
-                          {vid?.metadata?.title}
-                        </Typography>
-                        <AddIcon
-                          onClick={() => {
-                            setSelectExistingPlaylist(vid);
-                          }}
-                          sx={{
-                            cursor: "pointer",
-                          }}
-                        />
-                      </Box>
-                    );
-                  })}
-                </CardContentContainerComment>
-              </Box>
+                          <Typography
+                            sx={{
+                              fontSize: "14px",
+                            }}
+                          >
+                            {index + 1}
+                          </Typography>
+                          <Typography
+                            sx={{
+                              fontSize: "18px",
+                              wordBreak: "break-word",
+                            }}
+                          >
+                            {vid?.metadata?.title}
+                          </Typography>
+                          <AddIcon
+                            onClick={() => {
+                              setSelectExistingPlaylist(vid);
+                            }}
+                            sx={{
+                              cursor: "pointer",
+                            }}
+                          />
+                        </Box>
+                      );
+                    })}
+                  </CardContentContainerComment>
+                </Box>
               )}
               {playlistSetting === "new" && (
                 <>
@@ -866,13 +903,12 @@ export const UploadVideo = ({ editId, editContent }: NewCrowdfundProps) => {
                     variant="filled"
                     value={playlistTitle}
                     onChange={(e) => {
-                      const value = e.target.value
-                      let formattedValue: string = value
-                      
-                         formattedValue = value.replace(/[^a-zA-Z0-9\s-_!?]/g, "");
+                      const value = e.target.value;
+                      let formattedValue: string = value;
 
-                      
-                      setPlaylistTitle(formattedValue)
+                      formattedValue = value.replace(/[^a-zA-Z0-9\s-_!?]/g, "");
+
+                      setPlaylistTitle(formattedValue);
                     }}
                     inputProps={{ maxLength: 180 }}
                     required
@@ -974,7 +1010,7 @@ export const UploadVideo = ({ editId, editContent }: NewCrowdfundProps) => {
                 <CrowdfundActionButton
                   variant="contained"
                   onClick={() => {
-                    next()
+                    next();
                   }}
                 >
                   Next
@@ -991,16 +1027,16 @@ export const UploadVideo = ({ editId, editContent }: NewCrowdfundProps) => {
           onSubmit={() => {
             setIsOpenMultiplePublish(false);
             setIsOpen(false);
-            setFiles([])
-            setStep('videos')
-            setPlaylistCoverImage(null)
-            setPlaylistTitle('')
-            setPlaylistDescription('')
-            setSelectedCategory(null)
-            setSelectedSubCategory(null)
-            setSelectedCategoryVideos(null)
-            setSelectedSubCategoryVideos(null)
-            setPlaylistSetting(null)
+            setFiles([]);
+            setStep("videos");
+            setPlaylistCoverImage(null);
+            setPlaylistTitle("");
+            setPlaylistDescription("");
+            setSelectedCategory(null);
+            setSelectedSubCategory(null);
+            setSelectedCategoryVideos(null);
+            setSelectedSubCategoryVideos(null);
+            setPlaylistSetting(null);
             dispatch(
               setNotification({
                 msg: "Videos published",

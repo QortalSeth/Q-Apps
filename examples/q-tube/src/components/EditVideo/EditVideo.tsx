@@ -73,51 +73,51 @@ export const EditVideo = () => {
   const editVideoProperties = useSelector(
     (state: RootState) => state.video.editVideoProperties
   );
-  const [publishes, setPublishes] = useState<any[]>([])
+  const [publishes, setPublishes] = useState<any[]>([]);
   const [isOpenMultiplePublish, setIsOpenMultiplePublish] = useState(false);
-  const [videoPropertiesToSetToRedux, setVideoPropertiesToSetToRedux] = useState(null)
+  const [videoPropertiesToSetToRedux, setVideoPropertiesToSetToRedux] =
+    useState(null);
 
   const [title, setTitle] = useState<string>("");
   const [description, setDescription] = useState<string>("");
   const [coverImage, setCoverImage] = useState<string>("");
-  const [file, setFile] = useState(null)
+  const [file, setFile] = useState(null);
   const [selectedCategoryVideos, setSelectedCategoryVideos] =
     useState<any>(null);
   const [selectedSubCategoryVideos, setSelectedSubCategoryVideos] =
     useState<any>(null);
 
-    const { getRootProps, getInputProps } = useDropzone({
-      accept: {
-        "video/*": [],
-      },
-      maxFiles: 1,
-      maxSize: 419430400, // 400 MB in bytes
-      onDrop: (acceptedFiles, rejectedFiles) => {
-        const firstFile = acceptedFiles[0]
-        
-        setFile(firstFile);
+  const { getRootProps, getInputProps } = useDropzone({
+    accept: {
+      "video/*": [],
+    },
+    maxFiles: 1,
+    maxSize: 419430400, // 400 MB in bytes
+    onDrop: (acceptedFiles, rejectedFiles) => {
+      const firstFile = acceptedFiles[0];
 
-        let errorString = null
+      setFile(firstFile);
 
-        rejectedFiles.forEach(({ file, errors }) => {
-          errors.forEach((error) => {
-            if(error.code === 'file-too-large'){
-              errorString = 'File must be under 400mb'
-            }
-            console.log(`Error with file ${file.name}: ${error.message}`);
-          });
+      let errorString = null;
+
+      rejectedFiles.forEach(({ file, errors }) => {
+        errors.forEach((error) => {
+          if (error.code === "file-too-large") {
+            errorString = "File must be under 400mb";
+          }
+          console.log(`Error with file ${file.name}: ${error.message}`);
         });
-        if(errorString){
-          const notificationObj = {
-             msg: errorString,
-             alertType: "error",
-           };
-         
-   
-         dispatch(setNotification(notificationObj));
-         }
-      },
-    });
+      });
+      if (errorString) {
+        const notificationObj = {
+          msg: errorString,
+          alertType: "error",
+        };
+
+        dispatch(setNotification(notificationObj));
+      }
+    },
+  });
 
   // useEffect(() => {
   //   if (editVideoProperties) {
@@ -193,19 +193,19 @@ export const EditVideo = () => {
 
   const onClose = () => {
     dispatch(setEditVideo(null));
-    setVideoPropertiesToSetToRedux(null)
-    setFile(null)
-    setTitle("")
-    setDescription("")
-    setCoverImage("")
+    setVideoPropertiesToSetToRedux(null);
+    setFile(null);
+    setTitle("");
+    setDescription("");
+    setCoverImage("");
   };
 
   async function publishQDNResource() {
     try {
-      if(!title) throw new Error('Please enter a title')
-      if(!description) throw new Error('Please enter a description')
-      if(!coverImage) throw new Error('Please select cover image')
-      if(!selectedCategoryVideos) throw new Error('Please select a category')
+      if (!title) throw new Error("Please enter a title");
+      if (!description) throw new Error("Please enter a description");
+      if (!coverImage) throw new Error("Please select cover image");
+      if (!selectedCategoryVideos) throw new Error("Please select a category");
       if (!editVideoProperties) return;
       if (!userAddress) throw new Error("Unable to locate user address");
       let errorMsg = "";
@@ -231,7 +231,7 @@ export const EditVideo = () => {
         );
         return;
       }
-      let listOfPublishes = []
+      let listOfPublishes = [];
       const category = selectedCategoryVideos.id;
       const subcategory = selectedSubCategoryVideos?.id || "";
 
@@ -245,11 +245,30 @@ export const EditVideo = () => {
         category,
         subcategory,
         code: editVideoProperties.code,
+        videoType: file?.type || "video/mp4",
       };
 
       let metadescription =
         `**category:${category};subcategory:${subcategory};code:${editVideoProperties.code}**` +
         description.slice(0, 150);
+
+      let fileExtension = "mp4";
+      const fileExtensionSplit = file?.name?.split(".");
+      if (fileExtensionSplit?.length > 1) {
+        fileExtension = fileExtensionSplit?.pop() || "mp4";
+      }
+
+      let filename = title.slice(0, 15);
+      // Step 1: Replace all white spaces with underscores
+
+      // Replace all forms of whitespace (including non-standard ones) with underscores
+      let stringWithUnderscores = filename.replace(/[\s\uFEFF\xA0]+/g, "_");
+
+      // Remove all non-alphanumeric characters (except underscores)
+      let alphanumericString = stringWithUnderscores.replace(
+        /[^a-zA-Z0-9_]/g,
+        ""
+      );
 
       const crowdfundObjectToBase64 = await objectToBase64(videoObject);
       // Description is obtained from raw data
@@ -262,10 +281,11 @@ export const EditVideo = () => {
         description: metadescription,
         identifier: editVideoProperties.id,
         tag1: QTUBE_VIDEO_BASE,
+        filename: `video_metadata.json`,
       };
       listOfPublishes.push(requestBodyJson);
 
-      if(file && editVideoProperties.videoReference?.identifier){
+      if (file && editVideoProperties.videoReference?.identifier) {
         const requestBodyVideo: any = {
           action: "PUBLISH_QDN_RESOURCE",
           name: username,
@@ -274,23 +294,19 @@ export const EditVideo = () => {
           title: title.slice(0, 50),
           description: metadescription,
           identifier: editVideoProperties.videoReference?.identifier,
-          tag1: QTUBE_VIDEO_BASE
+          tag1: QTUBE_VIDEO_BASE,
+          filename: `${alphanumericString.trim()}.${fileExtension}`,
         };
-        
-        listOfPublishes.push(requestBodyVideo)
 
-        
+        listOfPublishes.push(requestBodyVideo);
       }
 
-      setPublishes(listOfPublishes)
+      setPublishes(listOfPublishes);
       setIsOpenMultiplePublish(true);
       setVideoPropertiesToSetToRedux({
         ...editVideoProperties,
         ...videoObject,
-      })
-      
-     
-
+      });
     } catch (error: any) {
       let notificationObj: any = null;
       if (typeof error === "string") {
@@ -368,24 +384,26 @@ export const EditVideo = () => {
             <NewCrowdfundTitle>Update Video properties</NewCrowdfundTitle>
           </Box>
           <>
-          <Box
-                {...getRootProps()}
-                sx={{
-                  border: "1px dashed gray",
-                  padding: 2,
-                  textAlign: "center",
-                  marginBottom: 2,
-                  cursor: "pointer",
-                }}
-              >
-                <input {...getInputProps()} />
-                <Typography>
-                  Click to update video file - optional
-                </Typography>
-              </Box>
-              <Typography sx={{
-                marginBottom: '10px'
-              }}>{file?.name}</Typography>
+            <Box
+              {...getRootProps()}
+              sx={{
+                border: "1px dashed gray",
+                padding: 2,
+                textAlign: "center",
+                marginBottom: 2,
+                cursor: "pointer",
+              }}
+            >
+              <input {...getInputProps()} />
+              <Typography>Click to update video file - optional</Typography>
+            </Box>
+            <Typography
+              sx={{
+                marginBottom: "10px",
+              }}
+            >
+              {file?.name}
+            </Typography>
             <Box
               sx={{
                 display: "flex",
@@ -464,8 +482,11 @@ export const EditVideo = () => {
                 variant="filled"
                 value={title}
                 onChange={(e) => {
-                  const value = e.target.value
-                  const formattedValue = value.replace(/[^a-zA-Z0-9\s-_!?]/g, "");
+                  const value = e.target.value;
+                  const formattedValue = value.replace(
+                    /[^a-zA-Z0-9\s-_!?]/g,
+                    ""
+                  );
                   setTitle(formattedValue);
                 }}
                 inputProps={{ maxLength: 180 }}
@@ -519,20 +540,16 @@ export const EditVideo = () => {
           isOpen={isOpenMultiplePublish}
           onSubmit={() => {
             setIsOpenMultiplePublish(false);
-            const clonedCopy = structuredClone(videoPropertiesToSetToRedux)
-            dispatch(
-              updateVideo(clonedCopy)
-            );
-            dispatch(
-              updateInHashMap(clonedCopy)
-            );
+            const clonedCopy = structuredClone(videoPropertiesToSetToRedux);
+            dispatch(updateVideo(clonedCopy));
+            dispatch(updateInHashMap(clonedCopy));
             dispatch(
               setNotification({
                 msg: "Video updated",
                 alertType: "success",
               })
             );
-            onClose()
+            onClose();
           }}
           publishes={publishes}
         />

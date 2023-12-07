@@ -423,6 +423,13 @@ export const EditPlaylist = () => {
   };
 
   const addVideo = (data) => {
+    if(playlistData?.videos?.length > 9){
+      dispatch(setNotification({
+        msg: "Max 10 videos per playlist",
+        alertType: "error",
+      }));
+      return
+    }
     const copyData = structuredClone(playlistData);
     copyData.videos = [...copyData.videos, { ...data }];
     setPlaylistData(copyData);
