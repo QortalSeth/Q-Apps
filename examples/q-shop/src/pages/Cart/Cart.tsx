@@ -106,10 +106,6 @@ export const Cart = () => {
   const catalogueHashMap = useSelector(
     (state: RootState) => state.global.catalogueHashMap
   );
-  // Redux loader state for spinner
-  const isLoadingGlobal = useSelector(
-    (state: RootState) => state.global.isLoadingGlobal
-  );
 
   const [cartOrders, setCartOrders] = useState<string[]>([]);
   const [localCart, setLocalCart] = useState<CartInterface>();
@@ -192,6 +188,15 @@ export const Cart = () => {
         setNotification({
           alertType: "error",
           msg: "Cannot find a store! Please try refreshing the page and trying again!"
+        })
+      );
+      return;
+    }
+    if (!storeOwner) {
+      dispatch(
+        setNotification({
+          alertType: "error",
+          msg: "Cannot find a store owner! Please try refreshing the page and trying again!"
         })
       );
       return;
@@ -366,7 +371,7 @@ export const Cart = () => {
       };
 
       const mailId = mailUid();
-      let identifier = `qortal_qmail_${storeOwner.slice(0, 20)}_${address.slice(
+      let identifier = `qortal_qmail_${storeOwner?.slice(0, 20)}_${address.slice(
         -6
       )}_mail_${mailId}`;
 
