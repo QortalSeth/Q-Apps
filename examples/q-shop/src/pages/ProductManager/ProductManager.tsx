@@ -56,6 +56,7 @@ import {
   DATA_CONTAINER_BASE,
   STORE_BASE,
 } from "../../constants/identifiers";
+import { resetOrders } from "../../state/features/orderSlice";
 
 const uid = new ShortUniqueId({ length: 10 });
 
@@ -477,6 +478,13 @@ export const ProductManager = () => {
       return;
     }
   }, [userName, dataContainer]);
+
+  // Cleanup orders when they leave ProductManager
+  useEffect(() => {
+    return () => {
+      dispatch(resetOrders());
+    }
+  }, [])
 
   return (
     <ProductManagerContainer>
