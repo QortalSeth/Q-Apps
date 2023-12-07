@@ -5,17 +5,12 @@ import {
   TextFieldProps,
 } from "@mui/material";
 import React, { useRef, useState } from "react";
-import {
-  isAllZerosNum,
-  isFloatNum,
-  isIntegerNum,
-  removeTrailingZeros,
-  setNumberWithinBounds,
-  sigDigitsExceeded,
-  stringIsEmpty,
-} from "qortal-app-utils";
 import AddIcon from "@mui/icons-material/Add";
 import RemoveIcon from "@mui/icons-material/Remove";
+import {
+  removeTrailingZeros,
+  setNumberWithinBounds,
+} from "./numberFunctions.ts";
 
 type eventType = React.ChangeEvent<HTMLInputElement>;
 type BoundedNumericTextFieldProps = {
@@ -44,6 +39,14 @@ export const BoundedNumericTextField = ({
   );
   const ref = useRef<HTMLInputElement | null>(null);
 
+  const stringIsEmpty = (value: string) => {
+    return value === "";
+  };
+
+  const isAllZerosNum = /^0*\.?0*$/;
+  const isFloatNum = /^-?[0-9]*\.?[0-9]*$/;
+  const isIntegerNum = /^-?[0-9]+$/;
+
   const skipMinMaxCheck = (value: string) => {
     const lastIndexIsDecimal = value.charAt(value.length - 1) === ".";
     const isEmpty = stringIsEmpty(value);
@@ -62,6 +65,16 @@ export const BoundedNumericTextField = ({
 
     const numberInBounds = boundedNum === valueNum;
     return numberInBounds ? value : boundedNum.toString();
+  };
+
+  const getSigDigits = (number: string) => {
+    if (isIntegerNum.test(number)) return 0;
+    const decimalSplit = number.split(".");
+    return decimalSplit[decimalSplit.length - 1].length;
+  };
+
+  const sigDigitsExceeded = (number: string, sigDigits: number) => {
+    return getSigDigits(number) > sigDigits;
   };
 
   const filterTypes = (value: string) => {

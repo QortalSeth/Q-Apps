@@ -1,13 +1,11 @@
 import { DonorDetailsButton } from "./Donate-styles";
 import { Tooltip } from "@mui/material";
-import {
-  addStringNumbers,
-  getAccountNames,
-  removeTrailingZeros,
-  SearchTransactionResponse,
-} from "qortal-app-utils";
+
 import React, { useEffect, useState } from "react";
 import DonorModal from "./DonorModal";
+import { getAccountNames } from "../../../utils/qortalRequestFunctions.ts";
+import { removeTrailingZeros } from "../../../utils/numberFunctions.ts";
+import { SearchTransactionResponse } from "../../../utils/qortalRequestTypes.ts";
 
 interface DonorInfoProps {
   rawDonorData: SearchTransactionResponse[];
@@ -36,10 +34,9 @@ const DonorInfo = ({
     });
 
     if (aggregateDonorData && donorIndex >= 0) {
-      donorArray[donorIndex].amount = addStringNumbers(
-        donorArray[donorIndex].amount,
-        donor.amount
-      );
+      donorArray[donorIndex].amount = (
+        +donorArray[donorIndex].amount + +donor.amount
+      ).toString();
     } else {
       donorArray.push(donor);
     }

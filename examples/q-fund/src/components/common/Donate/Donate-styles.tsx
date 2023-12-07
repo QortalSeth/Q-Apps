@@ -1,6 +1,6 @@
 import { styled } from "@mui/material/styles";
 import { Box, Button, InputLabel } from "@mui/material";
-import { changeLightness } from "qortal-app-utils";
+import { changeLightness } from "../../../utils/numberFunctions.ts";
 
 const ButtonStyle = styled(Button)({
   fontFamily: "Mulish",
@@ -25,7 +25,7 @@ export const DonateModalCol = styled(Box)({
   gap: "20px",
 });
 
-const donateButtonColor = "#34BFA6";
+export const donateButtonColor = "#34BFA6";
 export const CrowdfundPageDonateButton = styled(ButtonStyle)(({ theme }) => ({
   backgroundColor: donateButtonColor,
   "&:hover": {

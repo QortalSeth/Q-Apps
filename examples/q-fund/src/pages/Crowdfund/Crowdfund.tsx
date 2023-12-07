@@ -64,10 +64,8 @@ import { CrowdfundLoader } from "./CrowdfundLoader";
 import { ReusableModalStyled } from "../../components/common/Reviews/QFundOwnerReviews-styles";
 import { QFundOwnerReviews } from "../../components/common/Reviews/QFundOwnerReviews";
 import DonorInfo from "../../components/common/Donate/DonorInfo";
-import {
-  SearchTransactionResponse,
-  searchTransactions,
-} from "qortal-app-utils";
+import { searchTransactions } from "../../utils/qortalRequestFunctions.ts";
+import { SearchTransactionResponse } from "../../utils/qortalRequestTypes.ts";
 
 export const Crowdfund = () => {
   const theme = useTheme();

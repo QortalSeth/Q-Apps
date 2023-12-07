@@ -10,7 +10,7 @@ import {
   CountdownRow,
   EstimatedTimeRemainingFont,
 } from "./Countdown-styles";
-import { getDurationFromBlocks } from "qortal-app-utils";
+import { getDurationFromBlocks } from "../../../utils/time.ts";
 
 interface CountdownProps {
   endDate: moment.Moment;

@@ -45,7 +45,8 @@ import {
 import ImageUploader from "../ImageUploader";
 import { DesktopDateTimePicker } from "@mui/x-date-pickers";
 import { PiggybankSVG } from "../../assets/svgs/PiggybankSVG";
-import { getDaySummary, truncateNumber } from "qortal-app-utils";
+import { getDaySummary } from "../../utils/time.ts";
+import { truncateNumber } from "../../utils/numberFunctions.ts";
 
 dayjs.extend(isBetween);
 dayjs.extend(duration);
