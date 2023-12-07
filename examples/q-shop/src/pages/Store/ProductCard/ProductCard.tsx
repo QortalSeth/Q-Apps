@@ -72,8 +72,11 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, exchangeRate,
   };
 
   let price = product?.price?.find(item => item?.currency === "qort")?.value;
-  console.log({product})
-  if(price && exchangeRate && filterCoin !== CoinFilter.qort){
+  const priceArrr = product?.price?.find(item => item?.currency === CoinFilter.arrr)?.value;
+  if(filterCoin === CoinFilter.arrr && priceArrr) {
+    price = +priceArrr
+  }
+  else if(price && exchangeRate && filterCoin !== CoinFilter.qort){
     price = +price * exchangeRate
   }
 

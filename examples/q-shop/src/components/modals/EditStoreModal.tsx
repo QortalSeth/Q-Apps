@@ -112,7 +112,6 @@ const MyModal: React.FC<MyModalProps> = ({ open, onClose, onPublish }) => {
 
   useEffect(() => {
     if (open && currentStore && storeId === currentStore.id) {
-      console.log({currentStore})
       setTitle(currentStore?.title || "");
       setDescription(currentStore?.description || "");
       setLogo(currentStore?.logo || null);
@@ -155,7 +154,6 @@ const MyModal: React.FC<MyModalProps> = ({ open, onClose, onPublish }) => {
       if(res?.address){
         setArrrWalletAddress(res.address)
       }
-      console.log({res})
     } catch (error) {
       
     }

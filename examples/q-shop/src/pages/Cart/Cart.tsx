@@ -79,6 +79,8 @@ import QORTLogo from "../../assets/img/qort.png";
 import ARRRLogo from "../../assets/img/arrr.png";
 import { AcceptedCoin } from "../StoreList/StoreList-styles";
 import { ARRRSVG } from "../../assets/svgs/ARRRSVG";
+import { setPreferredCoin } from "../../state/features/storeSlice";
+import { CoinFilter } from "../Store/Store/Store";
 
 /* Currency must be replaced in the order confirmation email by proper currency */
 
@@ -136,6 +138,69 @@ export const Cart = () => {
   const [confirmPurchaseModalOpen, setConfirmPurchaseModalOpen] =
     useState<boolean>(false);
   const [coinToPayIn, setCoinToPayIn] = useState<string>("QORT");
+  const preferredCoin = useSelector((state: RootState) => state.store.preferredCoin);
+  const [exchangeRate, setExchangeRate] = useState<number | null>(
+    null
+  );
+  const currentStore = useSelector(
+    (state: RootState) => state.global.currentStore
+  );
+  const currentViewedStore = useSelector(
+    (state: RootState) => state.store.currentViewedStore
+  );
+
+
+  const calculateARRRExchangeRate = async()=> {
+    try {
+      const url = '/crosschain/price/PIRATECHAIN?maxtrades=10&inverse=true'
+    const info = await fetch(url, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    const responseDataStore = await info.text();
+
+    const ratio = +responseDataStore /100000000
+    if(isNaN(ratio)) throw new Error('Cannot get exchange rate')
+    setExchangeRate(ratio)
+    } catch (error) {
+      dispatch(setPreferredCoin(CoinFilter.qort))
+      dispatch(
+        setNotification({
+          alertType: "error",
+          msg: "Cannot get exchange rate- reverted to QORT",
+        })
+      );
+    }
+
+  }
+  const storeToUse = useMemo(()=> {
+    return  currentViewedStore
+   }, [currentViewedStore])
+
+   const switchCoin = async ()=> {
+    dispatch(setIsLoadingGlobal(true));
+
+    await calculateARRRExchangeRate()
+    dispatch(setIsLoadingGlobal(false));
+
+
+  }
+
+  useEffect(()=> {
+    if(preferredCoin === CoinFilter.arrr && storeToUse?.supportedCoins?.includes(CoinFilter.arrr)){
+      switchCoin()
+    } 
+  }, [preferredCoin, storeToUse])
+
+  const coinToUse = useMemo(()=> {
+    if(preferredCoin === CoinFilter.arrr && storeToUse?.supportedCoins?.includes(CoinFilter.arrr)){
+      return CoinFilter.arrr
+    } else {
+      return CoinFilter.qort
+    }
+  }, [preferredCoin, storeToUse])
 
   // Set cart & orders to local state
   useEffect(() => {
@@ -244,11 +309,15 @@ export const Cart = () => {
           product = catalogueHashMap[catalogueId]?.products[productId];
         }
         if (!product) return acc;
-        const priceInQort =
-          product.price?.find(
-            (priceItem: any) => priceItem?.currency === "qort"
-          )?.value || null;
-        if (!priceInQort) {
+        let price = product?.price?.find(item => item?.currency === "qort")?.value;
+                      const priceArrr = product?.price?.find(item => item?.currency === CoinFilter.arrr)?.value;
+                    
+                      if(coinToUse === CoinFilter.arrr && priceArrr) {
+                        price = +priceArrr
+                      } else if(price && exchangeRate && coinToUse !== CoinFilter.qort){
+                        price = +price * exchangeRate
+                      }
+        if (!price) {
           dispatch(
             setNotification({
               alertType: "error",
@@ -257,13 +326,13 @@ export const Cart = () => {
           );
           return;
         }
-        const totalProductPrice = priceInQort * quantity;
+        const totalProductPrice = price * quantity;
         acc[productId] = {
           product,
           catalogueId,
           quantity,
-          pricePerUnit: priceInQort,
-          totalProductPrice: priceInQort * quantity,
+          pricePerUnit: price,
+          totalProductPrice: price * quantity,
         };
         acc["totalPrice"] = acc["totalPrice"] + totalProductPrice;
         return acc;
@@ -301,14 +370,37 @@ export const Cart = () => {
       );
       return;
     }
-    const responseSendCoin = await qortalRequest({
-      action: "SEND_COIN",
-      coin: "QORT",
-      destinationAddress: address,
-      amount: priceToPay,
-    });
-    const signature = responseSendCoin.signature;
 
+    let responseSendCoin = null
+    let signature = null
+
+    if(coinToUse === CoinFilter.qort){
+       responseSendCoin = await qortalRequest({
+        action: "SEND_COIN",
+        coin: "QORT",
+        destinationAddress: address,
+        amount: priceToPay,
+      });
+       signature = responseSendCoin.signature;
+  
+    } else if(coinToUse === CoinFilter.arrr){
+
+      if(!storeToUse?.foreignCoins?.ARRR) throw new Error('Store has not set an ARRR address')
+      responseSendCoin = await qortalRequest({
+        action: "SEND_COIN",
+        coin: "ARRR",
+        destinationAddress: storeToUse?.foreignCoins?.ARRR.trim(),
+        amount: priceToPay,
+      });
+    } else {
+      dispatch(
+        setNotification({
+          alertType: "error",
+          msg: "Currency not found",
+        })
+      );
+    }
+   
     try {
       dispatch(setIsLoadingGlobal(true));
       // Validate whether order is coming from the USA to put state instead of region
@@ -331,8 +423,9 @@ export const Cart = () => {
         },
         payment: {
           total: priceToPay,
-          currency: "QORT",
+          currency: coinToUse,
           transactionSignature: signature,
+          arrrAddressUsed: coinToUse === CoinFilter.arrr ? storeToUse?.foreignCoins?.ARRR.trim() : ""
         },
         communicationMethod: ["Q-Mail"],
       };
@@ -355,8 +448,9 @@ export const Cart = () => {
         },
         payment: {
           total: priceToPay,
-          currency: "QORT",
+          currency: coinToUse,
           transactionSignature: signature,
+          arrrAddressUsed: coinToUse === CoinFilter.arrr ? storeToUse?.foreignCoins?.ARRR.trim() : ""
         },
         communicationMethod: ["Q-Mail"],
       };
@@ -701,13 +795,17 @@ export const Cart = () => {
 
       if (productId && catalogueId && catalogueHashMap[catalogueId]) {
         const product = catalogueHashMap[catalogueId].products[productId];
-        const priceInQort: number | null =
-          product.price?.find(
-            (priceItem: any) => priceItem?.currency === "qort"
-          )?.value || null;
+        let price = product?.price?.find(item => item?.currency === "qort")?.value;
+  const priceArrr = product?.price?.find(item => item?.currency === CoinFilter.arrr)?.value;
 
-        if (priceInQort !== null && quantity !== undefined) {
-          totalSum += priceInQort * quantity;
+  if(coinToUse === CoinFilter.arrr && priceArrr) {
+    price = +priceArrr
+  } else if(price && exchangeRate && coinToUse !== CoinFilter.qort){
+    price = +price * exchangeRate
+  }
+
+        if (price !== null && price !== undefined && quantity !== undefined) {
+          totalSum += price * quantity;
         }
       }
     });
@@ -717,7 +815,7 @@ export const Cart = () => {
 
   const totalSum = useMemo(
     () => calculateCartTotalSum(cartOrders, localCart, catalogueHashMap),
-    [cartOrders, localCart, catalogueHashMap]
+    [cartOrders, localCart, catalogueHashMap, coinToUse, exchangeRate]
   );
 
   return (
@@ -927,10 +1025,14 @@ export const Cart = () => {
                           catalogueHashMap[catalogueId]?.products[productId];
                       }
                       if (!product) return null;
-                      const priceInQort: number | null =
-                        product.price?.find(
-                          (priceItem: any) => priceItem?.currency === "qort"
-                        )?.value || null;
+                      let price = product?.price?.find(item => item?.currency === "qort")?.value;
+                      const priceArrr = product?.price?.find(item => item?.currency === CoinFilter.arrr)?.value;
+                    
+                      if(coinToUse === CoinFilter.arrr && priceArrr) {
+                        price = +priceArrr
+                      } else if(price && exchangeRate && coinToUse !== CoinFilter.qort){
+                        price = +price * exchangeRate
+                      }
                       return (
                         <ProductContainer container key={productId}>
                           <ProductInfoCol
@@ -953,24 +1055,42 @@ export const Cart = () => {
                               <ProductPriceFont>
                                 Price per unit:
                                 <span>
+                                {coinToUse === CoinFilter.qort && (
                                   <QortalSVG
                                     color={theme.palette.text.primary}
                                     height={"20"}
                                     width={"20"}
                                   />
-                                  {priceInQort}
+                    )}
+                                   {coinToUse === CoinFilter.arrr && (
+                                 <ARRRSVG
+                                  height={"20"}
+                                  width={"20"}
+                                  color={theme.palette.text.primary}
+                                  />
+                                    )}
+                                 {price}
                                 </span>
                               </ProductPriceFont>
-                              {priceInQort && (
+                              {price && (
                                 <ProductPriceFont>
                                   Total Price:
                                   <span>
-                                    <QortalSVG
-                                      color={theme.palette.text.primary}
-                                      height={"20"}
-                                      width={"20"}
-                                    />
-                                    {priceInQort * quantity}
+                                  {coinToUse === CoinFilter.qort && (
+                                  <QortalSVG
+                                    color={theme.palette.text.primary}
+                                    height={"20"}
+                                    width={"20"}
+                                  />
+                    )}
+                                   {coinToUse === CoinFilter.arrr && (
+                                 <ARRRSVG
+                                  height={"20"}
+                                  width={"20"}
+                                  color={theme.palette.text.primary}
+                                  />
+                                    )}
+                                    {price * quantity}
                                   </span>
                                 </ProductPriceFont>
                               )}
@@ -1048,22 +1168,36 @@ export const Cart = () => {
                         catalogueHashMap[catalogueId]?.products[productId];
                     }
                     if (!product) return null;
-                    const priceInQort: number | null =
-                      product.price?.find(
-                        (priceItem: any) => priceItem?.currency === "qort"
-                      )?.value || null;
+                    let price = product?.price?.find(item => item?.currency === "qort")?.value;
+                    const priceArrr = product?.price?.find(item => item?.currency === CoinFilter.arrr)?.value;
+                  
+                    if(coinToUse === CoinFilter.arrr && priceArrr) {
+                      price = +priceArrr
+                    } else if(price && exchangeRate && coinToUse !== CoinFilter.qort){
+                      price = +price * exchangeRate
+                    }
                     return (
                       <TotalSumItem>
                         <TotalSumItemTitle>
                           x{quantity} {product.title}
                         </TotalSumItemTitle>
                         <TotalSumItemTitle>
-                          <QortalSVG
-                            color={theme.palette.text.primary}
-                            height={"18"}
-                            width={"18"}
-                          />
-                          {priceInQort}
+                        {coinToUse === CoinFilter.qort && (
+                                  <QortalSVG
+                                  color={theme.palette.text.primary}
+                                  height={"18"}
+                                  width={"18"}
+                                />
+                                    )}
+                         
+                            {coinToUse === CoinFilter.arrr && (
+                                 <ARRRSVG
+                                  height={"18"}
+                                  width={"18"}
+                                  color={theme.palette.text.primary}
+                                  />
+                                    )}
+                          {price}
                         </TotalSumItemTitle>
                       </TotalSumItem>
                     );
@@ -1071,11 +1205,20 @@ export const Cart = () => {
                 </TotalSumItems>
                 <OrderTotalRow>
                   <span>Total:</span>
+                  {coinToUse === CoinFilter.qort && (
                   <QortalSVG
                     color={theme.palette.text.primary}
                     height={"22"}
                     width={"22"}
                   />
+                  )}
+                  {coinToUse === CoinFilter.arrr && (
+                   <ARRRSVG
+                height={"22"}
+                width={"22"}
+                color={theme.palette.text.primary}
+              />
+                  )}
                   {totalSum}
                 </OrderTotalRow>
                 {(checkoutPage || (!checkoutPage && isDigitalOrder)) && (
@@ -1094,7 +1237,7 @@ export const Cart = () => {
                         value={coinToPayIn}
                         renderValue={selected => {
                           const option = coinOptions.find(
-                            opt => opt.value === selected
+                            opt => opt.value === coinToUse
                           );
                           return (
                             <CoinToPayInRow>
@@ -1107,6 +1250,7 @@ export const Cart = () => {
                           );
                         }}
                         onChange={event => {
+                          dispatch(setPreferredCoin(event.target.value))
                           setCoinToPayIn(event.target.value as string);
                         }}
                         required

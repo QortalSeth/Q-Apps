@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
   Cart as CartInterface,
@@ -9,7 +9,7 @@ import { RootState } from "../../state/store";
 import { useNavigate, useParams } from "react-router-dom";
 import { useTheme } from "@mui/material";
 import TabImageList from "../../components/common/TabImageList/TabImageList";
-import { Product } from "../../state/features/storeSlice";
+import { Product, setPreferredCoin } from "../../state/features/storeSlice";
 import DangerousIcon from "@mui/icons-material/Dangerous";
 import { CartIcon } from "../../components/layout/Navbar/Navbar-styles";
 import {
@@ -40,6 +40,8 @@ import {
   Variant,
 } from "../../components/common/NumericTextFieldQshop";
 import { ARRRSVG } from "../../assets/svgs/ARRRSVG";
+import { CoinFilter } from "../Store/Store/Store";
+import { setIsLoadingGlobal } from "../../state/features/globalSlice";
 
 export const ProductPage = () => {
   const dispatch = useDispatch();
@@ -53,16 +55,78 @@ export const ProductPage = () => {
   const productID: string = params.product || "";
   const catalogueID: string = params.catalogue || "";
   const storeId: string = params.store || "";
-
+  const currentStore = useSelector(
+    (state: RootState) => state.global.currentStore
+  );
+  const currentViewedStore = useSelector(
+    (state: RootState) => state.store.currentViewedStore
+  );
   const [product, setProduct] = useState<Product | null>(null);
   const [cartAddAmount, setCartAddAmount] = useState<number>(0);
-  const [displayArrrPrice, setDisplayArrrPrice] = useState<boolean>(false);
-
+  const preferredCoin = useSelector((state: RootState) => state.store.preferredCoin);
+  const [exchangeRate, setExchangeRate] = useState<number | null>(
+    null
+  );
   const catalogueHashMap = useSelector(
     (state: RootState) => state.global.catalogueHashMap
   );
   const carts = useSelector((state: RootState) => state.cart.carts);
   const user = useSelector((state: RootState) => state.auth.user);
+
+  const calculateARRRExchangeRate = async()=> {
+    try {
+      const url = '/crosschain/price/PIRATECHAIN?maxtrades=10&inverse=true'
+    const info = await fetch(url, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    const responseDataStore = await info.text();
+
+    const ratio = +responseDataStore /100000000
+    if(isNaN(ratio)) throw new Error('Cannot get exchange rate')
+    setExchangeRate(ratio)
+    } catch (error) {
+      dispatch(setPreferredCoin(CoinFilter.qort))
+      dispatch(
+        setNotification({
+          alertType: "error",
+          msg: "Cannot get exchange rate- reverted to QORT",
+        })
+      );
+    }
+
+  }
+  const storeToUse = useMemo(()=> {
+    return storeOwner === user?.name
+   ? currentStore
+   : currentViewedStore
+   }, [storeOwner, user?.name, currentStore, currentViewedStore])
+
+   const switchCoin = async ()=> {
+    dispatch(setIsLoadingGlobal(true));
+
+    await calculateARRRExchangeRate()
+    dispatch(setIsLoadingGlobal(false));
+
+
+  }
+
+  useEffect(()=> {
+    if(preferredCoin === CoinFilter.arrr && storeToUse?.supportedCoins?.includes(CoinFilter.arrr)){
+      switchCoin()
+    } 
+  }, [preferredCoin, storeToUse])
+
+  const coinToUse = useMemo(()=> {
+    if(preferredCoin === CoinFilter.arrr && storeToUse?.supportedCoins?.includes(CoinFilter.arrr)){
+      return CoinFilter.arrr
+    } else {
+      return CoinFilter.qort
+    }
+  }, [preferredCoin, storeToUse])
+
 
   const { checkAndUpdateResourceCatalogue, getCatalogue } = useFetchOrders();
 
@@ -106,7 +170,15 @@ export const ProductPage = () => {
     awaitProductData();
   }, [catalogueHashMap]);
 
-  const price = product?.price?.find(item => item?.currency === "qort")?.value;
+  
+  let price = product?.price?.find(item => item?.currency === "qort")?.value;
+  const priceArrr = product?.price?.find(item => item?.currency === CoinFilter.arrr)?.value;
+
+  if(coinToUse === CoinFilter.arrr && priceArrr) {
+    price = +priceArrr
+  } else if(price && exchangeRate && coinToUse !== CoinFilter.qort){
+    price = +price * exchangeRate
+  }
 
   const addToCart = () => {
     if (user?.name === storeOwner) {
@@ -198,6 +270,7 @@ export const ProductPage = () => {
           {product.description}
         </ProductDescription>
         <ProductPriceRow>
+        {coinToUse === CoinFilter.qort && (
           <ProductPrice>
             <QortalSVG
               height={"26"}
@@ -206,7 +279,8 @@ export const ProductPage = () => {
             />{" "}
             {price}
           </ProductPrice>
-          {displayArrrPrice && (
+        )}
+          {coinToUse === CoinFilter.arrr && (
             <ProductPrice>
               <ARRRSVG
                 height={"26"}
@@ -221,8 +295,14 @@ export const ProductPage = () => {
       </ProductDetailsContainer>
       {/* Toggle to show price of ARRR or not */}
       <ArrrSwitch
-        checked={displayArrrPrice}
-        onChange={() => setDisplayArrrPrice(prevState => !prevState)}
+        checked={coinToUse === CoinFilter.arrr}
+        onChange={() => {
+          if (coinToUse !== CoinFilter.arrr) {
+            dispatch(setPreferredCoin(CoinFilter.arrr))
+          } else {
+            dispatch(setPreferredCoin(CoinFilter.qort))
+          }
+        }}
       />
       {user?.name && user?.name !== storeOwner ? (
         <CartBox>

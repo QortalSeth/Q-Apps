@@ -52,6 +52,8 @@ import { ExpandMoreSVG } from "../../../assets/svgs/ExpandMoreSVG";
 import { setNotification } from "../../../state/features/notificationsSlice";
 import { CustomInputField } from "../../../components/modals/CreateStoreModal-styles";
 import { CustomMenuItem } from "../NewProduct/NewProduct-styles";
+import { CoinFilter } from "../../Store/Store/Store";
+import { ARRRSVG } from "../../../assets/svgs/ARRRSVG";
 
 /* <QortalSVG /> must be replaced by <ARRRSVG /> everywhere here depending on the payment info */
 
@@ -82,6 +84,8 @@ export const ShowOrder: FC<ShowOrderProps> = ({
   const [note, setNote] = useState<string>("");
   const [selectedStatus, setSelectedStatus] = useState<string>("Received");
   const [paymentInfo, setPaymentInfo] = useState(null);
+  const [paymentInfoForeign, setPaymentInfoForeign] = useState(false);
+
   const [statusLoader, setStatusLoader] = useState(false);
 
   const closeModal = () => {
@@ -242,6 +246,10 @@ export const ShowOrder: FC<ShowOrderProps> = ({
     }
   }, [isOpen, order?.id]);
 
+
+  const coinToUse = order?.payment?.currency
+
+
   return (
     <Box
       sx={{
@@ -384,19 +392,37 @@ export const ShowOrder: FC<ShowOrderProps> = ({
                                   {`x ${product?.quantity}`}
                                   <span>{product?.pricePerUnit}</span>
                                 </OrderTitle>
-                                <QortalSVG
-                                  width={"22"}
-                                  height={"22"}
-                                  color={theme.palette.text.primary}
-                                />{" "}
+                                {coinToUse === CoinFilter.qort && (
+                                   <QortalSVG
+                                   width={"22"}
+                                   height={"22"}
+                                   color={theme.palette.text.primary}
+                                 />
+                                )}
+                                {coinToUse === CoinFilter.arrr && (
+                                   <ARRRSVG
+                                   width={"22"}
+                                   height={"22"}
+                                   color={theme.palette.text.primary}
+                                 />
+                                )}
                               </OrderQuantityRow>
                               <TotalPriceRow>
                                 Total: {product?.totalProductPrice}
-                                <QortalSVG
-                                  width={"22"}
-                                  height={"22"}
-                                  color={theme.palette.text.primary}
-                                />
+                                {coinToUse === CoinFilter.qort && (
+                                   <QortalSVG
+                                   width={"22"}
+                                   height={"22"}
+                                   color={theme.palette.text.primary}
+                                 />
+                                )}
+                                {coinToUse === CoinFilter.arrr && (
+                                   <ARRRSVG
+                                   width={"22"}
+                                   height={"22"}
+                                   color={theme.palette.text.primary}
+                                 />
+                                )}
                               </TotalPriceRow>
                             </OrderTitleCol>
                           </OrderDetailsCard>
@@ -408,11 +434,21 @@ export const ShowOrder: FC<ShowOrderProps> = ({
                   <TotalCostCol>
                     <Divider />
                     <PriceRow>
-                      <QortalSVG
-                        width={"22"}
-                        height={"22"}
-                        color={theme.palette.text.primary}
-                      />{" "}
+                    {coinToUse === CoinFilter.qort && (
+                                   <QortalSVG
+                                   width={"22"}
+                                   height={"22"}
+                                   color={theme.palette.text.primary}
+                                 />
+                                )}
+                                {coinToUse === CoinFilter.arrr && (
+                                   <ARRRSVG
+                                   width={"22"}
+                                   height={"22"}
+                                   color={theme.palette.text.primary}
+                                 />
+                                )}
+                    
                       <TotalCostFont>
                         {order?.details?.totalPrice}
                       </TotalCostFont>
@@ -420,10 +456,17 @@ export const ShowOrder: FC<ShowOrderProps> = ({
                   </TotalCostCol>
                   <TotalCostCol>
                     <DetailsRow
-                      onClick={() =>
-                        getPaymentInfo(
-                          order?.payment?.transactionSignature as string
-                        )
+                      onClick={() =>{
+                        if(coinToUse === CoinFilter.qort){
+                          getPaymentInfo(
+                            order?.payment?.transactionSignature as string
+                          )
+                        } else {
+                          setPaymentInfoForeign(true)
+                        }
+                      }
+                       
+                        
                       }
                     >
                       <DetailsFont>Payment Details</DetailsFont>
@@ -434,6 +477,31 @@ export const ShowOrder: FC<ShowOrderProps> = ({
                       />
                     </DetailsRow>
                   </TotalCostCol>
+
+                 {paymentInfoForeign && (
+                   <DetailsCard>
+                   {coinToUse === CoinFilter.arrr && (
+                    <>
+                     <span>Currency:</span>{" "}
+                          <span style={{ fontWeight: 300 }}>
+                            {coinToUse}
+                          </span>
+                          <span>Payment sent to</span>{" "}
+                          <span style={{ fontWeight: 300 }}>
+                            {order?.payment?.arrrAddressUsed}
+                          </span>
+                          </>
+                           )}
+                           <CloseDetailsCardIcon
+                        width={"18"}
+                        height={"18"}
+                        color={theme.palette.text.primary}
+                        onClickFunc={() => setPaymentInfoForeign(false)}
+                      />
+                   </DetailsCard>
+                 )}
+                    
+                 
                   {paymentInfo && (
                     <DetailsCard>
                       {Object.keys(paymentInfo || {}).map(key => {

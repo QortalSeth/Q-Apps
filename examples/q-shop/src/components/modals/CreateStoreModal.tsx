@@ -168,7 +168,6 @@ const CreateStoreModal: React.FC<CreateStoreModalProps> = ({
       if(res?.address){
         setArrrWalletAddress(res.address)
       }
-      console.log({res})
     } catch (error) {
       
     }

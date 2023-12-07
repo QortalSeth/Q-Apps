@@ -31,6 +31,7 @@ import {
   clearReviews,
   clearViewedStoreDataContainer,
   setCurrentViewedStore,
+  setPreferredCoin,
   setViewedStoreDataContainer,
 } from "../../../state/features/storeSlice";
 import LazyLoad from "../../../components/common/LazyLoad";
@@ -138,6 +139,8 @@ export const Store = () => {
   const storeId = useSelector((state: RootState) => state.store.storeId);
   // Get storeOwner from Redux
   const storeOwner = useSelector((state: RootState) => state.store.storeOwner);
+  const preferredCoin = useSelector((state: RootState) => state.store.preferredCoin);
+
   // Get current viewed store from Redux
   const currentViewedStore = useSelector(
     (state: RootState) => state.store.currentViewedStore
@@ -179,6 +182,35 @@ export const Store = () => {
   const [exchangeRate, setExchangeRate] = useState<number | null>(
     null
   );
+
+  const storeToUse = useMemo(()=> {
+   return username === user?.name
+  ? currentStore
+  : currentViewedStore
+  }, [username, user?.name, currentStore, currentViewedStore])
+
+  const switchCoin = async ()=> {
+    dispatch(setIsLoadingGlobal(true));
+
+    await calculateARRRExchangeRate()
+    dispatch(setIsLoadingGlobal(false));
+
+
+  }
+
+  useEffect(()=> {
+    if(preferredCoin === CoinFilter.arrr && storeToUse?.supportedCoins?.includes(CoinFilter.arrr)){
+      switchCoin()
+    } 
+  }, [preferredCoin, storeToUse])
+
+  const coinToUse = useMemo(()=> {
+    if(preferredCoin === CoinFilter.arrr && storeToUse?.supportedCoins?.includes(CoinFilter.arrr)){
+      return CoinFilter.arrr
+    } else {
+      return CoinFilter.qort
+    }
+  }, [preferredCoin, storeToUse])
   const getProducts = useCallback(async () => {
     if (!store) return;
     try {
@@ -588,9 +620,7 @@ export const Store = () => {
       </Typography>
     );
 
-  const storeToUse = username === user?.name
-  ? currentStore
-  : currentViewedStore
+  
 
 
   const calculateARRRExchangeRate = async()=> {
@@ -608,7 +638,7 @@ export const Store = () => {
     if(isNaN(ratio)) throw new Error('Cannot get exchange rate')
     setExchangeRate(ratio)
     } catch (error) {
-      setFilterCoin(CoinFilter.qort)
+      dispatch(setPreferredCoin(CoinFilter.qort))
       dispatch(
         setNotification({
           alertType: "error",
@@ -619,14 +649,7 @@ export const Store = () => {
 
   }
 
-  const switchCoin = async ()=> {
-    dispatch(setIsLoadingGlobal(true));
-
-    await calculateARRRExchangeRate()
-    dispatch(setIsLoadingGlobal(false));
-
-
-  }
+ 
   return (
     <Grid container sx={{ width: "100%" }}>
       <FiltersCol item xs={12} sm={3}>
@@ -740,14 +763,15 @@ export const Store = () => {
                 <AcceptedCoin src={QORT} alt="QORT-logo" />
               </AcceptedCoinRow>
               <FiltersCheckbox
-                checked={filterCoin.includes(CoinFilter.qort)}
+                checked={coinToUse === CoinFilter.qort}
                 onChange={() => {
-                  setFilterCoin(prevState => {
-                    if (prevState !== CoinFilter.qort) {
-                      return CoinFilter.qort
+           
+                    if (coinToUse !== CoinFilter.qort) {
+                      dispatch(setPreferredCoin(CoinFilter.qort))
+
                     } 
-                    return prevState
-                  });
+                 
+
                 }}
                 inputProps={{ "aria-label": "controlled" }}
               />
@@ -759,16 +783,11 @@ export const Store = () => {
                 <AcceptedCoin src={ARRR} alt="ARRR-logo" />
               </AcceptedCoinRow>
               <FiltersCheckbox
-                checked={filterCoin.includes(CoinFilter.arrr)}
+                checked={coinToUse === CoinFilter.arrr}
                 onChange={() => {
-                  setFilterCoin(prevState => {
-                    if (prevState !== CoinFilter.arrr) {
-                      return CoinFilter.arrr
+                    if (coinToUse !== CoinFilter.arrr) {
+                      dispatch(setPreferredCoin(CoinFilter.arrr))
                     } 
-
-                  return prevState
-                  });
-                  switchCoin()
                 }}
                 inputProps={{ "aria-label": "controlled" }}
               />
@@ -808,7 +827,7 @@ export const Store = () => {
               />
             </FiltersRow>
           </FiltersSubContainer>
-          {filterCoin === 'ARRR' && exchangeRate && (
+          {coinToUse === CoinFilter.arrr && exchangeRate && (
             <FiltersSubContainer>
             <ExchangeRateCard>
               <ExchangeRateRow>
@@ -818,6 +837,7 @@ export const Store = () => {
                 <ExchangeRateSubTitle>
                   {`Rate calculated by recent trade portal trades`}
                 </ExchangeRateSubTitle>
+               
               </ExchangeRateRow>
               <ExchangeRateRow style={{ gap: "10px" }}>
                 <AcceptedCoin src={QORT} alt="QORT-logo" />
@@ -993,7 +1013,7 @@ export const Store = () => {
                         productItem?.catalogueId
                       }`}
                     >
-                      <ProductCard product={productItem} exchangeRate={exchangeRate} filterCoin={filterCoin} />
+                      <ProductCard product={productItem} exchangeRate={exchangeRate} filterCoin={coinToUse} />
                     </ContextMenuResource>
                   </ProductCardCol>
                 );

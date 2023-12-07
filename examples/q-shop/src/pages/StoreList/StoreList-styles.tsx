@@ -321,7 +321,7 @@ export const ExchangeRateRow = styled(Box)(({ theme }) => ({
 
 export const ExchangeRateTitle = styled(Typography)(({ theme }) => ({
   fontFamily: "Merriweather Sans, sans-serif",
-  fontSize: "22px",
+  fontSize: "20px",
   fontWeight: 400,
   letterSpacing: "0.3px",
   color: theme.palette.text.primary,

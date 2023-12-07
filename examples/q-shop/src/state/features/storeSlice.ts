@@ -2,6 +2,7 @@ import { createSlice } from "@reduxjs/toolkit";
 import { RootState } from "../store";
 import { CurrentStore, DataContainer, ProductDataContainer } from "./globalSlice";
 import { ForeignCoins } from "../../components/modals/CreateStoreModal";
+import { CoinFilter } from "../../pages/Store/Store/Store";
 
 interface GlobalState {
   products: Product[];
@@ -23,6 +24,7 @@ interface GlobalState {
     products: ProductDataContainer[];
     categories: string[];
   };
+  preferredCoin: CoinFilter
 }
 
 const initialState: GlobalState = {
@@ -46,6 +48,7 @@ const initialState: GlobalState = {
     products: [],
     categories: []
   },
+  preferredCoin: CoinFilter.qort
 };
 
 export interface Price {
@@ -242,7 +245,11 @@ export const storeSlice = createSlice({
       state.filteredProducts = state.filteredProducts.filter(
         (item) => item.user !== username
       );
-    }
+    },
+    setPreferredCoin: (state, action) => {
+      const coin: CoinFilter = action.payload;
+      state.preferredCoin = coin
+    },
   }
 });
 
@@ -267,7 +274,8 @@ export const {
   clearReviews,
   addToStores,
   addToHashMapStoreReviews,
-  addToReviews
+  addToReviews,
+  setPreferredCoin
 } = storeSlice.actions;
 
 export default storeSlice.reducer;

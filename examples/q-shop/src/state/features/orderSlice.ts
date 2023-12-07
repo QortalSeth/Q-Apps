@@ -42,6 +42,7 @@ interface Payment {
   total: number
   currency: string
   transactionSignature: string
+  arrrAddressUsed?:string
 }
 enum CommunicationMethod {
   QMail = 'Q-Mail'
